@@ -42,6 +42,7 @@ repository = "https://github.com/entropy-lab/quam-sdk"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0"
+numpy = "^1.21.2"
 jsonschema = "^4.14.0"
 pydantic = "^1.9.2"
 rich = "^12.5.1"

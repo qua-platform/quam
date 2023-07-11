@@ -5,6 +5,7 @@ from .general import Mixer
 
 
 class Transmon(QuamElement):
+    id: int
     mixer: Mixer
 
     frequency_01: float = None
@@ -15,15 +16,20 @@ class Transmon(QuamElement):
 
     controller: str = "con1"
 
+    @property
+    def name(self):
+        return self.id if isinstance(self.id, str) else f"q{self.id}"
+    
+    def calculate_waveforms(self):
+        ...
+
+    def calculate_pulses(self):
+        ...
+
     def apply_to_config(self, config: dict):
         # Add XY to "elements"
         config["elements"][f"{self.name}_xy"] = {
-            "mixInputs": {
-                "I": (self.controller, self.xy.wiring.I),  # TODO fix wiring
-                "Q": (self.controller, self.xy.wiring.Q),  # TODO fix wiring
-                "lo_frequency": self.mixer.local_oscillator.frequency,
-                "mixer": self.mixer.name,
-            },
+            "mixInputs": self.mixer.get_input_config(),
             "intermediate_frequency": (self.frequency_01 - self.mixer.local_oscillator.frequency),
             "operations": {},  # TODO add operations
         }

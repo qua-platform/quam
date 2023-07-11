@@ -15,7 +15,7 @@ class Mixer(QuamElement):
 
     local_oscillator: LocalOscillator
 
-    qubit: "Transmon": None  # TODO add type hints without circular import
+    qubit: "Transmon" = None  # TODO add type hints without circular import
     resonator: "ReadoutResonator" = None  # TODO add type hints without circular import
 
     I_output_port: int = None  # TODO consider moving to "wiring"
@@ -28,7 +28,21 @@ class Mixer(QuamElement):
 
     @property
     def intermediate_frequency(self):
-        return self.qubit.frequency_01 - self.local_oscillator.frequency
+        if self.qubit is not None:
+            frequency = self.qubit.frequency_01
+        elif self.resonator is not None:
+            frequency = self.resonator.frequency
+        else:
+            raise ValueError("Mixer must be connected to either a qubit or a resonator")
+        return frequency - self.local_oscillator.frequency
+    
+    def get_input_config(self):
+        return { 
+            "I": (self.controller, self.wiring.I),  # TODO fix wiring
+            "Q": (self.controller, self.wiring.Q),
+            "lo_frequency": self.local_oscillator.frequency,
+            "mixer": self.name,
+        },
 
     def apply_to_config(self, config: dict):
         config["mixers"][self.name] = {
