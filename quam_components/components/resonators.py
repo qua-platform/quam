@@ -37,15 +37,15 @@ class ReadoutResonator(QuamElement):
         }
         if self.rotation_angle is not None:
             integration_weights.update({
-                f"rotated_cosine_weights_{name}": {
+                f"rotated_cosine_weights_{self.name}": {
                     "cosine": [(np.cos(self.rotation_angle), self.readout_pulse_length)],
                     "sine": [(-np.sin(self.rotation_angle), self.readout_pulse_length)],
                 },
-                f"rotated_sine_weights_{name}": {
+                f"rotated_sine_weights_{self.name}": {
                     "cosine": [(np.sin(self.rotation_angle), self.readout_pulse_length)],
                     "sine": [(np.cos(self.rotation_angle), self.readout_pulse_length)],
                 },
-                f"rotated_minus_sine_weights_{name}": {
+                f"rotated_minus_sine_weights_{self.name}": {
                     "cosine": [(-np.sin(self.rotation_angle), self.readout_pulse_length)],
                     "sine": [(-np.cos(self.rotation_angle), self.readout_pulse_length)],
                 },
