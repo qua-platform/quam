@@ -44,7 +44,7 @@ class Transmon(QuamElement):
             },
         }
 
-        # Add analog output Z (x and y are set in mixer)
+        # Add analog output Z (XY output is set in mixer)
         if self.z_max_frequency_point is not None and self.z_output_port is not None:
             analog_outputs = config["controllers"][self.controller]["analog_outputs"]
             analog_outputs[self.z_output_port] = {"offset": self.z_max_frequency_point}
