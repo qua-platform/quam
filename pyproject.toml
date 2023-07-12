@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "quam-components"
 packages = [
-    { include = "quan_components" }
+    { include = "quam_components" }
 ]
 include = [
     "LICENSE.md",
