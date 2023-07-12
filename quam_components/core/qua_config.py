@@ -11,7 +11,13 @@ qua_config_template = {
         }
     },
     "elements": {},
-    "pulses": {},
+    "pulses": {
+        "const_pulse": {
+            "operation": "control",
+            "length": 1000,
+            "waveforms": {"I": "const_wf", "Q": "zero_wf"},
+        }
+    },
     "waveforms": {
         "zero_wf": {"type": "constant", "sample": 0.0},
         "const_wf": {"type": "constant", "sample": 0.1},
