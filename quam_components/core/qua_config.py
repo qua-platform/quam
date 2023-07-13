@@ -1,6 +1,3 @@
-from dataclasses import fields
-
-from .quam_element import QuamElement
 
 
 qua_config_template = {
@@ -33,6 +30,8 @@ qua_config_template = {
 
 
 def build_config(quam, qua_config=None):
+    from .quam_base import QuamElement
+
     if qua_config is None:
         qua_config = qua_config_template.copy()
 

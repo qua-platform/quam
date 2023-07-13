@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Union
-from dataclasses import fields
+from dataclasses import fields, is_dataclass
 
 from .qua_config import build_config
 from quam_components.serialisers import get_serialiser
@@ -46,12 +46,17 @@ class QuamElement:
     
 
 def iterate_quam_elements(quam: Union[QuamBase, QuamElement]):
+    if not is_dataclass(quam):
+        return
     for data_field in fields(quam):
         val = getattr(quam, data_field.name)
         if isinstance(val, dict):
             yield from iterate_quam_elements(val)
         elif isinstance(val, list):
             for elem in val:
-                yield from iterate_quam_elements(elem)
+                if isinstance(elem, QuamElement):
+                    yield elem
+                    yield from iterate_quam_elements(elem)
         elif isinstance(val, QuamElement):
             yield val
+            yield from iterate_quam_elements(val)
