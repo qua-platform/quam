@@ -1,3 +1,5 @@
+from dataclasses import fields
+
 from .quam_element import QuamElement
 
 

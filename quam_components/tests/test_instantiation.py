@@ -3,8 +3,7 @@ from typing import List
 from copy import deepcopy
 from dataclasses import dataclass
 
-from quam_components.core.quam_base import QuamBase
-from quam_components.core.quam_element import QuamElement
+from quam_components.core.quam_base import QuamBase, QuamElement
 from quam_components.components.superconducting_qubits import Transmon
 from quam_components.core.quam_instantiation import get_class_attributes
 

@@ -1,10 +1,13 @@
 from pathlib import Path
-
 from typing import Union
+from dataclasses import fields
 
 from .qua_config import build_config
-from quam_components.serialise import get_serialiser
+from quam_components.serialisers import get_serialiser
 from quam_components.core.quam_instantiation import instantiate_quam_base
+
+
+__all__ = ["QuamBase", "QuamElement", "iterate_quam_elements"]
 
 
 class QuamBase:
@@ -33,3 +36,22 @@ class QuamBase:
 
     def build_config(self):
         return build_config(self)
+    
+
+class QuamElement:
+    controller: str = "con1"
+
+    def apply_to_config(self, config):
+        ...
+    
+
+def iterate_quam_elements(quam: Union[QuamBase, QuamElement]):
+    for data_field in fields(quam):
+        val = getattr(quam, data_field.name)
+        if isinstance(val, dict):
+            yield from iterate_quam_elements(val)
+        elif isinstance(val, list):
+            for elem in val:
+                yield from iterate_quam_elements(elem)
+        elif isinstance(val, QuamElement):
+            yield val
