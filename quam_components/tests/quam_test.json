@@ -1,0 +1,12 @@
+{
+    "qubits": [
+        {
+            "id": 0,
+            "xy": {
+                "pi_amp": 10e-3,
+                "pi_length": 40,
+                "anharmonicity": 200e6
+            }
+        }
+    ]
+}

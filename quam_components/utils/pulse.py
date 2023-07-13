@@ -1,3 +1,6 @@
+from typing import Tuple
+
+
 def pulse_str_to_axis_axis_angle(pulse_str: str) -> Tuple[str, str]:
     """Converts a pulse string to a tuple of axis and angle.
     

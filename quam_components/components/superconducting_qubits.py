@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 from dataclasses import dataclass
 
 from quam_components import QuamElement
@@ -12,9 +12,9 @@ __all__ = ["Transmon", "XYChannel", "ZChannel"]
 @dataclass
 class XYChannel(QuamElement):
     mixer: Mixer
-    qubit: "Transmon"
+    qubit: "Transmon" = None  # Initialized after creating the qubit
 
-    pulses: List[str] = [f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"]]
+    pulses: Iterable[str] = tuple(f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"])
     pi_amp: float = None
     pi_length: float = None
     drag_coefficient: float = None
@@ -72,10 +72,12 @@ class XYChannel(QuamElement):
 
 @dataclass
 class ZChannel(QuamElement):
+    qubit: "Transmon" = None  # Initialized after creating the qubit
+
     max_frequency_point: float = None
     output_port: int = None  # TODO consider moving to "wiring"
 
-    pulses: List[str] = ["const"]
+    pulses: Iterable[str] = ("const", )
     flux_pulse_length: float = None
     flux_pulse_amp: float = None
 
@@ -132,7 +134,9 @@ class Transmon(QuamElement):
     xy: XYChannel = None
     z: ZChannel = None
 
-    controller: str = "con1"
+    def post_init(self):
+        self.xy.qubit = self
+        self.z.qubit = self
 
     @property
     def name(self):
