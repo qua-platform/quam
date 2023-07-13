@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Generator
 from dataclasses import dataclass
 
 from quam_components.core import QuamBase, QuamElement, iterate_quam_elements
@@ -37,7 +37,7 @@ class TestQuamNested(QuamBase):
     quam_elem_list: List[TestQuamElement]
 
 
-def test_iterate_quam_elements_nested():
+def test_iterate_quam_elements_nested() -> Generator[QuamElement, None, None]:
     quam_element = TestQuamElement(
         int_val=42,
         quam_elem=QuamElement(),

@@ -30,18 +30,12 @@ qua_config_template = {
 
 
 def build_config(quam, qua_config=None):
-    from .quam_base import QuamElement
+    from .quam_base import iterate_quam_elements
 
     if qua_config is None:
         qua_config = qua_config_template.copy()
 
-    for val in quam.values():
-        if isinstance(val, dict):
-            build_config(quam=val, qua_config=qua_config)
-        elif isinstance(val, list):
-            for elem in val:
-                build_config(quam=elem, qua_config=qua_config)
-        elif isinstance(val, QuamElement):
-            val.apply_to_config(config=qua_config)
-
+    for quam_element in iterate_quam_elements(quam):
+        quam_element.apply_to_config(qua_config)
+        
     return qua_config
