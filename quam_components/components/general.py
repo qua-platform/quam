@@ -1,16 +1,11 @@
-# from __future__ import annotations
 import numpy as np
-from typing import List, TYPE_CHECKING
+from typing import List
 from dataclasses import dataclass
 
 from quam_components.core import QuamElement
 
-# Avoid circular import for typing
-# if TYPE_CHECKING:
-#     from .superconducting_qubits import Transmon
-#     from .resonators import ReadoutResonator
 
-
+@dataclass
 class LocalOscillator(QuamElement):
     power: float = None
     frequency: float = None
@@ -24,8 +19,7 @@ class Mixer(QuamElement):
 
     local_oscillator: LocalOscillator
 
-    qubit: QuamElement = None  # TODO add type hints without circular import
-    resonator: QuamElement = None  # TODO add type hints without circular import
+    frequency_drive: float = None
 
     I_output_port: int = None  # TODO consider moving to "wiring"
     Q_output_port: int = None  # TODO consider moving to "wiring"
@@ -37,13 +31,7 @@ class Mixer(QuamElement):
 
     @property
     def intermediate_frequency(self):
-        if self.qubit is not None:
-            frequency = self.qubit.frequency_01
-        elif self.resonator is not None:
-            frequency = self.resonator.frequency
-        else:
-            raise ValueError("Mixer must be connected to either a qubit or a resonator")
-        return frequency - self.local_oscillator.frequency
+        return self.frequency_drive - self.local_oscillator.frequency
     
     def get_input_config(self):
         return { 

@@ -1,8 +1,45 @@
 import pytest
+from typing import List
 from copy import deepcopy
+from dataclasses import dataclass
 
 from quam_components.core.quam_base import QuamBase
+from quam_components.core.quam_element import QuamElement
 from quam_components.components.superconducting_qubits import Transmon
+from quam_components.core.quam_instantiation import get_class_attributes
+
+
+def test_get_class_attributes():
+    @dataclass
+    class TestClass(QuamElement):
+        a: int
+        b: List[int]
+        c = 25
+        d: str = "hello"
+
+    attr_annotations = get_class_attributes(TestClass)
+    assert attr_annotations["required"] == {"a": int, "b": List[int]}
+    assert attr_annotations["optional"] == {"d": str, "controller": str}
+    assert attr_annotations["allowed"] == {"a": int, "b": List[int], "d": str, "controller": str}
+
+
+def test_get_class_attributes_subclass():
+
+    class AbstractClass(QuamElement):
+        elem: float = 42
+
+    @dataclass
+    class TestClass(AbstractClass):
+        a: int
+        b: List[int]
+        c = 25
+        d: str = "hello"
+
+    attr_annotations = get_class_attributes(TestClass)
+    assert attr_annotations["required"] == {"a": int, "b": List[int]}
+    assert attr_annotations["optional"] == {"d": str, "elem": float, "controller": str}
+    assert attr_annotations["allowed"] == {"a": int, "b": List[int], "d": str, "elem": float, "controller": str}
+
 
 
 quam_dict_single = {

@@ -1,16 +1,25 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, get_type_hints
+from dataclasses import MISSING
 from typeguard import check_type, TypeCheckError
 
 if TYPE_CHECKING:
     from quam_components.core import QuamBase, QuamElement
 
 
-def get_class_attributes(class_dict: dict, annotated_attrs: dict):
+def get_class_attributes(cls: type):
+    annotated_attrs = get_type_hints(cls)
+
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
-        if attr in class_dict:
+        if hasattr(cls, attr):
             attr_annotations["optional"][attr] = attr_type
+        elif attr in getattr(cls, '__dataclass_fields__', {}):
+            data_field = cls.__dataclass_fields__[attr]
+            if data_field.default_factory is not MISSING:
+                attr_annotations["optional"][attr] = attr_type
+            else:
+                attr_annotations["required"][attr] = attr_type
         else:
             attr_annotations["required"][attr] = attr_type
     attr_annotations["allowed"] = {**attr_annotations["required"], **attr_annotations["optional"]}
