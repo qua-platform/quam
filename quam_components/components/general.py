@@ -13,8 +13,6 @@ class LocalOscillator(QuamElement):
 
 @dataclass
 class Mixer(QuamElement):
-    # from quam_components.components.superconducting_qubits import Transmon as _Transmon
-    # from quam_components.components.resonators import ReadoutResonator as _ReadoutResonator
     name: str
 
     local_oscillator: LocalOscillator

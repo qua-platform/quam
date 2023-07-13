@@ -96,26 +96,8 @@ def test_instantiation_single_nested_element():
     assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
 
 
-def test_instantiation_fixed_attrs():
-    ...
+# def test_instantiation_fixed_attrs():
+#     ...
 
-def test_instantiation_unfixed_attrs():
-    ...
-
-# quam_dict = """
-# {
-#     "qubits": [
-#         {
-#             "id": 0,
-#             "xy": {
-#                 "pi_amp": 10e-3,
-#                 "pi_length": 40,
-#                 "anharmonicity": 200e6
-#             }
-#         }
-#     ]
-# }
-# """
-
-# class QuamTest(QuamBase):
-#     qubits: List[Transmon]
+# def test_instantiation_unfixed_attrs():
+#     ...
