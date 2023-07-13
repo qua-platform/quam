@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Union, Sequence
+from __future__ import annotations
+from typing import TYPE_CHECKING, List, get_type_hints
 from typeguard import check_type, TypeCheckError
 
 if TYPE_CHECKING:
@@ -17,17 +18,24 @@ def get_class_attributes(class_dict: dict, annotated_attrs: dict):
 
 
 def instantiate_quam_attrs(attrs, contents, obj_name):
+    from quam_components.core import QuamElement
+
     instantiated_attrs = {}
     for key, val in contents.items():
+        print(key)
         if key not in attrs["allowed"]:
             raise AttributeError(f"Invalid attribute {key}")
         
         required_type = attrs["allowed"][key]
-        if isinstance(required_type, QuamElement):
-            instantiated_val = instantiate_contents(required_type, val)
-        elif isinstance(required_type, Sequence):
+        try:
+            issubclass(required_type, QuamElement)
+        except TypeError:
+            print(required_type)
+        if issubclass(required_type, QuamElement):
+            instantiated_val = instantiate_quam_element(required_type, val)
+        elif issubclass(required_type, List):
             required_subtype = required_type.args[0]
-            if isinstance(required_subtype, QuamElement):
+            if issubclass(required_subtype, QuamElement):
                 instantiated_val = [
                     instantiate_quam_element(required_subtype, v) for v in val
                 ]
@@ -39,7 +47,10 @@ def instantiate_quam_attrs(attrs, contents, obj_name):
         try:
             check_type(instantiated_val, required_type)
         except TypeCheckError as e:
-            raise TypeError(f"Invalid attribute {key} for {obj_name}") from e
+            raise TypeError(
+                f"Wrong type type({key})={type(instantiated_val)} != {required_type} for '{obj_name}'") from e
+        
+        instantiated_attrs[key] = instantiated_val
         
     missing_attrs = [attr for attr in attrs["required"] if attr not in instantiated_attrs]
     if missing_attrs:
@@ -49,10 +60,9 @@ def instantiate_quam_attrs(attrs, contents, obj_name):
 
 
 def instantiate_quam_base(quam_base: QuamBase, contents: dict):
-    attr_annotations = get_class_attributes(
-        class_dict=quam_base.__class__.__dict__,
-        annotated_attrs=quam_base.__annotations__
-    )
+    # assert all(isinstance(elem, type) for elem in annotated_attrs.values()), \
+    #     [(elem, isinstance(elem, type)) for elem in annotated_attrs.values()]
+    attr_annotations = get_class_attributes(cls=quam_base.__class__)
 
     instantiated_attrs = instantiate_quam_attrs(
         attr_annotations, 
@@ -67,10 +77,7 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict):
 
 
 def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict):
-    attr_annotations = get_class_attributes(
-        class_dict=quam_element_cls.__dict__,
-        annotated_attrs=quam_element_cls.__annotations__
-    )
+    attr_annotations = get_class_attributes(quam_element_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
         attr_annotations, 

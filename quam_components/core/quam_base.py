@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from typing import Union
+
 from .qua_config import build_config
 from quam_components.serialise import get_serialiser
 from quam_components.core.quam_instantiation import instantiate_quam_base
@@ -18,13 +20,16 @@ class QuamBase:
     def save(self):
         ...
 
-    def load(self, filepath=None):
-        if filepath is None:
-            filepath = self.filepath
-
-        contents = self.serialiser.load(filepath)
+    def load(self, filepath_or_dict: Union[str, Path, dict] = None):
+        if isinstance(filepath_or_dict, (str, Path)):
+            contents = self.serialiser.load(filepath_or_dict)
+        elif isinstance(filepath_or_dict, dict):
+            contents = filepath_or_dict
+        elif filepath_or_dict is None and self.filepath is not None:
+            contents = self.serialiser.load(self.filepath)
 
         instantiate_quam_base(self, contents)
+
 
     def build_config(self):
         return build_config(self)

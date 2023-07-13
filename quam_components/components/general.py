@@ -1,4 +1,4 @@
-from __future__ import annotations
+# from __future__ import annotations
 import numpy as np
 from typing import List, TYPE_CHECKING
 from dataclasses import dataclass
@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from quam_components.core import QuamElement
 
 # Avoid circular import for typing
-if TYPE_CHECKING:
-    from .superconducting_qubits import Transmon
-    from .resonators import ReadoutResonator
+# if TYPE_CHECKING:
+#     from .superconducting_qubits import Transmon
+#     from .resonators import ReadoutResonator
 
 
 class LocalOscillator(QuamElement):
@@ -18,12 +18,14 @@ class LocalOscillator(QuamElement):
 
 @dataclass
 class Mixer(QuamElement):
+    # from quam_components.components.superconducting_qubits import Transmon as _Transmon
+    # from quam_components.components.resonators import ReadoutResonator as _ReadoutResonator
     name: str
 
     local_oscillator: LocalOscillator
 
-    qubit: Transmon = None  # TODO add type hints without circular import
-    resonator: ReadoutResonator = None  # TODO add type hints without circular import
+    qubit: QuamElement = None  # TODO add type hints without circular import
+    resonator: QuamElement = None  # TODO add type hints without circular import
 
     I_output_port: int = None  # TODO consider moving to "wiring"
     Q_output_port: int = None  # TODO consider moving to "wiring"
