@@ -1,11 +1,15 @@
 from __future__ import annotations
 import numpy as np
-from typing import List
+from typing import List, TYPE_CHECKING
 from dataclasses import dataclass
 
 from quam_components.core import QuamElement
-from .superconducting_qubits import Transmon
-from .resonators import ReadoutResonator
+
+# Avoid circular import for typing
+if TYPE_CHECKING:
+    from .superconducting_qubits import Transmon
+    from .resonators import ReadoutResonator
+
 
 class LocalOscillator(QuamElement):
     power: float = None
