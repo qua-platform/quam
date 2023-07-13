@@ -1,11 +1,15 @@
 from typing import List
-import numpy as np
+from dataclasses import dataclass
 
 from quam_components import QuamElement
 from .general import Mixer
 from quam_components.utils.pulse import pulse_str_to_axis_axis_angle
 
 
+__all__ = ["Transmon", "XYChannel", "ZChannel"]
+
+
+@dataclass
 class XYChannel(QuamElement):
     mixer: Mixer
     qubit: "Transmon"
@@ -66,6 +70,7 @@ class XYChannel(QuamElement):
         config["waveforms"].update(waveforms)
 
 
+@dataclass
 class ZChannel(QuamElement):
     max_frequency_point: float = None
     output_port: int = None  # TODO consider moving to "wiring"
@@ -118,6 +123,7 @@ class ZChannel(QuamElement):
         config["waveforms"].update(waveforms)
 
 
+@dataclass
 class Transmon(QuamElement):
     id: int
 

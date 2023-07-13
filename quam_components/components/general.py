@@ -1,22 +1,25 @@
+from __future__ import annotations
 import numpy as np
 from typing import List
+from dataclasses import dataclass
 
 from quam_components.core import QuamElement
-
+from .superconducting_qubits import Transmon
+from .resonators import ReadoutResonator
 
 class LocalOscillator(QuamElement):
     power: float = None
     frequency: float = None
 
 
-
+@dataclass
 class Mixer(QuamElement):
     name: str
 
     local_oscillator: LocalOscillator
 
-    qubit: "Transmon" = None  # TODO add type hints without circular import
-    resonator: "ReadoutResonator" = None  # TODO add type hints without circular import
+    qubit: Transmon = None  # TODO add type hints without circular import
+    resonator: ReadoutResonator = None  # TODO add type hints without circular import
 
     I_output_port: int = None  # TODO consider moving to "wiring"
     Q_output_port: int = None  # TODO consider moving to "wiring"

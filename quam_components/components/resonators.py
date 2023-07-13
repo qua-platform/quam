@@ -1,10 +1,15 @@
 import numpy as np
 from typing import Union
+from dataclasses import dataclass
 
 from quam_components import QuamElement
 from .general import Mixer
 
 
+__all__ = ["ReadoutResonator"]
+
+
+@dataclass
 class ReadoutResonator(QuamElement):
     id: Union[int, str]
     mixer: Mixer
