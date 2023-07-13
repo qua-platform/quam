@@ -81,18 +81,3 @@ def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict
     quam_element = quam_element_cls(**instantiated_attrs)
 
     return quam_element
-
-
-
-def instantiate_contents(obj_or_cls: Union[QuamBase, type[QuamElement]], contents: dict):
-    attrs = get_class_attributes(obj_or_cls)
-
-            
-        # verify that the instantiated element is of the correct type
-        
-        if isinstance(obj_or_cls, QuamBase):
-            setattr(obj_or_cls, key, element)
-        else:
-            
-
-        return element

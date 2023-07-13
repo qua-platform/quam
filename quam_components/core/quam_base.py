@@ -2,6 +2,7 @@ from pathlib import Path
 
 from .qua_config import build_config
 from quam_components.serialise import get_serialiser
+from quam_components.core.quam_instantiation import instantiate_quam_base
 
 
 class QuamBase:
@@ -23,12 +24,7 @@ class QuamBase:
 
         contents = self.serialiser.load(filepath)
 
-        self.instantiate_contents(contents)
-
-    def instantiate_contents(self, contents: dict):
-        for key, val in contents.items():
-            ...
-
+        instantiate_quam_base(self, contents)
 
     def build_config(self):
         return build_config(self)
