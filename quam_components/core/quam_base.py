@@ -60,9 +60,6 @@ class QuamElement(ReferenceClass):
 
     _quam: ClassVar[QuamBase] = None
 
-    def __post_init__(self):
-        super().__init__()
-
     def apply_to_config(self, config: dict) -> None:
         ...
 

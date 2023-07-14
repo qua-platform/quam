@@ -3,12 +3,9 @@ from typing import Any, Dict
 
 class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
-    _references: Dict[str, str] = {}  # Overwritten during __init__
+    _references: Dict[str, str] = None  # Overwritten during __init__
     _skip_attrs: list = ['_references']
     
-    def __init__(self) -> None:
-        self._references: Dict[str, str] = {}
-
     @staticmethod
     def _str_is_reference(__value: str) -> bool:
         return __value.startswith(":")
@@ -34,6 +31,9 @@ class ReferenceClass:
     def __getattribute__(self, __name: str) -> Any:
         skip_attrs = super().__getattribute__("_skip_attrs")
         references = super().__getattribute__("_references")
+        if references is None:
+            super().__setattr__("_references", {})
+            references = {}
 
         if __name in skip_attrs or __name not in references:
             return super().__getattribute__(__name)

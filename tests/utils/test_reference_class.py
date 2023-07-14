@@ -45,7 +45,7 @@ def test_reference_dataclass():
 
     sub_reference_class.c = ":d"
     assert sub_reference_class._references == {"c": ":d"}
-    assert SubReferenceDataClass._references == {}
+    assert SubReferenceDataClass._references is None
     assert sub_reference_class.c == "d"
 
     sub_reference_class.a = ":b"

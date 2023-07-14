@@ -23,18 +23,18 @@ class QuamElementTest(QuamElement):
     int_val: int
 
 
-def test_basic_quam_element_reference():
+def test_quam_element_reference_after_initialization():
     quam_elem = QuamElementTest(int_val=42)
 
     quam_elem.int_val = ":test"
     assert quam_elem._references == {"int_val": ":test"}
 
+def test_quam_element_reference_during_initialization():
     quam_elem = QuamElementTest(int_val=":test")
     assert quam_elem._references == {"int_val": ":test"}
 
 
 def test_basic_reference():
-
     @dataclass(kw_only=True, eq=False)
     class QuamBaseTest(QuamBase):
         quam_elem1: QuamElementTest
