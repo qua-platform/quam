@@ -79,7 +79,7 @@ class ZChannel(QuamElement):
     max_frequency_point: float = None
     output_port: int = None  # TODO consider moving to "wiring"
 
-    pulses: List[str] = field(default_factory=["const"])
+    pulses: List[str] = field(default_factory=lambda: ["const"])
     flux_pulse_length: float = None
     flux_pulse_amp: float = None
 

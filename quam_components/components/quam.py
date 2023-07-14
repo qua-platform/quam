@@ -1,4 +1,5 @@
 from typing import List
+from dataclasses import dataclass, field
 
 from quam_components.core import QuamBase
 from .general import *
@@ -9,7 +10,9 @@ from .resonators import *
 __all__ = ["QuAM"]
 
 
+@dataclass
 class QuAM(QuamBase):
-    mixers: List[Mixer]
-    qubits: List[Transmon]
-    resonators: List[ReadoutResonator]
+    mixers: List[Mixer] = field(default_factory=list)
+    qubits: List[Transmon] = field(default_factory=list)
+    resonators: List[ReadoutResonator] = field(default_factory=list)
+    local_oscillators: List[LocalOscillator] = field(default_factory=list)

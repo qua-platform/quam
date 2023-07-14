@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Union
-from dataclasses import fields, is_dataclass
+from dataclasses import fields, is_dataclass, Initvar
 
 from .qua_config import build_config
 from quam_components.serialisers import get_serialiser
@@ -33,13 +33,20 @@ class QuamBase:
 
         instantiate_quam_base(self, contents)
 
-
     def build_config(self):
         return build_config(self)
+    
+    def iterate_quam_elements(self):
+        return iterate_quam_elements(self)
+    
+    def get_referenced_value(self, reference: str):
+        ...  # TODO: implement
     
 
 class QuamElement:
     controller: str = "con1"
+
+    _quam: Initvar[QuamBase] = None
 
     def apply_to_config(self, config):
         ...

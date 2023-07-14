@@ -69,8 +69,6 @@ def instantiate_quam_attrs(attrs, contents, obj_name):
 
 
 def instantiate_quam_base(quam_base: QuamBase, contents: dict):
-    # assert all(isinstance(elem, type) for elem in annotated_attrs.values()), \
-    #     [(elem, isinstance(elem, type)) for elem in annotated_attrs.values()]
     attr_annotations = get_class_attributes(cls=quam_base.__class__)
 
     instantiated_attrs = instantiate_quam_attrs(
