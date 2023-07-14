@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Generator
 from dataclasses import fields, is_dataclass
 
 from .qua_config import build_config
@@ -52,18 +52,29 @@ class QuamElement:
         ...
 
 
-def iterate_quam_elements(quam: Union[QuamBase, QuamElement]):
+def iterate_quam_elements(quam: Union[QuamBase, QuamElement], skip_elems=None) -> Generator[QuamElement, None, None]:
     if not is_dataclass(quam):
         return
+    
+    if skip_elems is None:
+        skip_elems = []
+
     for data_field in fields(quam):
-        val = getattr(quam, data_field.name)
-        if isinstance(val, dict):
-            yield from iterate_quam_elements(val)
-        elif isinstance(val, list):
-            for elem in val:
-                if isinstance(elem, QuamElement):
-                    yield elem
-                    yield from iterate_quam_elements(elem)
-        elif isinstance(val, QuamElement):
-            yield val
-            yield from iterate_quam_elements(val)
+        attr_val = getattr(quam, data_field.name)
+        if attr_val in skip_elems:
+            continue
+
+        if isinstance(attr_val, QuamElement):
+            yield attr_val
+            skip_elems.append(attr_val)
+            yield from iterate_quam_elements(attr_val, skip_elems=skip_elems)
+        if isinstance(attr_val, list):
+            for elem in attr_val:
+                if not isinstance(elem, QuamElement):
+                    continue
+                if elem in skip_elems:
+                    continue
+                yield elem
+                skip_elems.append(elem)
+                yield from iterate_quam_elements(elem, skip_elems=skip_elems)
+

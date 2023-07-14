@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from quam_components.core import QuamElement
 
 
-@dataclass
+@dataclass(kw_only=True, eq=False)
 class LocalOscillator(QuamElement):
     power: float = None
     frequency: float = None
 
 
-@dataclass
+@dataclass(kw_only=True, eq=False)
 class Mixer(QuamElement):
     id: Union[int, str]
 

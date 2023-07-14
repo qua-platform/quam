@@ -9,21 +9,22 @@ from quam_components.utils.pulse import pulse_str_to_axis_axis_angle
 __all__ = ["Transmon", "XYChannel", "ZChannel"]
 
 
-@dataclass
+default_pulses = [f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"]]
+
+
+@dataclass(kw_only=True, eq=False)
 class XYChannel(QuamElement):
     mixer: Mixer
-    qubit: "Transmon" = None  # Initialized after creating the qubit
+    
+    pi_amp: float
+    pi_length: float
+    anharmonicity: float
 
-    pulses: List[str] = field(
-        default_factory=lambda: [
-            f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"]
-        ]
-    )
-    pi_amp: float = None
-    pi_length: float = None
-    drag_coefficient: float = None
-    anharmonicity: float = None
-    ac_stark_detuning: float = None
+    pulses: List[str] = field(default_factory=lambda: default_pulses)
+    drag_coefficient: float = 0
+    ac_stark_detuning: float = 0
+
+    qubit: "Transmon" = None  # Initialized after creating the qubit
 
     @property
     def pulse_mapping(self):
@@ -81,34 +82,48 @@ class XYChannel(QuamElement):
         config["waveforms"].update(waveforms)
 
 
-@dataclass
+@dataclass(kw_only=True, eq=False)
 class ZChannel(QuamElement):
     port: int
 
     qubit: "Transmon" = None  # Initialized after creating the qubit
 
-    max_frequency_point: float = None
+    offset: float = None  # z_max_frequency_point
 
-    pulses: List[str] = field(default_factory=lambda: ["const"])
-    flux_pulse_length: float = None
-    flux_pulse_amp: float = None
+    pulses: List[str] = field(default_factory=lambda: ["const_flux"])
+    pulse_length: float = None
+    pulse_amplitude: float = None
 
-    def add_pulses_waveforms(self):
+    filter_fir_taps: List[float] = None
+    filter_iir_taps: List[float] = None
+
+    @property
+    def pulse_mapping(self):
+        pulse_mapping = {}
+        for pulse in self.pulses:
+            if pulse == "const_flux":
+                pulse_mapping[pulse] = f"const_flux_{self.qubit.name}_pulse"
+            else:
+                raise ValueError(f"Unknown pulse {pulse}")
+        return pulse_mapping
+
+    def calculate_pulses_waveforms(self):
         pulses = {}
         waveforms = {}
 
-        # TODO iterate over pulses
-        pulses[f"const_flux_{self.qubit.name}_pulse"] = {
-            "operation": "control",
-            "length": self.flux_pulse_length,
-            "waveforms": {
-                "single": f"const_flux_{self.qubit.name}_wf",
-            },
-        }
-        waveforms[f"const_flux_{self.qubit.name}_wf"] = {
-            "type": "constant",
-            "sample": self.flux_pulse_amp,
-        }
+        for pulse_label, pulse_name in self.pulse_mapping.items():
+            if pulse_label == "const_flux":
+                pulses[pulse_name] = {
+                    "operation": "control",
+                    "length": self.pulse_length,
+                    "waveforms": {
+                        "single": f"const_flux_{self.qubit.name}_wf",
+                    },
+                }
+                waveforms[f"const_flux_{self.qubit.name}_wf"] = {
+                    "type": "constant",
+                    "sample": self.pulse_amplitude,
+                }
 
         return pulses, waveforms
 
@@ -117,30 +132,29 @@ class ZChannel(QuamElement):
             "singleInput": {
                 "port": (self.controller, self.port),  # TODO fix wiring
             },
-            "operations": {
-                "const": f"const_flux_pulse_{self.qubit.name}",
-            },
+            "operations": self.pulse_mapping
         }
 
-        # Add analog output
-        if self.z_max_frequency_point is not None:
-            analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-            analog_outputs[self.z_port] = {"offset": self.z_max_frequency_point}
+        analog_outputs = config["controllers"][self.controller]["analog_outputs"]
+        analog_output = analog_outputs[self.port] = {}
 
-            if self.filter_fir_taps is not None and self.filter_iir_taps is not None:
-                analog_outputs[self.z_port]["filter"].update(
-                    {
-                        "feedback": self.filter_iir_taps,
-                        "feedforward": self.filter_fir_taps,
-                    }
-                )
+        if self.offset is not None:
+            analog_output["offset"] = self.offset
+
+        if self.filter_fir_taps is not None:
+            output_filter = analog_output.setdefault("filter", {})
+            output_filter["feedforward"] = self.filter_fir_taps
+
+        if self.filter_iir_taps is not None:
+            output_filter = analog_output.setdefault("filter", {})
+            output_filter["feedback"] = self.filter_iir_taps
 
         pulses, waveforms = self.calculate_pulses_waveforms()
         config["pulses"].update(pulses)
         config["waveforms"].update(waveforms)
 
 
-@dataclass
+@dataclass(kw_only=True, eq=False)
 class Transmon(QuamElement):
     id: int
 

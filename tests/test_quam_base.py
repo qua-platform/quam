@@ -49,5 +49,5 @@ def test_iterate_quam_elements_nested() -> Generator[QuamElement, None, None]:
     )
 
     elems = list(iterate_quam_elements(test_quam))
-    assert len(elems) == 12
+    assert len(elems) == 4
     assert all(isinstance(elem, QuamElement) for elem in elems)
