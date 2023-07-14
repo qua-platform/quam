@@ -64,13 +64,14 @@ def instantiate_quam_attrs(attrs, contents, obj_name, quam_base: QuamBase):
         else:
             instantiated_val = val
 
-        try:
-            check_type(instantiated_val, required_type)
-        except TypeCheckError as e:
-            raise TypeError(
-                f"Wrong type type({key})={type(instantiated_val)} !="
-                f" {required_type} for '{obj_name}'"
-            ) from e
+        if not isinstance(instantiated_val, str) or not instantiated_val.startswith(':'):
+            try:
+                check_type(instantiated_val, required_type)
+            except TypeCheckError as e:
+                raise TypeError(
+                    f"Wrong type type({key})={type(instantiated_val)} !="
+                    f" {required_type} for '{obj_name}'"
+                ) from e
 
         instantiated_attrs[key] = instantiated_val
 

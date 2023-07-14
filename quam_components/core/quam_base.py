@@ -126,7 +126,7 @@ def iterate_quam_elements(quam: Union[QuamBase, QuamElement], skip_elems=None) -
     if isinstance(quam, QuamDictElement):
         obj_data_values = quam._attrs.values()
     else:
-        obj_data_values = [data_field.name for data_field in fields(quam)]
+        obj_data_values = [getattr(quam, data_field.name) for data_field in fields(quam)]
 
     for attr_val in obj_data_values:
         if attr_val in skip_elems:
