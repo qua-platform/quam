@@ -74,6 +74,8 @@ def test_instantiation_single_element():
     assert quam.qubit.id == 0
     assert quam.qubit.xy is None
 
+    assert quam.qubit._quam is quam
+
 
 quam_dict_single_nested = {
     "qubit": {
@@ -95,6 +97,8 @@ def test_instantiation_single_nested_element():
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict["qubit"]["xy"]["mixer"] = {
         "id": 0,
+        "port_I": 0,
+        "port_Q": 1,
         "local_oscillator": {"power": 10, "frequency": 6e9},
     }
     quam.load(quam_dict)
@@ -103,6 +107,10 @@ def test_instantiation_single_nested_element():
     assert quam.qubit.xy.mixer.name == "mixer0"
     assert quam.qubit.xy.mixer.local_oscillator.power == 10
     assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
+
+    assert quam.qubit._quam is quam
+    assert quam.qubit.xy._quam is quam
+    assert quam.qubit.xy.mixer._quam is quam
 
 
 # def test_instantiation_fixed_attrs():

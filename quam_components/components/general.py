@@ -17,10 +17,10 @@ class Mixer(QuamElement):
 
     local_oscillator: LocalOscillator
 
-    frequency_drive: float = None
-
     port_I: int
     port_Q: int
+
+    frequency_drive: float = None
 
     correction_gain: float = None
     correction_phase: float = None

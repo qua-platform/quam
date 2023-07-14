@@ -5,14 +5,14 @@ from quam_components.core import QuamBase, QuamElement, iterate_quam_elements
 
 
 @dataclass
-class TestQuam(QuamBase):
+class QuamTest(QuamBase):
     int_val: int
     quam_elem: QuamElement
     quam_elem_list: List[QuamElement]
 
 
 def test_iterate_quam_elements():
-    test_quam = TestQuam(
+    test_quam = QuamTest(
         int_val=42,
         quam_elem=QuamElement(),
         quam_elem_list=[QuamElement(), QuamElement()],
@@ -24,27 +24,27 @@ def test_iterate_quam_elements():
 
 
 @dataclass
-class TestQuamElement(QuamElement):
+class QuamElementTest(QuamElement):
     int_val: int
     quam_elem: QuamElement
     quam_elem_list: List[QuamElement]
 
 
 @dataclass
-class TestQuamNested(QuamBase):
+class NestedQuamTest(QuamBase):
     int_val: int
-    quam_elem: TestQuamElement
-    quam_elem_list: List[TestQuamElement]
+    quam_elem: QuamElementTest
+    quam_elem_list: List[QuamElementTest]
 
 
 def test_iterate_quam_elements_nested() -> Generator[QuamElement, None, None]:
-    quam_element = TestQuamElement(
+    quam_element = QuamElementTest(
         int_val=42,
         quam_elem=QuamElement(),
         quam_elem_list=[QuamElement(), QuamElement()],
     )
 
-    test_quam = TestQuam(
+    test_quam = NestedQuamTest(
         int_val=42, quam_elem=quam_element, quam_elem_list=[quam_element, quam_element]
     )
 

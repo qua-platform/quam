@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Union
-from dataclasses import fields, is_dataclass, Initvar
+from dataclasses import fields, is_dataclass
 
 from .qua_config import build_config
 from quam_components.serialisers import get_serialiser
@@ -46,7 +46,7 @@ class QuamBase:
 class QuamElement:
     controller: str = "con1"
 
-    _quam: Initvar[QuamBase] = None
+    _quam: QuamBase = None  # TODO does this need Initvar?
 
     def apply_to_config(self, config):
         ...

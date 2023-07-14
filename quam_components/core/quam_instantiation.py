@@ -30,7 +30,7 @@ def get_class_attributes(cls: type):
     return attr_annotations
 
 
-def instantiate_quam_attrs(attrs, contents, obj_name):
+def instantiate_quam_attrs(attrs, contents, obj_name, quam_base: QuamBase):
     # TODO should type checking be performed here or in the classes
     from quam_components.core import QuamElement
 
@@ -44,12 +44,12 @@ def instantiate_quam_attrs(attrs, contents, obj_name):
         if not isclass(required_type):  # probably part of typing module
             instantiated_val = val
         elif issubclass(required_type, QuamElement):
-            instantiated_val = instantiate_quam_element(required_type, val)
+            instantiated_val = instantiate_quam_element(required_type, val, quam_base)
         elif issubclass(required_type, List):
             required_subtype = required_type.args[0]
             if issubclass(required_subtype, QuamElement):
                 instantiated_val = [
-                    instantiate_quam_element(required_subtype, v) for v in val
+                    instantiate_quam_element(required_subtype, v, quam_base) for v in val
                 ]
             else:
                 instantiated_val = val
@@ -81,7 +81,7 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict):
     attr_annotations = get_class_attributes(cls=quam_base.__class__)
 
     instantiated_attrs = instantiate_quam_attrs(
-        attr_annotations, contents, obj_name=quam_base.__class__.__name__
+        attr_annotations, contents, obj_name=quam_base.__class__.__name__, quam_base=quam_base
     )
 
     for attr, val in instantiated_attrs.items():
@@ -90,13 +90,14 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict):
     return quam_base
 
 
-def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict):
+def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict, quam_base: QuamBase):
     attr_annotations = get_class_attributes(quam_element_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
-        attr_annotations, contents, obj_name=quam_element_cls.__name__
+        attr_annotations, contents, obj_name=quam_element_cls.__name__, quam_base=quam_base
     )
 
     quam_element = quam_element_cls(**instantiated_attrs)
+    quam_element._quam = quam_base
 
     return quam_element
