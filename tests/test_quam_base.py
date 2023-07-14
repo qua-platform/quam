@@ -15,7 +15,7 @@ def test_iterate_quam_elements():
     test_quam = TestQuam(
         int_val=42,
         quam_elem=QuamElement(),
-        quam_elem_list=[QuamElement(), QuamElement()]
+        quam_elem_list=[QuamElement(), QuamElement()],
     )
 
     elems = list(iterate_quam_elements(test_quam))
@@ -41,13 +41,11 @@ def test_iterate_quam_elements_nested() -> Generator[QuamElement, None, None]:
     quam_element = TestQuamElement(
         int_val=42,
         quam_elem=QuamElement(),
-        quam_elem_list=[QuamElement(), QuamElement()]
+        quam_elem_list=[QuamElement(), QuamElement()],
     )
 
     test_quam = TestQuam(
-        int_val=42,
-        quam_elem=quam_element,
-        quam_elem_list=[quam_element, quam_element]
+        int_val=42, quam_elem=quam_element, quam_elem_list=[quam_element, quam_element]
     )
 
     elems = list(iterate_quam_elements(test_quam))

@@ -19,11 +19,15 @@ def test_get_class_attributes():
     attr_annotations = get_class_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
     assert attr_annotations["optional"] == {"d": str, "controller": str}
-    assert attr_annotations["allowed"] == {"a": int, "b": List[int], "d": str, "controller": str}
+    assert attr_annotations["allowed"] == {
+        "a": int,
+        "b": List[int],
+        "d": str,
+        "controller": str,
+    }
 
 
 def test_get_class_attributes_subclass():
-
     class AbstractClass(QuamElement):
         elem: float = 42
 
@@ -37,8 +41,13 @@ def test_get_class_attributes_subclass():
     attr_annotations = get_class_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
     assert attr_annotations["optional"] == {"d": str, "elem": float, "controller": str}
-    assert attr_annotations["allowed"] == {"a": int, "b": List[int], "d": str, "elem": float, "controller": str}
-
+    assert attr_annotations["allowed"] == {
+        "a": int,
+        "b": List[int],
+        "d": str,
+        "elem": float,
+        "controller": str,
+    }
 
 
 quam_dict_single = {
@@ -73,7 +82,7 @@ quam_dict_single_nested = {
             "pi_amp": 10e-3,
             "pi_length": 40,
             "anharmonicity": 200e6,
-        }
+        },
     },
 }
 
@@ -84,9 +93,9 @@ def test_instantiation_single_nested_element():
         quam.load(quam_dict_single_nested)
 
     quam_dict = deepcopy(quam_dict_single_nested)
-    quam_dict['qubit']['xy']['mixer'] = {
-        "id": 0, 
-        "local_oscillator": {"power": 10, "frequency": 6e9}
+    quam_dict["qubit"]["xy"]["mixer"] = {
+        "id": 0,
+        "local_oscillator": {"power": 10, "frequency": 6e9},
     }
     quam.load(quam_dict)
 

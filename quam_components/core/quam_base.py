@@ -35,13 +35,13 @@ class QuamBase:
 
     def build_config(self):
         return build_config(self)
-    
+
     def iterate_quam_elements(self):
         return iterate_quam_elements(self)
-    
+
     def get_referenced_value(self, reference: str):
         ...  # TODO: implement
-    
+
 
 class QuamElement:
     controller: str = "con1"
@@ -50,7 +50,7 @@ class QuamElement:
 
     def apply_to_config(self, config):
         ...
-    
+
 
 def iterate_quam_elements(quam: Union[QuamBase, QuamElement]):
     if not is_dataclass(quam):

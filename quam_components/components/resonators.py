@@ -41,29 +41,52 @@ class ReadoutResonator(QuamElement):
             },
         }
         if self.rotation_angle is not None:
-            integration_weights.update({
-                f"rotated_cosine_weights_{self.name}": {
-                    "cosine": [(np.cos(self.rotation_angle), self.readout_pulse_length)],
-                    "sine": [(-np.sin(self.rotation_angle), self.readout_pulse_length)],
-                },
-                f"rotated_sine_weights_{self.name}": {
-                    "cosine": [(np.sin(self.rotation_angle), self.readout_pulse_length)],
-                    "sine": [(np.cos(self.rotation_angle), self.readout_pulse_length)],
-                },
-                f"rotated_minus_sine_weights_{self.name}": {
-                    "cosine": [(-np.sin(self.rotation_angle), self.readout_pulse_length)],
-                    "sine": [(-np.cos(self.rotation_angle), self.readout_pulse_length)],
-                },
-            })
+            integration_weights.update(
+                {
+                    f"rotated_cosine_weights_{self.name}": {
+                        "cosine": [
+                            (np.cos(self.rotation_angle), self.readout_pulse_length)
+                        ],
+                        "sine": [
+                            (-np.sin(self.rotation_angle), self.readout_pulse_length)
+                        ],
+                    },
+                    f"rotated_sine_weights_{self.name}": {
+                        "cosine": [
+                            (np.sin(self.rotation_angle), self.readout_pulse_length)
+                        ],
+                        "sine": [
+                            (np.cos(self.rotation_angle), self.readout_pulse_length)
+                        ],
+                    },
+                    f"rotated_minus_sine_weights_{self.name}": {
+                        "cosine": [
+                            (-np.sin(self.rotation_angle), self.readout_pulse_length)
+                        ],
+                        "sine": [
+                            (-np.cos(self.rotation_angle), self.readout_pulse_length)
+                        ],
+                    },
+                }
+            )
         return integration_weights
 
     def calculate_waveforms(self):
-        return {f"readout_{self.name}_wf": {"type": "constant", "sample": self.readout_pulse_amp}}
-    
+        return {
+            f"readout_{self.name}_wf": {
+                "type": "constant",
+                "sample": self.readout_pulse_amp,
+            }
+        }
+
     def calculate_pulses(self):
         integration_weights_labels = ["cos", "sin", "minus_sin"]
         if self.rotation_angle is None:
-            integration_weights_labels += ["rotated_cos", "rotated_sin", "rotated_minus_sin"]
+            integration_weights_labels += [
+                "rotated_cos",
+                "rotated_sin",
+                "rotated_minus_sin",
+            ]
         integration_weights_mapping = dict(
             zip(integration_weights_labels, self.calculate_integration_weights().keys())
         )
@@ -84,7 +107,9 @@ class ReadoutResonator(QuamElement):
     def apply_to_config(self, config: dict):
         config["elements"][self.name] = {
             "mixInputs": self.mixer.get_input_config(),
-            "intermediate_frequency": self.frequency_opt - self.mixer.local_oscillator.frequency,
+            "intermediate_frequency": (
+                self.frequency_opt - self.mixer.local_oscillator.frequency
+            ),
             "operations": {  # TODO add operations
                 # "cw": "const_pulse",
                 # "readout": f"readout_pulse_q{i}",
@@ -93,7 +118,9 @@ class ReadoutResonator(QuamElement):
                 "out1": (self.controller, 1),  # TODO Determine proper output ports
                 "out2": (self.controller, 2),
             },
-            "time_of_flight": self.global_parameters.time_of_flight,  # TODO Determine global parameters
+            "time_of_flight": (
+                self.global_parameters.time_of_flight
+            ),  # TODO Determine global parameters
             "smearing": self.smearing,
         }
 

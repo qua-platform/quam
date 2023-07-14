@@ -15,7 +15,7 @@ def get_class_attributes(cls: type):
     for attr, attr_type in annotated_attrs.items():
         if hasattr(cls, attr):
             attr_annotations["optional"][attr] = attr_type
-        elif attr in getattr(cls, '__dataclass_fields__', {}):
+        elif attr in getattr(cls, "__dataclass_fields__", {}):
             data_field = cls.__dataclass_fields__[attr]
             if data_field.default_factory is not MISSING:
                 attr_annotations["optional"][attr] = attr_type
@@ -23,7 +23,10 @@ def get_class_attributes(cls: type):
                 attr_annotations["required"][attr] = attr_type
         else:
             attr_annotations["required"][attr] = attr_type
-    attr_annotations["allowed"] = {**attr_annotations["required"], **attr_annotations["optional"]}
+    attr_annotations["allowed"] = {
+        **attr_annotations["required"],
+        **attr_annotations["optional"],
+    }
     return attr_annotations
 
 
@@ -35,7 +38,7 @@ def instantiate_quam_attrs(attrs, contents, obj_name):
     for key, val in contents.items():
         if key not in attrs["allowed"]:
             raise AttributeError(f"Invalid attribute {key}")
-        
+
         # TODO improve type checking
         required_type = attrs["allowed"][key]
         if not isclass(required_type):  # probably part of typing module
@@ -57,14 +60,20 @@ def instantiate_quam_attrs(attrs, contents, obj_name):
             check_type(instantiated_val, required_type)
         except TypeCheckError as e:
             raise TypeError(
-                f"Wrong type type({key})={type(instantiated_val)} != {required_type} for '{obj_name}'") from e
-        
+                f"Wrong type type({key})={type(instantiated_val)} !="
+                f" {required_type} for '{obj_name}'"
+            ) from e
+
         instantiated_attrs[key] = instantiated_val
-        
-    missing_attrs = [attr for attr in attrs["required"] if attr not in instantiated_attrs]
+
+    missing_attrs = [
+        attr for attr in attrs["required"] if attr not in instantiated_attrs
+    ]
     if missing_attrs:
-        raise AttributeError(f"Missing required attribute {missing_attrs} for {obj_name}")
-    
+        raise AttributeError(
+            f"Missing required attribute {missing_attrs} for {obj_name}"
+        )
+
     return instantiated_attrs
 
 
@@ -72,9 +81,7 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict):
     attr_annotations = get_class_attributes(cls=quam_base.__class__)
 
     instantiated_attrs = instantiate_quam_attrs(
-        attr_annotations, 
-        contents, 
-        obj_name=quam_base.__class__.__name__
+        attr_annotations, contents, obj_name=quam_base.__class__.__name__
     )
 
     for attr, val in instantiated_attrs.items():
@@ -87,9 +94,7 @@ def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict
     attr_annotations = get_class_attributes(quam_element_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
-        attr_annotations, 
-        contents, 
-        obj_name=quam_element_cls.__name__
+        attr_annotations, contents, obj_name=quam_element_cls.__name__
     )
 
     quam_element = quam_element_cls(**instantiated_attrs)

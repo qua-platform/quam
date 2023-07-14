@@ -15,20 +15,23 @@ class XYChannel(QuamElement):
     qubit: "Transmon" = None  # Initialized after creating the qubit
 
     pulses: List[str] = field(
-        default_factory=lambda: [f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"]]
+        default_factory=lambda: [
+            f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"]
+        ]
     )
     pi_amp: float = None
     pi_length: float = None
     drag_coefficient: float = None
     anharmonicity: float = None
     ac_stark_detuning: float = None
-    
+
     @property
     def pulse_mapping(self):
         return {pulse: f"{pulse}_{self.qubit.name}_pulse" for pulse in self.pulses}
 
     def calculate_pulses_waveforms(self):
         from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
+
         pulses = {}
         waveforms = {}
 
@@ -38,8 +41,8 @@ class XYChannel(QuamElement):
                 "length": self.pi_length,
                 "waveforms": {
                     "I": f"{pulse_label}_I_{self.qubit.name}_wf",
-                    "Q": f"{pulse_label}_Q_{self.qubit.name}_wf"
-                }
+                    "Q": f"{pulse_label}_Q_{self.qubit.name}_wf",
+                },
             }
 
             # Add XY waveforms
@@ -53,17 +56,25 @@ class XYChannel(QuamElement):
                 detuning=self.ac_stark_detuning,
             )
             waveform_I = waveform if axis == "X" else waveform_derivative
-            waveforms[f"{pulse_label}_I_{self.qubit.name}_wf"] = {"type": "arbitrary", "samples": waveform_I}
+            waveforms[f"{pulse_label}_I_{self.qubit.name}_wf"] = {
+                "type": "arbitrary",
+                "samples": waveform_I,
+            }
             waveform_Q = waveform_derivative if axis == "X" else waveform
-            waveforms[f"{pulse_label}_Q_{self.qubit.name}_wf"] = {"type": "arbitrary", "samples": waveform_Q}
+            waveforms[f"{pulse_label}_Q_{self.qubit.name}_wf"] = {
+                "type": "arbitrary",
+                "samples": waveform_Q,
+            }
 
         return pulses, waveforms
-    
+
     def apply_to_config(self, config: dict):
         # Add XY to "elements"
         config["elements"][f"{self.qubit.name}_xy"] = {
             "mixInputs": self.mixer.get_input_config(),
-            "intermediate_frequency": (self.frequency_01 - self.mixer.local_oscillator.frequency),
+            "intermediate_frequency": (
+                self.frequency_01 - self.mixer.local_oscillator.frequency
+            ),
             "operations": self.xy.pulse_mapping,
         }
 
@@ -95,12 +106,14 @@ class ZChannel(QuamElement):
                 "single": f"const_flux_{self.qubit.name}_wf",
             },
         }
-        waveforms[f"const_flux_{self.qubit.name}_wf"] = {"type": "constant", "sample": self.flux_pulse_amp}
+        waveforms[f"const_flux_{self.qubit.name}_wf"] = {
+            "type": "constant",
+            "sample": self.flux_pulse_amp,
+        }
 
         return pulses, waveforms
 
     def apply_to_config(self, config: dict):
-
         # Add to "elements"
         config["elements"][f"{self.qubit.name}_z"] = {
             "singleInput": {
@@ -115,13 +128,15 @@ class ZChannel(QuamElement):
         if self.z_max_frequency_point is not None and self.z_output_port is not None:
             analog_outputs = config["controllers"][self.controller]["analog_outputs"]
             analog_outputs[self.z_output_port] = {"offset": self.z_max_frequency_point}
-            
+
             if self.filter_fir_taps is not None and self.filter_iir_taps is not None:
-                analog_outputs[self.z_output_port]["filter"].update({
-                    "feedback": self.filter_iir_taps,
-                    "feedforward": self.filter_fir_taps,
-                })
-        
+                analog_outputs[self.z_output_port]["filter"].update(
+                    {
+                        "feedback": self.filter_iir_taps,
+                        "feedforward": self.filter_fir_taps,
+                    }
+                )
+
         pulses, waveforms = self.calculate_pulses_waveforms()
         config["pulses"].update(pulses)
         config["waveforms"].update(waveforms)
@@ -143,4 +158,3 @@ class Transmon(QuamElement):
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"q{self.id}"
-    

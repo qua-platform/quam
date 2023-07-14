@@ -1,5 +1,3 @@
-
-
 qua_config_template = {
     "version": 1,
     "controllers": {
@@ -25,7 +23,7 @@ qua_config_template = {
         "ON": {"samples": [(1, 0)]},
     },
     "integration_weights": {},
-    "mixers": {}
+    "mixers": {},
 }
 
 
@@ -37,5 +35,5 @@ def build_config(quam, qua_config=None):
 
     for quam_element in iterate_quam_elements(quam):
         quam_element.apply_to_config(qua_config)
-        
+
     return qua_config

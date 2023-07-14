@@ -30,18 +30,20 @@ class Mixer(QuamElement):
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"mixer{self.id}"
-    
+
     @property
     def intermediate_frequency(self):
         return self.frequency_drive - self.local_oscillator.frequency
-    
+
     def get_input_config(self):
-        return { 
-            "I": (self.controller, self.wiring.I),  # TODO fix wiring
-            "Q": (self.controller, self.wiring.Q),
-            "lo_frequency": self.local_oscillator.frequency,
-            "mixer": self.name,
-        },
+        return (
+            {
+                "I": (self.controller, self.wiring.I),  # TODO fix wiring
+                "Q": (self.controller, self.wiring.Q),
+                "lo_frequency": self.local_oscillator.frequency,
+                "mixer": self.name,
+            },
+        )
 
     def apply_to_config(self, config: dict):
         config["mixers"][self.name] = {
@@ -50,7 +52,9 @@ class Mixer(QuamElement):
         }
 
         if self.correction_gain is not None and self.correction_phase is not None:
-            correction_matrix = self.IQ_imbalance(self.correction_gain, self.correction_phase)
+            correction_matrix = self.IQ_imbalance(
+                self.correction_gain, self.correction_phase
+            )
             config["mixers"][self.name]["correction"] = correction_matrix
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
@@ -69,4 +73,6 @@ class Mixer(QuamElement):
         c = np.cos(phi)
         s = np.sin(phi)
         N = 1 / ((1 - g**2) * (2 * c**2 - 1))
-        return [float(N * x) for x in [(1 - g) * c, (1 + g) * s, (1 - g) * s, (1 + g) * c]]
+        return [
+            float(N * x) for x in [(1 - g) * c, (1 + g) * s, (1 - g) * s, (1 + g) * c]
+        ]
