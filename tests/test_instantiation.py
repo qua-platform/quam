@@ -114,6 +114,28 @@ def test_instantiation_single_nested_element():
     assert quam.qubit.xy.mixer._quam is quam
 
 
+def test_instantiate_quam_dict():
+    class QuamTest(QuamBase):
+        qubit: Transmon
+        wiring: dict
+
+    quam = QuamTest()
+    
+    quam_dict = deepcopy(quam_dict_single_nested)
+    quam_dict["qubit"]["xy"]["mixer"] = {
+        "id": 0,
+        "port_I": ":wiring:port_I",
+        "port_Q": ":wiring:port_Q",
+        "frequency_drive": 5e9,
+        "local_oscillator": {"power": 10, "frequency": 6e9},
+    }
+    quam_dict["wiring"] = {
+        "port_I": 0,
+        "port_Q": 1,
+    }
+    quam.load(quam_dict)
+
+
 # def test_instantiation_fixed_attrs():
 #     ...
 

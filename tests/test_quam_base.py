@@ -104,3 +104,18 @@ def test_iterate_quam_elements_dict():
     assert elems[0] is elem_dict
     assert elems[1] is elem_dict.b
     
+
+def test_nested_quam_dict_explicit():
+    elem = QuamDictElement(subdict=QuamDictElement(a=42))
+
+    assert elem.subdict.a == 42
+    assert elem.subdict._attrs == {"a": 42}
+    assert isinstance(elem.subdict, QuamDictElement)
+
+
+def test_nested_quam_dict():
+    elem = QuamDictElement(subdict=dict(a=42))
+
+    assert elem.subdict.a == 42
+    assert elem.subdict._attrs == {"a": 42}
+    assert isinstance(elem.subdict, QuamDictElement)

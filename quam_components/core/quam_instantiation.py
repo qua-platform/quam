@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, List, get_type_hints
+from typing import TYPE_CHECKING, List, Dict, get_type_hints
 from dataclasses import MISSING
 from typeguard import check_type, TypeCheckError
 from inspect import isclass
@@ -36,7 +36,7 @@ def get_class_attributes(cls: type):
 
 def instantiate_quam_attrs(attrs, contents, obj_name, quam_base: QuamBase):
     # TODO should type checking be performed here or in the classes
-    from quam_components.core import QuamElement
+    from quam_components.core import QuamElement, QuamDictElement
 
     instantiated_attrs = {}
     for key, val in contents.items():
@@ -57,6 +57,10 @@ def instantiate_quam_attrs(attrs, contents, obj_name, quam_base: QuamBase):
                 ]
             else:
                 instantiated_val = val
+        elif issubclass(required_type, (dict, QuamDictElement, Dict)):
+            instantiated_val = instantiate_quam_element(QuamDictElement, val, quam_base)
+
+
         else:
             instantiated_val = val
 
