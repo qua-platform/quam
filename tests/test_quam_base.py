@@ -4,6 +4,14 @@ from dataclasses import dataclass
 from quam_components.core import QuamBase, QuamElement, iterate_quam_elements
 
 
+def test_update_quam_element_quam():
+    quam_base = QuamBase()
+    assert QuamElement._quam is quam_base
+
+    quam_element = QuamElement()
+    assert quam_element._quam is quam_base
+
+
 @dataclass
 class QuamTest(QuamBase):
     int_val: int

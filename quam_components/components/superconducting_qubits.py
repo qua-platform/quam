@@ -168,6 +168,8 @@ class Transmon(QuamElement):
             self.xy.qubit = self
         if self.z is not None:
             self.z.qubit = self
+        
+        super().__post_init__()
 
     @property
     def name(self):

@@ -1,6 +1,6 @@
 from pathlib import Path
-from typing import Any, Union, Generator
-from dataclasses import fields, is_dataclass
+from typing import Union, Generator, ClassVar
+from dataclasses import dataclass, fields, is_dataclass
 
 from .qua_config import build_config
 from quam_components.serialisers import get_serialiser
@@ -11,8 +11,9 @@ from quam_components.core.quam_instantiation import instantiate_quam_base
 __all__ = ["QuamBase", "QuamElement", "iterate_quam_elements"]
 
 
+@dataclass(kw_only=True, eq=False)
 class QuamBase:
-    def __init__(self, filepath=None):
+    def __post_init__(self, filepath=None):
         self.filepath = filepath
 
         if self.filepath is not None:
@@ -20,6 +21,8 @@ class QuamBase:
             self.load()
         else:
             self.serialiser = None
+
+        QuamElement._quam = self
 
     def save(self):
         ...
@@ -46,14 +49,19 @@ class QuamBase:
 
         elem = self
         for component in reference_components:
+            # print(f"Getting {component} from {elem}")
             elem = getattr(elem, component)
         return elem
 
 
+@dataclass(kw_only=True, eq=False)
 class QuamElement(ReferenceClass):
     controller: str = "con1"
 
-    _quam: QuamBase = None  # TODO does this need Initvar?
+    _quam: ClassVar[QuamBase] = None
+
+    def __post_init__(self):
+        super().__init__()
 
     def apply_to_config(self, config: dict) -> None:
         ...
