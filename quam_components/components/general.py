@@ -19,8 +19,8 @@ class Mixer(QuamElement):
 
     frequency_drive: float = None
 
-    I_output_port: int = None  # TODO consider moving to "wiring"
-    Q_output_port: int = None  # TODO consider moving to "wiring"
+    port_I: int
+    port_Q: int
 
     correction_gain: float = None
     correction_phase: float = None

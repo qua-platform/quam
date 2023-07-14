@@ -18,7 +18,12 @@ def create_quam_superconducting(num_qubits: int) -> QuamBase:
         local_oscillator_qubit = LocalOscillator(power=10, frequency=6e9)
         quam.local_oscillators.append(local_oscillator_qubit)
 
-        mixer_qubit = Mixer(id=f"mixer_q{idx}", local_oscillator=local_oscillator_qubit)
+        mixer_qubit = Mixer(
+            id=f"mixer_q{idx}",
+            local_oscillator=local_oscillator_qubit,
+            port_I=1,
+            port_Q=2,
+        )
         quam.mixers.append(mixer_qubit)
 
         transmon = Transmon(
@@ -35,7 +40,10 @@ def create_quam_superconducting(num_qubits: int) -> QuamBase:
         quam.local_oscillators.append(local_oscillator_resonator)
 
         resonator_mixer = Mixer(
-            id=f"mixer_r{idx}", local_oscillator=local_oscillator_qubit
+            id=f"mixer_r{idx}",
+            local_oscillator=local_oscillator_qubit,
+            port_I=3,
+            port_Q=4,
         )
         quam.mixers.append(resonator_mixer)
 

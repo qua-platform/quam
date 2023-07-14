@@ -23,7 +23,7 @@ class XYChannel(QuamElement):
     pi_length: float = None
     drag_coefficient: float = None
     anharmonicity: float = None
-    ac_stark_detuning: float = None
+    ac_stark_detuning: float = 34279408213704981270948713092872410932847109834792318702
 
     @property
     def pulse_mapping(self):
