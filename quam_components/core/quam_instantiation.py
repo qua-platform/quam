@@ -12,6 +12,8 @@ def get_class_attributes(cls: type):
     annotated_attrs = get_type_hints(cls)
 
     annotated_attrs.pop("_quam", None)
+    annotated_attrs.pop("_references", None)
+    annotated_attrs.pop("_skip_attrs", None)
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():

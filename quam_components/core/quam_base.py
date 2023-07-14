@@ -1,9 +1,10 @@
 from pathlib import Path
-from typing import Union, Generator
+from typing import Any, Union, Generator
 from dataclasses import fields, is_dataclass
 
 from .qua_config import build_config
 from quam_components.serialisers import get_serialiser
+from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_base
 
 
@@ -39,17 +40,26 @@ class QuamBase:
     def iterate_quam_elements(self):
         return iterate_quam_elements(self)
 
-    def get_referenced_value(self, reference: str):
-        ...  # TODO: implement
+    def get_value_by_reference(self, reference: str):
+        assert reference.startswith(":")
+        reference_components = reference[1:].split(".")
+
+        elem = self
+        for component in reference_components:
+            elem = getattr(elem, component)
+        return elem
 
 
-class QuamElement:
+class QuamElement(ReferenceClass):
     controller: str = "con1"
 
     _quam: QuamBase = None  # TODO does this need Initvar?
 
-    def apply_to_config(self, config):
+    def apply_to_config(self, config: dict) -> None:
         ...
+
+    def _get_value_by_reference(self, reference: str):
+        return self._quam.get_value_by_reference(reference)
 
 
 def iterate_quam_elements(quam: Union[QuamBase, QuamElement], skip_elems=None) -> Generator[QuamElement, None, None]:
