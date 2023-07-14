@@ -99,6 +99,7 @@ def test_instantiation_single_nested_element():
         "id": 0,
         "port_I": 0,
         "port_Q": 1,
+        "frequency_drive": 5e9,
         "local_oscillator": {"power": 10, "frequency": 6e9},
     }
     quam.load(quam_dict)

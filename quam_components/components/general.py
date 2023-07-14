@@ -20,7 +20,10 @@ class Mixer(QuamElement):
     port_I: int
     port_Q: int
 
-    frequency_drive: float = None
+    frequency_drive: float
+
+    offset_I: float = None
+    offset_Q: float = None
 
     correction_gain: float = None
     correction_phase: float = None
@@ -38,8 +41,8 @@ class Mixer(QuamElement):
     def get_input_config(self):
         return (
             {
-                "I": (self.controller, self.wiring.I),  # TODO fix wiring
-                "Q": (self.controller, self.wiring.Q),
+                "I": (self.controller, self.port_I),
+                "Q": (self.controller, self.port_Q),
                 "lo_frequency": self.local_oscillator.frequency,
                 "mixer": self.name,
             },
@@ -58,8 +61,8 @@ class Mixer(QuamElement):
             config["mixers"][self.name]["correction"] = correction_matrix
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_outputs[self.Q_output_port] = {"offset": self.offset_Q}
-        analog_outputs[self.I_output_port] = {"offset": self.offset_I}
+        analog_outputs[self.port_I] = {"offset": self.offset_I}
+        analog_outputs[self.port_Q] = {"offset": self.offset_Q}
 
     @staticmethod
     def IQ_imbalance(g: float, phi: float) -> List[float]:

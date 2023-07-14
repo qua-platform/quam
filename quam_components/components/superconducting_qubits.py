@@ -23,7 +23,7 @@ class XYChannel(QuamElement):
     pi_length: float = None
     drag_coefficient: float = None
     anharmonicity: float = None
-    ac_stark_detuning: float = 34279408213704981270948713092872410932847109834792318702
+    ac_stark_detuning: float = None
 
     @property
     def pulse_mapping(self):
@@ -35,7 +35,7 @@ class XYChannel(QuamElement):
         pulses = {}
         waveforms = {}
 
-        for pulse_label, pulse_name in self._get_pulse_mapping().items():
+        for pulse_label, pulse_name in self.pulse_mapping.items():
             pulses[pulse_name] = {
                 "operation": "control",
                 "length": self.pi_length,
@@ -72,10 +72,8 @@ class XYChannel(QuamElement):
         # Add XY to "elements"
         config["elements"][f"{self.qubit.name}_xy"] = {
             "mixInputs": self.mixer.get_input_config(),
-            "intermediate_frequency": (
-                self.frequency_01 - self.mixer.local_oscillator.frequency
-            ),
-            "operations": self.xy.pulse_mapping,
+            "intermediate_frequency": self.mixer.intermediate_frequency,
+            "operations": self.pulse_mapping,
         }
 
         pulses, waveforms = self.calculate_pulses_waveforms()
@@ -85,10 +83,11 @@ class XYChannel(QuamElement):
 
 @dataclass
 class ZChannel(QuamElement):
+    port: int
+
     qubit: "Transmon" = None  # Initialized after creating the qubit
 
     max_frequency_point: float = None
-    output_port: int = None  # TODO consider moving to "wiring"
 
     pulses: List[str] = field(default_factory=lambda: ["const"])
     flux_pulse_length: float = None
@@ -114,10 +113,9 @@ class ZChannel(QuamElement):
         return pulses, waveforms
 
     def apply_to_config(self, config: dict):
-        # Add to "elements"
         config["elements"][f"{self.qubit.name}_z"] = {
             "singleInput": {
-                "port": (self.controller, self.z.wiring.port),  # TODO fix wiring
+                "port": (self.controller, self.port),  # TODO fix wiring
             },
             "operations": {
                 "const": f"const_flux_pulse_{self.qubit.name}",
@@ -125,12 +123,12 @@ class ZChannel(QuamElement):
         }
 
         # Add analog output
-        if self.z_max_frequency_point is not None and self.z_output_port is not None:
+        if self.z_max_frequency_point is not None:
             analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-            analog_outputs[self.z_output_port] = {"offset": self.z_max_frequency_point}
+            analog_outputs[self.z_port] = {"offset": self.z_max_frequency_point}
 
             if self.filter_fir_taps is not None and self.filter_iir_taps is not None:
-                analog_outputs[self.z_output_port]["filter"].update(
+                analog_outputs[self.z_port]["filter"].update(
                     {
                         "feedback": self.filter_iir_taps,
                         "feedforward": self.filter_fir_taps,
@@ -151,9 +149,11 @@ class Transmon(QuamElement):
     xy: XYChannel = None
     z: ZChannel = None
 
-    def post_init(self):
-        self.xy.qubit = self
-        self.z.qubit = self
+    def __post_init__(self):
+        if self.xy is not None:
+            self.xy.qubit = self
+        if self.z is not None:
+            self.z.qubit = self
 
     @property
     def name(self):

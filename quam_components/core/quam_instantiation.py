@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 def get_class_attributes(cls: type):
     annotated_attrs = get_type_hints(cls)
 
+    annotated_attrs.pop("_quam", None)
+
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
         if hasattr(cls, attr):
