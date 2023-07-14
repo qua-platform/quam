@@ -50,3 +50,22 @@ def test_basic_reference():
 
     assert quam_elem1.int_val == 1
     assert quam_elem2.int_val == 1
+
+
+def test_list_referencing():
+    @dataclass(kw_only=True, eq=False)
+    class QuamBaseTest(QuamBase):
+        quam_elems: List[QuamElementTest]
+        quam_elem2: QuamElementTest
+
+    quam_elems = [QuamElementTest(int_val=k) for k in range(5)]
+    quam_elem2 = QuamElementTest(int_val=":quam_elems[3].int_val")
+
+    assert quam_elem2._references == {"int_val": ":quam_elems[3].int_val"}
+
+    quam = QuamBaseTest(quam_elems=quam_elems, quam_elem2=quam_elem2)
+
+    for k, elem in enumerate(quam.quam_elems):
+        assert elem.int_val == k
+
+    assert quam_elem2.int_val == 3
