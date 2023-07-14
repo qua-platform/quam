@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Union
 from dataclasses import dataclass
 
 from quam_components.core import QuamElement
@@ -13,7 +13,7 @@ class LocalOscillator(QuamElement):
 
 @dataclass
 class Mixer(QuamElement):
-    name: str
+    id: Union[int, str]
 
     local_oscillator: LocalOscillator
 
@@ -27,6 +27,10 @@ class Mixer(QuamElement):
 
     controller: str = "con1"
 
+    @property
+    def name(self):
+        return self.id if isinstance(self.id, str) else f"mixer{self.id}"
+    
     @property
     def intermediate_frequency(self):
         return self.frequency_drive - self.local_oscillator.frequency

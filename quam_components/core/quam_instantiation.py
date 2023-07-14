@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, get_type_hints
 from dataclasses import MISSING
 from typeguard import check_type, TypeCheckError
+from inspect import isclass
 
 if TYPE_CHECKING:
     from quam_components.core import QuamBase, QuamElement
@@ -27,20 +28,19 @@ def get_class_attributes(cls: type):
 
 
 def instantiate_quam_attrs(attrs, contents, obj_name):
+    # TODO should type checking be performed here or in the classes
     from quam_components.core import QuamElement
 
     instantiated_attrs = {}
     for key, val in contents.items():
-        print(key)
         if key not in attrs["allowed"]:
             raise AttributeError(f"Invalid attribute {key}")
         
+        # TODO improve type checking
         required_type = attrs["allowed"][key]
-        try:
-            issubclass(required_type, QuamElement)
-        except TypeError:
-            print(required_type)
-        if issubclass(required_type, QuamElement):
+        if not isclass(required_type):  # probably part of typing module
+            instantiated_val = val
+        elif issubclass(required_type, QuamElement):
             instantiated_val = instantiate_quam_element(required_type, val)
         elif issubclass(required_type, List):
             required_subtype = required_type.args[0]

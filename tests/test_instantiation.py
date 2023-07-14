@@ -85,12 +85,13 @@ def test_instantiation_single_nested_element():
 
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict['qubit']['xy']['mixer'] = {
-        "name": "mixer", 
+        "id": 0, 
         "local_oscillator": {"power": 10, "frequency": 6e9}
     }
     quam.load(quam_dict)
 
-    assert quam.qubit.xy.mixer.name == "mixer"
+    assert quam.qubit.xy.mixer.id == 0
+    assert quam.qubit.xy.mixer.name == "mixer0"
     assert quam.qubit.xy.mixer.local_oscillator.power == 10
     assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
 
