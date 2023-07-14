@@ -76,12 +76,18 @@ class QuamElement(ReferenceClass):
     
 
 class QuamDictElement(QuamElement):
-    _attrs = {}
+    _attrs = {}  # TODO check if removing this raises any test errors
 
     def __init__(self, **kwargs):
         super().__init__()
 
-        self._attrs = kwargs
+        self._attrs = {}
+        for key, value in kwargs.items():
+            if isinstance(value, dict):
+                nested_dict = QuamDictElement(**value)
+                self._attrs[key] = nested_dict
+            else:
+                self._attrs[key] = value
 
     def __setitem__(self, key, value):
         self._attrs[key] = value
