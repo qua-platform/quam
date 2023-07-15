@@ -3,14 +3,14 @@ from typing import List
 from copy import deepcopy
 from dataclasses import dataclass
 
-from quam_components.core.quam_base import QuamBase, QuamElement
+from quam_components.core.quam_base import QuamBase, QuamComponent
 from quam_components.components.superconducting_qubits import Transmon
 from quam_components.core.quam_instantiation import get_class_attributes
 
 
 def test_get_class_attributes():
     @dataclass
-    class TestClass(QuamElement):
+    class TestClass(QuamComponent):
         a: int
         b: List[int]
         c = 25
@@ -28,7 +28,7 @@ def test_get_class_attributes():
 
 
 def test_get_class_attributes_subclass():
-    class AbstractClass(QuamElement):
+    class AbstractClass(QuamComponent):
         elem: float = 42
 
     @dataclass
@@ -112,6 +112,16 @@ def test_instantiation_single_nested_element():
     assert quam.qubit._quam is quam
     assert quam.qubit.xy._quam is quam
     assert quam.qubit.xy.mixer._quam is quam
+
+
+
+def test_instantiate_wrong_type():
+    class QuamTest(QuamBase):
+        qubit: Transmon
+
+    quam = QuamTest()
+    with pytest.raises(TypeError):
+        quam.load({"qubit": 0})
 
 
 def test_instantiate_quam_dict():

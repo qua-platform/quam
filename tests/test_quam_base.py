@@ -4,31 +4,31 @@ from dataclasses import dataclass, fields, is_dataclass
 from quam_components.core import *
 
 
-def test_update_quam_element_quam():
+def test_update_quam_component_quam():
     quam_base = QuamBase()
-    assert QuamElement._quam is quam_base
+    assert QuamComponent._quam is quam_base
 
-    quam_element = QuamElement()
-    assert quam_element._quam is quam_base
+    quam_component = QuamComponent()
+    assert quam_component._quam is quam_base
 
 
 @dataclass
 class QuamTest(QuamBase):
     int_val: int
-    quam_elem: QuamElement
-    quam_elem_list: List[QuamElement]
+    quam_elem: QuamComponent
+    quam_elem_list: List[QuamComponent]
 
 
-def test_iterate_quam_element():
-    elem = QuamElement()
-    elems = list(iterate_quam_elements(elem))
+def test_iterate_quam_component():
+    elem = QuamComponent()
+    elems = list(iterate_quam_components(elem))
     assert len(elems) == 1
     assert elems[0] is elem
 
 
-def test_iterate_quam_element_nested():
-    elem = QuamTest(int_val=42, quam_elem=QuamElement(), quam_elem_list=[QuamElement()])
-    elems = list(iterate_quam_elements(elem))
+def test_iterate_quam_component_nested():
+    elem = QuamTest(int_val=42, quam_elem=QuamComponent(), quam_elem_list=[QuamComponent()])
+    elems = list(iterate_quam_components(elem))
     assert len(elems) == 2
     assert elems[0] is elem.quam_elem
     assert elems[1] is elem.quam_elem_list[0]
@@ -37,48 +37,48 @@ def test_iterate_quam_element_nested():
 def test_iterate_quam_with_elements():
     test_quam = QuamTest(
         int_val=42,
-        quam_elem=QuamElement(),
-        quam_elem_list=[QuamElement(), QuamElement()],
+        quam_elem=QuamComponent(),
+        quam_elem_list=[QuamComponent(), QuamComponent()],
     )
 
-    elems = list(iterate_quam_elements(test_quam))
+    elems = list(iterate_quam_components(test_quam))
     assert len(elems) == 3
-    assert all(isinstance(elem, QuamElement) for elem in elems)
+    assert all(isinstance(elem, QuamComponent) for elem in elems)
 
 
 @dataclass
-class QuamElementTest(QuamElement):
+class QuamComponentTest(QuamComponent):
     int_val: int
-    quam_elem: QuamElement
-    quam_elem_list: List[QuamElement]
+    quam_elem: QuamComponent
+    quam_elem_list: List[QuamComponent]
 
 
 @dataclass
 class NestedQuamTest(QuamBase):
     int_val: int
-    quam_elem: QuamElementTest
-    quam_elem_list: List[QuamElementTest]
+    quam_elem: QuamComponentTest
+    quam_elem_list: List[QuamComponentTest]
 
 
-def test_iterate_quam_elements_nested():
-    quam_element = QuamElementTest(
+def test_iterate_quam_components_nested():
+    quam_component = QuamComponentTest(
         int_val=42,
-        quam_elem=QuamElement(),
-        quam_elem_list=[QuamElement(), QuamElement()],
+        quam_elem=QuamComponent(),
+        quam_elem_list=[QuamComponent(), QuamComponent()],
     )
 
     test_quam = NestedQuamTest(
-        int_val=42, quam_elem=quam_element, quam_elem_list=[quam_element, quam_element]
+        int_val=42, quam_elem=quam_component, quam_elem_list=[quam_component, quam_component]
     )
 
-    elems = list(iterate_quam_elements(test_quam))
+    elems = list(iterate_quam_components(test_quam))
     assert len(elems) == 4
-    assert all(isinstance(elem, QuamElement) for elem in elems)
+    assert all(isinstance(elem, QuamComponent) for elem in elems)
 
 
 def test_quam_dict_element():
-    elem = QuamDictElement(a=42)
-    assert isinstance(elem, QuamElement)
+    elem = QuamDictComponent(a=42)
+    assert isinstance(elem, QuamComponent)
     assert is_dataclass(elem)
     assert elem.a == 42
     assert elem._attrs == {"a": 42}
@@ -96,28 +96,28 @@ def test_quam_dict_element():
     assert elem._attrs == {"a": 43, "c": 45}
 
 
-def test_iterate_quam_elements_dict():
-    elem = QuamElement()
-    elem_dict = QuamDictElement(a=42, b=elem)
+def test_iterate_quam_components_dict():
+    elem = QuamComponent()
+    elem_dict = QuamDictComponent(a=42, b=elem)
 
-    elems = list(iterate_quam_elements(elem_dict))
+    elems = list(iterate_quam_components(elem_dict))
     assert len(elems) == 2
-    assert all(isinstance(elem, QuamElement) for elem in elems)
+    assert all(isinstance(elem, QuamComponent) for elem in elems)
     assert elems[0] is elem_dict
     assert elems[1] is elem_dict.b
 
 
 def test_nested_quam_dict_explicit():
-    elem = QuamDictElement(subdict=QuamDictElement(a=42))
+    elem = QuamDictComponent(subdict=QuamDictComponent(a=42))
 
     assert elem.subdict.a == 42
     assert elem.subdict._attrs == {"a": 42}
-    assert isinstance(elem.subdict, QuamDictElement)
+    assert isinstance(elem.subdict, QuamDictComponent)
 
 
 def test_nested_quam_dict():
-    elem = QuamDictElement(subdict=dict(a=42))
+    elem = QuamDictComponent(subdict=dict(a=42))
 
     assert elem.subdict.a == 42
     assert elem.subdict._attrs == {"a": 42}
-    assert isinstance(elem.subdict, QuamDictElement)
+    assert isinstance(elem.subdict, QuamDictComponent)

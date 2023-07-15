@@ -48,18 +48,18 @@ def get_class_attributes(cls: type) -> Dict[str, List[str]]:
 
 def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
     """Instantiate the attributes of a QuamDict"""
-    from quam_components.core import QuamDictElement
+    from quam_components.core import QuamDictComponent
 
     instantiated_attrs = {}
     for key, val in contents.items():
         if isinstance(val, dict):
-            instantiated_val = instantiate_quam_component(QuamDictElement, val, quam_base)
+            instantiated_val = instantiate_quam_component(QuamDictComponent, val, quam_base)
         elif isinstance(val, list):
             instantiated_val = [
                 (
                     elem
                     if not isinstance(elem, dict)
-                    else instantiate_quam_component(QuamDictElement, elem, quam_base)\
+                    else instantiate_quam_component(QuamDictComponent, elem, quam_base)\
                 )
                 for elem in val
             ]
@@ -73,23 +73,23 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
 def instantiate_quam_attrs(
     cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase
 ) -> dict:
-    """Instantiate the attributes of a QuamComponent or QuamDictElement
+    """Instantiate the attributes of a QuamComponent or QuamDictComponent
 
     Args:
-    cls: The class of the QuamBase, QuamComponent or QuamDictElement.
-    attrs: The attributes of the QuamBase, QuamComponent or QuamDictElement.
-    contents: The contents of the QuamBase, QuamComponent or QuamDictElement.
-    quam_base: The QuamBase object that the QuamBase, QuamComponent or QuamDictElement
+    cls: The class of the QuamBase, QuamComponent or QuamDictComponent.
+    attrs: The attributes of the QuamBase, QuamComponent or QuamDictComponent.
+    contents: The contents of the QuamBase, QuamComponent or QuamDictComponent.
+    quam_base: The QuamBase object that the QuamBase, QuamComponent or QuamDictComponent
             is part of.
 
     Returns:
         A dictionary with the instantiated attributes of the QuamComponent or
-        QuamDictElement.
+        QuamDictComponent.
     """
     # TODO should type checking be performed here or in the classes
-    from quam_components.core import QuamComponent, QuamDictElement
+    from quam_components.core import QuamComponent, QuamDictComponent
 
-    if issubclass(cls, QuamDictElement):
+    if issubclass(cls, QuamDictComponent):
         return instantiate_quam_dict_attrs(contents, quam_base)
 
     instantiated_attrs = {}
@@ -114,8 +114,8 @@ def instantiate_quam_attrs(
                 ]
             else:
                 instantiated_val = val
-        elif issubclass(required_type, (dict, QuamDictElement, Dict)):
-            instantiated_val = instantiate_quam_component(QuamDictElement, val, quam_base)
+        elif issubclass(required_type, (dict, QuamDictComponent, Dict)):
+            instantiated_val = instantiate_quam_component(QuamDictComponent, val, quam_base)
         else:
             instantiated_val = val
 
@@ -124,7 +124,7 @@ def instantiate_quam_attrs(
             instantiated_attrs[key] = instantiated_val
             continue
 
-        if isinstance(instantiated_val, QuamDictElement):
+        if isinstance(instantiated_val, QuamDictComponent):
             instantiated_attrs[key] = instantiated_val
             continue
 

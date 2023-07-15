@@ -8,7 +8,7 @@ def test_create_quam_superconducting_simple():
     assert len(quam.resonators) == 2
     assert len(quam.mixers) == 4
     assert len(quam.local_oscillators) == 4
-    assert len(list(quam.iterate_quam_elements())) == 16  # Includes XY and Z channels
+    assert len(list(quam.iterate_quam_components())) == 16  # Includes XY and Z channels
 
 
 def test_create_quam_superconducting_simple_build_config():

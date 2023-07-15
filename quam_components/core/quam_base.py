@@ -9,7 +9,7 @@ from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_base
 
 
-__all__ = ["QuamBase", "QuamComponent", "QuamDictElement", "iterate_quam_components"]
+__all__ = ["QuamBase", "QuamComponent", "QuamDictComponent", "iterate_quam_components"]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -28,7 +28,7 @@ class QuamBase:
     def save(self):
         ...
 
-    def load(self, filepath_or_dict: Union[str, Path, dict] = None):
+    def load(self, filepath_or_dict: Union[str, Path, dict] = None, validate_type: bool = True):
         if isinstance(filepath_or_dict, (str, Path)):
             contents = self.serialiser.load(filepath_or_dict)
         elif isinstance(filepath_or_dict, dict):
@@ -36,7 +36,7 @@ class QuamBase:
         elif filepath_or_dict is None and self.filepath is not None:
             contents = self.serialiser.load(self.filepath)
 
-        instantiate_quam_base(self, contents)
+        instantiate_quam_base(self, contents, validate_type=validate_type)
 
     def build_config(self):
         return build_config(self)
@@ -75,7 +75,7 @@ class QuamComponent(ReferenceClass):
         return self._quam.get_value_by_reference(reference)
 
 
-class QuamDictElement(QuamComponent):
+class QuamDictComponent(QuamComponent):
     _attrs = {}  # TODO check if removing this raises any test errors
 
     def __init__(self, **kwargs):
@@ -84,7 +84,7 @@ class QuamDictElement(QuamComponent):
         self._attrs = {}
         for key, value in kwargs.items():
             if isinstance(value, dict):
-                nested_dict = QuamDictElement(**value)
+                nested_dict = QuamDictComponent(**value)
                 self._attrs[key] = nested_dict
             else:
                 self._attrs[key] = value
@@ -125,7 +125,7 @@ def iterate_quam_components(
         yield quam
         skip_elems.append(quam)
 
-    if isinstance(quam, QuamDictElement):
+    if isinstance(quam, QuamDictComponent):
         obj_data_values = quam._attrs.values()
     else:
         obj_data_values = [
