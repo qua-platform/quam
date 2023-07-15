@@ -28,12 +28,12 @@ qua_config_template = {
 
 
 def build_config(quam, qua_config=None):
-    from .quam_base import iterate_quam_elements
+    from .quam_base import iterate_quam_components
 
     if qua_config is None:
         qua_config = qua_config_template.copy()
 
-    for quam_element in iterate_quam_elements(quam):
-        quam_element.apply_to_config(qua_config)
+    for quam_component in iterate_quam_components(quam):
+        quam_component.apply_to_config(qua_config)
 
     return qua_config

@@ -1,7 +1,7 @@
 from typing import List
 from dataclasses import dataclass, field
 
-from quam_components import QuamElement
+from quam_components import QuamComponent
 from .general import Mixer
 from quam_components.utils.pulse import pulse_str_to_axis_axis_angle
 
@@ -13,7 +13,7 @@ default_pulses = [f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "
 
 
 @dataclass(kw_only=True, eq=False)
-class XYChannel(QuamElement):
+class XYChannel(QuamComponent):
     mixer: Mixer
 
     pi_amp: float
@@ -83,7 +83,7 @@ class XYChannel(QuamElement):
 
 
 @dataclass(kw_only=True, eq=False)
-class ZChannel(QuamElement):
+class ZChannel(QuamComponent):
     port: int
 
     qubit: "Transmon" = None  # Initialized after creating the qubit
@@ -155,7 +155,7 @@ class ZChannel(QuamElement):
 
 
 @dataclass(kw_only=True, eq=False)
-class Transmon(QuamElement):
+class Transmon(QuamComponent):
     id: int
 
     frequency_01: float = None

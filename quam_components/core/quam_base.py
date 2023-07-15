@@ -9,7 +9,7 @@ from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_base
 
 
-__all__ = ["QuamBase", "QuamElement", "QuamDictElement", "iterate_quam_elements"]
+__all__ = ["QuamBase", "QuamComponent", "QuamDictElement", "iterate_quam_components"]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -23,7 +23,7 @@ class QuamBase:
         else:
             self.serialiser = None
 
-        QuamElement._quam = self
+        QuamComponent._quam = self
 
     def save(self):
         ...
@@ -41,8 +41,8 @@ class QuamBase:
     def build_config(self):
         return build_config(self)
 
-    def iterate_quam_elements(self):
-        return iterate_quam_elements(self)
+    def iterate_quam_components(self):
+        return iterate_quam_components(self)
 
     def get_value_by_reference(self, reference: str):
         assert reference.startswith(":")
@@ -63,7 +63,7 @@ class QuamBase:
 
 
 @dataclass(kw_only=True, eq=False)
-class QuamElement(ReferenceClass):
+class QuamComponent(ReferenceClass):
     controller: str = "con1"
 
     _quam: ClassVar[QuamBase] = None
@@ -75,7 +75,7 @@ class QuamElement(ReferenceClass):
         return self._quam.get_value_by_reference(reference)
 
 
-class QuamDictElement(QuamElement):
+class QuamDictElement(QuamComponent):
     _attrs = {}  # TODO check if removing this raises any test errors
 
     def __init__(self, **kwargs):
@@ -112,16 +112,16 @@ class QuamDictElement(QuamElement):
             super().__setattr__(key, value)
 
 
-def iterate_quam_elements(
-    quam: Union[QuamBase, QuamElement], skip_elems=None
-) -> Generator[QuamElement, None, None]:
+def iterate_quam_components(
+    quam: Union[QuamBase, QuamComponent], skip_elems=None
+) -> Generator[QuamComponent, None, None]:
     if not is_dataclass(quam):
         return
 
     if skip_elems is None:
         skip_elems = []
 
-    if isinstance(quam, QuamElement):
+    if isinstance(quam, QuamComponent):
         yield quam
         skip_elems.append(quam)
 
@@ -136,12 +136,12 @@ def iterate_quam_elements(
         if attr_val in skip_elems:
             continue
 
-        if isinstance(attr_val, QuamElement):
-            yield from iterate_quam_elements(attr_val, skip_elems=skip_elems)
+        if isinstance(attr_val, QuamComponent):
+            yield from iterate_quam_components(attr_val, skip_elems=skip_elems)
         if isinstance(attr_val, list):
             for elem in attr_val:
-                if not isinstance(elem, QuamElement):
+                if not isinstance(elem, QuamComponent):
                     continue
                 if elem in skip_elems:
                     continue
-                yield from iterate_quam_elements(elem, skip_elems=skip_elems)
+                yield from iterate_quam_components(elem, skip_elems=skip_elems)

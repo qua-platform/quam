@@ -2,17 +2,17 @@ import numpy as np
 from typing import List, Union
 from dataclasses import dataclass
 
-from quam_components.core import QuamElement
+from quam_components.core import QuamComponent
 
 
 @dataclass(kw_only=True, eq=False)
-class LocalOscillator(QuamElement):
+class LocalOscillator(QuamComponent):
     power: float = None
     frequency: float = None
 
 
 @dataclass(kw_only=True, eq=False)
-class Mixer(QuamElement):
+class Mixer(QuamComponent):
     id: Union[int, str]
 
     local_oscillator: LocalOscillator

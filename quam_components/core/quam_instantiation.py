@@ -5,7 +5,7 @@ from typeguard import check_type, TypeCheckError
 from inspect import isclass
 
 if TYPE_CHECKING:
-    from quam_components.core import QuamBase, QuamElement
+    from quam_components.core import QuamBase, QuamComponent
 
 
 def get_class_attributes(cls: type) -> Dict[str, List[str]]:
@@ -53,13 +53,13 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
     instantiated_attrs = {}
     for key, val in contents.items():
         if isinstance(val, dict):
-            instantiated_val = instantiate_quam_element(QuamDictElement, val, quam_base)
+            instantiated_val = instantiate_quam_component(QuamDictElement, val, quam_base)
         elif isinstance(val, list):
             instantiated_val = [
                 (
                     elem
                     if not isinstance(elem, dict)
-                    else instantiate_quam_element(QuamDictElement, elem, quam_base)\
+                    else instantiate_quam_component(QuamDictElement, elem, quam_base)\
                 )
                 for elem in val
             ]
@@ -73,21 +73,21 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
 def instantiate_quam_attrs(
     cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase
 ) -> dict:
-    """Instantiate the attributes of a QuamElement or QuamDictElement
+    """Instantiate the attributes of a QuamComponent or QuamDictElement
 
     Args:
-    cls: The class of the QuamBase, QuamElement or QuamDictElement.
-    attrs: The attributes of the QuamBase, QuamElement or QuamDictElement.
-    contents: The contents of the QuamBase, QuamElement or QuamDictElement.
-    quam_base: The QuamBase object that the QuamBase, QuamElement or QuamDictElement
+    cls: The class of the QuamBase, QuamComponent or QuamDictElement.
+    attrs: The attributes of the QuamBase, QuamComponent or QuamDictElement.
+    contents: The contents of the QuamBase, QuamComponent or QuamDictElement.
+    quam_base: The QuamBase object that the QuamBase, QuamComponent or QuamDictElement
             is part of.
 
     Returns:
-        A dictionary with the instantiated attributes of the QuamElement or
+        A dictionary with the instantiated attributes of the QuamComponent or
         QuamDictElement.
     """
     # TODO should type checking be performed here or in the classes
-    from quam_components.core import QuamElement, QuamDictElement
+    from quam_components.core import QuamComponent, QuamDictElement
 
     if issubclass(cls, QuamDictElement):
         return instantiate_quam_dict_attrs(contents, quam_base)
@@ -103,19 +103,19 @@ def instantiate_quam_attrs(
         required_type = attrs["allowed"][key]
         if not isclass(required_type):  # probably part of typing module
             instantiated_val = val
-        elif issubclass(required_type, QuamElement):
-            instantiated_val = instantiate_quam_element(required_type, val, quam_base)
+        elif issubclass(required_type, QuamComponent):
+            instantiated_val = instantiate_quam_component(required_type, val, quam_base)
         elif issubclass(required_type, List):
             required_subtype = required_type.args[0]
-            if issubclass(required_subtype, QuamElement):
+            if issubclass(required_subtype, QuamComponent):
                 instantiated_val = [
-                    instantiate_quam_element(required_subtype, v, quam_base)
+                    instantiate_quam_component(required_subtype, v, quam_base)
                     for v in val
                 ]
             else:
                 instantiated_val = val
         elif issubclass(required_type, (dict, QuamDictElement, Dict)):
-            instantiated_val = instantiate_quam_element(QuamDictElement, val, quam_base)
+            instantiated_val = instantiate_quam_component(QuamDictElement, val, quam_base)
         else:
             instantiated_val = val
 
@@ -175,31 +175,31 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict) -> QuamBase:
     return quam_base
 
 
-def instantiate_quam_element(
-    quam_element_cls: type[QuamElement], contents: dict, quam_base: QuamBase
-) -> QuamElement:
-    """Instantiate a QuamElement from a dict
+def instantiate_quam_component(
+    quam_component_cls: type[QuamComponent], contents: dict, quam_base: QuamBase
+) -> QuamComponent:
+    """Instantiate a QuamComponent from a dict
 
-    Note that any nested QuamElements are instantiated recursively
+    Note that any nested QuamComponents are instantiated recursively
 
     Args:
-        quam_element_cls: QuamElement class to instantiate
-        contents: dict of attributes to instantiate the QuamElement with
-        quam_base: QuamBase instance to attach the QuamElement to
+        quam_component_cls: QuamComponent class to instantiate
+        contents: dict of attributes to instantiate the QuamComponent with
+        quam_base: QuamBase instance to attach the QuamComponent to
 
     Returns:
-        QuamElement instance
+        QuamComponent instance
     """
-    attr_annotations = get_class_attributes(quam_element_cls)
+    attr_annotations = get_class_attributes(quam_component_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
-        cls=quam_element_cls,
+        cls=quam_component_cls,
         attrs=attr_annotations,
         contents=contents,
         quam_base=quam_base,
     )
 
-    quam_element = quam_element_cls(**instantiated_attrs)
-    quam_element._quam = quam_base
+    quam_component = quam_component_cls(**instantiated_attrs)
+    quam_component._quam = quam_base
 
-    return quam_element
+    return quam_component

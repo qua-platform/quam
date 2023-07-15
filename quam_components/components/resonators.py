@@ -2,7 +2,7 @@ import numpy as np
 from typing import Union
 from dataclasses import dataclass
 
-from quam_components import QuamElement
+from quam_components import QuamComponent
 from .general import Mixer
 
 
@@ -10,7 +10,7 @@ __all__ = ["ReadoutResonator"]
 
 
 @dataclass(kw_only=True, eq=False)
-class ReadoutResonator(QuamElement):
+class ReadoutResonator(QuamComponent):
     id: Union[int, str]
     mixer: Mixer
     readout_length: int = None
