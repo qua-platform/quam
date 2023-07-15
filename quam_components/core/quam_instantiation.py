@@ -56,8 +56,11 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
             instantiated_val = instantiate_quam_element(QuamDictElement, val, quam_base)
         elif isinstance(val, list):
             instantiated_val = [
-                elem if not isinstance(elem, dict) 
-                else instantiate_quam_element(QuamDictElement, elem, quam_base)
+                (
+                    elem
+                    if not isinstance(elem, dict)
+                    else instantiate_quam_element(QuamDictElement, elem, quam_base)\
+                )
                 for elem in val
             ]
         else:
@@ -67,8 +70,22 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
     return instantiated_attrs
 
 
-def instantiate_quam_attrs(cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase) -> dict:
-    """Instantiate the attributes of a QuamElement or QuamDictElement"""
+def instantiate_quam_attrs(
+    cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase
+) -> dict:
+    """Instantiate the attributes of a QuamElement or QuamDictElement
+
+    Args:
+    cls: The class of the QuamBase, QuamElement or QuamDictElement.
+    attrs: The attributes of the QuamBase, QuamElement or QuamDictElement.
+    contents: The contents of the QuamBase, QuamElement or QuamDictElement.
+    quam_base: The QuamBase object that the QuamBase, QuamElement or QuamDictElement
+            is part of.
+
+    Returns:
+        A dictionary with the instantiated attributes of the QuamElement or
+        QuamDictElement.
+    """
     # TODO should type checking be performed here or in the classes
     from quam_components.core import QuamElement, QuamDictElement
 
@@ -78,7 +95,9 @@ def instantiate_quam_attrs(cls: type, attrs: Dict[str, List[str]], contents: dic
     instantiated_attrs = {}
     for key, val in contents.items():
         if key not in attrs["allowed"]:
-            raise AttributeError(f"Attribute {key} is not a valid attr of {cls.__name__}")
+            raise AttributeError(
+                f"Attribute {key} is not a valid attr of {cls.__name__}"
+            )
 
         # TODO improve type checking
         required_type = attrs["allowed"][key]
@@ -105,6 +124,10 @@ def instantiate_quam_attrs(cls: type, attrs: Dict[str, List[str]], contents: dic
             instantiated_attrs[key] = instantiated_val
             continue
 
+        if isinstance(instantiated_val, QuamDictElement):
+            instantiated_attrs[key] = instantiated_val
+            continue
+
         # Perform type checking
         try:
             check_type(instantiated_val, required_type)
@@ -120,7 +143,9 @@ def instantiate_quam_attrs(cls: type, attrs: Dict[str, List[str]], contents: dic
         attr for attr in attrs["required"] if attr not in instantiated_attrs
     ]
     if missing_attrs:
-        raise AttributeError(f"Missing required attr {missing_attrs} for {cls.__name__}")
+        raise AttributeError(
+            f"Missing required attr {missing_attrs} for {cls.__name__}"
+        )
 
     return instantiated_attrs
 
