@@ -35,6 +35,7 @@ def get_class_attributes(cls: type):
 
 
 def instantiate_quam_attrs(attrs, contents, obj_name, quam_base: QuamBase):
+    """Instantiate the attributes of a QuamElement or QuamDictElement"""
     # TODO should type checking be performed here or in the classes
     from quam_components.core import QuamElement, QuamDictElement
 
@@ -86,7 +87,16 @@ def instantiate_quam_attrs(attrs, contents, obj_name, quam_base: QuamBase):
     return instantiated_attrs
 
 
-def instantiate_quam_base(quam_base: QuamBase, contents: dict):
+def instantiate_quam_base(quam_base: QuamBase, contents: dict) -> QuamBase:
+    """Instantiate a QuamBase from a dict
+    
+    Args:
+        quam_base: QuamBase instance to instantiate
+        contents: dict of attributes to instantiate the QuamBase with
+
+    Returns:
+        QuamBase instance
+    """
     attr_annotations = get_class_attributes(cls=quam_base.__class__)
 
     instantiated_attrs = instantiate_quam_attrs(
@@ -99,7 +109,19 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict):
     return quam_base
 
 
-def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict, quam_base: QuamBase):
+def instantiate_quam_element(quam_element_cls: type[QuamElement], contents: dict, quam_base: QuamBase): -> QuamElement:
+    """Instantiate a QuamElement from a dict
+
+    Note that any nested QuamElements are instantiated recursively
+    
+    Args:
+        quam_element_cls: QuamElement class to instantiate
+        contents: dict of attributes to instantiate the QuamElement with
+        quam_base: QuamBase instance to attach the QuamElement to
+
+    Returns:
+        QuamElement instance
+    """
     attr_annotations = get_class_attributes(quam_element_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
