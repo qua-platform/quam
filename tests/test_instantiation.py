@@ -124,6 +124,22 @@ def test_instantiate_wrong_type():
         quam.load({"qubit": 0})
 
 
+def test_instantiate_component_wrong_type():
+    from quam_components.core.quam_instantiation import instantiate_quam_component
+
+    @dataclass
+    class QuamTestComponent(QuamComponent):
+        test_str: str
+
+    instantiate_quam_component(QuamTestComponent, {"test_str": "hello"}, quam_base=None)
+
+    with pytest.raises(TypeError):
+        instantiate_quam_component(QuamTestComponent, {"test_str": 0}, quam_base=None)
+
+
+    instantiate_quam_component(QuamTestComponent, {"test_str": 0}, quam_base=None, validate_type=False)
+
+
 def test_instantiate_quam_dict():
     class QuamTest(QuamBase):
         qubit: Transmon

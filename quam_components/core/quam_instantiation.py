@@ -71,7 +71,7 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
 
 
 def instantiate_quam_attrs(
-    cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase
+    cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase, validate_type: bool = True
 ) -> dict:
     """Instantiate the attributes of a QuamComponent or QuamDictComponent
 
@@ -81,6 +81,8 @@ def instantiate_quam_attrs(
     contents: The contents of the QuamBase, QuamComponent or QuamDictComponent.
     quam_base: The QuamBase object that the QuamBase, QuamComponent or QuamDictComponent
             is part of.
+    validate_type: Whether to validate the type of the attributes.
+        A TypeError is raised if an attribute has the wrong type.
 
     Returns:
         A dictionary with the instantiated attributes of the QuamComponent or
@@ -104,12 +106,12 @@ def instantiate_quam_attrs(
         if not isclass(required_type):  # probably part of typing module
             instantiated_val = val
         elif issubclass(required_type, QuamComponent):
-            instantiated_val = instantiate_quam_component(required_type, val, quam_base)
+            instantiated_val = instantiate_quam_component(required_type, val, quam_base, validate_type=validate_type)
         elif issubclass(required_type, List):
             required_subtype = required_type.args[0]
             if issubclass(required_subtype, QuamComponent):
                 instantiated_val = [
-                    instantiate_quam_component(required_subtype, v, quam_base)
+                    instantiate_quam_component(required_subtype, v, quam_base, validate_type=validate_type)
                     for v in val
                 ]
             else:
@@ -119,23 +121,22 @@ def instantiate_quam_attrs(
         else:
             instantiated_val = val
 
-        # Do not check type if the value is a reference
+        # Do not check type if the value is a reference or dict
         if isinstance(instantiated_val, str) and instantiated_val.startswith(":"):
-            instantiated_attrs[key] = instantiated_val
-            continue
+            validate_attr_type = False
+        elif isinstance(instantiated_val, QuamDictComponent):
+            validate_attr_type = False
+        else:
+            validate_attr_type = validate_type
 
-        if isinstance(instantiated_val, QuamDictComponent):
-            instantiated_attrs[key] = instantiated_val
-            continue
-
-        # Perform type checking
-        try:
-            check_type(instantiated_val, required_type)
-        except TypeCheckError as e:
-            raise TypeError(
-                f"Wrong type type({key})={type(instantiated_val)} !="
-                f" {required_type} for '{cls.__name__}'"
-            ) from e
+        if validate_attr_type:
+            try:
+                check_type(instantiated_val, required_type)
+            except TypeCheckError as e:
+                raise TypeError(
+                    f"Wrong type type({key})={type(instantiated_val)} !="
+                    f" {required_type} for '{cls.__name__}'"
+                ) from e
 
         instantiated_attrs[key] = instantiated_val
 
@@ -150,12 +151,14 @@ def instantiate_quam_attrs(
     return instantiated_attrs
 
 
-def instantiate_quam_base(quam_base: QuamBase, contents: dict) -> QuamBase:
+def instantiate_quam_base(quam_base: QuamBase, contents: dict, validate_type: bool = True) -> QuamBase:
     """Instantiate a QuamBase from a dict
 
     Args:
         quam_base: QuamBase instance to instantiate
         contents: dict of attributes to instantiate the QuamBase with
+        validate_type: Whether to validate the type of the attributes.
+            A TypeError is raised if an attribute has the wrong type.
 
     Returns:
         QuamBase instance
@@ -167,6 +170,7 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict) -> QuamBase:
         attrs=attr_annotations,
         contents=contents,
         quam_base=quam_base,
+        validate_type=validate_type,
     )
 
     for attr, val in instantiated_attrs.items():
@@ -176,7 +180,7 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict) -> QuamBase:
 
 
 def instantiate_quam_component(
-    quam_component_cls: type[QuamComponent], contents: dict, quam_base: QuamBase
+    quam_component_cls: type[QuamComponent], contents: dict, quam_base: QuamBase, validate_type: bool = True
 ) -> QuamComponent:
     """Instantiate a QuamComponent from a dict
 
@@ -186,10 +190,14 @@ def instantiate_quam_component(
         quam_component_cls: QuamComponent class to instantiate
         contents: dict of attributes to instantiate the QuamComponent with
         quam_base: QuamBase instance to attach the QuamComponent to
+        validate_type: Whether to validate the type of the attributes.
+            A TypeError is raised if an attribute has the wrong type.
 
     Returns:
         QuamComponent instance
     """
+    if not isinstance(contents, dict):
+        raise TypeError(f"contents must be a dict, not {type(contents)}, could not instantiate {quam_base}")
     attr_annotations = get_class_attributes(quam_component_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
@@ -197,6 +205,7 @@ def instantiate_quam_component(
         attrs=attr_annotations,
         contents=contents,
         quam_base=quam_base,
+        validate_type=validate_type,
     )
 
     quam_component = quam_component_cls(**instantiated_attrs)
