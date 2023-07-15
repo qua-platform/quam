@@ -7,11 +7,13 @@ def test_instantiate_reference_class():
     reference_obj = ReferenceClass()
     assert reference_obj._references == {}
 
+
 def test_set_non_reference_attribute():
     reference_obj = ReferenceClass()
     reference_obj.test = 42
     assert reference_obj._references == {}
     assert reference_obj.test == 42
+
 
 def test_set_reference_attribute():
     reference_obj = ReferenceClass()
@@ -52,4 +54,3 @@ def test_reference_dataclass():
     assert sub_reference_class._references == {"a": ":b", "c": ":d"}
     assert sub_reference_class.a == "b"
     assert sub_reference_class.c == "d"
-

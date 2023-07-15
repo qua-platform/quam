@@ -15,7 +15,7 @@ default_pulses = [f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "
 @dataclass(kw_only=True, eq=False)
 class XYChannel(QuamElement):
     mixer: Mixer
-    
+
     pi_amp: float
     pi_length: float
     anharmonicity: float
@@ -132,7 +132,7 @@ class ZChannel(QuamElement):
             "singleInput": {
                 "port": (self.controller, self.port),  # TODO fix wiring
             },
-            "operations": self.pulse_mapping
+            "operations": self.pulse_mapping,
         }
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]

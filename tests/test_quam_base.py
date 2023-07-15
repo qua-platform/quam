@@ -25,12 +25,14 @@ def test_iterate_quam_element():
     assert len(elems) == 1
     assert elems[0] is elem
 
+
 def test_iterate_quam_element_nested():
     elem = QuamTest(int_val=42, quam_elem=QuamElement(), quam_elem_list=[QuamElement()])
     elems = list(iterate_quam_elements(elem))
     assert len(elems) == 2
     assert elems[0] is elem.quam_elem
     assert elems[1] is elem.quam_elem_list[0]
+
 
 def test_iterate_quam_with_elements():
     test_quam = QuamTest(
@@ -89,7 +91,7 @@ def test_quam_dict_element():
     assert elem.b == 44
     assert elem._attrs == {"a": 43}
 
-    elem['c'] = 45
+    elem["c"] = 45
     assert elem.c == 45
     assert elem._attrs == {"a": 43, "c": 45}
 
@@ -103,7 +105,7 @@ def test_iterate_quam_elements_dict():
     assert all(isinstance(elem, QuamElement) for elem in elems)
     assert elems[0] is elem_dict
     assert elems[1] is elem_dict.b
-    
+
 
 def test_nested_quam_dict_explicit():
     elem = QuamDictElement(subdict=QuamDictElement(a=42))

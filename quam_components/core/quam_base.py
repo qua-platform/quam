@@ -73,7 +73,7 @@ class QuamElement(ReferenceClass):
 
     def _get_value_by_reference(self, reference: str):
         return self._quam.get_value_by_reference(reference)
-    
+
 
 class QuamDictElement(QuamElement):
     _attrs = {}  # TODO check if removing this raises any test errors
@@ -102,9 +102,9 @@ class QuamDictElement(QuamElement):
             return self._attrs[key]
         except KeyError:
             raise AttributeError(key)
-    
+
     def __setattr__(self, key, value):
-        if key == '_attrs':
+        if key == "_attrs":
             super().__setattr__(key, value)
         elif key in self._attrs:
             self._attrs[key] = value
@@ -112,10 +112,12 @@ class QuamDictElement(QuamElement):
             super().__setattr__(key, value)
 
 
-def iterate_quam_elements(quam: Union[QuamBase, QuamElement], skip_elems=None) -> Generator[QuamElement, None, None]:
+def iterate_quam_elements(
+    quam: Union[QuamBase, QuamElement], skip_elems=None
+) -> Generator[QuamElement, None, None]:
     if not is_dataclass(quam):
         return
-    
+
     if skip_elems is None:
         skip_elems = []
 
@@ -126,7 +128,9 @@ def iterate_quam_elements(quam: Union[QuamBase, QuamElement], skip_elems=None) -
     if isinstance(quam, QuamDictElement):
         obj_data_values = quam._attrs.values()
     else:
-        obj_data_values = [getattr(quam, data_field.name) for data_field in fields(quam)]
+        obj_data_values = [
+            getattr(quam, data_field.name) for data_field in fields(quam)
+        ]
 
     for attr_val in obj_data_values:
         if attr_val in skip_elems:
@@ -141,4 +145,3 @@ def iterate_quam_elements(quam: Union[QuamBase, QuamElement], skip_elems=None) -
                 if elem in skip_elems:
                     continue
                 yield from iterate_quam_elements(elem, skip_elems=skip_elems)
-

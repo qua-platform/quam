@@ -10,6 +10,7 @@ def test_create_quam_superconducting_simple():
     assert len(quam.local_oscillators) == 4
     assert len(list(quam.iterate_quam_elements())) == 16  # Includes XY and Z channels
 
+
 def test_create_quam_superconducting_simple_build_config():
     quam = create_quam_superconducting_simple(num_qubits=2)
     qua_config = quam.build_config()

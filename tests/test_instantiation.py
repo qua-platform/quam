@@ -120,7 +120,7 @@ def test_instantiate_quam_dict():
         wiring: dict
 
     quam = QuamTest()
-    
+
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict["qubit"]["xy"]["mixer"] = {
         "id": 0,
