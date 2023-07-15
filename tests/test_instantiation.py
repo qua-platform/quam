@@ -5,7 +5,8 @@ from dataclasses import dataclass
 
 from quam_components.core.quam_base import QuamBase, QuamComponent
 from quam_components.components.superconducting_qubits import Transmon
-from quam_components.core.quam_instantiation import get_class_attributes
+from quam_components.core.quam_instantiation import *
+
 
 
 def test_get_class_attributes():
@@ -114,7 +115,6 @@ def test_instantiation_single_nested_element():
     assert quam.qubit.xy.mixer._quam is quam
 
 
-
 def test_instantiate_wrong_type():
     class QuamTest(QuamBase):
         qubit: Transmon
@@ -125,8 +125,6 @@ def test_instantiate_wrong_type():
 
 
 def test_instantiate_component_wrong_type():
-    from quam_components.core.quam_instantiation import instantiate_quam_component
-
     @dataclass
     class QuamTestComponent(QuamComponent):
         test_str: str
@@ -136,8 +134,9 @@ def test_instantiate_component_wrong_type():
     with pytest.raises(TypeError):
         instantiate_quam_component(QuamTestComponent, {"test_str": 0}, quam_base=None)
 
-
-    instantiate_quam_component(QuamTestComponent, {"test_str": 0}, quam_base=None, validate_type=False)
+    instantiate_quam_component(
+        QuamTestComponent, {"test_str": 0}, quam_base=None, validate_type=False
+    )
 
 
 def test_instantiate_quam_dict():
@@ -162,8 +161,17 @@ def test_instantiate_quam_dict():
     quam.load(quam_dict)
 
 
-# def test_instantiation_fixed_attrs():
-#     ...
+def test_instantiation_fixed_attrs():
+    @dataclass
+    class TestComponent(QuamComponent):
+        int_val: int
 
-# def test_instantiation_unfixed_attrs():
-#     ...
+    quam_element = instantiate_quam_component(TestComponent, {"int_val": 42})
+    assert quam_element.int_val == 42
+
+    with pytest.raises(AttributeError):
+        instantiate_quam_component(TestComponent, {"int_val": 42, "extra": 43})
+    
+    quam_element = instantiate_quam_component(TestComponent, {"int_val": 42, "extra": 43}, fix_attrs=False)
+    assert quam_element.int_val == 42
+    assert quam_element.extra == 43

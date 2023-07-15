@@ -27,7 +27,9 @@ def test_iterate_quam_component():
 
 
 def test_iterate_quam_component_nested():
-    elem = QuamTest(int_val=42, quam_elem=QuamComponent(), quam_elem_list=[QuamComponent()])
+    elem = QuamTest(
+        int_val=42, quam_elem=QuamComponent(), quam_elem_list=[QuamComponent()]
+    )
     elems = list(iterate_quam_components(elem))
     assert len(elems) == 2
     assert elems[0] is elem.quam_elem
@@ -68,7 +70,9 @@ def test_iterate_quam_components_nested():
     )
 
     test_quam = NestedQuamTest(
-        int_val=42, quam_elem=quam_component, quam_elem_list=[quam_component, quam_component]
+        int_val=42,
+        quam_elem=quam_component,
+        quam_elem_list=[quam_component, quam_component],
     )
 
     elems = list(iterate_quam_components(test_quam))

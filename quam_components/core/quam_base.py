@@ -28,7 +28,12 @@ class QuamBase:
     def save(self):
         ...
 
-    def load(self, filepath_or_dict: Union[str, Path, dict] = None, validate_type: bool = True):
+    def load(
+        self,
+        filepath_or_dict: Union[str, Path, dict] = None,
+        validate_type: bool = True,
+        fix_attrs: bool = True,
+    ):
         if isinstance(filepath_or_dict, (str, Path)):
             contents = self.serialiser.load(filepath_or_dict)
         elif isinstance(filepath_or_dict, dict):
@@ -36,7 +41,9 @@ class QuamBase:
         elif filepath_or_dict is None and self.filepath is not None:
             contents = self.serialiser.load(self.filepath)
 
-        instantiate_quam_base(self, contents, validate_type=validate_type)
+        instantiate_quam_base(
+            self, contents, validate_type=validate_type, fix_attrs=fix_attrs
+        )
 
     def build_config(self):
         return build_config(self)

@@ -46,20 +46,22 @@ def get_class_attributes(cls: type) -> Dict[str, List[str]]:
     return attr_annotations
 
 
-def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
+def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase = None) -> dict:
     """Instantiate the attributes of a QuamDict"""
     from quam_components.core import QuamDictComponent
 
-    instantiated_attrs = {}
+    instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
     for key, val in contents.items():
         if isinstance(val, dict):
-            instantiated_val = instantiate_quam_component(QuamDictComponent, val, quam_base)
+            instantiated_val = instantiate_quam_component(
+                QuamDictComponent, val, quam_base
+            )
         elif isinstance(val, list):
             instantiated_val = [
                 (
                     elem
                     if not isinstance(elem, dict)
-                    else instantiate_quam_component(QuamDictComponent, elem, quam_base)\
+                    else instantiate_quam_component(QuamDictComponent, elem, quam_base)
                 )
                 for elem in val
             ]
@@ -71,7 +73,12 @@ def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase) -> dict:
 
 
 def instantiate_quam_attrs(
-    cls: type, attrs: Dict[str, List[str]], contents: dict, quam_base: QuamBase, validate_type: bool = True
+    cls: type,
+    attrs: Dict[str, List[str]],
+    contents: dict,
+    quam_base: QuamBase = None,
+    validate_type: bool = True,
+    fix_attrs: bool = True,
 ) -> dict:
     """Instantiate the attributes of a QuamComponent or QuamDictComponent
 
@@ -83,6 +90,10 @@ def instantiate_quam_attrs(
             is part of.
     validate_type: Whether to validate the type of the attributes.
         A TypeError is raised if an attribute has the wrong type.
+        fix_attrs: Whether to only allow attributes that have been defined in the class
+            definition. If False, any attribute can be set.
+            QuamDictComponents are never fixed.
+
 
     Returns:
         A dictionary with the instantiated attributes of the QuamComponent or
@@ -94,30 +105,46 @@ def instantiate_quam_attrs(
     if issubclass(cls, QuamDictComponent):
         return instantiate_quam_dict_attrs(contents, quam_base)
 
-    instantiated_attrs = {}
+    instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
     for key, val in contents.items():
         if key not in attrs["allowed"]:
+            if not fix_attrs:
+                instantiated_attrs["extra"][key] = val
+                continue
             raise AttributeError(
                 f"Attribute {key} is not a valid attr of {cls.__name__}"
             )
 
-        # TODO improve type checking
         required_type = attrs["allowed"][key]
         if not isclass(required_type):  # probably part of typing module
             instantiated_val = val
         elif issubclass(required_type, QuamComponent):
-            instantiated_val = instantiate_quam_component(required_type, val, quam_base, validate_type=validate_type)
+            instantiated_val = instantiate_quam_component(
+                required_type,
+                val,
+                quam_base,
+                validate_type=validate_type,
+                fix_attrs=fix_attrs,
+            )
         elif issubclass(required_type, List):
             required_subtype = required_type.args[0]
             if issubclass(required_subtype, QuamComponent):
                 instantiated_val = [
-                    instantiate_quam_component(required_subtype, v, quam_base, validate_type=validate_type)
+                    instantiate_quam_component(
+                        required_subtype,
+                        v,
+                        quam_base,
+                        validate_type=validate_type,
+                        fix_attrs=fix_attrs,
+                    )
                     for v in val
                 ]
             else:
                 instantiated_val = val
         elif issubclass(required_type, (dict, QuamDictComponent, Dict)):
-            instantiated_val = instantiate_quam_component(QuamDictComponent, val, quam_base)
+            instantiated_val = instantiate_quam_component(
+                QuamDictComponent, val, quam_base
+            )
         else:
             instantiated_val = val
 
@@ -138,20 +165,26 @@ def instantiate_quam_attrs(
                     f" {required_type} for '{cls.__name__}'"
                 ) from e
 
-        instantiated_attrs[key] = instantiated_val
+        if key in attrs["required"]:
+            instantiated_attrs["required"][key] = instantiated_val
+        else:
+            instantiated_attrs["optional"][key] = instantiated_val
 
-    missing_attrs = [
-        attr for attr in attrs["required"] if attr not in instantiated_attrs
-    ]
+    missing_attrs = set(attrs["required"]) - set(instantiated_attrs["required"])
     if missing_attrs:
         raise AttributeError(
             f"Missing required attr {missing_attrs} for {cls.__name__}"
         )
-
+    
     return instantiated_attrs
 
 
-def instantiate_quam_base(quam_base: QuamBase, contents: dict, validate_type: bool = True) -> QuamBase:
+def instantiate_quam_base(
+    quam_base: QuamBase,
+    contents: dict,
+    validate_type: bool = True,
+    fix_attrs: bool = True,
+) -> QuamBase:
     """Instantiate a QuamBase from a dict
 
     Args:
@@ -159,6 +192,9 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict, validate_type: bo
         contents: dict of attributes to instantiate the QuamBase with
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
+        fix_attrs: Whether to only allow attributes that have been defined in the class
+            definition. If False, any attribute can be set.
+            QuamDictComponents are never fixed.
 
     Returns:
         QuamBase instance
@@ -171,16 +207,27 @@ def instantiate_quam_base(quam_base: QuamBase, contents: dict, validate_type: bo
         contents=contents,
         quam_base=quam_base,
         validate_type=validate_type,
+        fix_attrs=fix_attrs,
     )
 
-    for attr, val in instantiated_attrs.items():
+    for attr, val in instantiated_attrs["required"].items():
         setattr(quam_base, attr, val)
+    for attr, val in instantiated_attrs["optional"].items():
+        setattr(quam_base, attr, val)
+    
+    if not fix_attrs:
+        for attr, val in instantiated_attrs["extra"].items():
+            setattr(quam_base, attr, val)
 
     return quam_base
 
 
 def instantiate_quam_component(
-    quam_component_cls: type[QuamComponent], contents: dict, quam_base: QuamBase, validate_type: bool = True
+    quam_component_cls: type[QuamComponent],
+    contents: dict,
+    quam_base: QuamBase = None,
+    validate_type: bool = True,
+    fix_attrs: bool = True,
 ) -> QuamComponent:
     """Instantiate a QuamComponent from a dict
 
@@ -192,12 +239,18 @@ def instantiate_quam_component(
         quam_base: QuamBase instance to attach the QuamComponent to
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
+        fix_attrs: Whether to only allow attributes that have been defined in the class
+            definition. If False, any attribute can be set.
+            QuamDictComponents are never fixed.
 
     Returns:
         QuamComponent instance
     """
     if not isinstance(contents, dict):
-        raise TypeError(f"contents must be a dict, not {type(contents)}, could not instantiate {quam_base}")
+        raise TypeError(
+            f"contents must be a dict, not {type(contents)}, could not instantiate"
+            f" {quam_base}"
+        )
     attr_annotations = get_class_attributes(quam_component_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
@@ -206,9 +259,14 @@ def instantiate_quam_component(
         contents=contents,
         quam_base=quam_base,
         validate_type=validate_type,
+        fix_attrs=fix_attrs,
     )
 
-    quam_component = quam_component_cls(**instantiated_attrs)
+    quam_component = quam_component_cls(**instantiated_attrs["required"], **instantiated_attrs["optional"])
     quam_component._quam = quam_base
+
+    if not fix_attrs:
+        for attr, val in instantiated_attrs["extra"].items():
+            setattr(quam_component, attr, val)
 
     return quam_component
