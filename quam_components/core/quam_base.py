@@ -1,6 +1,6 @@
 from pathlib import Path
 import collections
-from typing import Union, Generator, ClassVar
+from typing import Union, Generator, ClassVar, Any, Dict
 from dataclasses import dataclass, fields, is_dataclass
 
 from .qua_config import build_config
@@ -9,7 +9,13 @@ from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_base
 
 
-__all__ = ["QuamBase", "QuamComponent", "QuamDictComponent", "iterate_quam_components"]
+__all__ = [
+    "QuamBase",
+    "QuamComponent",
+    "QuamDictComponent",
+    "iterate_quam_components",
+    "get_attrs",
+]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -50,6 +56,9 @@ class QuamBase:
 
     def iterate_quam_components(self):
         return iterate_quam_components(self)
+
+    def get_attrs(self):
+        return get_attrs(self)
 
     def get_value_by_reference(self, reference: str):
         assert reference.startswith(":")
@@ -132,14 +141,9 @@ def iterate_quam_components(
         yield quam
         skip_elems.append(quam)
 
-    if isinstance(quam, QuamDictComponent):
-        obj_data_values = quam._attrs.values()
-    else:
-        obj_data_values = [
-            getattr(quam, data_field.name) for data_field in fields(quam)
-        ]
+    attrs = get_attrs(quam)
 
-    for attr_val in obj_data_values:
+    for attr_val in attrs.values():
         if attr_val in skip_elems:
             continue
 
@@ -152,3 +156,11 @@ def iterate_quam_components(
                 if elem in skip_elems:
                     continue
                 yield from iterate_quam_components(elem, skip_elems=skip_elems)
+
+
+def get_attrs(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
+    if isinstance(quam, QuamDictComponent):
+        return quam._attrs
+    else:
+        attr_names = [data_field.name for data_field in fields(quam)]
+        return {attr: getattr(quam, attr) for attr in attr_names}

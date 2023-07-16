@@ -24,6 +24,7 @@ def test_iterate_quam_component():
     elems = list(iterate_quam_components(elem))
     assert len(elems) == 1
     assert elems[0] is elem
+    assert set(get_attrs(elem)) == {"controller"}
 
 
 def test_iterate_quam_component_nested():
@@ -34,6 +35,8 @@ def test_iterate_quam_component_nested():
     assert len(elems) == 2
     assert elems[0] is elem.quam_elem
     assert elems[1] is elem.quam_elem_list[0]
+
+    assert set(get_attrs(elem)) == {"int_val", "quam_elem", "quam_elem_list"}
 
 
 def test_iterate_quam_with_elements():
@@ -105,6 +108,7 @@ def test_iterate_quam_components_dict():
     elem_dict = QuamDictComponent(a=42, b=elem)
 
     elems = list(iterate_quam_components(elem_dict))
+
     assert len(elems) == 2
     assert all(isinstance(elem, QuamComponent) for elem in elems)
     assert elems[0] is elem_dict

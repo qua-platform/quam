@@ -3,22 +3,7 @@ from pathlib import Path
 import json
 
 from quam_components.core import QuamBase, QuamComponent
-
-
-class AbstractSerialiser:
-    def save(
-        self,
-        path: Union[Path, str],
-        quam_obj: Union[QuamBase, QuamComponent],
-        component_mapping: Dict[str, str] = None,
-    ):
-        raise NotImplementedError
-
-    def load(
-        self,
-        path: Union[Path, str] = None,
-    ):
-        raise NotImplementedError
+from quam_components.serialisers.base import AbstractSerialiser
 
 
 class JSONSerialiser(AbstractSerialiser):
