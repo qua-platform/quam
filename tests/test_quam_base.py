@@ -24,7 +24,7 @@ def test_iterate_quam_component():
     elems = list(iterate_quam_components(elem))
     assert len(elems) == 1
     assert elems[0] is elem
-    assert set(get_attrs(elem)) == {"controller"}
+    assert set(get_attrs(elem)) == set()
 
 
 def test_iterate_quam_component_nested():
@@ -129,3 +129,14 @@ def test_nested_quam_dict():
     assert elem.subdict.a == 42
     assert elem.subdict._attrs == {"a": 42}
     assert isinstance(elem.subdict, QuamDictComponent)
+
+
+def test_quam_component_to_dict_basic():
+    @dataclass
+    class QuamBasicComponent(QuamComponent):
+        a: int
+        b: str
+
+    elem = QuamBasicComponent(a=42, b="foo")
+
+    assert elem.to_dict() == {"a": 42, "b": "foo"}

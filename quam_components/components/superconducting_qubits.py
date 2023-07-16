@@ -97,6 +97,8 @@ class ZChannel(QuamComponent):
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
+    controller: str = "con1"
+
     @property
     def pulse_mapping(self):
         pulse_mapping = {}

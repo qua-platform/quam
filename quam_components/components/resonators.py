@@ -21,6 +21,8 @@ class ReadoutResonator(QuamComponent):
     smearing: int = 0
     rotation_angle: float = None
 
+    controller: str = "con1"
+
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"res{self.id}"

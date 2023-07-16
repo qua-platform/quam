@@ -83,8 +83,6 @@ class QuamBase:
 
 @dataclass(kw_only=True, eq=False)
 class QuamComponent(ReferenceClass):
-    controller: str = "con1"
-
     _quam: ClassVar[QuamBase] = None
 
     def get_attrs(self):
@@ -180,7 +178,7 @@ def quam_to_dict(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
         return quam._attrs
     
     quam_dict = {}
-    for attr, val in quam.get_attrs():
+    for attr, val in quam.get_attrs().items():
         if isinstance(val, QuamComponent):
             quam_dict[attr] = quam_to_dict(val)
         elif isinstance(val, list):

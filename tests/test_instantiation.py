@@ -18,12 +18,11 @@ def test_get_class_attributes():
 
     attr_annotations = get_class_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
-    assert attr_annotations["optional"] == {"d": str, "controller": str}
+    assert attr_annotations["optional"] == {"d": str,}
     assert attr_annotations["allowed"] == {
         "a": int,
         "b": List[int],
         "d": str,
-        "controller": str,
     }
 
 
@@ -40,13 +39,12 @@ def test_get_class_attributes_subclass():
 
     attr_annotations = get_class_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
-    assert attr_annotations["optional"] == {"d": str, "elem": float, "controller": str}
+    assert attr_annotations["optional"] == {"d": str, "elem": float}
     assert attr_annotations["allowed"] == {
         "a": int,
         "b": List[int],
         "d": str,
         "elem": float,
-        "controller": str,
     }
 
 
