@@ -259,8 +259,12 @@ def instantiate_quam_component(
         **instantiated_attrs["required"], **instantiated_attrs["optional"]
     )
 
-    if not fix_attrs or isinstance(quam_component, QuamDictComponent):
+    if not fix_attrs:
         for attr, val in instantiated_attrs["extra"].items():
             setattr(quam_component, attr, val)
+    elif isinstance(quam_component, QuamDictComponent):
+        for attr, val in instantiated_attrs["extra"].items():
+            quam_component._attrs[attr] = val
+
 
     return quam_component

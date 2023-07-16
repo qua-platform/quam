@@ -17,11 +17,11 @@ def test_serialise_empty_quam_base(tmp_path):
         contents = json.load(f)
         assert contents == {}
 
-    contents = json_serialiser.load(file)
-    assert contents["contents"] == {}
-    assert contents["component_mapping"] == {}
-    assert contents["default_filename"] == "quam2.json"
-    assert contents["default_foldername"] == None
+    contents, metadata = json_serialiser.load(file)
+    assert contents == {}
+    assert metadata["component_mapping"] == {}
+    assert metadata["default_filename"] == "quam2.json"
+    assert metadata["default_foldername"] == None
 
 
 def test_content_mapping(tmp_path):
