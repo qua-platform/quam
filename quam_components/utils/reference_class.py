@@ -49,5 +49,5 @@ class ReferenceClass:
             return super().__getattribute__(__name)
 
         reference = references[__name]
-        print(f"Got reference {__name} -> {reference}")
+        # print(f"Got reference {__name} -> {reference}")
         return self._get_value_by_reference(reference)
