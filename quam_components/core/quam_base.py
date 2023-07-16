@@ -173,19 +173,18 @@ def get_attrs(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
         return {attr: getattr(quam, attr) for attr in attr_names}
 
 
-def quam_to_dict(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
+def quam_to_dict(quam: Any) -> Dict[str, Any]:
     if isinstance(quam, QuamDictComponent):
-        return quam._attrs
-    
-    quam_dict = {}
-    for attr, val in quam.get_attrs().items():
-        if isinstance(val, QuamComponent):
-            quam_dict[attr] = quam_to_dict(val)
-        elif isinstance(val, list):
-            quam_dict[attr] = [
-                quam_to_dict(elem) if isinstance(elem, QuamComponent) else elem
-                for elem in val
-            ]
-        else:
-            quam_dict[attr] = val
-    return quam_dict
+        return {key: quam_to_dict(val) for key, val in quam._attrs.items()}
+    elif isinstance(quam, (QuamComponent, QuamBase)):
+        quam_dict = {}
+        for attr, val in quam.get_attrs().items():
+            if isinstance(val, list):
+                quam_dict[attr] = [quam_to_dict(elem) for elem in val]
+            elif isinstance(val, QuamComponent):
+                quam_dict[attr] = quam_to_dict(val)
+            else:
+                quam_dict[attr] = val
+        return quam_dict
+    else:
+        return quam

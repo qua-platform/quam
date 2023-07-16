@@ -130,13 +130,28 @@ def test_nested_quam_dict():
     assert elem.subdict._attrs == {"a": 42}
     assert isinstance(elem.subdict, QuamDictComponent)
 
+    assert elem.to_dict() == {"subdict": {"a": 42}}
+
+@dataclass
+class QuamBasicComponent(QuamComponent):
+    a: int
+    b: str
 
 def test_quam_component_to_dict_basic():
-    @dataclass
-    class QuamBasicComponent(QuamComponent):
-        a: int
-        b: str
 
     elem = QuamBasicComponent(a=42, b="foo")
 
     assert elem.to_dict() == {"a": 42, "b": "foo"}
+
+
+def test_quam_component_to_dict_nested():
+    @dataclass
+    class QuamNestedComponent(QuamComponent):
+        a: int
+        b: str
+        c: QuamComponent
+
+    nested_elem = QuamBasicComponent(a=42, b="foo")
+    elem = QuamNestedComponent(a=42, b="foo", c=nested_elem)
+
+    assert elem.to_dict() == {"a": 42, "b": "foo", "c": {"a": 42, "b": "foo"}}
