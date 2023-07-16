@@ -60,13 +60,13 @@ quam_dict_single = {
 }
 
 
+@dataclass
 class QuamTestSingle(QuamBase):
     qubit: Transmon
 
 
 def test_instantiation_single_element():
-    quam = QuamTestSingle()
-    quam.load(quam_dict_single)
+    quam = QuamTestSingle.load(quam_dict_single)
 
     assert isinstance(quam.qubit, Transmon)
     assert quam.qubit.id == 0
@@ -88,9 +88,9 @@ quam_dict_single_nested = {
 
 
 def test_instantiation_single_nested_element():
-    quam = QuamTestSingle()
+
     with pytest.raises(AttributeError):
-        quam.load(quam_dict_single_nested)
+        quam = QuamTestSingle.load(quam_dict_single_nested)
 
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict["qubit"]["xy"]["mixer"] = {
@@ -100,7 +100,7 @@ def test_instantiation_single_nested_element():
         "frequency_drive": 5e9,
         "local_oscillator": {"power": 10, "frequency": 6e9},
     }
-    quam.load(quam_dict)
+    quam = QuamTestSingle.load(quam_dict)
 
     assert quam.qubit.xy.mixer.id == 0
     assert quam.qubit.xy.mixer.name == "mixer0"
@@ -116,9 +116,8 @@ def test_instantiate_wrong_type():
     class QuamTest(QuamBase):
         qubit: Transmon
 
-    quam = QuamTest()
     with pytest.raises(TypeError):
-        quam.load({"qubit": 0})
+        QuamTest.load({"qubit": 0})
 
 
 def test_instantiate_component_wrong_type():
@@ -126,28 +125,28 @@ def test_instantiate_component_wrong_type():
     class QuamTestComponent(QuamComponent):
         test_str: str
 
-    instantiate_quam_component(QuamTestComponent, {"test_str": "hello"}, quam_base=None)
+    instantiate_quam_component(QuamTestComponent, {"test_str": "hello"})
 
     with pytest.raises(TypeError):
-        instantiate_quam_component(QuamTestComponent, {"test_str": 0}, quam_base=None)
+        instantiate_quam_component(QuamTestComponent, {"test_str": 0})
 
     instantiate_quam_component(
-        QuamTestComponent, {"test_str": 0}, quam_base=None, validate_type=False
+        QuamTestComponent, {"test_str": 0}, validate_type=False
     )
 
 
 def test_instantiate_quam_dict():
+    @dataclass
     class QuamTest(QuamBase):
         qubit: Transmon
         wiring: dict
 
-    quam = QuamTest()
 
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict["qubit"]["xy"]["mixer"] = {
         "id": 0,
-        "port_I": ":wiring:port_I",
-        "port_Q": ":wiring:port_Q",
+        "port_I": ":wiring.port_I",
+        "port_Q": ":wiring.port_Q",
         "frequency_drive": 5e9,
         "local_oscillator": {"power": 10, "frequency": 6e9},
     }
@@ -155,7 +154,7 @@ def test_instantiate_quam_dict():
         "port_I": 0,
         "port_Q": 1,
     }
-    quam.load(quam_dict)
+    QuamTest.load(quam_dict)
 
 
 def test_instantiation_fixed_attrs():

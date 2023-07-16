@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 
 from quam_components.core import QuamBase, QuamComponent
-from quam_components.serialisers.base import AbstractSerialiser
+from quam_components.serialisation.base import AbstractSerialiser
 
 
 class JSONSerialiser(AbstractSerialiser):
@@ -13,11 +13,13 @@ class JSONSerialiser(AbstractSerialiser):
 
     def save(
         self,
-        quam_obj: Union[QuamBase, QuamComponent],
+        quam_obj: QuamBase,
         path: Union[Path, str] = None,
         component_mapping: Dict[str, str] = None,
     ):
         """
+
+
         No path, no component mapping -> save to default file
         No path, component mapping -> Create folder, save to default file, save components separately
         JSON Path, no component mapping -> Save to json file
@@ -67,8 +69,8 @@ class JSONSerialiser(AbstractSerialiser):
         path: Union[Path, str] = None,
     ):
         path = Path(path)
-        results = {
-            "contents": {},
+        contents = {}
+        metadata = {
             "component_mapping": {},
             "default_filename": None,
             "default_foldername": None,
@@ -81,20 +83,20 @@ class JSONSerialiser(AbstractSerialiser):
             if not path.suffix == ".json":
                 raise TypeError(f"File {path} is not a JSON file.")
 
-            results["default_filename"] = path.name
+            metadata["default_filename"] = path.name
             with open(path, "r") as f:
-                results["contents"] = json.load(f)
+                contents = json.load(f)
         elif path.is_dir():
-            results["default_foldername"] = path.name
+            metadata["default_foldername"] = path.name
             for file in path.iterdir():
                 if not file.suffix == ".json":
                     continue
 
                 with open(file, "r") as f:
                     file_contents = json.load(f)
-                results["contents"].update(file_contents)
+                contents.update(file_contents)
 
                 for key in file_contents:
-                    results["component_mapping"][key] = str(file)
+                    metadata["component_mapping"][key] = str(file)
 
-        return results
+        return contents, metadata

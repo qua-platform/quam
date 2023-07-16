@@ -54,6 +54,9 @@ def test_basic_reference():
     assert quam_elem1.int_val == 1
     assert quam_elem2.int_val == 1
 
+    quam_elem2.int_val = ":quam_elem1"
+    assert list(iterate_quam_components(quam)) == [quam_elem1, quam_elem2]
+
 
 def test_list_referencing():
     @dataclass(kw_only=True, eq=False)
@@ -89,5 +92,7 @@ def test_reference_dict_elem():
 
     assert quam_elem2.int_val == 2
 
+
+    
 
 # TODO Test referencing when a quam element is added to a quam

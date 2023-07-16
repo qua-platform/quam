@@ -1,10 +1,9 @@
 from pathlib import Path
-import collections
-from typing import Union, Generator, ClassVar, Any, Dict
+from typing import Union, Generator, ClassVar, Any, Dict, Self
 from dataclasses import dataclass, fields, is_dataclass
 
 from .qua_config import build_config
-from quam_components.serialisers import get_serialiser
+from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_base
 
@@ -20,35 +19,29 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class QuamBase:
-    def __post_init__(self, filepath=None):
-        self.filepath = filepath
-
-        if self.filepath is not None:
-            self.serialiser = get_serialiser(self.filepath)
-            self.load()
-        else:
-            self.serialiser = None
-
+    def __post_init__(self):
         QuamComponent._quam = self
 
     def save(self):
         ...
 
+    @classmethod
     def load(
-        self,
-        filepath_or_dict: Union[str, Path, dict] = None,
+        cls,
+        filepath_or_dict: Union[str, Path, dict],
         validate_type: bool = True,
         fix_attrs: bool = True,
-    ):
-        if isinstance(filepath_or_dict, (str, Path)):
-            contents = self.serialiser.load(filepath_or_dict)
-        elif isinstance(filepath_or_dict, dict):
+    ) -> Self:
+        if isinstance(filepath_or_dict, dict):
             contents = filepath_or_dict
-        elif filepath_or_dict is None and self.filepath is not None:
-            contents = self.serialiser.load(self.filepath)
+        else:
+            serialiser = get_serialiser(filepath_or_dict)
+            contents, _ = serialiser.load(filepath_or_dict)
 
-        instantiate_quam_base(
-            self, contents, validate_type=validate_type, fix_attrs=fix_attrs
+        return instantiate_quam_base(
+            cls, contents, 
+            validate_type=validate_type, 
+            fix_attrs=fix_attrs
         )
 
     def build_config(self):

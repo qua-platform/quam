@@ -17,6 +17,15 @@ class ReferenceClass:
         This function should generally be overwritten by subclasses
         """
         return __name[1:]
+    
+    def _get_reference(self, attr: str) -> bool:
+        """Check if an attribute is a reference
+        """
+        attr_val = super().__getattribute__(attr)
+        if self._str_is_reference(attr_val):
+            return attr_val
+        else:
+            return None
 
     def __setattr__(self, __name: str, __value: Any) -> None:
         if isinstance(__value, str) and self._str_is_reference(__value):

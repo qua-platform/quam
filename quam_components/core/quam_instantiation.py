@@ -46,22 +46,20 @@ def get_class_attributes(cls: type) -> Dict[str, List[str]]:
     return attr_annotations
 
 
-def instantiate_quam_dict_attrs(contents: dict, quam_base: QuamBase = None) -> dict:
+def instantiate_quam_dict_attrs(contents: dict) -> dict:
     """Instantiate the attributes of a QuamDict"""
     from quam_components.core import QuamDictComponent
 
     instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
     for key, val in contents.items():
         if isinstance(val, dict):
-            instantiated_val = instantiate_quam_component(
-                QuamDictComponent, val, quam_base
-            )
+            instantiated_val = instantiate_quam_component(QuamDictComponent, val)
         elif isinstance(val, list):
             instantiated_val = [
                 (
                     elem
                     if not isinstance(elem, dict)
-                    else instantiate_quam_component(QuamDictComponent, elem, quam_base)
+                    else instantiate_quam_component(QuamDictComponent, elem)
                 )
                 for elem in val
             ]
@@ -76,7 +74,6 @@ def instantiate_quam_attrs(
     cls: type,
     attrs: Dict[str, List[str]],
     contents: dict,
-    quam_base: QuamBase = None,
     validate_type: bool = True,
     fix_attrs: bool = True,
 ) -> dict:
@@ -103,7 +100,7 @@ def instantiate_quam_attrs(
     from quam_components.core import QuamComponent, QuamDictComponent
 
     if issubclass(cls, QuamDictComponent):
-        return instantiate_quam_dict_attrs(contents, quam_base)
+        return instantiate_quam_dict_attrs(contents)
 
     instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
     for key, val in contents.items():
@@ -122,7 +119,6 @@ def instantiate_quam_attrs(
             instantiated_val = instantiate_quam_component(
                 required_type,
                 val,
-                quam_base,
                 validate_type=validate_type,
                 fix_attrs=fix_attrs,
             )
@@ -133,7 +129,6 @@ def instantiate_quam_attrs(
                     instantiate_quam_component(
                         required_subtype,
                         v,
-                        quam_base,
                         validate_type=validate_type,
                         fix_attrs=fix_attrs,
                     )
@@ -142,9 +137,7 @@ def instantiate_quam_attrs(
             else:
                 instantiated_val = val
         elif issubclass(required_type, (dict, QuamDictComponent, Dict)):
-            instantiated_val = instantiate_quam_component(
-                QuamDictComponent, val, quam_base
-            )
+            instantiated_val = instantiate_quam_component(QuamDictComponent, val)
         else:
             instantiated_val = val
 
@@ -180,7 +173,7 @@ def instantiate_quam_attrs(
 
 
 def instantiate_quam_base(
-    quam_base: QuamBase,
+    quam_base_cls: type[QuamBase],
     contents: dict,
     validate_type: bool = True,
     fix_attrs: bool = True,
@@ -199,25 +192,25 @@ def instantiate_quam_base(
     Returns:
         QuamBase instance
     """
-    attr_annotations = get_class_attributes(cls=quam_base.__class__)
+    attr_annotations = get_class_attributes(cls=quam_base_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
-        cls=quam_base.__class__,
+        cls=quam_base_cls,
         attrs=attr_annotations,
         contents=contents,
-        quam_base=quam_base,
         validate_type=validate_type,
         fix_attrs=fix_attrs,
     )
 
-    for attr, val in instantiated_attrs["required"].items():
-        setattr(quam_base, attr, val)
-    for attr, val in instantiated_attrs["optional"].items():
-        setattr(quam_base, attr, val)
+    attrs = {**instantiated_attrs["required"], **instantiated_attrs["optional"]}
+    quam_base = quam_base_cls(**attrs)
 
     if not fix_attrs:
         for attr, val in instantiated_attrs["extra"].items():
             setattr(quam_base, attr, val)
+
+    for quam_component in quam_base.iterate_quam_components():
+        quam_component._quam = quam_base
 
     return quam_base
 
@@ -225,7 +218,6 @@ def instantiate_quam_base(
 def instantiate_quam_component(
     quam_component_cls: type[QuamComponent],
     contents: dict,
-    quam_base: QuamBase = None,
     validate_type: bool = True,
     fix_attrs: bool = True,
 ) -> QuamComponent:
@@ -249,7 +241,7 @@ def instantiate_quam_component(
     if not isinstance(contents, dict):
         raise TypeError(
             f"contents must be a dict, not {type(contents)}, could not instantiate"
-            f" {quam_base}"
+            f" {quam_component_cls}"
         )
     attr_annotations = get_class_attributes(quam_component_cls)
 
@@ -257,7 +249,6 @@ def instantiate_quam_component(
         cls=quam_component_cls,
         attrs=attr_annotations,
         contents=contents,
-        quam_base=quam_base,
         validate_type=validate_type,
         fix_attrs=fix_attrs,
     )
@@ -265,7 +256,6 @@ def instantiate_quam_component(
     quam_component = quam_component_cls(
         **instantiated_attrs["required"], **instantiated_attrs["optional"]
     )
-    quam_component._quam = quam_base
 
     if not fix_attrs:
         for attr, val in instantiated_attrs["extra"].items():
