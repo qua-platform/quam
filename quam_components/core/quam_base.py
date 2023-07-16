@@ -84,6 +84,9 @@ class QuamComponent(ReferenceClass):
 
     _quam: ClassVar[QuamBase] = None
 
+    def get_attrs(self):
+        return get_attrs(self)
+    
     def apply_to_config(self, config: dict) -> None:
         ...
 
