@@ -59,6 +59,9 @@ class QuamBase:
 
     def get_attrs(self):
         return get_attrs(self)
+    
+    def to_dict(self):
+        return quam_to_dict(self)
 
     def get_value_by_reference(self, reference: str):
         assert reference.startswith(":")
@@ -87,6 +90,9 @@ class QuamComponent(ReferenceClass):
     def get_attrs(self):
         return get_attrs(self)
     
+    def to_dict(self):
+        return quam_to_dict(self)
+
     def apply_to_config(self, config: dict) -> None:
         ...
 
@@ -167,3 +173,21 @@ def get_attrs(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
     else:
         attr_names = [data_field.name for data_field in fields(quam)]
         return {attr: getattr(quam, attr) for attr in attr_names}
+
+
+def quam_to_dict(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
+    if isinstance(quam, QuamDictComponent):
+        return quam._attrs
+    
+    quam_dict = {}
+    for attr, val in quam.get_attrs():
+        if isinstance(val, QuamComponent):
+            quam_dict[attr] = quam_to_dict(val)
+        elif isinstance(val, list):
+            quam_dict[attr] = [
+                quam_to_dict(elem) if isinstance(elem, QuamComponent) else elem
+                for elem in val
+            ]
+        else:
+            quam_dict[attr] = val
+    return quam_dict
