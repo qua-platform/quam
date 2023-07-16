@@ -138,7 +138,6 @@ class QuamBasicComponent(QuamComponent):
     b: str
 
 def test_quam_component_to_dict_basic():
-
     elem = QuamBasicComponent(a=42, b="foo")
 
     assert elem.to_dict() == {"a": 42, "b": "foo"}

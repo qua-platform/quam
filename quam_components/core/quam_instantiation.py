@@ -65,7 +65,7 @@ def instantiate_quam_dict_attrs(contents: dict) -> dict:
             ]
         else:
             instantiated_val = val
-        instantiated_attrs[key] = instantiated_val
+        instantiated_attrs["extra"][key] = instantiated_val
 
     return instantiated_attrs
 
@@ -238,6 +238,8 @@ def instantiate_quam_component(
     Returns:
         QuamComponent instance
     """
+    from quam_components.core import QuamDictComponent
+
     if not isinstance(contents, dict):
         raise TypeError(
             f"contents must be a dict, not {type(contents)}, could not instantiate"
@@ -257,7 +259,7 @@ def instantiate_quam_component(
         **instantiated_attrs["required"], **instantiated_attrs["optional"]
     )
 
-    if not fix_attrs:
+    if not fix_attrs or isinstance(quam_component, QuamDictComponent):
         for attr, val in instantiated_attrs["extra"].items():
             setattr(quam_component, attr, val)
 

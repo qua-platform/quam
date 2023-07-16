@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Union, Generator, ClassVar, Any, Dict, Self
+from typing import Union, Generator, ClassVar, Any, Dict, Self, List
 from dataclasses import dataclass, fields, is_dataclass
 
 from .qua_config import build_config
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
-from quam_components.core.quam_instantiation import instantiate_quam_base
+from quam_components.core.quam_instantiation import instantiate_quam_base, instantiate_quam_dict_attrs
 
 
 __all__ = [
@@ -21,6 +21,12 @@ __all__ = [
 class QuamBase:
     def __post_init__(self):
         QuamComponent._quam = self
+
+    def __setattr__(self, name, value):
+        if isinstance(value, dict):
+            value = QuamDictComponent(**value)
+
+        super().__setattr__(name, value)
 
     def save(self):
         ...
@@ -100,13 +106,8 @@ class QuamDictComponent(QuamComponent):
     def __init__(self, **kwargs):
         super().__init__()
 
-        self._attrs = {}
-        for key, value in kwargs.items():
-            if isinstance(value, dict):
-                nested_dict = QuamDictComponent(**value)
-                self._attrs[key] = nested_dict
-            else:
-                self._attrs[key] = value
+
+        self._attrs = instantiate_quam_dict_attrs(kwargs)["extra"]
 
     def __setitem__(self, key, value):
         self._attrs[key] = value
@@ -146,7 +147,8 @@ def iterate_quam_components(
 
     attrs = get_attrs(quam)
 
-    for attr_val in attrs.values():
+    for attr in attrs:
+        attr_val = getattr(quam, attr)
         if attr_val in skip_elems:
             continue
 
@@ -161,12 +163,11 @@ def iterate_quam_components(
                 yield from iterate_quam_components(elem, skip_elems=skip_elems)
 
 
-def get_attrs(quam: Union[QuamBase, QuamComponent]) -> Dict[str, Any]:
+def get_attrs(quam: Union[QuamBase, QuamComponent]) -> List[str]:
     if isinstance(quam, QuamDictComponent):
-        return quam._attrs
+        return list(quam._attrs.keys())
     else:
-        attr_names = [data_field.name for data_field in fields(quam)]
-        return {attr: getattr(quam, attr) for attr in attr_names}
+        return [data_field.name for data_field in fields(quam)]
 
 
 def quam_to_dict(quam: Any) -> Dict[str, Any]:
@@ -174,7 +175,9 @@ def quam_to_dict(quam: Any) -> Dict[str, Any]:
         return {key: quam_to_dict(val) for key, val in quam._attrs.items()}
     elif isinstance(quam, (QuamComponent, QuamBase)):
         quam_dict = {}
-        for attr, val in quam.get_attrs().items():
+        attrs = quam.get_attrs()
+        for attr in attrs:
+            val = getattr(quam, attr)
             if isinstance(val, list):
                 quam_dict[attr] = [quam_to_dict(elem) for elem in val]
             elif isinstance(val, QuamComponent):

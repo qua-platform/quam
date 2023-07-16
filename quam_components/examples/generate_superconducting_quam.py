@@ -64,6 +64,10 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
         QuamBase: A QuAM with the specified number of qubits.
     """
     quam = QuAM()
+    quam.wiring = {
+        "qubits": [{"port_I": 4*k, "port_Q": 4*k+1} for k in range(num_qubits)],
+        "resonators": [{"port_I": 4*k+2, "port_Q": 4*k+3} for k in range(num_qubits)]
+    }
 
     for idx in range(num_qubits):
         # Create qubit components
@@ -73,8 +77,8 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
         mixer_qubit = Mixer(
             id=f"mixer_q{idx}",
             local_oscillator=f":local_oscillators[{idx}]",
-            port_I=1,
-            port_Q=2,
+            port_I=f":wiring.qubits[{idx}].port_I",
+            port_Q=f":wiring.qubits[{idx}].port_Q",
             frequency_drive=5e9,
         )
         quam.mixers.append(mixer_qubit)  # TODO fix with reference
@@ -95,12 +99,13 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
         resonator_mixer = Mixer(
             id=f"mixer_r{idx}",
             local_oscillator=f":local_oscillators[{idx}]",
-            port_I=3,
-            port_Q=4,
+            port_I=f":wiring.resonators[{idx}].port_I",
+            port_Q=f":wiring.resonators[{idx}].port_Q",
             frequency_drive=5e9,
         )
         quam.mixers.append(resonator_mixer)
 
         readout_resonator = ReadoutResonator(id=idx, mixer=resonator_mixer)
         quam.resonators.append(readout_resonator)
+
     return quam

@@ -29,11 +29,11 @@ class ReferenceClass:
 
     def __setattr__(self, __name: str, __value: Any) -> None:
         if isinstance(__value, str) and self._str_is_reference(__value):
-            print(f"Setting reference {__name} to {__value}")
+            # print(f"Setting reference {__name} to {__value}")
             self._references[__name] = __value
 
         elif __name in self._references:
-            print(f"Removing existing reference {__name} -> {self._references[__name]}")
+            # print(f"Removing existing reference {__name} -> {self._references[__name]}")
             self._references.pop(__name)
 
         super().__setattr__(__name, __value)

@@ -1,4 +1,4 @@
-from quam_components.examples.generate_quam import *
+from quam_components.examples.generate_superconducting_quam import *
 
 
 def test_create_quam_superconducting_simple():
@@ -8,9 +8,22 @@ def test_create_quam_superconducting_simple():
     assert len(quam.resonators) == 2
     assert len(quam.mixers) == 4
     assert len(quam.local_oscillators) == 4
-    assert len(list(quam.iterate_quam_components())) == 16  # Includes XY and Z channels
+
+    assert len(list(quam.iterate_quam_components())) == 17  # Includes XY and Z channels
 
 
 def test_create_quam_superconducting_simple_build_config():
     quam = create_quam_superconducting_simple(num_qubits=2)
     qua_config = quam.build_config()
+    assert isinstance(qua_config, dict)
+
+
+def test_create_quam_superconducting_simple_build_config():
+    quam = create_quam_superconducting_referenced(num_qubits=2)
+
+    assert hasattr(quam.wiring.qubits[0], "port_I")
+
+    qua_config = quam.build_config()
+    print(quam.qubits[0].xy.mixer.port_I)
+    assert quam.qubits[0].xy.mixer.port_I == 0
+    assert quam.qubits[0].xy.mixer.port_Q == 1
