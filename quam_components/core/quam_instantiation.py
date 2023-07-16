@@ -175,7 +175,7 @@ def instantiate_quam_attrs(
         raise AttributeError(
             f"Missing required attr {missing_attrs} for {cls.__name__}"
         )
-    
+
     return instantiated_attrs
 
 
@@ -214,7 +214,7 @@ def instantiate_quam_base(
         setattr(quam_base, attr, val)
     for attr, val in instantiated_attrs["optional"].items():
         setattr(quam_base, attr, val)
-    
+
     if not fix_attrs:
         for attr, val in instantiated_attrs["extra"].items():
             setattr(quam_base, attr, val)
@@ -262,7 +262,9 @@ def instantiate_quam_component(
         fix_attrs=fix_attrs,
     )
 
-    quam_component = quam_component_cls(**instantiated_attrs["required"], **instantiated_attrs["optional"])
+    quam_component = quam_component_cls(
+        **instantiated_attrs["required"], **instantiated_attrs["optional"]
+    )
     quam_component._quam = quam_base
 
     if not fix_attrs:

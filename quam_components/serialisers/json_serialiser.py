@@ -19,7 +19,7 @@ class AbstractSerialiser:
         path: Union[Path, str] = None,
     ):
         raise NotImplementedError
-    
+
 
 class JSONSerialiser(AbstractSerialiser):
     def save(
@@ -28,8 +28,7 @@ class JSONSerialiser(AbstractSerialiser):
         quam_obj: Union[QuamBase, QuamComponent],
         component_mapping: Dict[str, str] = None,
     ):
-        
-        
+        ...
 
     def load(
         self,
@@ -42,14 +41,14 @@ class JSONSerialiser(AbstractSerialiser):
             raise FileNotFoundError(f"Path {path} not found, cannot load JSON.")
 
         if path.is_file():
-            if not path.suffix == '.json':
+            if not path.suffix == ".json":
                 raise TypeError(f"File {path} is not a JSON file.")
             with open(path, "r") as f:
                 contents = json.load(f)
         elif path.is_dir():
             contents = {}
             for file in path.iterdir():
-                if not file.suffix == '.json':
+                if not file.suffix == ".json":
                     continue
 
                 with open(file, "r") as f:

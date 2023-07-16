@@ -8,7 +8,6 @@ from quam_components.components.superconducting_qubits import Transmon
 from quam_components.core.quam_instantiation import *
 
 
-
 def test_get_class_attributes():
     @dataclass
     class TestClass(QuamComponent):
@@ -171,7 +170,9 @@ def test_instantiation_fixed_attrs():
 
     with pytest.raises(AttributeError):
         instantiate_quam_component(TestComponent, {"int_val": 42, "extra": 43})
-    
-    quam_element = instantiate_quam_component(TestComponent, {"int_val": 42, "extra": 43}, fix_attrs=False)
+
+    quam_element = instantiate_quam_component(
+        TestComponent, {"int_val": 42, "extra": 43}, fix_attrs=False
+    )
     assert quam_element.int_val == 42
     assert quam_element.extra == 43
