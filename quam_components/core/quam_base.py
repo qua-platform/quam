@@ -61,16 +61,19 @@ class QuamBase:
         reference_components = reference[1:].split(".")
 
         elem = self
-        for component in reference_components:
-            # print(f"Getting {component} from {elem}")
-            if not component.endswith("]"):
-                elem = getattr(elem, component)
+        try:
+            for component in reference_components:
+                # print(f"Getting {component} from {elem}")
+                if not component.endswith("]"):
+                    elem = getattr(elem, component)
 
-            else:
-                component, index_str = component.split("[")
-                index = int(index_str[:-1])
+                else:
+                    component, index_str = component.split("[")
+                    index = int(index_str[:-1])
 
-                elem = getattr(elem, component)[index]
+                    elem = getattr(elem, component)[index]
+        except AttributeError:
+            return reference
         return elem
 
 

@@ -24,7 +24,7 @@ def test_serialise_empty_quam_base(tmp_path):
     assert contents["default_foldername"] == None
 
 
-def test_content_mappin(tmp_path):
+def test_content_mapping(tmp_path):
     @dataclass(kw_only=True, eq=False)
     class QuamBase1(QuamBase):
         int_val: int
@@ -35,16 +35,17 @@ def test_content_mappin(tmp_path):
     class QuamComponent1(QuamComponent):
         int_val: int
 
-    quam_base = QuamBase1(
+    quam = QuamBase1(
         int_val=1,
         quam_component=QuamComponent1(int_val=2),
         quam_component_separate=QuamComponent1(int_val=3),
     )
 
+    json_serialiser = JSONSerialiser()
     json_file = tmp_path / "quam"
 
-    quam_base.save()
-    elem = quam_base.load()
-    
+    json_serialiser.save(quam, path=json_file)
+    contents, metadata = json_serialiser.load(json_file)
+    assert list(contents.keys()) == ["int_val", "quam_component", "quam_component_separate"]
 
     
