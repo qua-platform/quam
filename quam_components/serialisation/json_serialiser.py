@@ -31,6 +31,7 @@ class JSONSerialiser(AbstractSerialiser):
         self.default_foldername used when component_mapping is not None and path is not a folder
         """
         component_mapping = component_mapping or self.component_mapping
+        
 
         contents = quam_obj.to_dict()
 
@@ -54,6 +55,9 @@ class JSONSerialiser(AbstractSerialiser):
         if component_mapping:
             component_mapping = component_mapping.copy()
             for component_filename, components in component_mapping.items():
+                if isinstance(components, str):
+                    components = [components]
+                    
                 subcomponents = {}
                 for component in components:
                     subcomponents[component] = contents.pop(component)
@@ -87,7 +91,7 @@ class JSONSerialiser(AbstractSerialiser):
             with open(path, "r") as f:
                 contents = json.load(f)
         elif path.is_dir():
-            metadata["default_foldername"] = path.name
+            metadata["default_foldername"] = str(path)
             for file in path.iterdir():
                 if not file.suffix == ".json":
                     continue
@@ -96,7 +100,9 @@ class JSONSerialiser(AbstractSerialiser):
                     file_contents = json.load(f)
                 contents.update(file_contents)
 
-                for key in file_contents:
-                    metadata["component_mapping"][key] = str(file)
+                if file.name == self.default_filename:
+                    metadata["default_filename"] = file.name
+                else:
+                    metadata["component_mapping"][file.name] = list(file_contents.keys())
 
         return contents, metadata
