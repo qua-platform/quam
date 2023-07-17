@@ -115,7 +115,9 @@ def instantiate_quam_attrs(
 
         required_type = attrs["allowed"][key]
 
-        if typing.get_origin(required_type):
+        if isinstance(val, str) and val.startswith(":"):
+            instantiated_val = val
+        elif typing.get_origin(required_type):
             # Required type is a typing class
             if typing.get_origin(required_type) == list and typing.get_args(
                 required_type
@@ -150,6 +152,7 @@ def instantiate_quam_attrs(
             )
         else:
             instantiated_val = val
+
         # Do not check type if the value is a reference or dict
         if isinstance(instantiated_val, str) and instantiated_val.startswith(":"):
             validate_attr_type = False

@@ -197,12 +197,12 @@ def get_attrs(
     quam: Union[QuamBase, QuamComponent], follow_references=False, include_defaults=True
 ) -> List[str]:
     if isinstance(quam, QuamDictComponent):
-        attrs = list(quam._attrs.keys())
+        attr_names = list(quam._attrs.keys())
     else:
-        attrs = [data_field.name for data_field in fields(quam)]
+        attr_names = [data_field.name for data_field in fields(quam)]
 
     skip_attrs = getattr(quam, "_skip_attrs", [])
-    attr_names = [attr for attr in attrs if attr not in skip_attrs]
+    attr_names = [attr for attr in attr_names if attr not in skip_attrs]
 
     if not follow_references:
         attrs = {attr: quam.get_unreferenced_value(attr) for attr in attr_names}
@@ -244,8 +244,7 @@ def quam_to_dict(
         attrs = quam.get_attrs(
             follow_references=follow_references, include_defaults=include_defaults
         )
-        for attr in attrs:
-            val = getattr(quam, attr)
+        for attr, val in attrs.items():
             if isinstance(val, list):
                 quam_dict[attr] = [
                     quam_to_dict(
