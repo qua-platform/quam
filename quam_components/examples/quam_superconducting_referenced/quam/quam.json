@@ -48,13 +48,7 @@
             "id": 0,
             "frequency_01": 6100000000.0,
             "xy": {
-                "mixer": {
-                    "id": "mixer_q0",
-                    "local_oscillator": ":local_oscillators[0]",
-                    "port_I": ":wiring.qubits[0].port_I",
-                    "port_Q": ":wiring.qubits[0].port_Q",
-                    "frequency_drive": ":qubits[0].frequency_01"
-                },
+                "mixer": ":mixers[0]",
                 "pi_amp": 0.01,
                 "pi_length": 40,
                 "anharmonicity": 200000000.0
@@ -67,13 +61,7 @@
             "id": 1,
             "frequency_01": 6100000000.0,
             "xy": {
-                "mixer": {
-                    "id": "mixer_q1",
-                    "local_oscillator": ":local_oscillators[1]",
-                    "port_I": ":wiring.qubits[1].port_I",
-                    "port_Q": ":wiring.qubits[1].port_Q",
-                    "frequency_drive": ":qubits[1].frequency_01"
-                },
+                "mixer": ":mixers[2]",
                 "pi_amp": 0.01,
                 "pi_length": 40,
                 "anharmonicity": 200000000.0
@@ -86,13 +74,7 @@
             "id": 2,
             "frequency_01": 6100000000.0,
             "xy": {
-                "mixer": {
-                    "id": "mixer_q2",
-                    "local_oscillator": ":local_oscillators[2]",
-                    "port_I": ":wiring.qubits[2].port_I",
-                    "port_Q": ":wiring.qubits[2].port_Q",
-                    "frequency_drive": ":qubits[2].frequency_01"
-                },
+                "mixer": ":mixers[4]",
                 "pi_amp": 0.01,
                 "pi_length": 40,
                 "anharmonicity": 200000000.0
@@ -105,35 +87,17 @@
     "resonators": [
         {
             "id": 0,
-            "mixer": {
-                "id": "mixer_r0",
-                "local_oscillator": ":local_oscillators[0]",
-                "port_I": ":wiring.resonators[0].port_I",
-                "port_Q": ":wiring.resonators[0].port_Q",
-                "frequency_drive": ":resonators[0].frequency_opt"
-            },
+            "mixer": ":mixers[1]",
             "frequency_opt": 5900000000.0
         },
         {
             "id": 1,
-            "mixer": {
-                "id": "mixer_r1",
-                "local_oscillator": ":local_oscillators[1]",
-                "port_I": ":wiring.resonators[1].port_I",
-                "port_Q": ":wiring.resonators[1].port_Q",
-                "frequency_drive": ":resonators[1].frequency_opt"
-            },
+            "mixer": ":mixers[3]",
             "frequency_opt": 5900000000.0
         },
         {
             "id": 2,
-            "mixer": {
-                "id": "mixer_r2",
-                "local_oscillator": ":local_oscillators[2]",
-                "port_I": ":wiring.resonators[2].port_I",
-                "port_Q": ":wiring.resonators[2].port_Q",
-                "frequency_drive": ":resonators[2].frequency_opt"
-            },
+            "mixer": ":mixers[5]",
             "frequency_opt": 5900000000.0
         }
     ],

@@ -91,7 +91,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
         transmon = Transmon(
             id=idx,
             xy=XYChannel(
-                mixer=mixer_qubit, pi_amp=10e-3, pi_length=40, anharmonicity=200e6
+                mixer=f":mixers[{2*idx}]", pi_amp=10e-3, pi_length=40, anharmonicity=200e6
             ),
             z=ZChannel(port=5),
             frequency_01=6.1e9,
@@ -112,7 +112,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
         quam.mixers.append(resonator_mixer)
 
         readout_resonator = ReadoutResonator(
-            id=idx, mixer=resonator_mixer, frequency_opt=5.9e9
+            id=idx, mixer=f":mixers[{2*idx+1}]", frequency_opt=5.9e9
         )
         quam.resonators.append(readout_resonator)
     return quam
