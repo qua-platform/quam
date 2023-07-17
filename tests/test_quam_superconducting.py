@@ -34,5 +34,5 @@ def test_quam_superconducting_referenced(tmp_path):
     folder.mkdir(exist_ok=True)
     quam = create_quam_superconducting_referenced(num_qubits=3)
 
-    quam.qubits[0].to_dict()
+    d = quam.qubits[0].to_dict()
     quam.save(folder / "quam")

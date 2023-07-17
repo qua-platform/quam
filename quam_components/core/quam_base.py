@@ -197,6 +197,10 @@ def quam_to_dict(quam: Any, follow_references=False) -> Dict[str, Any]:
             key: quam_to_dict(val, follow_references=follow_references)
             for key, val in quam._attrs.items()
         }
+    elif isinstance(quam, list):
+        return [
+            quam_to_dict(elem, follow_references=follow_references) for elem in quam
+        ]
     elif isinstance(quam, (QuamComponent, QuamBase)):
         quam_dict = {}
         attrs = quam.get_attrs(follow_references=follow_references)
