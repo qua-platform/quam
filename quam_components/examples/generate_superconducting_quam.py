@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from quam_components.components import *
 from quam_components.core import QuamBase
 
@@ -65,8 +67,10 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
     """
     quam = QuAM()
     quam.wiring = {
-        "qubits": [{"port_I": 4*k, "port_Q": 4*k+1} for k in range(num_qubits)],
-        "resonators": [{"port_I": 4*k+2, "port_Q": 4*k+3} for k in range(num_qubits)]
+        "qubits": [{"port_I": 4 * k, "port_Q": 4 * k + 1} for k in range(num_qubits)],
+        "resonators": [
+            {"port_I": 4 * k + 2, "port_Q": 4 * k + 3} for k in range(num_qubits)
+        ],
     }
 
     for idx in range(num_qubits):
@@ -107,5 +111,11 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
 
         readout_resonator = ReadoutResonator(id=idx, mixer=resonator_mixer)
         quam.resonators.append(readout_resonator)
-
     return quam
+
+
+if __name__ == "__main__":
+    folder = Path("quam_superconducting_referenced")
+    folder.mkdir(exist_ok=True)
+    quam = create_quam_superconducting_referenced(num_qubits=3)
+    quam.save(folder / "quam")

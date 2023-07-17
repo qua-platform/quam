@@ -5,7 +5,6 @@ class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
 
     _references: Dict[str, str] = None  # Overwritten during __init__
-    _skip_attrs: list = ["_references"]
 
     @staticmethod
     def _str_is_reference(__value: str) -> bool:
@@ -17,15 +16,10 @@ class ReferenceClass:
         This function should generally be overwritten by subclasses
         """
         return __name[1:]
-    
-    def _get_reference(self, attr: str) -> bool:
-        """Check if an attribute is a reference
-        """
-        attr_val = super().__getattribute__(attr)
-        if self._str_is_reference(attr_val):
-            return attr_val
-        else:
-            return None
+
+    def get_unreferenced_value(self, attr: str) -> bool:
+        """Check if an attribute is a reference"""
+        return super().__getattribute__(attr)
 
     def __setattr__(self, __name: str, __value: Any) -> None:
         if isinstance(__value, str) and self._str_is_reference(__value):
@@ -39,13 +33,12 @@ class ReferenceClass:
         super().__setattr__(__name, __value)
 
     def __getattribute__(self, __name: str) -> Any:
-        skip_attrs = super().__getattribute__("_skip_attrs")
         references = super().__getattribute__("_references")
         if references is None:
             super().__setattr__("_references", {})
             references = {}
 
-        if __name in skip_attrs or __name not in references:
+        if __name not in references:
             return super().__getattribute__(__name)
 
         reference = references[__name]

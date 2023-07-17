@@ -266,5 +266,4 @@ def instantiate_quam_component(
         for attr, val in instantiated_attrs["extra"].items():
             quam_component._attrs[attr] = val
 
-
     return quam_component

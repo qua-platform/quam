@@ -25,6 +25,7 @@ class XYChannel(QuamComponent):
     ac_stark_detuning: float = 0
 
     qubit: "Transmon" = None  # Initialized after creating the qubit
+    _skip_attrs = ["qubit"]
 
     @property
     def pulse_mapping(self):
@@ -86,8 +87,6 @@ class XYChannel(QuamComponent):
 class ZChannel(QuamComponent):
     port: int
 
-    qubit: "Transmon" = None  # Initialized after creating the qubit
-
     offset: float = None  # z_max_frequency_point
 
     pulses: List[str] = field(default_factory=lambda: ["const_flux"])
@@ -98,6 +97,9 @@ class ZChannel(QuamComponent):
     filter_iir_taps: List[float] = None
 
     controller: str = "con1"
+
+    qubit: "Transmon" = None  # Initialized after creating the qubit
+    _skip_attrs = ["qubit"]
 
     @property
     def pulse_mapping(self):

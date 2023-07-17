@@ -1,9 +1,11 @@
-from typing import Union, Dict
+from typing import Union, Dict, TYPE_CHECKING
 from pathlib import Path
 import json
 
-from quam_components.core import QuamBase, QuamComponent
 from quam_components.serialisation.base import AbstractSerialiser
+
+# if TYPE_CHECKING:
+from quam_components.core import QuamBase, QuamComponent
 
 
 class JSONSerialiser(AbstractSerialiser):
@@ -31,7 +33,6 @@ class JSONSerialiser(AbstractSerialiser):
         self.default_foldername used when component_mapping is not None and path is not a folder
         """
         component_mapping = component_mapping or self.component_mapping
-        
 
         contents = quam_obj.to_dict()
 
@@ -40,7 +41,7 @@ class JSONSerialiser(AbstractSerialiser):
             if component_mapping:
                 folder = self.default_foldername
             else:
-                folder = Path('.')
+                folder = Path(".")
         elif path.suffix == ".json":
             default_filename = path.name
             folder = path.parent
@@ -57,7 +58,7 @@ class JSONSerialiser(AbstractSerialiser):
             for component_filename, components in component_mapping.items():
                 if isinstance(components, str):
                     components = [components]
-                    
+
                 subcomponents = {}
                 for component in components:
                     subcomponents[component] = contents.pop(component)
@@ -103,6 +104,8 @@ class JSONSerialiser(AbstractSerialiser):
                 if file.name == self.default_filename:
                     metadata["default_filename"] = file.name
                 else:
-                    metadata["component_mapping"][file.name] = list(file_contents.keys())
+                    metadata["component_mapping"][file.name] = list(
+                        file_contents.keys()
+                    )
 
         return contents, metadata

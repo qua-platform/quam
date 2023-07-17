@@ -27,3 +27,11 @@ def test_create_quam_superconducting_simple_build_config():
     print(quam.qubits[0].xy.mixer.port_I)
     assert quam.qubits[0].xy.mixer.port_I == 0
     assert quam.qubits[0].xy.mixer.port_Q == 1
+
+def test_quam_superconducting_referenced(tmp_path):
+    folder = tmp_path / "quam_superconducting_referenced"
+    folder.mkdir(exist_ok=True)
+    quam = create_quam_superconducting_referenced(num_qubits=3)
+
+    quam.qubits[0].to_dict()
+    quam.save(folder / "quam")

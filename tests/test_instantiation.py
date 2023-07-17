@@ -18,7 +18,9 @@ def test_get_class_attributes():
 
     attr_annotations = get_class_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
-    assert attr_annotations["optional"] == {"d": str,}
+    assert attr_annotations["optional"] == {
+        "d": str,
+    }
     assert attr_annotations["allowed"] == {
         "a": int,
         "b": List[int],
@@ -88,7 +90,6 @@ quam_dict_single_nested = {
 
 
 def test_instantiation_single_nested_element():
-
     with pytest.raises(AttributeError):
         quam = QuamTestSingle.load(quam_dict_single_nested)
 
@@ -130,9 +131,7 @@ def test_instantiate_component_wrong_type():
     with pytest.raises(TypeError):
         instantiate_quam_component(QuamTestComponent, {"test_str": 0})
 
-    instantiate_quam_component(
-        QuamTestComponent, {"test_str": 0}, validate_type=False
-    )
+    instantiate_quam_component(QuamTestComponent, {"test_str": 0}, validate_type=False)
 
 
 def test_instantiate_quam_dict():
@@ -140,7 +139,6 @@ def test_instantiate_quam_dict():
     class QuamTest(QuamBase):
         qubit: Transmon
         wiring: dict
-
 
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict["qubit"]["xy"]["mixer"] = {

@@ -132,10 +132,12 @@ def test_nested_quam_dict():
 
     assert elem.to_dict() == {"subdict": {"a": 42}}
 
+
 @dataclass
 class QuamBasicComponent(QuamComponent):
     a: int
     b: str
+
 
 def test_quam_component_to_dict_basic():
     elem = QuamBasicComponent(a=42, b="foo")

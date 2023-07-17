@@ -93,6 +93,4 @@ def test_reference_dict_elem():
     assert quam_elem2.int_val == 2
 
 
-    
-
 # TODO Test referencing when a quam element is added to a quam
