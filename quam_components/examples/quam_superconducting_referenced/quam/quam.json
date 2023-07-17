@@ -1,0 +1,340 @@
+{
+    "mixers": [
+        {
+            "id": "mixer_q0",
+            "local_oscillator": {
+                "power": 10,
+                "frequency": 6000000000.0
+            },
+            "port_I": 0,
+            "port_Q": 1,
+            "frequency_drive": 6100000000.0,
+            "offset_I": null,
+            "offset_Q": null,
+            "correction_gain": null,
+            "correction_phase": null,
+            "controller": "con1"
+        },
+        {
+            "id": "mixer_r0",
+            "local_oscillator": {
+                "power": 10,
+                "frequency": 6000000000.0
+            },
+            "port_I": 2,
+            "port_Q": 3,
+            "frequency_drive": 5900000000.0,
+            "offset_I": null,
+            "offset_Q": null,
+            "correction_gain": null,
+            "correction_phase": null,
+            "controller": "con1"
+        },
+        {
+            "id": "mixer_q1",
+            "local_oscillator": {
+                "power": 10,
+                "frequency": 6000000000.0
+            },
+            "port_I": 4,
+            "port_Q": 5,
+            "frequency_drive": 6100000000.0,
+            "offset_I": null,
+            "offset_Q": null,
+            "correction_gain": null,
+            "correction_phase": null,
+            "controller": "con1"
+        },
+        {
+            "id": "mixer_r1",
+            "local_oscillator": {
+                "power": 10,
+                "frequency": 6000000000.0
+            },
+            "port_I": 6,
+            "port_Q": 7,
+            "frequency_drive": 5900000000.0,
+            "offset_I": null,
+            "offset_Q": null,
+            "correction_gain": null,
+            "correction_phase": null,
+            "controller": "con1"
+        },
+        {
+            "id": "mixer_q2",
+            "local_oscillator": {
+                "power": 10,
+                "frequency": 6000000000.0
+            },
+            "port_I": 8,
+            "port_Q": 9,
+            "frequency_drive": 6100000000.0,
+            "offset_I": null,
+            "offset_Q": null,
+            "correction_gain": null,
+            "correction_phase": null,
+            "controller": "con1"
+        },
+        {
+            "id": "mixer_r2",
+            "local_oscillator": {
+                "power": 10,
+                "frequency": 6000000000.0
+            },
+            "port_I": 10,
+            "port_Q": 11,
+            "frequency_drive": 5900000000.0,
+            "offset_I": null,
+            "offset_Q": null,
+            "correction_gain": null,
+            "correction_phase": null,
+            "controller": "con1"
+        }
+    ],
+    "qubits": [
+        {
+            "id": 0,
+            "frequency_01": 6100000000.0,
+            "xy": {
+                "mixer": {
+                    "id": "mixer_q0",
+                    "local_oscillator": {
+                        "power": 10,
+                        "frequency": 6000000000.0
+                    },
+                    "port_I": 0,
+                    "port_Q": 1,
+                    "frequency_drive": 6100000000.0,
+                    "offset_I": null,
+                    "offset_Q": null,
+                    "correction_gain": null,
+                    "correction_phase": null,
+                    "controller": "con1"
+                },
+                "pi_amp": 0.01,
+                "pi_length": 40,
+                "anharmonicity": 200000000.0,
+                "pulses": [
+                    "Xm90",
+                    "X90",
+                    "X180",
+                    "Ym90",
+                    "Y90",
+                    "Y180"
+                ],
+                "drag_coefficient": 0,
+                "ac_stark_detuning": 0
+            },
+            "z": {
+                "port": 5,
+                "offset": null,
+                "pulses": [
+                    "const_flux"
+                ],
+                "pulse_length": null,
+                "pulse_amplitude": null,
+                "filter_fir_taps": null,
+                "filter_iir_taps": null,
+                "controller": "con1"
+            }
+        },
+        {
+            "id": 1,
+            "frequency_01": 6100000000.0,
+            "xy": {
+                "mixer": {
+                    "id": "mixer_q1",
+                    "local_oscillator": {
+                        "power": 10,
+                        "frequency": 6000000000.0
+                    },
+                    "port_I": 4,
+                    "port_Q": 5,
+                    "frequency_drive": 6100000000.0,
+                    "offset_I": null,
+                    "offset_Q": null,
+                    "correction_gain": null,
+                    "correction_phase": null,
+                    "controller": "con1"
+                },
+                "pi_amp": 0.01,
+                "pi_length": 40,
+                "anharmonicity": 200000000.0,
+                "pulses": [
+                    "Xm90",
+                    "X90",
+                    "X180",
+                    "Ym90",
+                    "Y90",
+                    "Y180"
+                ],
+                "drag_coefficient": 0,
+                "ac_stark_detuning": 0
+            },
+            "z": {
+                "port": 5,
+                "offset": null,
+                "pulses": [
+                    "const_flux"
+                ],
+                "pulse_length": null,
+                "pulse_amplitude": null,
+                "filter_fir_taps": null,
+                "filter_iir_taps": null,
+                "controller": "con1"
+            }
+        },
+        {
+            "id": 2,
+            "frequency_01": 6100000000.0,
+            "xy": {
+                "mixer": {
+                    "id": "mixer_q2",
+                    "local_oscillator": {
+                        "power": 10,
+                        "frequency": 6000000000.0
+                    },
+                    "port_I": 8,
+                    "port_Q": 9,
+                    "frequency_drive": 6100000000.0,
+                    "offset_I": null,
+                    "offset_Q": null,
+                    "correction_gain": null,
+                    "correction_phase": null,
+                    "controller": "con1"
+                },
+                "pi_amp": 0.01,
+                "pi_length": 40,
+                "anharmonicity": 200000000.0,
+                "pulses": [
+                    "Xm90",
+                    "X90",
+                    "X180",
+                    "Ym90",
+                    "Y90",
+                    "Y180"
+                ],
+                "drag_coefficient": 0,
+                "ac_stark_detuning": 0
+            },
+            "z": {
+                "port": 5,
+                "offset": null,
+                "pulses": [
+                    "const_flux"
+                ],
+                "pulse_length": null,
+                "pulse_amplitude": null,
+                "filter_fir_taps": null,
+                "filter_iir_taps": null,
+                "controller": "con1"
+            }
+        }
+    ],
+    "resonators": [
+        {
+            "id": 0,
+            "mixer": {
+                "id": "mixer_r0",
+                "local_oscillator": {
+                    "power": 10,
+                    "frequency": 6000000000.0
+                },
+                "port_I": 2,
+                "port_Q": 3,
+                "frequency_drive": 5900000000.0,
+                "offset_I": null,
+                "offset_Q": null,
+                "correction_gain": null,
+                "correction_phase": null,
+                "controller": "con1"
+            },
+            "readout_length": null,
+            "readout_amplitude": null,
+            "frequency_opt": 5900000000.0,
+            "frequency_res": null,
+            "time_of_flight": null,
+            "smearing": 0,
+            "rotation_angle": null,
+            "controller": "con1"
+        },
+        {
+            "id": 1,
+            "mixer": {
+                "id": "mixer_r1",
+                "local_oscillator": {
+                    "power": 10,
+                    "frequency": 6000000000.0
+                },
+                "port_I": 6,
+                "port_Q": 7,
+                "frequency_drive": 5900000000.0,
+                "offset_I": null,
+                "offset_Q": null,
+                "correction_gain": null,
+                "correction_phase": null,
+                "controller": "con1"
+            },
+            "readout_length": null,
+            "readout_amplitude": null,
+            "frequency_opt": 5900000000.0,
+            "frequency_res": null,
+            "time_of_flight": null,
+            "smearing": 0,
+            "rotation_angle": null,
+            "controller": "con1"
+        },
+        {
+            "id": 2,
+            "mixer": {
+                "id": "mixer_r2",
+                "local_oscillator": {
+                    "power": 10,
+                    "frequency": 6000000000.0
+                },
+                "port_I": 10,
+                "port_Q": 11,
+                "frequency_drive": 5900000000.0,
+                "offset_I": null,
+                "offset_Q": null,
+                "correction_gain": null,
+                "correction_phase": null,
+                "controller": "con1"
+            },
+            "readout_length": null,
+            "readout_amplitude": null,
+            "frequency_opt": 5900000000.0,
+            "frequency_res": null,
+            "time_of_flight": null,
+            "smearing": 0,
+            "rotation_angle": null,
+            "controller": "con1"
+        }
+    ],
+    "local_oscillators": [
+        {
+            "power": 10,
+            "frequency": 6000000000.0
+        },
+        {
+            "power": 10,
+            "frequency": 6000000000.0
+        },
+        {
+            "power": 10,
+            "frequency": 6000000000.0
+        },
+        {
+            "power": 10,
+            "frequency": 6000000000.0
+        },
+        {
+            "power": 10,
+            "frequency": 6000000000.0
+        },
+        {
+            "power": 10,
+            "frequency": 6000000000.0
+        }
+    ]
+}

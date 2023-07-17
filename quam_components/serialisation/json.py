@@ -64,10 +64,10 @@ class JSONSerialiser(AbstractSerialiser):
                     subcomponents[component] = contents.pop(component)
 
                 with open(folder / component_filename, "w") as f:
-                    json.dump(subcomponents, f)
+                    json.dump(subcomponents, f, indent=4)
 
         with open(folder / default_filename, "w") as f:
-            json.dump(contents, f)
+            json.dump(contents, f, indent=4)
 
     def load(
         self,

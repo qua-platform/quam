@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from quam_components.components import *
 from quam_components.core import QuamBase
@@ -34,7 +35,7 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamBase:
             xy=XYChannel(
                 mixer=mixer_qubit, pi_amp=10e-3, pi_length=40, anharmonicity=200e6
             ),
-            z=ZChannel(port=5),
+            z=ZChannel(port=5)
         )
         quam.qubits.append(transmon)
 
@@ -83,7 +84,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
             local_oscillator=f":local_oscillators[{idx}]",
             port_I=f":wiring.qubits[{idx}].port_I",
             port_Q=f":wiring.qubits[{idx}].port_Q",
-            frequency_drive=5e9,
+            frequency_drive=f":qubits[{idx}].frequency_01",
         )
         quam.mixers.append(mixer_qubit)  # TODO fix with reference
 
@@ -93,6 +94,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
                 mixer=mixer_qubit, pi_amp=10e-3, pi_length=40, anharmonicity=200e6
             ),
             z=ZChannel(port=5),
+            frequency_01=6.1e9
         )
         quam.qubits.append(transmon)
 
@@ -105,17 +107,25 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
             local_oscillator=f":local_oscillators[{idx}]",
             port_I=f":wiring.resonators[{idx}].port_I",
             port_Q=f":wiring.resonators[{idx}].port_Q",
-            frequency_drive=5e9,
+            frequency_drive=f":resonators[{idx}].frequency_opt",
         )
         quam.mixers.append(resonator_mixer)
 
-        readout_resonator = ReadoutResonator(id=idx, mixer=resonator_mixer)
+        readout_resonator = ReadoutResonator(id=idx, mixer=resonator_mixer, frequency_opt=5.9e9)
         quam.resonators.append(readout_resonator)
     return quam
 
 
 if __name__ == "__main__":
-    folder = Path("quam_superconducting_referenced")
+    folder = Path('quam-components/quam_components/examples/quam_superconducting_referenced')
     folder.mkdir(exist_ok=True)
+    
     quam = create_quam_superconducting_referenced(num_qubits=3)
-    quam.save(folder / "quam")
+    quam.save(folder / "quam", content_mapping={"wiring.json": "wiring"})
+
+
+    qua_file = folder / "qua_config.json"
+    qua_config = quam.build_config()
+    json.dump(qua_config, qua_file.open('w'), indent=4)
+
+    quam_loaded = QuAM.load(folder / "quam")

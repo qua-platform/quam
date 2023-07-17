@@ -1,0 +1,32 @@
+{
+    "wiring": {
+        "qubits": [
+            {
+                "port_I": 0,
+                "port_Q": 1
+            },
+            {
+                "port_I": 4,
+                "port_Q": 5
+            },
+            {
+                "port_I": 8,
+                "port_Q": 9
+            }
+        ],
+        "resonators": [
+            {
+                "port_I": 2,
+                "port_Q": 3
+            },
+            {
+                "port_I": 6,
+                "port_Q": 7
+            },
+            {
+                "port_I": 10,
+                "port_Q": 11
+            }
+        ]
+    }
+}

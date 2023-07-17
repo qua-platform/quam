@@ -1,4 +1,5 @@
 from __future__ import annotations
+import typing
 from typing import TYPE_CHECKING, List, Dict, get_type_hints
 from dataclasses import MISSING
 from typeguard import check_type, TypeCheckError
@@ -113,8 +114,31 @@ def instantiate_quam_attrs(
             )
 
         required_type = attrs["allowed"][key]
-        if not isclass(required_type):  # probably part of typing module
-            instantiated_val = val
+        
+        if typing.get_origin(required_type):
+            # Required type is a typing class
+            if typing.get_origin(required_type) == list and typing.get_args(required_type):
+                required_subtype = typing.get_args(required_type)[0]
+                if issubclass(required_subtype, QuamComponent):
+                    instantiated_val = [
+                        instantiate_quam_component(
+                            required_subtype,
+                            v,
+                            validate_type=validate_type,
+                            fix_attrs=fix_attrs,
+                        )
+                        for v in val
+                    ]
+                else:
+                    instantiated_val = val
+            elif typing.get_origin(required_type) == dict:
+                # TODO type checking for dict
+                instantiated_val = instantiate_quam_component(QuamDictComponent, val)
+            else:
+                # TODO Check type for remaining typing classes
+                instantiated_val = val
+        elif issubclass(required_type, (dict, QuamDictComponent)):
+            instantiated_val = instantiate_quam_component(QuamDictComponent, val)
         elif issubclass(required_type, QuamComponent):
             instantiated_val = instantiate_quam_component(
                 required_type,
@@ -122,25 +146,8 @@ def instantiate_quam_attrs(
                 validate_type=validate_type,
                 fix_attrs=fix_attrs,
             )
-        elif issubclass(required_type, List):
-            required_subtype = required_type.args[0]
-            if issubclass(required_subtype, QuamComponent):
-                instantiated_val = [
-                    instantiate_quam_component(
-                        required_subtype,
-                        v,
-                        validate_type=validate_type,
-                        fix_attrs=fix_attrs,
-                    )
-                    for v in val
-                ]
-            else:
-                instantiated_val = val
-        elif issubclass(required_type, (dict, QuamDictComponent, Dict)):
-            instantiated_val = instantiate_quam_component(QuamDictComponent, val)
         else:
             instantiated_val = val
-
         # Do not check type if the value is a reference or dict
         if isinstance(instantiated_val, str) and instantiated_val.startswith(":"):
             validate_attr_type = False
@@ -149,7 +156,8 @@ def instantiate_quam_attrs(
         else:
             validate_attr_type = validate_type
 
-        if validate_attr_type:
+        # TODO type check if instantiated_val is None but val is required
+        if validate_attr_type and instantiated_val is not None:
             try:
                 check_type(instantiated_val, required_type)
             except TypeCheckError as e:
@@ -265,5 +273,6 @@ def instantiate_quam_component(
     elif isinstance(quam_component, QuamDictComponent):
         for attr, val in instantiated_attrs["extra"].items():
             quam_component._attrs[attr] = val
+
 
     return quam_component
