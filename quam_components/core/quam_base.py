@@ -138,6 +138,10 @@ class QuamDictComponent(QuamComponent):
         else:
             super().__setattr__(key, value)
 
+    def get_unreferenced_value(self, attr: str) -> bool:
+        """Check if an attribute is a reference"""
+        return self.__getattr__(attr)
+
 
 def iterate_quam_components(
     quam: Union[QuamBase, QuamComponent], skip_elems=None
