@@ -1,10 +1,9 @@
-from typing import Union, Dict, TYPE_CHECKING, Any
+from typing import Union, Dict, Any
 from pathlib import Path
 import json
 
 from quam_components.serialisation.base import AbstractSerialiser
 
-# if TYPE_CHECKING:
 from quam_components.core import QuamBase, QuamComponent
 
 
