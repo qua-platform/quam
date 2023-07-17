@@ -1,4 +1,4 @@
-from typing import Union, Dict, TYPE_CHECKING
+from typing import Union, Dict, TYPE_CHECKING, Any
 from pathlib import Path
 import json
 
@@ -13,11 +13,16 @@ class JSONSerialiser(AbstractSerialiser):
     default_foldername = "quam"
     component_mapping = {}
 
+    def _save_dict_to_json(self, contents: Dict[str, Any], path: Path):
+        with open(path, "w") as f:
+            json.dump(contents, f, indent=4)
+
     def save(
         self,
         quam_obj: QuamBase,
         path: Union[Path, str] = None,
         component_mapping: Dict[str, str] = None,
+        include_defaults: bool = False
     ):
         """
 
@@ -34,7 +39,7 @@ class JSONSerialiser(AbstractSerialiser):
         """
         component_mapping = component_mapping or self.component_mapping
 
-        contents = quam_obj.to_dict()
+        contents = quam_obj.to_dict(include_defaults=include_defaults)
 
         if path is None:
             default_filename = self.default_filename
@@ -53,21 +58,18 @@ class JSONSerialiser(AbstractSerialiser):
 
         folder.mkdir(exist_ok=True)
 
-        if component_mapping:
-            component_mapping = component_mapping.copy()
-            for component_filename, components in component_mapping.items():
-                if isinstance(components, str):
-                    components = [components]
+        component_mapping = component_mapping.copy()
+        for component_filename, components in component_mapping.items():
+            if isinstance(components, str):
+                components = [components]
 
-                subcomponents = {}
-                for component in components:
-                    subcomponents[component] = contents.pop(component)
+            subcomponents = {}
+            for component in components:
+                subcomponents[component] = contents.pop(component)
 
-                with open(folder / component_filename, "w") as f:
-                    json.dump(subcomponents, f, indent=4)
+            self._save_dict_to_json(subcomponents, folder / component_filename)
 
-        with open(folder / default_filename, "w") as f:
-            json.dump(contents, f, indent=4)
+        self._save_dict_to_json(contents, folder / default_filename)
 
     def load(
         self,

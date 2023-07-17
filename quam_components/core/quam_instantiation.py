@@ -114,10 +114,12 @@ def instantiate_quam_attrs(
             )
 
         required_type = attrs["allowed"][key]
-        
+
         if typing.get_origin(required_type):
             # Required type is a typing class
-            if typing.get_origin(required_type) == list and typing.get_args(required_type):
+            if typing.get_origin(required_type) == list and typing.get_args(
+                required_type
+            ):
                 required_subtype = typing.get_args(required_type)[0]
                 if issubclass(required_subtype, QuamComponent):
                     instantiated_val = [
@@ -273,6 +275,5 @@ def instantiate_quam_component(
     elif isinstance(quam_component, QuamDictComponent):
         for attr, val in instantiated_attrs["extra"].items():
             quam_component._attrs[attr] = val
-
 
     return quam_component
