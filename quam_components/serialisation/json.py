@@ -4,7 +4,7 @@ import json
 
 from quam_components.serialisation.base import AbstractSerialiser
 
-from quam_components.core import QuamBase, QuamComponent
+from quam_components.core import QuamRoot, QuamComponent
 
 
 class JSONSerialiser(AbstractSerialiser):
@@ -18,7 +18,7 @@ class JSONSerialiser(AbstractSerialiser):
 
     def save(
         self,
-        quam_obj: QuamBase,
+        quam_obj: QuamRoot,
         path: Union[Path, str] = None,
         component_mapping: Dict[str, str] = None,
         include_defaults: bool = False

@@ -2,11 +2,11 @@ import json
 from dataclasses import dataclass
 
 from quam_components.serialisation.json import JSONSerialiser
-from quam_components.core.quam_base import QuamBase, QuamComponent
+from quam_components.core.quam_base import QuamRoot, QuamComponent
 
 
 def test_serialise_empty_quam_base(tmp_path):
-    quam = QuamBase()
+    quam = QuamRoot()
     json_serialiser = JSONSerialiser()
 
     file = tmp_path / "quam2.json"
@@ -25,7 +25,7 @@ def test_serialise_empty_quam_base(tmp_path):
 
 
 @dataclass(kw_only=True, eq=False)
-class QuamBase1(QuamBase):
+class QuamBase1(QuamRoot):
     int_val: int
     quam_component: QuamComponent
     quam_component_separate: QuamComponent

@@ -3,7 +3,7 @@ from typing import List
 from copy import deepcopy
 from dataclasses import dataclass
 
-from quam_components.core.quam_base import QuamBase, QuamComponent
+from quam_components.core.quam_base import QuamRoot, QuamComponent
 from quam_components.components.superconducting_qubits import Transmon
 from quam_components.core.quam_instantiation import *
 
@@ -63,7 +63,7 @@ quam_dict_single = {
 
 
 @dataclass
-class QuamTestSingle(QuamBase):
+class QuamTestSingle(QuamRoot):
     qubit: Transmon
 
 
@@ -114,7 +114,7 @@ def test_instantiation_single_nested_element():
 
 
 def test_instantiate_wrong_type():
-    class QuamTest(QuamBase):
+    class QuamTest(QuamRoot):
         qubit: Transmon
 
     with pytest.raises(TypeError):
@@ -136,7 +136,7 @@ def test_instantiate_component_wrong_type():
 
 def test_instantiate_quam_dict():
     @dataclass
-    class QuamTest(QuamBase):
+    class QuamTest(QuamRoot):
         qubit: Transmon
         wiring: dict
 

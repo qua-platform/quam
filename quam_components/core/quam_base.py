@@ -12,7 +12,7 @@ from quam_components.core.quam_instantiation import (
 
 
 __all__ = [
-    "QuamBase",
+    "QuamRoot",
     "QuamComponent",
     "QuamDictComponent",
     "iterate_quam_components",
@@ -21,7 +21,7 @@ __all__ = [
 
 
 @dataclass(kw_only=True, eq=False)
-class QuamBase:
+class QuamRoot:
     def __post_init__(self):
         QuamComponent._quam = self
 
@@ -95,7 +95,7 @@ class QuamBase:
 
 @dataclass(kw_only=True, eq=False)
 class QuamComponent(ReferenceClass):
-    _quam: ClassVar[QuamBase] = None
+    _quam: ClassVar[QuamRoot] = None
 
     def get_attrs(self, follow_references=False, include_defaults=True):
         return get_attrs(self, follow_references=follow_references, include_defaults=include_defaults)
@@ -148,7 +148,7 @@ class QuamDictComponent(QuamComponent):
 
 
 def iterate_quam_components(
-    quam: Union[QuamBase, QuamComponent], skip_elems=None
+    quam: Union[QuamRoot, QuamComponent], skip_elems=None
 ) -> Generator[QuamComponent, None, None]:
     if not is_dataclass(quam):
         return
@@ -194,7 +194,7 @@ def _attr_val_is_default(val, quam, attr):
 
 
 def get_attrs(
-    quam: Union[QuamBase, QuamComponent], follow_references=False, include_defaults=True
+    quam: Union[QuamRoot, QuamComponent], follow_references=False, include_defaults=True
 ) -> List[str]:
     if isinstance(quam, QuamDictComponent):
         attr_names = list(quam._attrs.keys())
@@ -239,7 +239,7 @@ def quam_to_dict(
             )
             for elem in quam
         ]
-    elif isinstance(quam, (QuamComponent, QuamBase)):
+    elif isinstance(quam, (QuamComponent, QuamRoot)):
         quam_dict = {}
         attrs = quam.get_attrs(
             follow_references=follow_references, include_defaults=include_defaults

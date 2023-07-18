@@ -97,7 +97,7 @@ class ReadoutResonator(QuamComponent):
             "intermediate_frequency": self.mixer.intermediate_frequency,
             "operations": {
                 "cw": "const_pulse",
-                "readout": f"readout_pulse_q{i}",
+                "readout": f"readout_pulse_q{self.id}",
             },
             "outputs": {
                 "out1": (self.controller, self.mixer.port_I),

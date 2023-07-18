@@ -6,7 +6,7 @@ from typeguard import check_type, TypeCheckError
 from inspect import isclass
 
 if TYPE_CHECKING:
-    from quam_components.core import QuamBase, QuamComponent
+    from quam_components.core import QuamRoot, QuamComponent
 
 
 def get_class_attributes(cls: type) -> Dict[str, List[str]]:
@@ -186,11 +186,11 @@ def instantiate_quam_attrs(
 
 
 def instantiate_quam_base(
-    quam_base_cls: type[QuamBase],
+    quam_base_cls: type[QuamRoot],
     contents: dict,
     validate_type: bool = True,
     fix_attrs: bool = True,
-) -> QuamBase:
+) -> QuamRoot:
     """Instantiate a QuamBase from a dict
 
     Args:

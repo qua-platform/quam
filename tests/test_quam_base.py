@@ -5,7 +5,7 @@ from quam_components.core import *
 
 
 def test_update_quam_component_quam():
-    quam_base = QuamBase()
+    quam_base = QuamRoot()
     assert QuamComponent._quam is quam_base
 
     quam_component = QuamComponent()
@@ -13,7 +13,7 @@ def test_update_quam_component_quam():
 
 
 @dataclass
-class QuamTest(QuamBase):
+class QuamTest(QuamRoot):
     int_val: int
     quam_elem: QuamComponent
     quam_elem_list: List[QuamComponent]
@@ -59,7 +59,7 @@ class QuamComponentTest(QuamComponent):
 
 
 @dataclass
-class NestedQuamTest(QuamBase):
+class NestedQuamTest(QuamRoot):
     int_val: int
     quam_elem: QuamComponentTest
     quam_elem_list: List[QuamComponentTest]

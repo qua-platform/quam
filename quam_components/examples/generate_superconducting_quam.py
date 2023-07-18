@@ -2,10 +2,10 @@ from pathlib import Path
 import json
 
 from quam_components.components import *
-from quam_components.core import QuamBase
+from quam_components.core import QuamRoot
 
 
-def create_quam_superconducting_simple(num_qubits: int) -> QuamBase:
+def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
     """Create a QuAM with a number of qubits.
 
     Args:
@@ -57,7 +57,7 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamBase:
     return quam
 
 
-def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
+def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
     """Create a QuAM with a number of qubits.
 
     Args:
