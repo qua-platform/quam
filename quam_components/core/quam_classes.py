@@ -37,7 +37,7 @@ class QuamRoot:
             quam_obj=self,
             path=path,
             component_mapping=content_mapping,
-            include_defaults = include_defaults
+            include_defaults=include_defaults,
         )
 
     @classmethod
@@ -64,7 +64,9 @@ class QuamRoot:
         return iterate_quam_components(self)
 
     def get_attrs(self, follow_references=False, include_defaults=True):
-        return get_attrs(self, follow_references=follow_references, include_defaults=include_defaults)
+        return get_attrs(
+            self, follow_references=follow_references, include_defaults=include_defaults
+        )
 
     def to_dict(self, follow_references=False, include_defaults=False):
         return quam_to_dict(
@@ -99,7 +101,9 @@ class QuamComponent(ReferenceClass):
     _quam: ClassVar[QuamRoot] = None
 
     def get_attrs(self, follow_references=False, include_defaults=True):
-        return get_attrs(self, follow_references=follow_references, include_defaults=include_defaults)
+        return get_attrs(
+            self, follow_references=follow_references, include_defaults=include_defaults
+        )
 
     def to_dict(self, follow_references=False, include_defaults=False):
         return quam_to_dict(
@@ -186,7 +190,7 @@ def _attr_val_is_default(val, quam, attr):
     dataclass_fields = fields(quam)
     if not any(field.name == attr for field in dataclass_fields):
         return False
-    
+
     field = next(field for field in dataclass_fields if field.name == attr)
     if field.default is not MISSING:
         return val == field.default

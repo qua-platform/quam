@@ -1,5 +1,5 @@
 from typing import List
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, fields, is_dataclass, field
 
 from quam_components.core import *
 
@@ -156,3 +156,44 @@ def test_quam_component_to_dict_nested():
     elem = QuamNestedComponent(a=42, b="foo", c=nested_elem)
 
     assert elem.to_dict() == {"a": 42, "b": "foo", "c": {"a": 42, "b": "foo"}}
+
+
+def test_to_dict_nondefault():
+    @dataclass
+    class QuamBasicComponent(QuamComponent):
+        required_val: int
+        optional_val: int = 42
+        optional_list: List[int] = field(default_factory=list)
+
+    quam_component = QuamBasicComponent(required_val=42)
+    assert quam_component.to_dict() == {"required_val": 42}
+    assert quam_component.to_dict(include_defaults=True) == {
+        "required_val": 42,
+        "optional_val": 42,
+        "optional_list": [],
+    }
+
+    quam_component = QuamBasicComponent(required_val=42, optional_val=43)
+    assert quam_component.to_dict() == {"required_val": 42, "optional_val": 43}
+    assert quam_component.to_dict(include_defaults=True) == {
+        "required_val": 42,
+        "optional_val": 43,
+        "optional_list": [],
+    }
+
+    quam_component = QuamBasicComponent(required_val=42, optional_list=["test"])
+    assert quam_component.to_dict() == {"required_val": 42, "optional_list": ["test"]}
+    assert quam_component.to_dict(include_defaults=True) == {
+        "required_val": 42,
+        "optional_val": 42,
+        "optional_list": ["test"],
+    }
+
+    quam_component = QuamBasicComponent(required_val=42)
+    quam_component.optional_list.append("test")
+    assert quam_component.to_dict() == {"required_val": 42, "optional_list": ["test"]}
+    assert quam_component.to_dict(include_defaults=True) == {
+        "required_val": 42,
+        "optional_val": 42,
+        "optional_list": ["test"],
+    }

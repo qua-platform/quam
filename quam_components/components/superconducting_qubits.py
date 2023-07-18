@@ -20,7 +20,7 @@ class XYChannel(QuamComponent):
     pi_length: float
     anharmonicity: float
 
-    pulses: List[str] = field(default_factory=lambda: default_pulses)
+    pulses: List[str] = field(default_factory=lambda: default_pulses.copy())
     drag_coefficient: float = 0
     ac_stark_detuning: float = 0
 

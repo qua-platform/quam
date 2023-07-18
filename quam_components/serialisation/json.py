@@ -21,7 +21,7 @@ class JSONSerialiser(AbstractSerialiser):
         quam_obj: QuamRoot,
         path: Union[Path, str] = None,
         component_mapping: Dict[str, str] = None,
-        include_defaults: bool = False
+        include_defaults: bool = False,
     ):
         """
 
