@@ -81,10 +81,10 @@ def instantiate_quam_attrs(
     """Instantiate the attributes of a QuamComponent or QuamDictComponent
 
     Args:
-    cls: The class of the QuamBase, QuamComponent or QuamDictComponent.
-    attrs: The attributes of the QuamBase, QuamComponent or QuamDictComponent.
-    contents: The contents of the QuamBase, QuamComponent or QuamDictComponent.
-    quam_base: The QuamBase object that the QuamBase, QuamComponent or QuamDictComponent
+    cls: The class of the QuamRoot, QuamComponent or QuamDictComponent.
+    attrs: The attributes of the QuamRoot, QuamComponent or QuamDictComponent.
+    contents: The contents of the QuamRoot, QuamComponent or QuamDictComponent.
+    quam_root: The QuamRoot object that the QuamRoot, QuamComponent or QuamDictComponent
             is part of.
     validate_type: Whether to validate the type of the attributes.
         A TypeError is raised if an attribute has the wrong type.
@@ -185,17 +185,17 @@ def instantiate_quam_attrs(
     return instantiated_attrs
 
 
-def instantiate_quam_base(
-    quam_base_cls: type[QuamRoot],
+def instantiate_quam_root(
+    quam_root_cls: type[QuamRoot],
     contents: dict,
     validate_type: bool = True,
     fix_attrs: bool = True,
 ) -> QuamRoot:
-    """Instantiate a QuamBase from a dict
+    """Instantiate a QuamRoot from a dict
 
     Args:
-        quam_base: QuamBase instance to instantiate
-        contents: dict of attributes to instantiate the QuamBase with
+        quam_root: QuamRoot instance to instantiate
+        contents: dict of attributes to instantiate the QuamRoot with
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
         fix_attrs: Whether to only allow attributes that have been defined in the class
@@ -203,12 +203,12 @@ def instantiate_quam_base(
             QuamDictComponents are never fixed.
 
     Returns:
-        QuamBase instance
+        QuamRoot instance
     """
-    attr_annotations = get_class_attributes(cls=quam_base_cls)
+    attr_annotations = get_class_attributes(cls=quam_root_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
-        cls=quam_base_cls,
+        cls=quam_root_cls,
         attrs=attr_annotations,
         contents=contents,
         validate_type=validate_type,
@@ -216,16 +216,16 @@ def instantiate_quam_base(
     )
 
     attrs = {**instantiated_attrs["required"], **instantiated_attrs["optional"]}
-    quam_base = quam_base_cls(**attrs)
+    quam_root = quam_root_cls(**attrs)
 
     if not fix_attrs:
         for attr, val in instantiated_attrs["extra"].items():
-            setattr(quam_base, attr, val)
+            setattr(quam_root, attr, val)
 
-    for quam_component in quam_base.iterate_quam_components():
-        quam_component._quam = quam_base
+    for quam_component in quam_root.iterate_quam_components():
+        quam_component._quam = quam_root
 
-    return quam_base
+    return quam_root
 
 
 def instantiate_quam_component(
@@ -241,7 +241,7 @@ def instantiate_quam_component(
     Args:
         quam_component_cls: QuamComponent class to instantiate
         contents: dict of attributes to instantiate the QuamComponent with
-        quam_base: QuamBase instance to attach the QuamComponent to
+        quam_root: QuamRoot instance to attach the QuamComponent to
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
         fix_attrs: Whether to only allow attributes that have been defined in the class

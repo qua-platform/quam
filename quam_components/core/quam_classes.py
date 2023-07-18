@@ -6,7 +6,7 @@ from .qua_config import build_config
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import (
-    instantiate_quam_base,
+    instantiate_quam_root,
     instantiate_quam_dict_attrs,
 )
 
@@ -31,12 +31,13 @@ class QuamRoot:
 
         super().__setattr__(name, value)
 
-    def save(self, path=None, content_mapping=None):
+    def save(self, path=None, content_mapping=None, include_defaults=False):
         serialiser = get_serialiser(self)
         serialiser.save(
             quam_obj=self,
             path=path,
             component_mapping=content_mapping,
+            include_defaults = include_defaults
         )
 
     @classmethod
@@ -52,7 +53,7 @@ class QuamRoot:
             serialiser = get_serialiser(filepath_or_dict)
             contents, _ = serialiser.load(filepath_or_dict)
 
-        return instantiate_quam_base(
+        return instantiate_quam_root(
             cls, contents, validate_type=validate_type, fix_attrs=fix_attrs
         )
 

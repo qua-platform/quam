@@ -2,10 +2,10 @@ import json
 from dataclasses import dataclass
 
 from quam_components.serialisation.json import JSONSerialiser
-from quam_components.core.quam_base import QuamRoot, QuamComponent
+from quam_components.core import QuamRoot, QuamComponent
 
 
-def test_serialise_empty_quam_base(tmp_path):
+def test_serialise_empty_quam_root(tmp_path):
     quam = QuamRoot()
     json_serialiser = JSONSerialiser()
 
@@ -25,7 +25,7 @@ def test_serialise_empty_quam_base(tmp_path):
 
 
 @dataclass(kw_only=True, eq=False)
-class QuamBase1(QuamRoot):
+class QuamRoot1(QuamRoot):
     int_val: int
     quam_component: QuamComponent
     quam_component_separate: QuamComponent
@@ -37,7 +37,7 @@ class QuamComponent1(QuamComponent):
 
 
 def test_save_load_basic(tmp_path):
-    quam = QuamBase1(
+    quam = QuamRoot1(
         int_val=1,
         quam_component=QuamComponent1(int_val=2),
         quam_component_separate=QuamComponent1(int_val=3),
@@ -68,7 +68,7 @@ def test_save_load_basic(tmp_path):
 
 
 def test_save_load_basic_content_mapping(tmp_path):
-    quam = QuamBase1(
+    quam = QuamRoot1(
         int_val=1,
         quam_component=QuamComponent1(int_val=2),
         quam_component_separate=QuamComponent1(int_val=3),
@@ -105,7 +105,7 @@ def test_save_load_basic_content_mapping(tmp_path):
 
 
 def test_save_load_folder_content_mapping(tmp_path):
-    quam = QuamBase1(
+    quam = QuamRoot1(
         int_val=1,
         quam_component=QuamComponent1(int_val=2),
         quam_component_separate=QuamComponent1(int_val=3),

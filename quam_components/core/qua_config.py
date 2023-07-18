@@ -28,7 +28,7 @@ qua_config_template = {
 
 
 def build_config(quam, qua_config=None):
-    from .quam_base import iterate_quam_components
+    from .quam_classes import iterate_quam_components
 
     if qua_config is None:
         qua_config = qua_config_template.copy()

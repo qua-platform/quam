@@ -5,11 +5,11 @@ from quam_components.core import *
 
 
 def test_update_quam_component_quam():
-    quam_base = QuamRoot()
-    assert QuamComponent._quam is quam_base
+    quam_root = QuamRoot()
+    assert QuamComponent._quam is quam_root
 
     quam_component = QuamComponent()
-    assert quam_component._quam is quam_base
+    assert quam_component._quam is quam_root
 
 
 @dataclass

@@ -12,7 +12,7 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
         num_qubits (int): Number of qubits to create.
 
     Returns:
-        QuamBase: A QuAM with the specified number of qubits.
+        QuamRoot: A QuAM with the specified number of qubits.
     """
     quam = QuAM()
 
@@ -64,7 +64,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         num_qubits (int): Number of qubits to create.
 
     Returns:
-        QuamBase: A QuAM with the specified number of qubits.
+        QuamRoot: A QuAM with the specified number of qubits.
     """
     quam = QuAM()
     quam.wiring = {
