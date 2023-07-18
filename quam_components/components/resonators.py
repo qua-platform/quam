@@ -17,7 +17,7 @@ class ReadoutResonator(QuamComponent):
     readout_amplitude: float = None
     frequency_opt: float = None
     frequency_res: float = None
-    time_of_flight: int = None
+    time_of_flight: int = 0
     smearing: int = 0
     rotation_angle: float = None
 
@@ -28,6 +28,9 @@ class ReadoutResonator(QuamComponent):
         return self.id if isinstance(self.id, str) else f"res{self.id}"
 
     def calculate_integration_weights(self):
+        if self.readout_length is None or self.readout_amplitude is None:
+            return {}
+        
         integration_weights = {
             f"cosine_weights_{self.name}": {
                 "cosine": [(1.0, self.readout_length)],
@@ -59,6 +62,9 @@ class ReadoutResonator(QuamComponent):
         return integration_weights
 
     def calculate_waveforms(self):
+        if self.readout_amplitude is None or self.readout_length is None:
+            return {}
+        
         return {
             f"readout_{self.name}_wf": {
                 "type": "constant",
@@ -67,6 +73,9 @@ class ReadoutResonator(QuamComponent):
         }
 
     def calculate_pulses(self):
+        if self.readout_amplitude is None or self.readout_length is None:
+            return {}
+
         integration_weights_labels = ["cos", "sin", "minus_sin"]
         if self.rotation_angle is None:
             integration_weights_labels += [
@@ -97,18 +106,18 @@ class ReadoutResonator(QuamComponent):
             "intermediate_frequency": self.mixer.intermediate_frequency,
             "operations": {
                 "cw": "const_pulse",
-                "readout": f"readout_pulse_q{self.id}",
             },
             "outputs": {
                 "out1": (self.controller, self.mixer.port_I),
                 "out2": (self.controller, self.mixer.port_Q),
             },
             "smearing": self.smearing,
+            "time_of_flight": self.time_of_flight
         }
-
-        if self.time_of_flight is not None:
-            config["elements"][self.name]["time_of_flight"] = self.time_of_flight
-
+        
+        if self.readout_amplitude is not None and self.readout_length is not None:
+            config["elements"][self.name]["operations"]["readout"] = f"readout_pulse_q{self.id}",
+        
         integration_weights = self.calculate_integration_weights()
         config["integration_weights"].update(integration_weights)
         waveforms = self.calculate_waveforms()

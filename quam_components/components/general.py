@@ -25,11 +25,11 @@ class Mixer(QuamComponent):
 
     frequency_drive: float
 
-    offset_I: float = None
-    offset_Q: float = None
+    offset_I: float = 0
+    offset_Q: float = 0
 
-    correction_gain: float = None
-    correction_phase: float = None
+    correction_gain: float = 0
+    correction_phase: float = 0
 
     controller: str = "con1"
 
@@ -42,30 +42,28 @@ class Mixer(QuamComponent):
         return self.frequency_drive - self.local_oscillator.frequency
 
     def get_input_config(self):
-        return (
-            {
-                "I": (self.controller, self.port_I),
-                "Q": (self.controller, self.port_Q),
-                "lo_frequency": self.local_oscillator.frequency,
-                "mixer": self.name,
-            },
-        )
+        return {
+            "I": (self.controller, self.port_I),
+            "Q": (self.controller, self.port_Q),
+            "lo_frequency": self.local_oscillator.frequency,
+            "mixer": self.name,
+        }
+        
 
     def apply_to_config(self, config: dict):
-        config["mixers"][self.name] = {
+        correction_matrix = self.IQ_imbalance(
+            self.correction_gain, self.correction_phase
+        )
+        
+        config["mixers"][self.name] = [{
             "intermediate_frequency": self.intermediate_frequency,
             "lo_frequency": self.local_oscillator.frequency,
-        }
-
-        if self.correction_gain is not None and self.correction_phase is not None:
-            correction_matrix = self.IQ_imbalance(
-                self.correction_gain, self.correction_phase
-            )
-            config["mixers"][self.name]["correction"] = correction_matrix
+            "correction": correction_matrix
+        }]
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_outputs[self.port_I] = {"offset": self.offset_I} if self.offset_I else {}
-        analog_outputs[self.port_Q] = {"offset": self.offset_Q} if self.offset_Q else {}
+        analog_outputs[self.port_I] = {"offset": self.offset_I}
+        analog_outputs[self.port_Q] = {"offset": self.offset_Q}
 
     @staticmethod
     def IQ_imbalance(g: float, phi: float) -> List[float]:

@@ -87,7 +87,7 @@ class XYChannel(QuamComponent):
 class ZChannel(QuamComponent):
     port: int
 
-    offset: float = None  # z_max_frequency_point
+    z_max_frequency_point: float = None  # z_max_frequency_point
 
     pulses: List[str] = field(default_factory=lambda: ["const_flux"])
     pulse_length: float = None
@@ -95,6 +95,8 @@ class ZChannel(QuamComponent):
 
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
+
+    offset: float = 0
 
     controller: str = "con1"
 
@@ -106,7 +108,8 @@ class ZChannel(QuamComponent):
         pulse_mapping = {}
         for pulse in self.pulses:
             if pulse == "const_flux":
-                pulse_mapping[pulse] = f"const_flux_{self.qubit.name}_pulse"
+                if self.pulse_length is not None and self.pulse_amplitude is not None:
+                    pulse_mapping[pulse] = f"const_flux_{self.qubit.name}_pulse"
             else:
                 raise ValueError(f"Unknown pulse {pulse}")
         return pulse_mapping
@@ -117,6 +120,8 @@ class ZChannel(QuamComponent):
 
         for pulse_label, pulse_name in self.pulse_mapping.items():
             if pulse_label == "const_flux":
+                if self.pulse_length is None or self.pulse_amplitude is None:
+                    continue
                 pulses[pulse_name] = {
                     "operation": "control",
                     "length": self.pulse_length,
@@ -140,10 +145,7 @@ class ZChannel(QuamComponent):
         }
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_output = analog_outputs[self.port] = {}
-
-        if self.offset is not None:
-            analog_output["offset"] = self.offset
+        analog_output = analog_outputs[self.port] = {"offset": self.offset}
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
