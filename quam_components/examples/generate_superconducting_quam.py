@@ -28,7 +28,7 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamBase:
             port_Q=2,
             frequency_drive=5e9,
         )
-        quam.mixers.append(mixer_qubit)  # TODO fix with reference
+        quam.mixers.append(mixer_qubit)
 
         transmon = Transmon(
             id=idx,
@@ -86,7 +86,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
             port_Q=f":wiring.qubits[{idx}].port_Q",
             frequency_drive=f":qubits[{idx}].frequency_01",
         )
-        quam.mixers.append(mixer_qubit)  # TODO fix with reference
+        quam.mixers.append(mixer_qubit)
 
         transmon = Transmon(
             id=idx,

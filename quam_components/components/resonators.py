@@ -95,13 +95,13 @@ class ReadoutResonator(QuamComponent):
         config["elements"][self.name] = {
             "mixInputs": self.mixer.get_input_config(),
             "intermediate_frequency": self.mixer.intermediate_frequency,
-            "operations": {  # TODO add operations
-                # "cw": "const_pulse",
-                # "readout": f"readout_pulse_q{i}",
+            "operations": {
+                "cw": "const_pulse",
+                "readout": f"readout_pulse_q{i}",
             },
             "outputs": {
-                "out1": (self.controller, 1),  # TODO Determine proper output ports
-                "out2": (self.controller, 2),
+                "out1": (self.controller, self.mixer.port_I),
+                "out2": (self.controller, self.mixer.port_Q),
             },
             "smearing": self.smearing,
         }

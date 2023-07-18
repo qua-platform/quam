@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from quam_components.core import QuamComponent
 
 
+__all__ = ["LocalOscillator", "Mixer"]
+
+
 @dataclass(kw_only=True, eq=False)
 class LocalOscillator(QuamComponent):
     power: float = None
@@ -61,8 +64,8 @@ class Mixer(QuamComponent):
             config["mixers"][self.name]["correction"] = correction_matrix
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_outputs[self.port_I] = {"offset": self.offset_I}
-        analog_outputs[self.port_Q] = {"offset": self.offset_Q}
+        analog_outputs[self.port_I] = {"offset": self.offset_I} if self.offset_I else {}
+        analog_outputs[self.port_Q] = {"offset": self.offset_Q} if self.offset_Q else {}
 
     @staticmethod
     def IQ_imbalance(g: float, phi: float) -> List[float]:

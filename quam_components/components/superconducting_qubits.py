@@ -134,7 +134,7 @@ class ZChannel(QuamComponent):
     def apply_to_config(self, config: dict):
         config["elements"][f"{self.qubit.name}_z"] = {
             "singleInput": {
-                "port": (self.controller, self.port),  # TODO fix wiring
+                "port": (self.controller, self.port),
             },
             "operations": self.pulse_mapping,
         }
