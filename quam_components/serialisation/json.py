@@ -8,7 +8,7 @@ from quam_components.core import QuamBase, QuamComponent
 
 
 class JSONSerialiser(AbstractSerialiser):
-    default_filename = "quam.json"
+    default_filename = "state.json"
     default_foldername = "quam"
     component_mapping = {}
 

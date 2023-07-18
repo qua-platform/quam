@@ -75,7 +75,7 @@ def test_save_load_basic_content_mapping(tmp_path):
     )
 
     json_serialiser = JSONSerialiser()
-    json_file = tmp_path / "quam.json"
+    json_file = tmp_path / "state.json"
 
     json_serialiser.save(
         quam,
@@ -100,7 +100,7 @@ def test_save_load_basic_content_mapping(tmp_path):
     assert metadata["component_mapping"] == {
         "separate.json": ["quam_component_separate"]
     }
-    assert metadata["default_filename"] == "quam.json"
+    assert metadata["default_filename"] == "state.json"
     assert metadata["default_foldername"] == str(tmp_path)
 
 
@@ -120,7 +120,7 @@ def test_save_load_folder_content_mapping(tmp_path):
         component_mapping={"separate.json": "quam_component_separate"},
     )
 
-    json_file = json_folder / "quam.json"
+    json_file = json_folder / "state.json"
     quam_dict = json.load(json_file.open("r"))
 
     assert quam_dict == {"int_val": 1, "quam_component": {"int_val": 2}}
@@ -138,5 +138,5 @@ def test_save_load_folder_content_mapping(tmp_path):
     assert metadata["component_mapping"] == {
         "separate.json": ["quam_component_separate"]
     }
-    assert metadata["default_filename"] == "quam.json"
+    assert metadata["default_filename"] == "state.json"
     assert metadata["default_foldername"] == str(json_folder)

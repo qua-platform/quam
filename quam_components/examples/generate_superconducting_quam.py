@@ -68,9 +68,9 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
     """
     quam = QuAM()
     quam.wiring = {
-        "qubits": [{"port_I": 4 * k, "port_Q": 4 * k + 1} for k in range(num_qubits)],
+        "qubits": [{"port_I": 5 * k, "port_Q": 5 * k + 1, "port_Z": 5 * k + 2} for k in range(num_qubits)],
         "resonators": [
-            {"port_I": 4 * k + 2, "port_Q": 4 * k + 3} for k in range(num_qubits)
+            {"port_I": 5 * k + 3, "port_Q": 5 * k + 4} for k in range(num_qubits)
         ],
     }
 
@@ -93,7 +93,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamBase:
             xy=XYChannel(
                 mixer=f":mixers[{2*idx}]", pi_amp=10e-3, pi_length=40, anharmonicity=200e6
             ),
-            z=ZChannel(port=5),
+            z=ZChannel(port=f":wiring.qubits[{idx}].port_Z"),
             frequency_01=6.1e9,
         )
         quam.qubits.append(transmon)
@@ -132,3 +132,7 @@ if __name__ == "__main__":
     json.dump(qua_config, qua_file.open("w"), indent=4)
 
     quam_loaded = QuAM.load(folder / "quam")
+
+    qua_file = folder / "qua_config2.json"
+    qua_config = quam.build_config()
+    json.dump(qua_config, qua_file.open("w"), indent=4)
