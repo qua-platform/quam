@@ -86,13 +86,12 @@ class Mixer(QuamComponent):
 class AnalogInput(QuamComponent):
     port: int
     offset: float = 0
-    gain_db: float = 0
+    gain: float = 0
 
     controller: str = "con1"
 
     def apply_to_config(self, config: dict) -> None:
-        ...
-        # config["controllers"][self.controller]["analog_inputs"][self.port] = {
-        #     "offset": self.offset,
-        #     "gain": self.gain_db,
-        # }
+        config["controllers"][self.controller]["analog_inputs"][self.port] = {
+            "offset": self.offset,
+            "gain_db": self.gain,
+        }

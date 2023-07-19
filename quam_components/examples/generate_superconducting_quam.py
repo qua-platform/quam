@@ -122,7 +122,8 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         quam.mixers.append(resonator_mixer)
 
         readout_resonator = ReadoutResonator(
-            id=idx, mixer=f":mixers[{2*idx+1}]", frequency_opt=5.9e9
+            id=idx, mixer=f":mixers[{2*idx+1}]", frequency_opt=5.9e9,
+            readout_amplitude=0.01, readout_length=100
         )
         quam.resonators.append(readout_resonator)
 
