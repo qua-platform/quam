@@ -9,7 +9,7 @@ def test_create_quam_superconducting_simple():
     assert len(quam.mixers) == 4
     assert len(quam.local_oscillators) == 4
 
-    assert len(list(quam.iterate_quam_components())) == 17  # Includes XY and Z channels
+    assert len(list(quam.iterate_quam_components())) == 19  # Includes XY and Z channels
 
 
 def test_create_quam_superconducting_simple_build_config():
@@ -25,8 +25,8 @@ def test_create_quam_superconducting_simple_build_config():
 
     qua_config = quam.build_config()
     print(quam.qubits[0].xy.mixer.port_I)
-    assert quam.qubits[0].xy.mixer.port_I == 0
-    assert quam.qubits[0].xy.mixer.port_Q == 1
+    assert quam.qubits[0].xy.mixer.port_I == 1
+    assert quam.qubits[0].xy.mixer.port_Q == 2
 
 
 def test_quam_superconducting_referenced(tmp_path):
@@ -47,7 +47,7 @@ def test_quam_referenced_full(tmp_path):
 
     loaded_quam = json.load((folder / "quam" / "state.json").open("r"))
     assert set(loaded_quam.keys()) == set(
-        ["qubits", "resonators", "mixers", "local_oscillators"]
+        ["qubits", "resonators", "mixers", "local_oscillators", "analog_inputs"]
     )
     assert len(loaded_quam["qubits"]) == 3
     assert len(loaded_quam["resonators"]) == 3
@@ -62,7 +62,7 @@ def test_quam_referenced_full(tmp_path):
     assert set(loaded_quam.keys()) == set(["wiring"])
     assert len(loaded_quam["wiring"]["qubits"]) == 3
     assert len(loaded_quam["wiring"]["resonators"]) == 3
-    assert loaded_quam["wiring"]["qubits"][0]["port_I"] == 0
+    assert loaded_quam["wiring"]["qubits"][0]["port_I"] == 1
 
     qua_file = folder / "qua_config.json"
     qua_config = quam.build_config()

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from quam_components.core import QuamComponent
 
 
-__all__ = ["LocalOscillator", "Mixer"]
+__all__ = ["LocalOscillator", "Mixer", "AnalogInput"]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -80,3 +80,19 @@ class Mixer(QuamComponent):
         return [
             float(N * x) for x in [(1 - g) * c, (1 + g) * s, (1 - g) * s, (1 + g) * c]
         ]
+
+
+@dataclass(kw_only=True, eq=False)
+class AnalogInput(QuamComponent):
+    port: int
+    offset: float = 0
+    gain_db: float = 0
+
+    controller: str = "con1"
+
+    def apply_to_config(self, config: dict) -> None:
+        ...
+        # config["controllers"][self.controller]["analog_inputs"][self.port] = {
+        #     "offset": self.offset,
+        #     "gain": self.gain_db,
+        # }

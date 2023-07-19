@@ -16,4 +16,5 @@ class QuAM(QuamRoot):
     qubits: List[Transmon] = field(default_factory=list)
     resonators: List[ReadoutResonator] = field(default_factory=list)
     local_oscillators: List[LocalOscillator] = field(default_factory=list)
+    analog_inputs: List[AnalogInput] = field(default_factory=list)
     wiring: dict = field(default_factory=dict)

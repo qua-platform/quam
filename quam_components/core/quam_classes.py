@@ -128,6 +128,9 @@ class QuamDictComponent(QuamComponent):
     def __setitem__(self, key, value):
         self._attrs[key] = value
 
+    def __getitem__(self, key):
+        return self._attrs[key]
+
     def __getattr__(self, key):
         try:
             return super().__getattr__(key)
@@ -168,7 +171,11 @@ def iterate_quam_components(
     attrs = get_attrs(quam)
 
     for attr in attrs:
-        attr_val = getattr(quam, attr)
+        if isinstance(quam, QuamDictComponent):
+            attr_val = quam[attr]
+        else:
+            attr_val = getattr(quam, attr)
+        
         if attr_val in skip_elems:
             continue
 

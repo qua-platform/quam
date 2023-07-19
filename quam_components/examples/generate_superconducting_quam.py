@@ -54,6 +54,10 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
 
         readout_resonator = ReadoutResonator(id=idx, mixer=resonator_mixer)
         quam.resonators.append(readout_resonator)
+
+    # Create analog inputs
+    quam.analog_inputs.append(AnalogInput(port=1))
+    quam.analog_inputs.append(AnalogInput(port=2))
     return quam
 
 
@@ -69,11 +73,11 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
     quam = QuAM()
     quam.wiring = {
         "qubits": [
-            {"port_I": 5 * k, "port_Q": 5 * k + 1, "port_Z": 5 * k + 2}
+            {"port_I": 5 * k + 1, "port_Q": 5 * k + 2, "port_Z": 5 * k + 3}
             for k in range(num_qubits)
         ],
         "resonators": [
-            {"port_I": 5 * k + 3, "port_Q": 5 * k + 4} for k in range(num_qubits)
+            {"port_I": 5 * k + 4, "port_Q": 5 * k + 5} for k in range(num_qubits)
         ],
     }
 
@@ -121,6 +125,10 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             id=idx, mixer=f":mixers[{2*idx+1}]", frequency_opt=5.9e9
         )
         quam.resonators.append(readout_resonator)
+
+    # Create analog inputs
+    quam.analog_inputs.append(AnalogInput(port=1))
+    quam.analog_inputs.append(AnalogInput(port=2))
     return quam
 
 
