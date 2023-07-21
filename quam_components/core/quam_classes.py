@@ -25,6 +25,20 @@ class QuamBase(ReferenceClass):
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
 
+    def _attr_val_is_default(self, attr, val):
+        if not is_dataclass(self):
+            return False
+
+        dataclass_fields = fields(self)
+        if not any(field.name == attr for field in dataclass_fields):
+            return False
+
+        field = next(field for field in dataclass_fields if field.name == attr)
+        if field.default is not MISSING:
+            return val == field.default
+        elif field.default_factory is not MISSING:
+            return val == field.default_factory()
+
     def get_attrs(
         self, follow_references=False, include_defaults=True
     ) -> Dict[str, Any]:
@@ -42,7 +56,7 @@ class QuamBase(ReferenceClass):
             attrs = {
                 attr: val
                 for attr, val in attrs.items()
-                if not _attr_val_is_default(val, self, attr)
+                if not self._attr_val_is_default(attr, val)
             }
         return attrs
 
@@ -75,13 +89,29 @@ class QuamBase(ReferenceClass):
 
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
-            if isinstance(attr_val, list):
-                for elem in attr_val:
-                    if not isinstance(elem, QuamBase):
-                        continue
-                    if elem in skip_elems:
-                        continue
-                    yield from elem.iterate_components(skip_elems=skip_elems)
+            elif isinstance(attr_val, (list, tuple)):
+                yield from [
+                    elem.iterate_components(skip_elems=skip_elems)
+                    for elem in attr_val
+                    if isinstance(elem, QuamBase)
+                ]
+
+    def _get_value_by_reference(self, reference: str):
+        assert reference.startswith(":")
+        reference_components = reference[1:].split(".")
+
+        elem = self
+        try:
+            for component in reference_components:
+                if component.endswith("]"):
+                    component, index_str = component[:-1].split("[")
+                    elem = getattr(elem, component)[int(index_str)]
+                else:
+                    elem = getattr(elem, component)
+
+        except AttributeError:
+            return reference
+        return elem
 
 
 @dataclass(kw_only=True, eq=False)
@@ -128,25 +158,6 @@ class QuamRoot(QuamBase):
             quam_component.apply_to_config(qua_config)
 
         return qua_config
-
-    def _get_value_by_reference(self, reference: str):
-        assert reference.startswith(":")
-        reference_components = reference[1:].split(".")
-
-        elem = self
-        try:
-            for component in reference_components:
-                # print(f"Getting {component} from {elem}")
-                if not component.endswith("]"):
-                    elem = getattr(elem, component)
-                else:
-                    component, index_str = component.split("[")
-                    index = int(index_str[:-1])
-
-                    elem = getattr(elem, component)[index]
-        except AttributeError:
-            return reference
-        return elem
 
     def get_unreferenced_value(self, attr):
         return getattr(self, attr)
@@ -209,23 +220,11 @@ class QuamDictComponent(QuamComponent):
             for key, val in self._attrs.items()
         }
 
+    def _attr_val_is_default(self, attr, val):
+        return False
+
     def get_unreferenced_value(self, attr: str) -> bool:
         return self.__getattr__(attr)
-
-
-def _attr_val_is_default(val, quam, attr):
-    if not is_dataclass(quam):
-        return False
-
-    dataclass_fields = fields(quam)
-    if not any(field.name == attr for field in dataclass_fields):
-        return False
-
-    field = next(field for field in dataclass_fields if field.name == attr)
-    if field.default is not MISSING:
-        return val == field.default
-    elif field.default_factory is not MISSING:
-        return val == field.default_factory()
 
 
 def to_dict(
