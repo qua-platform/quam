@@ -175,7 +175,7 @@ def iterate_quam_components(
             attr_val = quam[attr]
         else:
             attr_val = getattr(quam, attr)
-        
+
         if attr_val in skip_elems:
             continue
 

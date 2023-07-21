@@ -48,18 +48,19 @@ class Mixer(QuamComponent):
             "lo_frequency": self.local_oscillator.frequency,
             "mixer": self.name,
         }
-        
 
     def apply_to_config(self, config: dict):
         correction_matrix = self.IQ_imbalance(
             self.correction_gain, self.correction_phase
         )
-        
-        config["mixers"][self.name] = [{
-            "intermediate_frequency": self.intermediate_frequency,
-            "lo_frequency": self.local_oscillator.frequency,
-            "correction": correction_matrix
-        }]
+
+        config["mixers"][self.name] = [
+            {
+                "intermediate_frequency": self.intermediate_frequency,
+                "lo_frequency": self.local_oscillator.frequency,
+                "correction": correction_matrix,
+            }
+        ]
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
         analog_outputs[self.port_I] = {"offset": self.offset_I}

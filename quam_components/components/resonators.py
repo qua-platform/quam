@@ -104,17 +104,19 @@ class ReadoutResonator(QuamComponent):
                 "out2": (self.controller, 2),
             },
             "smearing": self.smearing,
-            "time_of_flight": self.time_of_flight
+            "time_of_flight": self.time_of_flight,
         }
-        
+
         if self.readout_amplitude is not None and self.readout_length is not None:
-            config["elements"][self.name]["operations"]["readout"] = f"readout_pulse_q{self.id}"
-            
+            config["elements"][self.name]["operations"][
+                "readout"
+            ] = f"readout_pulse_q{self.id}"
+
             pulses = self.calculate_pulses()
             config["pulses"].update(pulses)
-            
+
             integration_weights = self.calculate_integration_weights()
             config["integration_weights"].update(integration_weights)
-            
+
             waveforms = self.calculate_waveforms()
             config["waveforms"].update(waveforms)
