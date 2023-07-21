@@ -41,13 +41,13 @@ documentation = "https://entropy-lab.io/latest/quam_sdk"
 repository = "https://github.com/entropy-lab/quam-sdk"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4.0"
+python = ">=3.8,<4.0"
 numpy = "^1.21.2"
-jsonschema = "^4.14.0"
-pydantic = "^1.9.2"
-rich = "^12.5.1"
-rich-click = "^1.6.1"
-pyyaml = "^6.0"
+# jsonschema = "^4.14.0"
+# pydantic = "^1.9.2"
+# rich = "^12.5.1"
+# rich-click = "^1.6.1"
+# pyyaml = "^6.0"
 qualang-tools = "^0.15.0"
 typeguard = "^4.0.0"
 
@@ -57,12 +57,12 @@ pytest-cov = "^3.0.0"
 black = "^22.3.0"
 flake8 = "^4.0.1"
 flake8-bugbear = "^22.4.25"
-poethepoet = "^0.10.0"
+# poethepoet = "^0.10.0"
 typing-extensions = "^4.3.0"
 
 [tool.black]
 target-version = ["py38"]
-line-length = 80
+line-length = 88
 preview = true
 
 [tool.poe.tasks.check-format]
