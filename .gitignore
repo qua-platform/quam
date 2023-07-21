@@ -2,6 +2,5 @@
 .vscode
 *.pyc
 quam_components/examples/output
-bin
-lib
-pyvenv.cfg
+additional
+venv-quam
