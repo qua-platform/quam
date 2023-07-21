@@ -55,7 +55,7 @@ def test_basic_reference():
     assert quam_elem2.int_val == 1
 
     quam_elem2.int_val = ":quam_elem1"
-    assert list(iterate_quam_components(quam)) == [quam_elem1, quam_elem2]
+    assert list(quam.iterate_components()) == [quam_elem1, quam_elem2]
 
 
 def test_list_referencing():

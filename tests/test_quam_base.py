@@ -21,22 +21,22 @@ class QuamTest(QuamRoot):
 
 def test_iterate_quam_component():
     elem = QuamComponent()
-    elems = list(iterate_quam_components(elem))
+    elems = list(elem.iterate_components())
     assert len(elems) == 1
     assert elems[0] is elem
-    assert set(get_attrs(elem)) == set()
+    assert set(elem.get_attrs()) == set()
 
 
 def test_iterate_quam_component_nested():
     elem = QuamTest(
         int_val=42, quam_elem=QuamComponent(), quam_elem_list=[QuamComponent()]
     )
-    elems = list(iterate_quam_components(elem))
+    elems = list(elem.iterate_components())
     assert len(elems) == 2
     assert elems[0] is elem.quam_elem
     assert elems[1] is elem.quam_elem_list[0]
 
-    assert set(get_attrs(elem)) == {"int_val", "quam_elem", "quam_elem_list"}
+    assert set(elem.get_attrs()) == {"int_val", "quam_elem", "quam_elem_list"}
 
 
 def test_iterate_quam_with_elements():
@@ -46,7 +46,7 @@ def test_iterate_quam_with_elements():
         quam_elem_list=[QuamComponent(), QuamComponent()],
     )
 
-    elems = list(iterate_quam_components(test_quam))
+    elems = list(test_quam.iterate_components())
     assert len(elems) == 3
     assert all(isinstance(elem, QuamComponent) for elem in elems)
 
@@ -65,7 +65,7 @@ class NestedQuamTest(QuamRoot):
     quam_elem_list: List[QuamComponentTest]
 
 
-def test_iterate_quam_components_nested():
+def test_iterate_components_nested():
     quam_component = QuamComponentTest(
         int_val=42,
         quam_elem=QuamComponent(),
@@ -78,7 +78,7 @@ def test_iterate_quam_components_nested():
         quam_elem_list=[quam_component, quam_component],
     )
 
-    elems = list(iterate_quam_components(test_quam))
+    elems = list(test_quam.iterate_components())
     assert len(elems) == 4
     assert all(isinstance(elem, QuamComponent) for elem in elems)
 
@@ -103,11 +103,11 @@ def test_quam_dict_element():
     assert elem._attrs == {"a": 43, "c": 45}
 
 
-def test_iterate_quam_components_dict():
+def test_iterate_components_dict():
     elem = QuamComponent()
     elem_dict = QuamDictComponent(a=42, b=elem)
 
-    elems = list(iterate_quam_components(elem_dict))
+    elems = list(elem_dict.iterate_components())
 
     assert len(elems) == 2
     assert all(isinstance(elem, QuamComponent) for elem in elems)
