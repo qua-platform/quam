@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from quam_components.core import QuamComponent
 
@@ -69,11 +69,13 @@ class Mixer(QuamComponent):
     @staticmethod
     def IQ_imbalance(g: float, phi: float) -> List[float]:
         """
-        Creates the correction matrix for the mixer imbalance caused by the gain and phase imbalances, more information can
-        be seen here:
+        Creates the correction matrix for the mixer imbalance caused by the gain and
+        phase imbalances, more information can be seen here:
         https://docs.qualang.io/libs/examples/mixer-calibration/#non-ideal-mixer
-        :param g: relative gain imbalance between the I & Q ports. (unit-less), set to 0 for no gain imbalance.
-        :param phi: relative phase imbalance between the I & Q ports (radians), set to 0 for no phase imbalance.
+        :param g: relative gain imbalance between the I & Q ports. (unit-less),
+            set to 0 for no gain imbalance.
+        :param phi: relative phase imbalance between the I & Q ports (radians),
+            set to 0 for no phase imbalance.
         """
         c = np.cos(phi)
         s = np.sin(phi)
@@ -96,3 +98,77 @@ class AnalogInput(QuamComponent):
             "offset": self.offset,
             "gain_db": self.gain,
         }
+
+
+@dataclass(kw_only=True, eq=False)
+class Pulse(QuamComponent):
+    ...
+
+
+@dataclass(kw_only=True, eq=False)
+class PulseEmitter(QuamComponent):
+    pulses: List[Union[str, Pulse]] = field(default_factory=lambda: [])
+    pulse_default: str = None
+
+    def generate_waveforms_pulses(self):
+        for pulse in self.pulses:
+            if isinstance(pulse, str):
+                pulse = self.pulse_default
+            yield pulse.generate_waveform_pulse()
+
+
+@dataclass(kw_only=True, eq=False)
+class IQChannel(PulseEmitter):
+    mixer: Mixer
+
+    name: str = "IQ"
+
+    def apply_to_config(self, config: dict):
+        # Add XY to "elements"
+        config["elements"][f"{self.name}_xy"] = {
+            "mixInputs": self.mixer.get_input_config(),
+            "intermediate_frequency": self.mixer.intermediate_frequency,
+            # "operations": ,
+        }
+        # TODO decide on "operations" for IQChannel
+
+        # pulses, waveforms = self.calculate_pulses_waveforms()
+        # config["pulses"].update(pulses)
+        # config["waveforms"].update(waveforms)
+
+
+@dataclass(kw_only=True, eq=False)
+class SingleChannel(PulseEmitter):
+    port: int
+    filter_fir_taps: List[float] = None
+    filter_iir_taps: List[float] = None
+
+    offset: float = 0
+
+    controller: str = "con1"
+
+    # TODO fix self.qubit.name
+
+    def apply_to_config(self, config: dict):
+        config["elements"][f"{self.qubit.name}_z"] = {
+            "singleInput": {
+                "port": (self.controller, self.port),
+            },
+            # "operations": self.pulse_mapping,
+        }
+        # TODO fix "operations"
+
+        analog_outputs = config["controllers"][self.controller]["analog_outputs"]
+        analog_output = analog_outputs[self.port] = {"offset": self.offset}
+
+        if self.filter_fir_taps is not None:
+            output_filter = analog_output.setdefault("filter", {})
+            output_filter["feedforward"] = self.filter_fir_taps
+
+        if self.filter_iir_taps is not None:
+            output_filter = analog_output.setdefault("filter", {})
+            output_filter["feedback"] = self.filter_iir_taps
+
+        # pulses, waveforms = self.calculate_pulses_waveforms()
+        # config["pulses"].update(pulses)
+        # config["waveforms"].update(waveforms)
