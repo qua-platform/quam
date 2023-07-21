@@ -87,7 +87,7 @@ class XYChannel(QuamComponent):
 class ZChannel(QuamComponent):
     port: int
 
-    z_max_frequency_point: float = None  # z_max_frequency_point
+    z_max_frequency_point: float = None
 
     pulses: List[str] = field(default_factory=lambda: ["const_flux"])
     pulse_length: float = None
