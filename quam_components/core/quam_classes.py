@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import Union, Generator, ClassVar, Any, Dict, Self, List
+from typing import Union, Generator, ClassVar, Any, Dict, Self
 from dataclasses import dataclass, fields, is_dataclass, MISSING
+import json
 
-from .qua_config import build_config
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import (
@@ -12,16 +12,80 @@ from quam_components.core.quam_instantiation import (
 
 
 __all__ = [
+    "QuamBase",
     "QuamRoot",
     "QuamComponent",
     "QuamDictComponent",
-    "iterate_quam_components",
-    "get_attrs",
 ]
 
 
 @dataclass(kw_only=True, eq=False)
-class QuamRoot:
+class QuamBase(ReferenceClass):
+    def _get_attr_names(self):
+        assert is_dataclass(self)
+        return [data_field.name for data_field in fields(self)]
+
+    def get_attrs(
+        self, follow_references=False, include_defaults=True
+    ) -> Dict[str, Any]:
+        attr_names = self._get_attr_names()
+
+        skip_attrs = getattr(self, "_skip_attrs", [])
+        attr_names = [attr for attr in attr_names if attr not in skip_attrs]
+
+        if not follow_references:
+            attrs = {attr: self.get_unreferenced_value(attr) for attr in attr_names}
+        else:
+            attrs = {attr: getattr(self, attr) for attr in attr_names}
+
+        if not include_defaults:
+            attrs = {
+                attr: val
+                for attr, val in attrs.items()
+                if not _attr_val_is_default(val, self, attr)
+            }
+        return attrs
+
+    def to_dict(self, follow_references=False, include_defaults=True):
+        attrs = self.get_attrs(
+            follow_references=follow_references, include_defaults=include_defaults
+        )
+        quam_dict = {
+            attr: to_dict(
+                val,
+                follow_references=follow_references,
+                include_defaults=include_defaults,
+            )
+            for attr, val in attrs.items()
+        }
+        return quam_dict
+
+    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+        if skip_elems is None:
+            skip_elems = []
+
+        yield self
+        skip_elems.append(self)
+
+        attrs = self.get_attrs(follow_references=False, include_defaults=True)
+
+        for attr_val in attrs.values():
+            if attr_val in skip_elems:
+                continue
+
+            if isinstance(attr_val, QuamBase):
+                yield from attr_val.iterate_components(skip_elems=skip_elems)
+            if isinstance(attr_val, list):
+                for elem in attr_val:
+                    if not isinstance(elem, QuamBase):
+                        continue
+                    if elem in skip_elems:
+                        continue
+                    yield from elem.iterate_components(skip_elems=skip_elems)
+
+
+@dataclass(kw_only=True, eq=False)
+class QuamRoot(QuamBase):
     def __post_init__(self):
         QuamComponent._quam = self
 
@@ -58,20 +122,12 @@ class QuamRoot:
         )
 
     def build_config(self):
-        return build_config(self)
+        qua_config = json.load("qua_config_template.json")
 
-    def iterate_quam_components(self):
-        return iterate_quam_components(self)
+        for quam_component in self.iterate_components():
+            quam_component.apply_to_config(qua_config)
 
-    def get_attrs(self, follow_references=False, include_defaults=True):
-        return get_attrs(
-            self, follow_references=follow_references, include_defaults=include_defaults
-        )
-
-    def to_dict(self, follow_references=False, include_defaults=False):
-        return quam_to_dict(
-            self, follow_references=follow_references, include_defaults=include_defaults
-        )
+        return qua_config
 
     def _get_value_by_reference(self, reference: str):
         assert reference.startswith(":")
@@ -97,18 +153,8 @@ class QuamRoot:
 
 
 @dataclass(kw_only=True, eq=False)
-class QuamComponent(ReferenceClass):
+class QuamComponent(QuamBase):
     _quam: ClassVar[QuamRoot] = None
-
-    def get_attrs(self, follow_references=False, include_defaults=True):
-        return get_attrs(
-            self, follow_references=follow_references, include_defaults=include_defaults
-        )
-
-    def to_dict(self, follow_references=False, include_defaults=False):
-        return quam_to_dict(
-            self, follow_references=follow_references, include_defaults=include_defaults
-        )
 
     def apply_to_config(self, config: dict) -> None:
         ...
@@ -150,44 +196,21 @@ class QuamDictComponent(QuamComponent):
         else:
             super().__setattr__(key, value)
 
+    def _get_attr_names(self):
+        return list(self._attrs.keys())
+
+    def to_dict(self, follow_references=False, include_defaults=True):
+        return {
+            key: to_dict(
+                val,
+                follow_references=follow_references,
+                include_defaults=include_defaults,
+            )
+            for key, val in self._attrs.items()
+        }
+
     def get_unreferenced_value(self, attr: str) -> bool:
-        """Check if an attribute is a reference"""
         return self.__getattr__(attr)
-
-
-def iterate_quam_components(
-    quam: Union[QuamRoot, QuamComponent], skip_elems=None
-) -> Generator[QuamComponent, None, None]:
-    if not is_dataclass(quam):
-        return
-
-    if skip_elems is None:
-        skip_elems = []
-
-    if isinstance(quam, QuamComponent):
-        yield quam
-        skip_elems.append(quam)
-
-    attrs = get_attrs(quam)
-
-    for attr in attrs:
-        if isinstance(quam, QuamDictComponent):
-            attr_val = quam[attr]
-        else:
-            attr_val = getattr(quam, attr)
-
-        if attr_val in skip_elems:
-            continue
-
-        if isinstance(attr_val, QuamComponent):
-            yield from iterate_quam_components(attr_val, skip_elems=skip_elems)
-        if isinstance(attr_val, list):
-            for elem in attr_val:
-                if not isinstance(elem, QuamComponent):
-                    continue
-                if elem in skip_elems:
-                    continue
-                yield from iterate_quam_components(elem, skip_elems=skip_elems)
 
 
 def _attr_val_is_default(val, quam, attr):
@@ -205,75 +228,21 @@ def _attr_val_is_default(val, quam, attr):
         return val == field.default_factory()
 
 
-def get_attrs(
-    quam: Union[QuamRoot, QuamComponent], follow_references=False, include_defaults=True
-) -> List[str]:
-    if isinstance(quam, QuamDictComponent):
-        attr_names = list(quam._attrs.keys())
-    else:
-        attr_names = [data_field.name for data_field in fields(quam)]
-
-    skip_attrs = getattr(quam, "_skip_attrs", [])
-    attr_names = [attr for attr in attr_names if attr not in skip_attrs]
-
-    if not follow_references:
-        attrs = {attr: quam.get_unreferenced_value(attr) for attr in attr_names}
-    else:
-        attrs = {attr: getattr(quam, attr) for attr in attr_names}
-
-    if not include_defaults:
-        attrs = {
-            attr: val
-            for attr, val in attrs.items()
-            if not _attr_val_is_default(val, quam, attr)
-        }
-    return attrs
-
-
-def quam_to_dict(
+def to_dict(
     quam: Any, follow_references=False, include_defaults=False
 ) -> Dict[str, Any]:
-    if isinstance(quam, QuamDictComponent):
-        return {
-            key: quam_to_dict(
-                val,
-                follow_references=follow_references,
-                include_defaults=include_defaults,
-            )
-            for key, val in quam._attrs.items()
-        }
+    if isinstance(quam, QuamBase):
+        return quam.to_dict(
+            follow_references=follow_references, include_defaults=include_defaults
+        )
     elif isinstance(quam, list):
         return [
-            quam_to_dict(
+            to_dict(
                 elem,
                 follow_references=follow_references,
                 include_defaults=include_defaults,
             )
             for elem in quam
         ]
-    elif isinstance(quam, (QuamComponent, QuamRoot)):
-        quam_dict = {}
-        attrs = quam.get_attrs(
-            follow_references=follow_references, include_defaults=include_defaults
-        )
-        for attr, val in attrs.items():
-            if isinstance(val, list):
-                quam_dict[attr] = [
-                    quam_to_dict(
-                        elem,
-                        follow_references=follow_references,
-                        include_defaults=include_defaults,
-                    )
-                    for elem in val
-                ]
-            elif isinstance(val, QuamComponent):
-                quam_dict[attr] = quam_to_dict(
-                    val,
-                    follow_references=follow_references,
-                    include_defaults=include_defaults,
-                )
-            else:
-                quam_dict[attr] = val
-        return quam_dict
     else:
         return quam
