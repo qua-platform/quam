@@ -1,22 +1,13 @@
 [tool.poetry]
 name = "quam-components"
-packages = [
-    { include = "quam_components" }
-]
-include = [
-    "LICENSE.md",
-]
-exclude = [
-    "**/tests/**",
-    "**/conftest.py/**",
-]
+packages = [{ include = "quam_components" }]
+include = ["LICENSE.md"]
+exclude = ["**/tests/**", "**/conftest.py/**"]
 version = "0.1.0"
 description = "Quantum Abstract Machine (QuAM) software development kit (SDK) facilitates development of abstraction layers in experiments."
 authors = ["Serwan Asaad <serwan.asaad@quantum-machines.co>"]
 license = "BSD-3-Clause"
-maintainers = [
-    "Serwan Asaad <serwan.asaad@quantum-machines.co>"
-]
+maintainers = ["Serwan Asaad <serwan.asaad@quantum-machines.co>"]
 readme = "README.md"
 
 classifiers = [
@@ -26,7 +17,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Information Technology",
     "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: BSD License"
+    "License :: OSI Approved :: BSD License",
 ]
 
 keywords = [
@@ -34,7 +25,7 @@ keywords = [
     "experiment-control",
     "quantum-infrastructure",
     "abstraction-layer",
-    "abstraction-library"
+    "abstraction-library",
 ]
 
 documentation = "https://entropy-lab.io/latest/quam_sdk"
@@ -51,47 +42,47 @@ numpy = "^1.21.2"
 qualang-tools = "^0.15.0"
 typeguard = "^4.0.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.1.2"
-pytest-cov = "^3.0.0"
-black = "^22.3.0"
-flake8 = "^4.0.1"
-flake8-bugbear = "^22.4.25"
+black = "^23.7.0"
+# pytest-cov = "^3.0.0"
+# black = "^22.3.0"
+flake8 = "^5.0.1"
+pyproject-flake8 = "^5.0.0"
+# flake8-bugbear = "^22.4.25"
 # poethepoet = "^0.10.0"
-typing-extensions = "^4.3.0"
+# typing-extensions = "^4.3.0"
+# coverage = "^6.4.4"
 
 [tool.black]
 target-version = ["py38"]
 line-length = 88
 preview = true
 
-[tool.poe.tasks.check-format]
-cmd = "black . --check --line-length 80"
-help = "Format source files according to the style rules"
+[tool.flake8]
+max-line-length = 88
+
+# [tool.poe.tasks.check-format]
+# cmd = "black . --check --line-length 80"
+# help = "Format source files according to the style rules"
 
 
-[tool.poe.tasks.format]
-cmd = "black . --line-length 80"
-help = "Format source files according to the style rules"
+# [tool.poe.tasks.format]
+# cmd = "black . --line-length 80"
+# help = "Format source files according to the style rules"
 
-[tool.poe.tasks.lint]
-cmd = "flake8 ."
-help = "Check for lint errors"
+# [tool.poe.tasks.lint]
+# cmd = "flake8 ."
+# help = "Check for lint errors"
 
-[tool.poe.tasks.test]
-cmd = "pytest"
-help = "Run all unit tests"
+# [tool.poe.tasks.test]
+# cmd = "pytest"
+# help = "Run all unit tests"
 
-[tool.poe.tasks.check]
-sequence = ["check-format", "lint", "test"]
-help = "Run format and all checks on the code"
+# [tool.poe.tasks.check]
+# sequence = ["check-format", "lint", "test"]
+# help = "Run format and all checks on the code"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.group.dev.dependencies]
-numpy = "^1.1.0"
-scipy = "^1.3.1"
-coverage = "^6.4.4"
-
+# [build-system]
+# requires = ["poetry-core>=1.0.0"]
+# build-backend = "poetry.core.masonry.api"
