@@ -4,7 +4,7 @@ import json
 
 from quam_components.serialisation.base import AbstractSerialiser
 
-from quam_components.core import QuamRoot, QuamComponent
+from quam_components.core import QuamRoot
 
 
 class JSONSerialiser(AbstractSerialiser):
@@ -27,14 +27,16 @@ class JSONSerialiser(AbstractSerialiser):
 
 
         No path, no component mapping -> save to default file
-        No path, component mapping -> Create folder, save to default file, save components separately
+        No path, component mapping -> Create folder, save to default file,
+            save components separately
         JSON Path, no component mapping -> Save to json file
         JSON Path, component mapping -> Save to json file, save components separately
         Folder Path, no component mapping -> Create folder, save to default file
-        Folder Path, component mapping -> Create folder, save to default file, save components separately
+        Folder Path, component mapping -> Create folder, save to default file,
+            save components separately
 
-        self.default_filename used when component_mapping is not None or no path provided
-        self.default_foldername used when component_mapping is not None and path is not a folder
+        self.default_filename when component_mapping != None or no path provided
+        self.default_foldername when component_mapping != None and path is not a folder
         """
         component_mapping = component_mapping or self.component_mapping
 

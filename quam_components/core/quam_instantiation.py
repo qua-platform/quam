@@ -3,7 +3,6 @@ import typing
 from typing import TYPE_CHECKING, List, Dict, get_type_hints
 from dataclasses import MISSING
 from typeguard import check_type, TypeCheckError
-from inspect import isclass
 
 if TYPE_CHECKING:
     from quam_components.core import QuamRoot, QuamComponent

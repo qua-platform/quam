@@ -1,7 +1,6 @@
-from typing import Union, Dict, TYPE_CHECKING
+from typing import Union, Dict
 from pathlib import Path
 
-# if TYPE_CHECKING:
 from quam_components.core import QuamRoot, QuamComponent
 
 

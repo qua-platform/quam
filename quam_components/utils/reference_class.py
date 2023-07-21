@@ -27,7 +27,7 @@ class ReferenceClass:
             self._references[__name] = __value
 
         elif __name in self._references:
-            # print(f"Removing existing reference {__name} -> {self._references[__name]}")
+            # print(f"Removing reference {__name} -> {self._references[__name]}")
             self._references.pop(__name)
 
         super().__setattr__(__name, __value)
