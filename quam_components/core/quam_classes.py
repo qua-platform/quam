@@ -78,7 +78,9 @@ class QuamBase(ReferenceClass):
         if skip_elems is None:
             skip_elems = []
 
-        yield self
+        if not isinstance(self, QuamRoot):
+            yield self
+
         skip_elems.append(self)
 
         attrs = self.get_attrs(follow_references=False, include_defaults=True)
@@ -90,11 +92,9 @@ class QuamBase(ReferenceClass):
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
             elif isinstance(attr_val, (list, tuple)):
-                yield from [
-                    elem.iterate_components(skip_elems=skip_elems)
-                    for elem in attr_val
-                    if isinstance(elem, QuamBase)
-                ]
+                for elem in attr_val:
+                    if isinstance(elem, QuamBase):
+                        yield from elem.iterate_components(skip_elems=skip_elems)
 
     def _get_value_by_reference(self, reference: str):
         assert reference.startswith(":")
