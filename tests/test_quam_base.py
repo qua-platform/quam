@@ -12,14 +12,20 @@ def test_update_quam_component_quam():
     assert quam_component._quam is quam_root
 
 
-@dataclass
+@dataclass(eq=False)
 class QuamTest(QuamRoot):
     int_val: int
     quam_elem: QuamComponent
     quam_elem_list: List[QuamComponent]
 
 
-def test_iterate_quam_component():
+def test_iterate_empty_quam_root():
+    quam_root = QuamRoot()
+    elems = list(quam_root.iterate_components())
+    assert len(elems) == 0
+
+
+def test_iterate_empty_quam_component():
     elem = QuamComponent()
     elems = list(elem.iterate_components())
     assert len(elems) == 1
@@ -37,6 +43,39 @@ def test_iterate_quam_component_nested():
     assert elems[1] is elem.quam_elem_list[0]
 
     assert set(elem.get_attrs()) == {"int_val", "quam_elem", "quam_elem_list"}
+
+
+def test_iterate_quam_component_duplicate():
+    @dataclass
+    class QuamTest(QuamRoot):
+        quam_elem1: QuamComponent
+        quam_elem2: QuamComponent
+
+    quam_components = [QuamComponent(), QuamComponent()]
+    elem = QuamTest(quam_elem1=quam_components[0], quam_elem2=quam_components[1])
+    elems = list(elem.iterate_components())
+    assert elems == quam_components
+
+    quam_component = QuamComponent()
+    elem = QuamTest(quam_elem1=quam_component, quam_elem2=quam_component)
+    elems = list(elem.iterate_components())
+    assert elems == [quam_component]
+
+
+def test_iterate_quam_component_list_duplicate():
+    @dataclass
+    class QuamTest(QuamRoot):
+        quam_list: List[QuamComponent]
+
+    quam_components = [QuamComponent(), QuamComponent()]
+    elem = QuamTest(quam_list=quam_components)
+    elems = list(elem.iterate_components())
+    assert elems == quam_components
+
+    quam_component = QuamComponent()
+    elem = QuamTest(quam_list=[quam_component, quam_component])
+    elems = list(elem.iterate_components())
+    assert elems == [quam_component]
 
 
 def test_iterate_quam_with_elements():

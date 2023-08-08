@@ -78,10 +78,9 @@ class QuamBase(ReferenceClass):
         if skip_elems is None:
             skip_elems = []
 
-        if not isinstance(self, QuamRoot):
+        if isinstance(self, QuamComponent) and self not in skip_elems:
+            skip_elems.append(self)
             yield self
-
-        skip_elems.append(self)
 
         attrs = self.get_attrs(follow_references=False, include_defaults=True)
 
