@@ -60,7 +60,7 @@ class QuamBase(ReferenceClass):
             }
         return attrs
 
-    def to_dict(self, follow_references=False, include_defaults=True):
+    def to_dict(self, follow_references=False, include_defaults=False):
         attrs = self.get_attrs(
             follow_references=follow_references, include_defaults=include_defaults
         )
