@@ -1,7 +1,7 @@
 from pathlib import Path
+from copy import deepcopy
 from typing import Union, Generator, ClassVar, Any, Dict, Self
 from dataclasses import dataclass, fields, is_dataclass, MISSING
-import json
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
@@ -9,6 +9,7 @@ from quam_components.core.quam_instantiation import (
     instantiate_quam_root,
     instantiate_quam_dict_attrs,
 )
+from .qua_config_template import qua_config_template
 
 
 __all__ = [
@@ -151,7 +152,7 @@ class QuamRoot(QuamBase):
         )
 
     def build_config(self):
-        qua_config = json.load("qua_config_template.json")
+        qua_config = deepcopy(qua_config_template)
 
         for quam_component in self.iterate_components():
             quam_component.apply_to_config(qua_config)
