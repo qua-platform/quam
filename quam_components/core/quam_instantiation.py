@@ -221,7 +221,7 @@ def instantiate_quam_root(
         for attr, val in instantiated_attrs["extra"].items():
             setattr(quam_root, attr, val)
 
-    for quam_component in quam_root.iterate_quam_components():
+    for quam_component in quam_root.iterate_components():
         quam_component._quam = quam_root
 
     return quam_root
