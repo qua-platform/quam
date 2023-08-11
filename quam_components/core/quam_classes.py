@@ -1,7 +1,7 @@
 from pathlib import Path
 from copy import deepcopy
 from typing import Union, Generator, ClassVar, Any, Dict, Self
-from dataclasses import dataclass, fields, is_dataclass, MISSING
+from dataclasses import fields, is_dataclass, MISSING
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
@@ -20,8 +20,22 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
 class QuamBase(ReferenceClass):
+    def __init__(self):
+        # This prohibits instantiating without it being a dataclass
+        # This means that we have to subclass this class and make it a dataclass
+        if not is_dataclass(self):
+            if type(self) in [QuamBase, QuamComponent, QuamRoot]:
+                raise TypeError(
+                    f"Cannot instantiate {self.__class__.__name__} directly. "
+                    "Please create a subclass and make it a dataclass."
+                )
+            else:
+                raise TypeError(
+                    f"Cannot instantiate {self.__class__.__name__}. "
+                    "Please make it a dataclass."
+                )
+
     def _get_attr_names(self):
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
@@ -114,7 +128,6 @@ class QuamBase(ReferenceClass):
         return elem
 
 
-@dataclass(kw_only=True, eq=False)
 class QuamRoot(QuamBase):
     def __post_init__(self):
         QuamComponent._quam = self
@@ -163,7 +176,6 @@ class QuamRoot(QuamBase):
         return getattr(self, attr)
 
 
-@dataclass(kw_only=True, eq=False)
 class QuamComponent(QuamBase):
     _quam: ClassVar[QuamRoot] = None
 

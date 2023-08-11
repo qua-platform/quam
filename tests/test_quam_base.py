@@ -1,7 +1,19 @@
 from typing import List
 from dataclasses import dataclass, fields, is_dataclass, field
+import pytest
 
 from quam_components.core import *
+
+
+def test_error_create_base_classes_directly():
+    for cls in [QuamBase, QuamRoot, QuamComponent]:
+        with pytest.raises(TypeError) as exc_info:
+            cls()
+        assert (
+            str(exc_info.value)
+            == f"Cannot instantiate {cls.__name__} directly. "
+            "Please create a subclass and make it a dataclass."
+        )
 
 
 def test_update_quam_component_quam():
