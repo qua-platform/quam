@@ -5,8 +5,13 @@ from quam_components.serialisation.json import JSONSerialiser
 from quam_components.core import QuamRoot, QuamComponent
 
 
+@dataclass
+class BareQuamRoot(QuamRoot):
+    pass
+
+
 def test_serialise_empty_quam_root(tmp_path):
-    quam = QuamRoot()
+    quam = BareQuamRoot()
     json_serialiser = JSONSerialiser()
 
     file = tmp_path / "quam2.json"
@@ -21,7 +26,7 @@ def test_serialise_empty_quam_root(tmp_path):
     assert contents == {}
     assert metadata["component_mapping"] == {}
     assert metadata["default_filename"] == "quam2.json"
-    assert metadata["default_foldername"] == None
+    assert metadata["default_foldername"] is None
 
 
 @dataclass(kw_only=True, eq=False)

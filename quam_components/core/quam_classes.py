@@ -1,7 +1,7 @@
 from pathlib import Path
 from copy import deepcopy
 from typing import Union, Generator, ClassVar, Any, Dict, Self
-from dataclasses import fields, is_dataclass, MISSING
+from dataclasses import dataclass, fields, is_dataclass, MISSING
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
@@ -93,14 +93,17 @@ class QuamBase(ReferenceClass):
         if skip_elems is None:
             skip_elems = []
 
-        if isinstance(self, QuamComponent) and self not in skip_elems:
+        # We don't use "self in skip_elems" because we want to check for identity
+        if isinstance(self, QuamComponent) and not any(
+            self is elem for elem in skip_elems
+        ):
             skip_elems.append(self)
             yield self
 
         attrs = self.get_attrs(follow_references=False, include_defaults=True)
 
         for attr_val in attrs.values():
-            if attr_val in skip_elems:
+            if any(attr_val is elem for elem in skip_elems):
                 continue
 
             if isinstance(attr_val, QuamBase):
@@ -186,6 +189,7 @@ class QuamComponent(QuamBase):
         return self._quam._get_value_by_reference(reference)
 
 
+@dataclass
 class QuamDictComponent(QuamComponent):
     _attrs = {}  # TODO check if removing this raises any test errors
 
