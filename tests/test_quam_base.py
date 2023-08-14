@@ -59,6 +59,16 @@ def test_iterate_empty_quam_root():
     assert len(elems) == 0
 
 
+def test_iterate_quam_root():
+    quam_root = QuamTest(int_val=42, quam_elem=BareQuamComponent(), quam_elem_list=[])
+    elems = list(quam_root.iterate_components())
+    assert elems == [quam_root.quam_elem]
+
+    quam_root.quam_elem_list.append(BareQuamComponent())
+    elems = list(quam_root.iterate_components())
+    assert elems == [quam_root.quam_elem, quam_root.quam_elem_list[0]]
+
+
 def test_iterate_empty_quam_component():
     elem = BareQuamComponent()
     elems = list(elem.iterate_components())

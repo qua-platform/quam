@@ -54,6 +54,8 @@ class QuamBase(ReferenceClass):
         elif field.default_factory is not MISSING:
             return val == field.default_factory()
 
+        return False
+
     def get_attrs(
         self, follow_references=False, include_defaults=True
     ) -> Dict[str, Any]:
