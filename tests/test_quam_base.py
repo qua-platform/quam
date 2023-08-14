@@ -1,14 +1,48 @@
 from typing import List
 from dataclasses import dataclass, fields, is_dataclass, field
+import pytest
 
 from quam_components.core import *
 
 
+def test_error_create_base_classes_directly():
+    for cls in [QuamBase, QuamRoot, QuamComponent]:
+        with pytest.raises(TypeError) as exc_info:
+            cls()
+        assert (
+            str(exc_info.value)
+            == f"Cannot instantiate {cls.__name__} directly. "
+            "Please create a subclass and make it a dataclass."
+        )
+
+
+def test_create_dataclass_subclass():
+    for cls in [QuamBase, QuamRoot, QuamComponent]:
+
+        @dataclass
+        class TestClass(cls):
+            pass
+
+        test_class = TestClass()
+        assert isinstance(test_class, cls)
+        assert is_dataclass(test_class)
+
+
+@dataclass
+class BareQuamRoot(QuamRoot):
+    pass
+
+
+@dataclass
+class BareQuamComponent(QuamComponent):
+    pass
+
+
 def test_update_quam_component_quam():
-    quam_root = QuamRoot()
+    quam_root = BareQuamRoot()
     assert QuamComponent._quam is quam_root
 
-    quam_component = QuamComponent()
+    quam_component = BareQuamComponent()
     assert quam_component._quam is quam_root
 
 
@@ -20,13 +54,13 @@ class QuamTest(QuamRoot):
 
 
 def test_iterate_empty_quam_root():
-    quam_root = QuamRoot()
+    quam_root = BareQuamRoot()
     elems = list(quam_root.iterate_components())
     assert len(elems) == 0
 
 
 def test_iterate_empty_quam_component():
-    elem = QuamComponent()
+    elem = BareQuamComponent()
     elems = list(elem.iterate_components())
     assert len(elems) == 1
     assert elems[0] is elem
@@ -35,7 +69,7 @@ def test_iterate_empty_quam_component():
 
 def test_iterate_quam_component_nested():
     elem = QuamTest(
-        int_val=42, quam_elem=QuamComponent(), quam_elem_list=[QuamComponent()]
+        int_val=42, quam_elem=BareQuamComponent(), quam_elem_list=[BareQuamComponent()]
     )
     elems = list(elem.iterate_components())
     assert len(elems) == 2
@@ -51,12 +85,12 @@ def test_iterate_quam_component_duplicate():
         quam_elem1: QuamComponent
         quam_elem2: QuamComponent
 
-    quam_components = [QuamComponent(), QuamComponent()]
+    quam_components = [BareQuamComponent(), BareQuamComponent()]
     elem = QuamTest(quam_elem1=quam_components[0], quam_elem2=quam_components[1])
     elems = list(elem.iterate_components())
     assert elems == quam_components
 
-    quam_component = QuamComponent()
+    quam_component = BareQuamComponent()
     elem = QuamTest(quam_elem1=quam_component, quam_elem2=quam_component)
     elems = list(elem.iterate_components())
     assert elems == [quam_component]
@@ -67,12 +101,12 @@ def test_iterate_quam_component_list_duplicate():
     class QuamTest(QuamRoot):
         quam_list: List[QuamComponent]
 
-    quam_components = [QuamComponent(), QuamComponent()]
+    quam_components = [BareQuamComponent(), BareQuamComponent()]
     elem = QuamTest(quam_list=quam_components)
     elems = list(elem.iterate_components())
     assert elems == quam_components
 
-    quam_component = QuamComponent()
+    quam_component = BareQuamComponent()
     elem = QuamTest(quam_list=[quam_component, quam_component])
     elems = list(elem.iterate_components())
     assert elems == [quam_component]
@@ -81,8 +115,8 @@ def test_iterate_quam_component_list_duplicate():
 def test_iterate_quam_with_elements():
     test_quam = QuamTest(
         int_val=42,
-        quam_elem=QuamComponent(),
-        quam_elem_list=[QuamComponent(), QuamComponent()],
+        quam_elem=BareQuamComponent(),
+        quam_elem_list=[BareQuamComponent(), BareQuamComponent()],
     )
 
     elems = list(test_quam.iterate_components())
@@ -107,8 +141,8 @@ class NestedQuamTest(QuamRoot):
 def test_iterate_components_nested():
     quam_component = QuamComponentTest(
         int_val=42,
-        quam_elem=QuamComponent(),
-        quam_elem_list=[QuamComponent(), QuamComponent()],
+        quam_elem=BareQuamComponent(),
+        quam_elem_list=[BareQuamComponent(), BareQuamComponent()],
     )
 
     test_quam = NestedQuamTest(
@@ -143,7 +177,7 @@ def test_quam_dict_element():
 
 
 def test_iterate_components_dict():
-    elem = QuamComponent()
+    elem = BareQuamComponent()
     elem_dict = QuamDictComponent(a=42, b=elem)
 
     elems = list(elem_dict.iterate_components())

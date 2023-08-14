@@ -20,8 +20,22 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
 class QuamBase(ReferenceClass):
+    def __init__(self):
+        # This prohibits instantiating without it being a dataclass
+        # This means that we have to subclass this class and make it a dataclass
+        if not is_dataclass(self):
+            if type(self) in [QuamBase, QuamComponent, QuamRoot]:
+                raise TypeError(
+                    f"Cannot instantiate {self.__class__.__name__} directly. "
+                    "Please create a subclass and make it a dataclass."
+                )
+            else:
+                raise TypeError(
+                    f"Cannot instantiate {self.__class__.__name__}. "
+                    "Please make it a dataclass."
+                )
+
     def _get_attr_names(self):
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
@@ -79,14 +93,17 @@ class QuamBase(ReferenceClass):
         if skip_elems is None:
             skip_elems = []
 
-        if isinstance(self, QuamComponent) and self not in skip_elems:
+        # We don't use "self in skip_elems" because we want to check for identity
+        if isinstance(self, QuamComponent) and not any(
+            self is elem for elem in skip_elems
+        ):
             skip_elems.append(self)
             yield self
 
         attrs = self.get_attrs(follow_references=False, include_defaults=True)
 
         for attr_val in attrs.values():
-            if attr_val in skip_elems:
+            if any(attr_val is elem for elem in skip_elems):
                 continue
 
             if isinstance(attr_val, QuamBase):
@@ -114,7 +131,6 @@ class QuamBase(ReferenceClass):
         return elem
 
 
-@dataclass(kw_only=True, eq=False)
 class QuamRoot(QuamBase):
     def __post_init__(self):
         QuamComponent._quam = self
@@ -163,7 +179,6 @@ class QuamRoot(QuamBase):
         return getattr(self, attr)
 
 
-@dataclass(kw_only=True, eq=False)
 class QuamComponent(QuamBase):
     _quam: ClassVar[QuamRoot] = None
 
@@ -174,6 +189,7 @@ class QuamComponent(QuamBase):
         return self._quam._get_value_by_reference(reference)
 
 
+@dataclass
 class QuamDictComponent(QuamComponent):
     _attrs = {}  # TODO check if removing this raises any test errors
 
