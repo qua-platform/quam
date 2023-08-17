@@ -61,7 +61,7 @@ def test_quam_root_default_attr():
 
     assert quam_root.get_attrs() == {"int_val": 42, "default_none": None}
     assert quam_root.get_attrs(include_defaults=False) == {}
-    
+
     quam_root.int_val = 43
     assert quam_root.get_attrs() == {"int_val": 43, "default_none": None}
     assert quam_root.get_attrs(include_defaults=False) == {"int_val": 43}
@@ -71,4 +71,3 @@ def test_quam_root_default_attr():
     quam_root = QuamTest(int_val=43)
     assert quam_root.get_attrs() == {"int_val": 43, "default_none": None}
     assert quam_root.get_attrs(include_defaults=False) == {"int_val": 43}
-
