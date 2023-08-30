@@ -198,7 +198,7 @@ class QuamDictComponent(QuamComponent):
     def __init__(self, **kwargs):
         super().__init__()
 
-        self._attrs = instantiate_quam_dict_attrs(kwargs)["extra"]
+        self.__dict__["_attrs"] = instantiate_quam_dict_attrs(kwargs)["extra"]
 
     def __setitem__(self, key, value):
         self._attrs[key] = value
@@ -218,9 +218,7 @@ class QuamDictComponent(QuamComponent):
             raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if key == "_attrs":
-            super().__setattr__(key, value)
-        elif key in self._attrs:
+        if key in self._attrs:
             self._attrs[key] = value
         else:
             super().__setattr__(key, value)
