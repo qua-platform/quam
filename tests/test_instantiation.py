@@ -8,7 +8,7 @@ from quam_components.components.superconducting_qubits import Transmon
 from quam_components.core.quam_instantiation import *
 
 
-def test_get_class_attributes():
+def test_get_dataclass_attributes():
     @dataclass
     class TestClass(QuamComponent):
         a: int
@@ -16,7 +16,7 @@ def test_get_class_attributes():
         c = 25
         d: str = "hello"
 
-    attr_annotations = get_class_attributes(TestClass)
+    attr_annotations = get_dataclass_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
     assert attr_annotations["optional"] == {
         "d": str,
@@ -28,7 +28,7 @@ def test_get_class_attributes():
     }
 
 
-def test_get_class_attributes_subclass():
+def test_get_dataclass_attributes_subclass():
     class AbstractClass(QuamComponent):
         elem: float = 42
 
@@ -39,7 +39,7 @@ def test_get_class_attributes_subclass():
         c = 25
         d: str = "hello"
 
-    attr_annotations = get_class_attributes(TestClass)
+    attr_annotations = get_dataclass_attributes(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
     assert attr_annotations["optional"] == {"d": str, "elem": float}
     assert attr_annotations["allowed"] == {

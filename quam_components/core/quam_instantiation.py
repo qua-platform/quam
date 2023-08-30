@@ -8,11 +8,11 @@ if TYPE_CHECKING:
     from quam_components.core import QuamRoot, QuamComponent
 
 
-def get_class_attributes(cls: type) -> Dict[str, List[str]]:
-    """Get the attributes of a class that are not methods or private.
+def get_dataclass_attributes(cls: type) -> Dict[str, List[str]]:
+    """Get the attributes of a dataclass that are not methods or private.
 
     Args:
-        cls: The class to get the attributes of.
+        cls: The dataclass to get the attributes of.
 
     Returns:
         A dictionary with the following keys:
@@ -20,6 +20,7 @@ def get_class_attributes(cls: type) -> Dict[str, List[str]]:
             - "optional": A list of the optional attributes of the class,
               i.e. with a default value.
             - "allowed": A list of all the allowed attributes of the class.
+              Generally the same as "required" + "optional".
     """
     annotated_attrs = get_type_hints(cls)
 
@@ -47,7 +48,21 @@ def get_class_attributes(cls: type) -> Dict[str, List[str]]:
 
 
 def instantiate_quam_dict_attrs(contents: dict) -> dict:
-    """Instantiate the attributes of a QuamDict"""
+    """Instantiate the QuamComponent attributes of a dict
+
+    The dict cannot contain QuamComponents because it won't be (de)serialised correctly.
+    References also don't work in a dict.
+    QuamDictComponents are converted to dicts.
+
+    Args:
+        contents: The contents of the QuamDictComponent.
+
+    Returns:
+        A dictionary containing
+            - "required": empty list
+            - "optional": empty list
+            - "extra": A dictionary with the contents of the QuamDictComponent.
+    """
     from quam_components.core import QuamDictComponent
 
     instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
@@ -80,16 +95,16 @@ def instantiate_quam_attrs(
     """Instantiate the attributes of a QuamComponent or QuamDictComponent
 
     Args:
-    cls: The class of the QuamRoot, QuamComponent or QuamDictComponent.
-    attrs: The attributes of the QuamRoot, QuamComponent or QuamDictComponent.
-    contents: The contents of the QuamRoot, QuamComponent or QuamDictComponent.
-    quam_root: The QuamRoot object that the QuamRoot, QuamComponent or QuamDictComponent
-            is part of.
-    validate_type: Whether to validate the type of the attributes.
-        A TypeError is raised if an attribute has the wrong type.
-        fix_attrs: Whether to only allow attributes that have been defined in the class
-            definition. If False, any attribute can be set.
-            QuamDictComponents are never fixed.
+        cls: The class of the QuamRoot, QuamComponent or QuamDictComponent.
+        attrs: The attributes of the QuamRoot, QuamComponent or QuamDictComponent.
+        contents: The contents of the QuamRoot, QuamComponent or QuamDictComponent.
+        quam_root: The QuamRoot object that the QuamRoot, QuamComponent or
+            QuamDictComponent is part of.
+        validate_type: Whether to validate the type of the attributes.
+            A TypeError is raised if an attribute has the wrong type.
+            fix_attrs: Whether to only allow attributes that have been defined in the
+                class definition. If False, any attribute can be set.
+                QuamDictComponents are never fixed.
 
 
     Returns:
@@ -192,6 +207,8 @@ def instantiate_quam_root(
 ) -> QuamRoot:
     """Instantiate a QuamRoot from a dict
 
+    This includes instantiating all the QuamComponents in the QuamRoot from the dict
+
     Args:
         quam_root: QuamRoot instance to instantiate
         contents: dict of attributes to instantiate the QuamRoot with
@@ -204,7 +221,7 @@ def instantiate_quam_root(
     Returns:
         QuamRoot instance
     """
-    attr_annotations = get_class_attributes(cls=quam_root_cls)
+    attr_annotations = get_dataclass_attributes(cls=quam_root_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
         cls=quam_root_cls,
@@ -257,7 +274,7 @@ def instantiate_quam_component(
             f"contents must be a dict, not {type(contents)}, could not instantiate"
             f" {quam_component_cls}"
         )
-    attr_annotations = get_class_attributes(quam_component_cls)
+    attr_annotations = get_dataclass_attributes(quam_component_cls)
 
     instantiated_attrs = instantiate_quam_attrs(
         cls=quam_component_cls,
