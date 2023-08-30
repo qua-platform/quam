@@ -1,10 +1,6 @@
 import pytest
-from dataclasses import dataclass
-from quam_components.core.quam_classes import (
-    QuamBase,
-    QuamComponent,
-    QuamDictComponent,
-)
+from dataclasses import dataclass, field
+from quam_components.core.quam_classes import *
 
 
 @dataclass
@@ -73,3 +69,38 @@ def test_quam_dict_setitem():
     assert quam_dict.to_dict() == {"val1": 42}
     assert quam_dict["val1"] == 42
     assert quam_dict.get_unreferenced_value("val1") == 42
+
+
+def test_dict_from_quam_root():
+    @dataclass
+    class TestDictQuamRoot(QuamRoot):
+        test_dict: dict = field(default_factory=dict)
+
+    quam_root = TestDictQuamRoot()
+    assert isinstance(quam_root.test_dict, QuamDictComponent)
+
+
+def test_dict_from_quam_component():
+    @dataclass
+    class TestDictQuamComponent(QuamComponent):
+        test_dict: dict = field(default_factory=dict)
+
+    quam_component = TestDictQuamComponent()
+    assert isinstance(quam_component.test_dict, QuamDictComponent)
+
+    quam_component = TestDictQuamComponent(test_dict={"bla": 42})
+    assert isinstance(quam_component.test_dict, QuamDictComponent)
+    assert quam_component.test_dict.bla == 42
+
+
+def test_dict_from_quam_dict():
+    @dataclass
+    class TestDictQuamDict(QuamDictComponent):
+        test_dict: dict = field(default_factory=dict)
+
+    quam_component = TestDictQuamDict()
+    assert isinstance(quam_component.test_dict, QuamDictComponent)
+
+    quam_component = TestDictQuamDict(test_dict={"bla": 42})
+    assert isinstance(quam_component.test_dict, QuamDictComponent)
+    assert quam_component.test_dict.bla == 42
