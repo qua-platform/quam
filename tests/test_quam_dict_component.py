@@ -71,6 +71,15 @@ def test_quam_dict_setitem():
     assert quam_dict.get_unreferenced_value("val1") == 42
 
 
+def test_inner_quam_dict():
+    quam_dict = QuamDictComponent(inner_dict={"val1": 42})
+    assert isinstance(quam_dict.inner_dict, QuamDictComponent)
+
+    quam_dict = QuamDictComponent(inner_dict={"inner_inner_dict": {"val1": 42}})
+    assert isinstance(quam_dict.inner_dict, QuamDictComponent)
+    assert isinstance(quam_dict.inner_dict.inner_inner_dict, QuamDictComponent)
+
+
 def test_dict_from_quam_root():
     @dataclass
     class TestDictQuamRoot(QuamRoot):
