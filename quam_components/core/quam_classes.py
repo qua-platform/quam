@@ -193,8 +193,6 @@ class QuamComponent(QuamBase):
 
 @dataclass
 class QuamDictComponent(QuamComponent):
-    _attrs = {}  # TODO check if removing this raises any test errors
-
     def __init__(self, **kwargs):
         super().__init__()
 
