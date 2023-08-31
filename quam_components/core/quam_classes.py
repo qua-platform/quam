@@ -166,8 +166,8 @@ class QuamRoot(QuamBase):
         return instantiate_quam_class(
             quam_class=cls,
             contents=contents,
-            validate_type=validate_type,
             fix_attrs=fix_attrs,
+            validate_type=validate_type,
         )
 
     def build_config(self):
@@ -204,6 +204,7 @@ class QuamDictComponent(QuamComponent):
     def __setitem__(self, key, value):
         if isinstance(value, dict):
             value = QuamDictComponent(**value)
+        # TODO Add logic for QuamListComponent here
 
         self._attrs[key] = value
 

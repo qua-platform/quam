@@ -1,27 +1,27 @@
 from __future__ import annotations
 import typing
-from typing import TYPE_CHECKING, Dict, get_type_hints
+from typing import TYPE_CHECKING, Dict, get_type_hints, Any
 from dataclasses import MISSING
 from typeguard import check_type, TypeCheckError
+from inspect import isclass
 
 if TYPE_CHECKING:
     from quam_components.core import QuamBase, QuamComponent
 
 
 def get_dataclass_attr_annotations(cls: type) -> Dict[str, Dict[str, type]]:
-    """Get the attributes of a dataclass that are not methods or private.
+    """Get the attributes and annotations of a dataclass
 
     Args:
         cls: The dataclass to get the attributes of.
 
     Returns:
         A dictionary where the keys are "required", "optional" and "allowed".
-        The values are dictionaries with the attribute names as keys and the
-        attribute types as values.
-        The dictionary keys are:
             - "required": Required attributes of the class.
             - "optional": Optional attributes of the class, i.e. with a default value.
             - "allowed": allowed attributes of the class := "required" + "optional".
+        For each key, the values are dictionaries with the attribute names as keys
+        and the attribute types as values.
     """
     annotated_attrs = get_type_hints(cls)
 
@@ -48,59 +48,122 @@ def get_dataclass_attr_annotations(cls: type) -> Dict[str, Dict[str, type]]:
     return attr_annotations
 
 
-def validate_attr_type(instantiated_attr, required_type: type, str_repr: str = ""):
+def validate_obj_type(elem, required_type: type, str_repr: str = "") -> None:
+    """Validate whether the object is an instance of the correct type
+
+    References (strings starting with ":") are not checked.
+    None is always allowed.
+
+    Args:
+        elem: The object to validate the type of.
+        required_type: The required type of the object.
+        str_repr: A string representation of the object, used for error messages.
+
+    Returns:
+        None
+
+    Raises:
+        TypeError if the type of the attribute is not the required type
+    """
     # Do not check type if the value is a reference
-    if isinstance(instantiated_attr, str) and instantiated_attr.startswith(":"):
+    if isinstance(elem, str) and elem.startswith(":"):
         return
-    if instantiated_attr is None:
+    if elem is None:
         return
 
     try:
-        check_type(instantiated_attr, required_type)
+        check_type(elem, required_type)
     except TypeCheckError as e:
         raise TypeError(
-            f"Wrong type type({str_repr})={type(instantiated_attr)} != {required_type}"
+            f"Wrong type type({str_repr})={type(elem)} != {required_type}"
         ) from e
 
 
-def instantiate_quam_attrs_from_dict(
+def instantiate_attrs_from_dict(
     attr_dict: dict,
     required_type: type,
     fix_attrs: bool = True,
     validate_type: bool = True,
     str_repr: str = "",
 ) -> dict:
+    """Instantiate the QuamComponent attributes in a dict
+
+    QuamComponents are only instantiated if required_type is typing.Dict and the value
+    subtype is a QuamComponent. In this case, the value is instantiated as a
+    QuamComponent.
+    Otherwise, no QuamComponents are instantiated.
+
+    Args:
+        attr_dict: The attributes to instantiate.
+        required_type: The required type of the attributes, either dict or typing.Dict.
+        fix_attrs: Whether to only allow attributes that have been defined in the class
+            Only included because it's passed on when instantiating QuamComponents.
+        validate_type: Whether to validate the type of the attributes.
+            A TypeError is raised if an attribute has the wrong type.
+        str_repr: A string representation of the object, used for error messages.
+
+    Returns:
+        A dictionary with the instantiated attributes.
+    """
+    from quam_components.core import QuamComponent  # noqa: F811
+
     if typing.get_origin(required_type) == dict:
         required_subtype = typing.get_args(required_type)[1]
     else:
         required_subtype = None
 
-    instantiated_attr_list = []
+    instantiated_attr_dict = {}
     for attr_name, attr_val in attr_dict.items():
+        if not required_subtype:
+            instantiated_attr_dict[attr_name] = attr_val
+            continue
+
         if issubclass(required_subtype, QuamComponent):
             instantiated_attr = instantiate_quam_class(
                 required_subtype,
                 attr_val,
-                validate_type=validate_type,
                 fix_attrs=fix_attrs,
+                validate_type=validate_type,
                 str_repr=f"{str_repr}[{attr_name}]",
             )
-        # Add custom __class__ QuamComponent logic here
         else:
             instantiated_attr = attr_val
+        # Add custom __class__ QuamComponent logic here
 
-        instantiated_attr_list[attr_name] = instantiated_attr
+        validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
 
-    return instantiated_attr_list
+        instantiated_attr_dict[attr_name] = instantiated_attr
+
+    return instantiated_attr_dict
 
 
-def instantiate_quam_attrs_from_list(
+def instantiate_attrs_from_list(
     attr_list: list,
     required_type: type,
     fix_attrs: bool = True,
     validate_type: bool = True,
     str_repr: str = "",
 ) -> list:
+    """Instantiate the QuamComponent attributes in a list
+
+    QuamComponents are only instantiated if required_type is typing.List and the subtype
+    is a QuamComponent. In this case, the value is instantiated as a QuamComponent.
+    Otherwise, no QuamComponents are instantiated.
+
+    Args:
+        attr_list: The attributes to instantiate.
+        required_type: The required type of the attributes, either list or typing.List.
+        fix_attrs: Whether to only allow attributes that have been defined in the class
+            Only included because it's passed on when instantiating QuamComponents.
+        validate_type: Whether to validate the type of the attributes.
+            A TypeError is raised if an attribute has the wrong type.
+        str_repr: A string representation of the object, used for error messages.
+
+    Returns:
+        A list with the instantiated attributes.
+    """
+    from quam_components.core import QuamComponent  # noqa: F811
+
     if typing.get_origin(required_type) == list:
         required_subtype = typing.get_args(required_type)[0]
     else:
@@ -108,30 +171,60 @@ def instantiate_quam_attrs_from_list(
 
     instantiated_attr_list = []
     for k, attr_val in enumerate(attr_list):
+        if not required_subtype:
+            instantiated_attr_list.append(attr_val)
+            continue
+
         if issubclass(required_subtype, QuamComponent):
             instantiated_attr = instantiate_quam_class(
                 required_subtype,
                 attr_val,
-                validate_type=validate_type,
                 fix_attrs=fix_attrs,
+                validate_type=validate_type,
                 str_repr=f"{str_repr}[{k}]",
             )
-        # Add custom __class__ QuamComponent logic here
         else:
             instantiated_attr = attr_val
+        # Add custom __class__ QuamComponent logic here
+
+        validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
 
         instantiated_attr_list.append(instantiated_attr)
 
     return instantiated_attr_list
 
 
-def instantiate_quam_attr(
+def instantiate_attr(
     attr_val,
     required_type: type,
     fix_attrs: bool = True,
     validate_type: bool = True,
     str_repr: str = "",
 ):
+    """Instantiate a single attribute which may be a QuamComponent
+
+    The attribute instantiation behaviour depends on the required attribute type:
+        - If the required type is a QuamComponent -> instantiate the QuamComponent
+        - If the required type is a dict -> instantiate all elements of the dict
+        - If the required type is a list -> instantiate all elements of the list
+        - Otherwise, the attribute is not instantiated
+
+    Note that references and None are not instantiated, nor validated.
+
+    Args:
+        attr_val: The attribute to instantiate.
+        required_type: The required type of the attribute.
+        fix_attrs: Whether to only allow attributes that have been defined in the class
+            Only included because it's passed on when instantiating QuamComponents.
+        validate_type: Whether to validate the type of the attributes.
+            If True, a TypeError is raised if an attribute has the wrong type.
+        str_repr: A string representation of the object, used for error messages.
+
+    Returns:
+        The instantiated attribute.
+    """
+    from quam_components.core import QuamComponent  # noqa: F811
+
     if isinstance(attr_val, str) and attr_val.startswith(":"):
         # Value is a reference, add without instantiating
         return attr_val
@@ -139,8 +232,16 @@ def instantiate_quam_attr(
     if attr_val is None:
         return attr_val
 
-    if isinstance(attr_val, dict) or typing.get_origin(required_type) == dict:
-        instantiated_attr = instantiate_quam_attrs_from_dict(
+    if isclass(required_type) and issubclass(required_type, QuamComponent):
+        instantiated_attr = instantiate_quam_class(
+            quam_class=required_type,
+            contents=attr_val,
+            fix_attrs=fix_attrs,
+            validate_type=validate_type,
+            str_repr=str_repr,
+        )
+    elif isinstance(attr_val, dict) or typing.get_origin(required_type) == dict:
+        instantiated_attr = instantiate_attrs_from_dict(
             attr_dict=attr_val,
             required_type=required_type,
             fix_attrs=fix_attrs,
@@ -148,62 +249,54 @@ def instantiate_quam_attr(
             str_repr=str_repr,
         )
     elif isinstance(attr_val, list) or typing.get_origin(required_type) == list:
-        instantiated_attr = instantiate_quam_attrs_from_list(
+        instantiated_attr = instantiate_attrs_from_list(
             attr_list=attr_val,
             required_type=required_type,
             fix_attrs=fix_attrs,
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif typing.get_origin(required_type) is not None:
+    elif typing.get_origin(required_type) is not None and validate_type:
         raise TypeError(
             f"Instantiation for type {required_type} in {str_repr} not implemented"
-        )
-    elif issubclass(required_type, QuamComponent):
-        instantiated_attr = instantiate_quam_class(
-            quam_class=required_type,
-            contents=attr_val,
-            validate_type=validate_type,
-            fix_attrs=fix_attrs,
-            str_repr=str_repr,
         )
     else:
         instantiated_attr = attr_val
 
     if validate_type:
-        validate_attr_type(
-            instantiated_attr=instantiated_attr,
+        # TODO Add logic that required attributes cannot be None
+        validate_obj_type(
+            elem=instantiated_attr,
             required_type=required_type,
             str_repr=str_repr,
         )
     return instantiated_attr
 
 
-def instantiate_quam_attrs(
+def instantiate_attrs(
     attr_annotations: Dict[str, Dict[str, type]],
     contents: dict,
-    validate_type: bool = True,
     fix_attrs: bool = True,
+    validate_type: bool = True,
     str_repr: str = "",
-) -> dict:
-    """Instantiate the attributes of a QuamComponent or QuamDictComponent
+) -> Dict[str, Any]:
+    """Instantiate attributes if they are or contain QuamComponents
+
+    Dictionaries and lists are instantiated recursively
 
     Args:
-        parent_cls: The class of the QuamRoot, QuamComponent or QuamDictComponent.
-        attrs: The attributes of the QuamRoot, QuamComponent or QuamDictComponent.
-        contents: The contents of the QuamRoot, QuamComponent or QuamDictComponent.
-        quam_root: The QuamRoot object that the QuamRoot, QuamComponent or
-            QuamDictComponent is part of.
+        attr_annotations: The attributes of the QuamComponent or QuamDictComponent
+            together with their types. Grouped into "required", "optional" and "allowed"
+        contents: The attr contents of the QuamRoot, QuamComponent or QuamDictComponent.
+        fix_attrs: Whether to only allow attributes that have been defined in the
+            class definition. If False, any attribute can be set.
+            QuamDictComponents are never fixed.
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
-            fix_attrs: Whether to only allow attributes that have been defined in the
-                class definition. If False, any attribute can be set.
-                QuamDictComponents are never fixed.
-
+        str_repr: A string representation of the object, used for error messages.
 
     Returns:
-        A dictionary with the instantiated attributes of the QuamComponent or
-        QuamDictComponent.
+        A dictionary where each element has been instantiated if it is a QuamComponent
     """
     instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
     for attr_name, attr_val in contents.items():
@@ -215,7 +308,7 @@ def instantiate_quam_attrs(
                 f"Attribute {attr_name} is not a valid attr of {str_repr}"
             )
 
-        instantiated_attr = instantiate_quam_attr(
+        instantiated_attr = instantiate_attr(
             attr_val=attr_val,
             required_type=attr_annotations["allowed"][attr_name],
             fix_attrs=fix_attrs,
@@ -240,8 +333,8 @@ def instantiate_quam_attrs(
 def instantiate_quam_class(
     quam_class: type[QuamBase],
     contents: dict,
-    validate_type: bool = True,
     fix_attrs: bool = True,
+    validate_type: bool = True,
     str_repr: str = "",
 ) -> QuamBase:
     """Instantiate a QuamBase from a dict
@@ -249,13 +342,14 @@ def instantiate_quam_class(
     Note that any nested QuamBases are instantiated recursively
 
     Args:
-        quam_cls: QuamBase class to instantiate
+        quam_class: QuamBase class to instantiate
         contents: dict of attributes to instantiate the QuamBase with
-        validate_type: Whether to validate the type of the attributes.
-            A TypeError is raised if an attribute has the wrong type.
         fix_attrs: Whether to only allow attributes that have been defined in the class
             definition. If False, any attribute can be set.
             QuamDictComponents are never fixed.
+        validate_type: Whether to validate the type of the attributes.
+            A TypeError is raised if an attribute has the wrong type.
+        str_repr: A string representation of the object, used for error messages.
 
     Returns:
         QuamBase instance
@@ -269,11 +363,11 @@ def instantiate_quam_class(
         )
     attr_annotations = get_dataclass_attr_annotations(quam_class)
 
-    instantiated_attrs = instantiate_quam_attrs(
+    instantiated_attrs = instantiate_attrs(
         attr_annotations=attr_annotations,
         contents=contents,
-        validate_type=validate_type,
         fix_attrs=fix_attrs,
+        validate_type=validate_type,
         str_repr=str_repr,
     )
 
