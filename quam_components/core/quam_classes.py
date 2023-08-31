@@ -5,10 +5,7 @@ from dataclasses import dataclass, fields, is_dataclass, MISSING
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
-from quam_components.core.quam_instantiation import (
-    instantiate_quam_root,
-    instantiate_quam_dict_attrs,
-)
+from quam_components.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
 
 
@@ -165,8 +162,11 @@ class QuamRoot(QuamBase):
             serialiser = get_serialiser(filepath_or_dict)
             contents, _ = serialiser.load(filepath_or_dict)
 
-        return instantiate_quam_root(
-            cls, contents, validate_type=validate_type, fix_attrs=fix_attrs
+        return instantiate_quam_class(
+            quam_class=cls,
+            contents=contents,
+            validate_type=validate_type,
+            fix_attrs=fix_attrs,
         )
 
     def build_config(self):
@@ -196,7 +196,9 @@ class QuamDictComponent(QuamComponent):
     def __init__(self, **kwargs):
         super().__init__()
 
-        self.__dict__["_attrs"] = instantiate_quam_dict_attrs(kwargs)["extra"]
+        self.__dict__["_attrs"] = {}
+        for key, val in kwargs.items():
+            self._attrs[key] = val
 
     def __setitem__(self, key, value):
         self._attrs[key] = value

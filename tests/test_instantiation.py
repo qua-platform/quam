@@ -16,7 +16,7 @@ def test_get_dataclass_attributes():
         c = 25
         d: str = "hello"
 
-    attr_annotations = get_dataclass_attributes(TestClass)
+    attr_annotations = get_dataclass_attr_annotations(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
     assert attr_annotations["optional"] == {
         "d": str,
@@ -39,7 +39,7 @@ def test_get_dataclass_attributes_subclass():
         c = 25
         d: str = "hello"
 
-    attr_annotations = get_dataclass_attributes(TestClass)
+    attr_annotations = get_dataclass_attr_annotations(TestClass)
     assert attr_annotations["required"] == {"a": int, "b": List[int]}
     assert attr_annotations["optional"] == {"d": str, "elem": float}
     assert attr_annotations["allowed"] == {
