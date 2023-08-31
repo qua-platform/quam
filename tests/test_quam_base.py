@@ -280,3 +280,21 @@ def test_to_dict_nondefault():
         "optional_val": 42,
         "optional_list": ["test"],
     }
+
+
+def test_quam_setattr_quam_dict_component():
+    @dataclass
+    class TestQuamRoot(QuamRoot):
+        quam_dict: dict = field(default_factory=dict)
+
+    quam = TestQuamRoot()
+    assert isinstance(quam.quam_dict, QuamDictComponent)
+
+    quam.quam_dict = {"a": 42}
+    assert isinstance(quam.quam_dict, QuamDictComponent)
+    assert quam.quam_dict.a == 42
+
+    quam.quam_dict = {"a": {"b": 43}}
+    assert isinstance(quam.quam_dict, QuamDictComponent)
+    assert isinstance(quam.quam_dict.a, QuamDictComponent)
+    assert quam.quam_dict.a.b == 43

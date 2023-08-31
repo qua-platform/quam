@@ -201,6 +201,9 @@ class QuamDictComponent(QuamComponent):
         for key, val in kwargs.items():
             self[key] = val
 
+    def __iter__(self):
+        return iter(self._attrs)
+
     def __setitem__(self, key, value):
         if isinstance(value, dict):
             value = QuamDictComponent(**value)

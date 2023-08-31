@@ -104,3 +104,10 @@ def test_dict_from_quam_component():
     quam_component = TestDictQuamComponent(test_dict={"bla": 42})
     assert isinstance(quam_component.test_dict, QuamDictComponent)
     assert quam_component.test_dict.bla == 42
+
+
+def test_quam_dict_getattr():
+    quam_dict = QuamDictComponent(val1=42)
+    assert quam_dict.val1 == 42
+    assert hasattr(quam_dict, "val1")
+    assert "val1" in quam_dict

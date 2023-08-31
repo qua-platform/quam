@@ -343,12 +343,12 @@ def test_instantiate_component_wrong_type():
     class QuamTestComponent(QuamComponent):
         test_str: str
 
-    instantiate_quam_component(QuamTestComponent, {"test_str": "hello"})
+    instantiate_quam_class(QuamTestComponent, {"test_str": "hello"})
 
     with pytest.raises(TypeError):
-        instantiate_quam_component(QuamTestComponent, {"test_str": 0})
+        instantiate_quam_class(QuamTestComponent, {"test_str": 0})
 
-    instantiate_quam_component(QuamTestComponent, {"test_str": 0}, validate_type=False)
+    instantiate_quam_class(QuamTestComponent, {"test_str": 0}, validate_type=False)
 
 
 def test_instantiate_quam_dict():
@@ -377,13 +377,13 @@ def test_instantiation_fixed_attrs():
     class TestComponent(QuamComponent):
         int_val: int
 
-    quam_element = instantiate_quam_component(TestComponent, {"int_val": 42})
+    quam_element = instantiate_quam_class(TestComponent, {"int_val": 42})
     assert quam_element.int_val == 42
 
     with pytest.raises(AttributeError):
-        instantiate_quam_component(TestComponent, {"int_val": 42, "extra": 43})
+        instantiate_quam_class(TestComponent, {"int_val": 42, "extra": 43})
 
-    quam_element = instantiate_quam_component(
+    quam_element = instantiate_quam_class(
         TestComponent, {"int_val": 42, "extra": 43}, fix_attrs=False
     )
     assert quam_element.int_val == 42

@@ -256,6 +256,11 @@ def instantiate_attr(
             validate_type=validate_type,
             str_repr=str_repr,
         )
+    elif typing.get_origin(required_type) == typing.Union:
+        assert all(
+            t in [str, int, float, bool] for t in typing.get_args(required_type)
+        ), "Currently only Union[str, int, float, bool] is supported"
+        instantiated_attr = attr_val
     elif typing.get_origin(required_type) is not None and validate_type:
         raise TypeError(
             f"Instantiation for type {required_type} in {str_repr} not implemented"
