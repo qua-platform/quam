@@ -33,6 +33,13 @@ class QuamBase(ReferenceClass):
                     "Please make it a dataclass."
                 )
 
+    def __setattr__(self, name, value):
+        if isinstance(value, dict):
+            value = QuamDictComponent(**value)
+        # TODO Add logic for QuamListComponent here
+
+        super().__setattr__(name, value)
+
     def _get_attr_names(self):
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
@@ -134,12 +141,6 @@ class QuamRoot(QuamBase):
     def __post_init__(self):
         QuamComponent._quam = self
 
-    def __setattr__(self, name, value):
-        if isinstance(value, dict):
-            value = QuamDictComponent(**value)
-
-        super().__setattr__(name, value)
-
     def save(self, path=None, content_mapping=None, include_defaults=False):
         serialiser = get_serialiser(self)
         serialiser.save(
@@ -198,9 +199,12 @@ class QuamDictComponent(QuamComponent):
 
         self.__dict__["_attrs"] = {}
         for key, val in kwargs.items():
-            self._attrs[key] = val
+            self[key] = val
 
     def __setitem__(self, key, value):
+        if isinstance(value, dict):
+            value = QuamDictComponent(**value)
+
         self._attrs[key] = value
 
     def __getitem__(self, key):
@@ -208,20 +212,12 @@ class QuamDictComponent(QuamComponent):
 
     def __getattr__(self, key):
         try:
-            return super().__getattr__(key)
-        except AttributeError:
-            pass
-
-        try:
-            return self._attrs[key]
+            return self[key]
         except KeyError:
             raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if key in self._attrs:
-            self._attrs[key] = value
-        else:
-            super().__setattr__(key, value)
+        self[key] = value
 
     def _get_attr_names(self):
         return list(self._attrs.keys())

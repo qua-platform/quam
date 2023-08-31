@@ -49,13 +49,13 @@ def test_quam_dict_setattr():
 
     quam_dict.val1 = 42
     assert quam_dict.val1 == 42
-    assert quam_dict._attrs == {}
-    assert quam_dict._get_attr_names() == []
-    assert quam_dict.get_attrs() == {}
+    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict._get_attr_names() == ["val1"]
+    assert quam_dict.get_attrs() == {"val1": 42}
     with pytest.raises(KeyError):
-        quam_dict["val1"]
+        quam_dict["val2"]
     with pytest.raises(AttributeError):
-        quam_dict.get_unreferenced_value("val1")
+        quam_dict.get_unreferenced_value("val2")
 
 
 def test_quam_dict_setitem():
@@ -79,6 +79,10 @@ def test_inner_quam_dict():
     assert isinstance(quam_dict.inner_dict, QuamDictComponent)
     assert isinstance(quam_dict.inner_dict.inner_inner_dict, QuamDictComponent)
 
+    quam_dict = QuamDictComponent()
+    quam_dict.inner_dict = {"val1": 42}
+    assert isinstance(quam_dict.inner_dict, QuamDictComponent)
+
 
 def test_dict_from_quam_root():
     @dataclass
@@ -98,18 +102,5 @@ def test_dict_from_quam_component():
     assert isinstance(quam_component.test_dict, QuamDictComponent)
 
     quam_component = TestDictQuamComponent(test_dict={"bla": 42})
-    assert isinstance(quam_component.test_dict, QuamDictComponent)
-    assert quam_component.test_dict.bla == 42
-
-
-def test_dict_from_quam_dict():
-    @dataclass
-    class TestDictQuamDict(QuamDictComponent):
-        test_dict: dict = field(default_factory=dict)
-
-    quam_component = TestDictQuamDict()
-    assert isinstance(quam_component.test_dict, QuamDictComponent)
-
-    quam_component = TestDictQuamDict(test_dict={"bla": 42})
     assert isinstance(quam_component.test_dict, QuamDictComponent)
     assert quam_component.test_dict.bla == 42

@@ -179,11 +179,11 @@ def test_quam_dict_element():
 
     elem.b = 44
     assert elem.b == 44
-    assert elem._attrs == {"a": 43}
+    assert elem._attrs == {"a": 43, "b": 44}
 
     elem["c"] = 45
     assert elem.c == 45
-    assert elem._attrs == {"a": 43, "c": 45}
+    assert elem._attrs == {"a": 43, "b": 44, "c": 45}
 
 
 def test_iterate_components_dict():
