@@ -48,7 +48,9 @@ def get_dataclass_attr_annotations(cls: type) -> Dict[str, Dict[str, type]]:
     return attr_annotations
 
 
-def validate_obj_type(elem, required_type: type, str_repr: str = "") -> None:
+def validate_obj_type(
+    elem, required_type: type, allow_none: bool = True, str_repr: str = ""
+) -> None:
     """Validate whether the object is an instance of the correct type
 
     References (strings starting with ":") are not checked.
@@ -57,6 +59,7 @@ def validate_obj_type(elem, required_type: type, str_repr: str = "") -> None:
     Args:
         elem: The object to validate the type of.
         required_type: The required type of the object.
+        allow_none: Whether None is allowed as a value even if it's the wrong type.
         str_repr: A string representation of the object, used for error messages.
 
     Returns:
@@ -68,15 +71,19 @@ def validate_obj_type(elem, required_type: type, str_repr: str = "") -> None:
     # Do not check type if the value is a reference
     if isinstance(elem, str) and elem.startswith(":"):
         return
-    if elem is None:
+    if elem is None and allow_none:
         return
-
     try:
         check_type(elem, required_type)
     except TypeCheckError as e:
-        raise TypeError(
-            f"Wrong type type({str_repr})={type(elem)} != {required_type}"
-        ) from e
+        if elem is None:
+            raise TypeError(
+                f"None is not allowed for required attribute {str_repr}"
+            ) from e
+        else:
+            raise TypeError(
+                f"Wrong type type({str_repr})={type(elem)} != {required_type}"
+            ) from e
 
 
 def instantiate_attrs_from_dict(
@@ -196,7 +203,8 @@ def instantiate_attrs_from_list(
 
 def instantiate_attr(
     attr_val,
-    required_type: type,
+    expected_type: type,
+    allow_none: bool = False,
     fix_attrs: bool = True,
     validate_type: bool = True,
     str_repr: str = "",
@@ -214,6 +222,7 @@ def instantiate_attr(
     Args:
         attr_val: The attribute to instantiate.
         required_type: The required type of the attribute.
+        allow_none: Whether None is allowed as a value even if it's the wrong type.
         fix_attrs: Whether to only allow attributes that have been defined in the class
             Only included because it's passed on when instantiating QuamComponents.
         validate_type: Whether to validate the type of the attributes.
@@ -227,43 +236,41 @@ def instantiate_attr(
 
     if isinstance(attr_val, str) and attr_val.startswith(":"):
         # Value is a reference, add without instantiating
-        return attr_val
-
-    if attr_val is None:
-        return attr_val
-
-    if isclass(required_type) and issubclass(required_type, QuamComponent):
+        instantiated_attr = attr_val
+    elif attr_val is None:
+        instantiated_attr = attr_val
+    elif isclass(expected_type) and issubclass(expected_type, QuamComponent):
         instantiated_attr = instantiate_quam_class(
-            quam_class=required_type,
+            quam_class=expected_type,
             contents=attr_val,
             fix_attrs=fix_attrs,
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif isinstance(attr_val, dict) or typing.get_origin(required_type) == dict:
+    elif isinstance(attr_val, dict) or typing.get_origin(expected_type) == dict:
         instantiated_attr = instantiate_attrs_from_dict(
             attr_dict=attr_val,
-            required_type=required_type,
+            required_type=expected_type,
             fix_attrs=fix_attrs,
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif isinstance(attr_val, list) or typing.get_origin(required_type) == list:
+    elif isinstance(attr_val, list) or typing.get_origin(expected_type) == list:
         instantiated_attr = instantiate_attrs_from_list(
             attr_list=attr_val,
-            required_type=required_type,
+            required_type=expected_type,
             fix_attrs=fix_attrs,
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif typing.get_origin(required_type) == typing.Union:
+    elif typing.get_origin(expected_type) == typing.Union:
         assert all(
-            t in [str, int, float, bool] for t in typing.get_args(required_type)
+            t in [str, int, float, bool] for t in typing.get_args(expected_type)
         ), "Currently only Union[str, int, float, bool] is supported"
         instantiated_attr = attr_val
-    elif typing.get_origin(required_type) is not None and validate_type:
+    elif typing.get_origin(expected_type) is not None and validate_type:
         raise TypeError(
-            f"Instantiation for type {required_type} in {str_repr} not implemented"
+            f"Instantiation for type {expected_type} in {str_repr} not implemented"
         )
     else:
         instantiated_attr = attr_val
@@ -272,7 +279,8 @@ def instantiate_attr(
         # TODO Add logic that required attributes cannot be None
         validate_obj_type(
             elem=instantiated_attr,
-            required_type=required_type,
+            required_type=expected_type,
+            allow_none=allow_none,
             str_repr=str_repr,
         )
     return instantiated_attr
@@ -315,7 +323,8 @@ def instantiate_attrs(
 
         instantiated_attr = instantiate_attr(
             attr_val=attr_val,
-            required_type=attr_annotations["allowed"][attr_name],
+            expected_type=attr_annotations["allowed"][attr_name],
+            allow_none=attr_name not in attr_annotations["required"],
             fix_attrs=fix_attrs,
             validate_type=validate_type,
             str_repr=f"{str_repr}.{attr_name}",

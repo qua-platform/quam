@@ -226,33 +226,39 @@ def test_instantiate_from_quam_component_typing_list():
 
 
 def test_instantiate_attr_reference():
-    obj = instantiate_attr(attr_val=":reference", required_type=str)
+    obj = instantiate_attr(attr_val=":reference", expected_type=str)
     assert obj == ":reference"
 
-    obj = instantiate_attr(attr_val=":reference", required_type=int)
+    obj = instantiate_attr(attr_val=":reference", expected_type=int)
     assert obj == ":reference"
 
 
 def test_instantiate_attr_None():
-    obj = instantiate_attr(attr_val=None, required_type=str)
+    with pytest.raises(TypeError):
+        instantiate_attr(attr_val=None, expected_type=str)
+
+    obj = instantiate_attr(attr_val=None, expected_type=str, validate_type=False)
+    assert obj is None
+
+    obj = instantiate_attr(attr_val=None, expected_type=str, allow_none=True)
     assert obj is None
 
 
 def test_instantiate_other_typing():
     with pytest.raises(TypeError):
-        instantiate_attr(attr_val=1, required_type=typing.Union)
+        instantiate_attr(attr_val=1, expected_type=typing.Union)
 
-    obj = instantiate_attr(attr_val=1, required_type=typing.Union, validate_type=False)
+    obj = instantiate_attr(attr_val=1, expected_type=typing.Union, validate_type=False)
     assert obj == 1
 
 
 def test_instantiate_quam_component_attr():
     contents = {}
     with pytest.raises(AttributeError):
-        instantiate_attr(contents, required_type=TestQuamComponent)
+        instantiate_attr(contents, expected_type=TestQuamComponent)
 
     contents = {"test_str": "hello"}
-    obj = instantiate_attr(contents, required_type=TestQuamComponent)
+    obj = instantiate_attr(contents, expected_type=TestQuamComponent)
     assert isinstance(obj, TestQuamComponent)
     assert obj.test_str == "hello"
 
@@ -388,3 +394,13 @@ def test_instantiation_fixed_attrs():
     )
     assert quam_element.int_val == 42
     assert quam_element.extra == 43
+
+
+def test_instantiate_required_cannot_be_None():
+    @dataclass
+    class TestComponent(QuamComponent):
+        int_val: int
+
+    instantiate_quam_class(TestComponent, {"int_val": 42})
+    with pytest.raises(TypeError):
+        instantiate_quam_class(TestComponent, {"int_val": None})
