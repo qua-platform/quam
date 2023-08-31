@@ -179,11 +179,11 @@ def test_quam_dict_element():
 
     elem.b = 44
     assert elem.b == 44
-    assert elem._attrs == {"a": 43}
+    assert elem._attrs == {"a": 43, "b": 44}
 
     elem["c"] = 45
     assert elem.c == 45
-    assert elem._attrs == {"a": 43, "c": 45}
+    assert elem._attrs == {"a": 43, "b": 44, "c": 45}
 
 
 def test_iterate_components_dict():
@@ -280,3 +280,21 @@ def test_to_dict_nondefault():
         "optional_val": 42,
         "optional_list": ["test"],
     }
+
+
+def test_quam_setattr_quam_dict_component():
+    @dataclass
+    class TestQuamRoot(QuamRoot):
+        quam_dict: dict = field(default_factory=dict)
+
+    quam = TestQuamRoot()
+    assert isinstance(quam.quam_dict, QuamDictComponent)
+
+    quam.quam_dict = {"a": 42}
+    assert isinstance(quam.quam_dict, QuamDictComponent)
+    assert quam.quam_dict.a == 42
+
+    quam.quam_dict = {"a": {"b": 43}}
+    assert isinstance(quam.quam_dict, QuamDictComponent)
+    assert isinstance(quam.quam_dict.a, QuamDictComponent)
+    assert quam.quam_dict.a.b == 43

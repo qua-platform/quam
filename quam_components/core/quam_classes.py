@@ -5,10 +5,7 @@ from dataclasses import dataclass, fields, is_dataclass, MISSING
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
-from quam_components.core.quam_instantiation import (
-    instantiate_quam_root,
-    instantiate_quam_dict_attrs,
-)
+from quam_components.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
 
 
@@ -35,6 +32,13 @@ class QuamBase(ReferenceClass):
                     f"Cannot instantiate {self.__class__.__name__}. "
                     "Please make it a dataclass."
                 )
+
+    def __setattr__(self, name, value):
+        if isinstance(value, dict):
+            value = QuamDictComponent(**value)
+        # TODO Add logic for QuamListComponent here
+
+        super().__setattr__(name, value)
 
     def _get_attr_names(self):
         assert is_dataclass(self)
@@ -137,12 +141,6 @@ class QuamRoot(QuamBase):
     def __post_init__(self):
         QuamComponent._quam = self
 
-    def __setattr__(self, name, value):
-        if isinstance(value, dict):
-            value = QuamDictComponent(**value)
-
-        super().__setattr__(name, value)
-
     def save(self, path=None, content_mapping=None, include_defaults=False):
         serialiser = get_serialiser(self)
         serialiser.save(
@@ -165,8 +163,11 @@ class QuamRoot(QuamBase):
             serialiser = get_serialiser(filepath_or_dict)
             contents, _ = serialiser.load(filepath_or_dict)
 
-        return instantiate_quam_root(
-            cls, contents, validate_type=validate_type, fix_attrs=fix_attrs
+        return instantiate_quam_class(
+            quam_class=cls,
+            contents=contents,
+            fix_attrs=fix_attrs,
+            validate_type=validate_type,
         )
 
     def build_config(self):
@@ -196,9 +197,18 @@ class QuamDictComponent(QuamComponent):
     def __init__(self, **kwargs):
         super().__init__()
 
-        self.__dict__["_attrs"] = instantiate_quam_dict_attrs(kwargs)["extra"]
+        self.__dict__["_attrs"] = {}
+        for key, val in kwargs.items():
+            self[key] = val
+
+    def __iter__(self):
+        return iter(self._attrs)
 
     def __setitem__(self, key, value):
+        if isinstance(value, dict):
+            value = QuamDictComponent(**value)
+        # TODO Add logic for QuamListComponent here
+
         self._attrs[key] = value
 
     def __getitem__(self, key):
@@ -206,20 +216,12 @@ class QuamDictComponent(QuamComponent):
 
     def __getattr__(self, key):
         try:
-            return super().__getattr__(key)
-        except AttributeError:
-            pass
-
-        try:
-            return self._attrs[key]
+            return self[key]
         except KeyError:
             raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if key in self._attrs:
-            self._attrs[key] = value
-        else:
-            super().__setattr__(key, value)
+        self[key] = value
 
     def _get_attr_names(self):
         return list(self._attrs.keys())
