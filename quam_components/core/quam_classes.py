@@ -205,7 +205,7 @@ class QuamComponent(QuamBase):
 
 
 @dataclass
-class QuamDict(QuamComponent):
+class QuamDict(QuamBase):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -251,12 +251,15 @@ class QuamDict(QuamComponent):
     def _attr_val_is_default(self, attr, val):
         return False
 
+    def apply_to_config(self, config: dict) -> None:
+        ...
+
     def get_unreferenced_value(self, attr: str) -> bool:
         return self.__getattr__(attr)
 
 
 @dataclass
-class QuamListComponent(UserList, QuamComponent):
+class QuamListComponent(UserList, QuamBase):
     def __init__(self, *args):
         # TODO Figure out why this is needed
         super().__init__(*args)
