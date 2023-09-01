@@ -168,7 +168,8 @@ def test_iterate_components_nested():
 
 def test_quam_dict_element():
     elem = QuamDict(a=42)
-    assert isinstance(elem, QuamComponent)
+    assert not isinstance(elem, QuamComponent)
+    assert isinstance(elem, QuamBase)
     assert is_dataclass(elem)
     assert elem.a == 42
     assert elem._attrs == {"a": 42}
@@ -193,7 +194,6 @@ def test_iterate_components_dict():
     elems = list(elem_dict.iterate_components())
 
     assert len(elems) == 2
-    assert all(isinstance(elem, QuamComponent) for elem in elems)
     assert elems[0] is elem_dict
     assert elems[1] is elem_dict.b
 

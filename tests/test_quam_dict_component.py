@@ -11,7 +11,7 @@ class BareQuamComponent(QuamComponent):
 def test_empty_quam_dict():
     quam_dict = QuamDict()
     assert isinstance(quam_dict, QuamBase)
-    assert isinstance(quam_dict, QuamComponent)
+    assert not isinstance(quam_dict, QuamComponent)
 
     assert quam_dict._attrs == {}
     assert quam_dict._get_attr_names() == []

@@ -22,8 +22,8 @@ __all__ = [
 def convert_dict_and_list(value):
     if isinstance(value, dict):
         return QuamDict(**value)
-    elif isinstance(value, list):
-        return QuamList(value)
+    # elif isinstance(value, list):
+    #     return QuamList(value)
     else:
         return value
 
@@ -103,10 +103,11 @@ class QuamBase(ReferenceClass):
         if skip_elems is None:
             skip_elems = []
 
-        # We don't use "self in skip_elems" because we want to check for identity
-        if isinstance(self, QuamComponent) and not any(
-            self is elem for elem in skip_elems
-        ):
+        # We don't use "self in skip_elems" because we want to check for identity,
+        # not equality. The reason is that you would otherwise have to instantiate
+        # dataclasses using @dataclass(eq=False)
+        in_skip_elems = any(self is elem for elem in skip_elems)
+        if not isinstance(self, QuamRoot) and not in_skip_elems:
             skip_elems.append(self)
             yield self
 
