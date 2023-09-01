@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from pathlib import Path
 from copy import deepcopy
 from typing import Iterator, Union, Generator, ClassVar, Any, Dict, Self
@@ -22,8 +23,8 @@ __all__ = [
 def convert_dict_and_list(value):
     if isinstance(value, dict):
         return QuamDict(**value)
-    # elif isinstance(value, list):
-    #     return QuamList(value)
+    elif type(value) == list:
+        return QuamList(value)
     else:
         return value
 
@@ -107,7 +108,7 @@ class QuamBase(ReferenceClass):
         # not equality. The reason is that you would otherwise have to instantiate
         # dataclasses using @dataclass(eq=False)
         in_skip_elems = any(self is elem for elem in skip_elems)
-        if not isinstance(self, QuamRoot) and not in_skip_elems:
+        if isinstance(self, QuamComponent) and not in_skip_elems:
             skip_elems.append(self)
             yield self
 
@@ -119,10 +120,6 @@ class QuamBase(ReferenceClass):
 
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
-            elif isinstance(attr_val, (list, tuple)):
-                for elem in attr_val:
-                    if isinstance(elem, QuamBase):
-                        yield from elem.iterate_components(skip_elems=skip_elems)
 
     def _get_value_by_reference(self, reference: str):
         assert reference.startswith(":")
@@ -214,6 +211,9 @@ class QuamDict(QuamBase):
         for key, val in kwargs.items():
             self[key] = val
 
+    def __repr__(self) -> str:
+        return super().__repr__()
+
     def __iter__(self):
         return iter(self._attrs)
 
@@ -252,11 +252,19 @@ class QuamDict(QuamBase):
     def _attr_val_is_default(self, attr, val):
         return False
 
-    def apply_to_config(self, config: dict) -> None:
-        ...
-
     def get_unreferenced_value(self, attr: str) -> bool:
         return self.__getattr__(attr)
+
+    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+        if skip_elems is None:
+            skip_elems = []
+
+        for attr_val in self._attrs.values():
+            if any(attr_val is elem for elem in skip_elems):
+                continue
+
+            if isinstance(attr_val, QuamBase):
+                yield from attr_val.iterate_components(skip_elems=skip_elems)
 
 
 @dataclass
@@ -265,16 +273,52 @@ class QuamList(UserList, QuamBase):
         # TODO Figure out why this is needed
         super().__init__(*args)
 
+    # def __eq__(self, __value: object) -> bool:
+    #     return super().__eq__(__value)
+
+    def __repr__(self) -> str:
+        return super().__repr__()
+
     def __iter__(self) -> Iterator:
+        # TODO is this necessary?
         return super().__iter__()
 
     def __setitem__(self, i, item):
-        print(f"Setting item {i} to {item}")
-        super().__setitem__(i, item)
+        converted_item = convert_dict_and_list(item)
+        super().__setitem__(i, converted_item)
 
     def __setattr__(self, i, item):
-        print(f"Setting attr {i} to {item}")
-        super().__setattr__(i, item)
+        if i == "data":
+            return super().__setattr__(i, item)
+        converted_item = convert_dict_and_list(item)
+        super().__setattr__(i, converted_item)
+
+    def __iadd__(self, other: Iterable) -> Self:
+        converted_other = [convert_dict_and_list(elem) for elem in other]
+        return super().__iadd__(converted_other)
+
+    def append(self, item: Any) -> None:
+        converted_item = convert_dict_and_list(item)
+        return super().append(converted_item)
+
+    def insert(self, i: int, item: Any) -> None:
+        converted_item = convert_dict_and_list(item)
+        return super().insert(i, converted_item)
+
+    def extend(self, iterable: Iterator) -> None:
+        converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
+        return super().extend(converted_iterable)
+
+    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+        if skip_elems is None:
+            skip_elems = []
+
+        for attr_val in self.data:
+            if any(attr_val is elem for elem in skip_elems):
+                continue
+
+            if isinstance(attr_val, QuamBase):
+                yield from attr_val.iterate_components(skip_elems=skip_elems)
 
 
 def to_dict(

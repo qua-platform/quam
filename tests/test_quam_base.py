@@ -193,9 +193,8 @@ def test_iterate_components_dict():
 
     elems = list(elem_dict.iterate_components())
 
-    assert len(elems) == 2
-    assert elems[0] is elem_dict
-    assert elems[1] is elem_dict.b
+    assert len(elems) == 1
+    assert elems[0] is elem_dict.b
 
 
 def test_nested_quam_dict_explicit():
