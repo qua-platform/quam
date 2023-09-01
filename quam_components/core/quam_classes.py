@@ -1,7 +1,8 @@
 from pathlib import Path
 from copy import deepcopy
-from typing import Union, Generator, ClassVar, Any, Dict, Self
+from typing import Iterator, Union, Generator, ClassVar, Any, Dict, Self
 from dataclasses import dataclass, fields, is_dataclass, MISSING
+from collections import UserList
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
@@ -14,6 +15,7 @@ __all__ = [
     "QuamRoot",
     "QuamComponent",
     "QuamDictComponent",
+    "QuamListComponent",
 ]
 
 
@@ -241,6 +243,16 @@ class QuamDictComponent(QuamComponent):
 
     def get_unreferenced_value(self, attr: str) -> bool:
         return self.__getattr__(attr)
+
+
+@dataclass
+class QuamListComponent(UserList, QuamComponent):
+    def __init__(self, *args):
+        # TODO Figure out why this is needed
+        super().__init__(*args)
+
+    def __iter__(self) -> Iterator:
+        return super().__iter__()
 
 
 def to_dict(
