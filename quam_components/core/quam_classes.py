@@ -273,8 +273,8 @@ class QuamList(UserList, QuamBase):
         # TODO Figure out why this is needed
         super().__init__(*args)
 
-    # def __eq__(self, __value: object) -> bool:
-    #     return super().__eq__(__value)
+    def __eq__(self, value: object) -> bool:
+        return super().__eq__(value)
 
     def __repr__(self) -> str:
         return super().__repr__()

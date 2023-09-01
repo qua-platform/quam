@@ -2,6 +2,14 @@ from collections import UserList
 from quam_components.core import *
 
 
+def test_quam_list_inheritance():
+    quam_list = QuamList()
+    assert isinstance(quam_list, QuamBase)
+    assert not isinstance(quam_list, list)
+    assert isinstance(quam_list, QuamList)
+    assert isinstance(quam_list, UserList)
+
+
 def test_quam_list_equality():
     assert QuamList() == QuamList()
     assert QuamList() != QuamList([1, 2, 3])
@@ -14,15 +22,8 @@ def test_quam_list_equality():
     assert QuamList([1, 2, 3]) != [1, 2, 3, 4]
 
 
-def test_quam_list_inheritance():
-    quam_list = QuamList()
-    assert isinstance(quam_list, QuamBase)
-    assert isinstance(quam_list, list)
-    assert isinstance(quam_list, QuamList)
-    assert isinstance(quam_list, UserList)
-
-
 def test_quam_list_properties():
+    quam_list = QuamList()
     assert quam_list.data == []
     assert quam_list == []
 
