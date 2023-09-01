@@ -9,7 +9,7 @@ class BareQuamComponent(QuamComponent):
 
 
 def test_empty_quam_dict():
-    quam_dict = QuamDictComponent()
+    quam_dict = QuamDict()
     assert isinstance(quam_dict, QuamBase)
     assert isinstance(quam_dict, QuamComponent)
 
@@ -30,7 +30,7 @@ def test_empty_quam_dict():
 
 
 def test_quam_dict_nonempty():
-    quam_dict = QuamDictComponent(val1=42)
+    quam_dict = QuamDict(val1=42)
     assert quam_dict._attrs == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
@@ -45,7 +45,7 @@ def test_quam_dict_nonempty():
 
 
 def test_quam_dict_setattr():
-    quam_dict = QuamDictComponent()
+    quam_dict = QuamDict()
 
     quam_dict.val1 = 42
     assert quam_dict.val1 == 42
@@ -59,7 +59,7 @@ def test_quam_dict_setattr():
 
 
 def test_quam_dict_setitem():
-    quam_dict = QuamDictComponent()
+    quam_dict = QuamDict()
 
     quam_dict["val1"] = 42
     assert quam_dict.val1 == 42
@@ -72,16 +72,16 @@ def test_quam_dict_setitem():
 
 
 def test_inner_quam_dict():
-    quam_dict = QuamDictComponent(inner_dict={"val1": 42})
-    assert isinstance(quam_dict.inner_dict, QuamDictComponent)
+    quam_dict = QuamDict(inner_dict={"val1": 42})
+    assert isinstance(quam_dict.inner_dict, QuamDict)
 
-    quam_dict = QuamDictComponent(inner_dict={"inner_inner_dict": {"val1": 42}})
-    assert isinstance(quam_dict.inner_dict, QuamDictComponent)
-    assert isinstance(quam_dict.inner_dict.inner_inner_dict, QuamDictComponent)
+    quam_dict = QuamDict(inner_dict={"inner_inner_dict": {"val1": 42}})
+    assert isinstance(quam_dict.inner_dict, QuamDict)
+    assert isinstance(quam_dict.inner_dict.inner_inner_dict, QuamDict)
 
-    quam_dict = QuamDictComponent()
+    quam_dict = QuamDict()
     quam_dict.inner_dict = {"val1": 42}
-    assert isinstance(quam_dict.inner_dict, QuamDictComponent)
+    assert isinstance(quam_dict.inner_dict, QuamDict)
 
 
 def test_dict_from_quam_root():
@@ -90,7 +90,7 @@ def test_dict_from_quam_root():
         test_dict: dict = field(default_factory=dict)
 
     quam_root = TestDictQuamRoot()
-    assert isinstance(quam_root.test_dict, QuamDictComponent)
+    assert isinstance(quam_root.test_dict, QuamDict)
 
 
 def test_dict_from_quam_component():
@@ -99,15 +99,15 @@ def test_dict_from_quam_component():
         test_dict: dict = field(default_factory=dict)
 
     quam_component = TestDictQuamComponent()
-    assert isinstance(quam_component.test_dict, QuamDictComponent)
+    assert isinstance(quam_component.test_dict, QuamDict)
 
     quam_component = TestDictQuamComponent(test_dict={"bla": 42})
-    assert isinstance(quam_component.test_dict, QuamDictComponent)
+    assert isinstance(quam_component.test_dict, QuamDict)
     assert quam_component.test_dict.bla == 42
 
 
 def test_quam_dict_getattr():
-    quam_dict = QuamDictComponent(val1=42)
+    quam_dict = QuamDict(val1=42)
     assert quam_dict.val1 == 42
     assert hasattr(quam_dict, "val1")
     assert "val1" in quam_dict

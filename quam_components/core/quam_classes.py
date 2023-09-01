@@ -14,14 +14,14 @@ __all__ = [
     "QuamBase",
     "QuamRoot",
     "QuamComponent",
-    "QuamDictComponent",
+    "QuamDict",
     "QuamListComponent",
 ]
 
 
 def convert_dict_and_list(value):
     if isinstance(value, dict):
-        return QuamDictComponent(**value)
+        return QuamDict(**value)
     elif isinstance(value, list):
         return QuamListComponent(value)
     else:
@@ -205,7 +205,7 @@ class QuamComponent(QuamBase):
 
 
 @dataclass
-class QuamDictComponent(QuamComponent):
+class QuamDict(QuamComponent):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -218,7 +218,7 @@ class QuamDictComponent(QuamComponent):
 
     def __setitem__(self, key, value):
         if isinstance(value, dict):
-            value = QuamDictComponent(**value)
+            value = QuamDict(**value)
         # TODO Add logic for QuamListComponent here
 
         self._attrs[key] = value

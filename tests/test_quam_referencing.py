@@ -88,7 +88,7 @@ def test_reference_dict_elem():
         quam_elem_dict: dict
         quam_elem2: QuamComponentTest
 
-    quam_elem_dict = QuamDictComponent(port_I=2)
+    quam_elem_dict = QuamDict(port_I=2)
     quam_elem2 = QuamComponentTest(int_val=":quam_elem_dict.port_I")
 
     assert quam_elem2._references == {"int_val": ":quam_elem_dict.port_I"}
