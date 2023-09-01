@@ -15,7 +15,7 @@ __all__ = [
     "QuamRoot",
     "QuamComponent",
     "QuamDict",
-    "QuamListComponent",
+    "QuamList",
 ]
 
 
@@ -23,7 +23,7 @@ def convert_dict_and_list(value):
     if isinstance(value, dict):
         return QuamDict(**value)
     elif isinstance(value, list):
-        return QuamListComponent(value)
+        return QuamList(value)
     else:
         return value
 
@@ -259,7 +259,7 @@ class QuamDict(QuamBase):
 
 
 @dataclass
-class QuamListComponent(UserList, QuamBase):
+class QuamList(UserList, QuamBase):
     def __init__(self, *args):
         # TODO Figure out why this is needed
         super().__init__(*args)
