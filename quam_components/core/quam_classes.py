@@ -19,6 +19,15 @@ __all__ = [
 ]
 
 
+def convert_dict_and_list(value):
+    if isinstance(value, dict):
+        return QuamDictComponent(**value)
+    elif isinstance(value, list):
+        return QuamListComponent(value)
+    else:
+        return value
+
+
 class QuamBase(ReferenceClass):
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
@@ -34,13 +43,6 @@ class QuamBase(ReferenceClass):
                     f"Cannot instantiate {self.__class__.__name__}. "
                     "Please make it a dataclass."
                 )
-
-    def __setattr__(self, name, value):
-        if isinstance(value, dict):
-            value = QuamDictComponent(**value)
-        # TODO Add logic for QuamListComponent here
-
-        super().__setattr__(name, value)
 
     def _get_attr_names(self):
         assert is_dataclass(self)
@@ -143,6 +145,10 @@ class QuamRoot(QuamBase):
     def __post_init__(self):
         QuamComponent._quam = self
 
+    def __setattr__(self, name, value):
+        converted_val = convert_dict_and_list(value)
+        super().__setattr__(name, converted_val)
+
     def save(self, path=None, content_mapping=None, include_defaults=False):
         serialiser = get_serialiser(self)
         serialiser.save(
@@ -186,6 +192,10 @@ class QuamRoot(QuamBase):
 
 class QuamComponent(QuamBase):
     _quam: ClassVar[QuamRoot] = None
+
+    def __setattr__(self, name, value):
+        converted_val = convert_dict_and_list(value)
+        super().__setattr__(name, converted_val)
 
     def apply_to_config(self, config: dict) -> None:
         ...
@@ -253,6 +263,14 @@ class QuamListComponent(UserList, QuamComponent):
 
     def __iter__(self) -> Iterator:
         return super().__iter__()
+
+    def __setitem__(self, i, item):
+        print(f"Setting item {i} to {item}")
+        super().__setitem__(i, item)
+
+    def __setattr__(self, i, item):
+        print(f"Setting attr {i} to {item}")
+        super().__setattr__(i, item)
 
 
 def to_dict(
