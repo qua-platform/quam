@@ -270,7 +270,7 @@ class QuamDict(QuamBase):
 @dataclass
 class QuamList(UserList, QuamBase):
     def __init__(self, *args):
-        # TODO Figure out why this is needed
+        # Apparently we need this, I think it's because of multiple inheritance
         super().__init__(*args)
 
     def __eq__(self, value: object) -> bool:
@@ -278,10 +278,6 @@ class QuamList(UserList, QuamBase):
 
     def __repr__(self) -> str:
         return super().__repr__()
-
-    def __iter__(self) -> Iterator:
-        # TODO is this necessary?
-        return super().__iter__()
 
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)
@@ -328,7 +324,7 @@ def to_dict(
         return quam.to_dict(
             follow_references=follow_references, include_defaults=include_defaults
         )
-    elif isinstance(quam, list):
+    elif isinstance(quam, (list, QuamList)):
         return [
             to_dict(
                 elem,
