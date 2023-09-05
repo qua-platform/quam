@@ -36,10 +36,11 @@ __all__ = [
 
 
 def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type:
-    """Get the type annotation of a value.
+    """Get the type annotation for the values in a QuamDict or QuamList.
 
-    If the value is a dataclass, we check the type annotation of the attribute.
-    If the value is a QuamDict or QuamList, we check the _value_annotation.
+    If the QuamDict is defined as Dict[str, int], this will return int.
+    If the QuamList is defined as List[int], this will return int.
+    In all other cases, this will return None.
     """
     annotated_attrs = get_type_hints(parent)
     if parent_attr not in annotated_attrs:

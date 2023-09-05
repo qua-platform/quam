@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, ClassVar
 from dataclasses import dataclass, field
 
 from quam_components import QuamComponent
@@ -24,7 +24,7 @@ class XYChannel(QuamComponent):
     drag_coefficient: float = 0
     ac_stark_detuning: float = 0
 
-    qubit: "Transmon" = None  # Initialized after creating the qubit
+    qubit: ClassVar["Transmon"] = None  # Initialized after creating the qubit
     _skip_attrs = ["qubit"]
 
     @property
@@ -100,7 +100,7 @@ class ZChannel(QuamComponent):
 
     controller: str = "con1"
 
-    qubit: "Transmon" = None  # Initialized after creating the qubit
+    qubit: ClassVar["Transmon"] = None  # Initialized after creating the qubit
     _skip_attrs = ["qubit"]
 
     @property
