@@ -17,4 +17,4 @@ class TestQuamComponent(QuamComponent):
 
 def test_get_local_class_path():
     class_path = get_full_class_path(TestQuamComponent)
-    assert class_path == "tests.utils.test_get_full_class_path.TestQuamComponent"
+    assert class_path == "test_get_full_class_path.TestQuamComponent"

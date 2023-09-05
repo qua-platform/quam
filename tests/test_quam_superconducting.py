@@ -58,8 +58,16 @@ def test_quam_referenced_full(tmp_path):
 
     loaded_quam = json.load((folder / "quam" / "state.json").open("r"))
     assert set(loaded_quam.keys()) == set(
-        ["qubits", "resonators", "mixers", "local_oscillators", "analog_inputs"]
+        [
+            "qubits",
+            "resonators",
+            "mixers",
+            "local_oscillators",
+            "analog_inputs",
+            "__class__",
+        ]
     )
+    assert loaded_quam["__class__"] == "quam_components.components.quam.QuAM"
     assert len(loaded_quam["qubits"]) == 3
     assert len(loaded_quam["resonators"]) == 3
     assert len(loaded_quam["mixers"]) == 6

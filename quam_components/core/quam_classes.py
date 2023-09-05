@@ -206,6 +206,9 @@ class QuamRoot(QuamBase):
         converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
         super().__setattr__(name, converted_val)
 
+        if isinstance(converted_val, QuamBase):
+            converted_val.__dict__["parent"] = self
+
     def save(self, path=None, content_mapping=None, include_defaults=False):
         serialiser = get_serialiser(self)
         serialiser.save(
@@ -260,6 +263,9 @@ class QuamComponent(QuamBase):
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
         super().__setattr__(name, converted_val)
+
+        if isinstance(converted_val, QuamBase):
+            converted_val.__dict__["parent"] = self
 
     def apply_to_config(self, config: dict) -> None:
         ...
