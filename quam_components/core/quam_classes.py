@@ -104,10 +104,11 @@ class QuamBase(ReferenceClass):
 
         return False
 
-    def _attr_type_matches_annotation(self, attr: str, val: Any) -> bool:
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
-        The attribute type must exactly match the annotation
+        The attribute type must exactly match the annotation.
+        For dict and list, no additional type check of args is performed.
         """
         annotated_attrs = get_dataclass_attr_annotations(self)
         if attr not in annotated_attrs["allowed"]:
@@ -152,7 +153,7 @@ class QuamBase(ReferenceClass):
                     follow_references=follow_references,
                     include_defaults=include_defaults,
                 )
-                if not self._attr_type_matches_annotation(attr, val):
+                if not self._val_matches_attr_annotation(attr, val):
                     quam_dict[attr]["__class__"] = get_full_class_path(val)
             else:
                 quam_dict[attr] = val
@@ -296,7 +297,7 @@ class QuamDict(UserDict, QuamBase):
         # TODO implement reference kwargs
         return self.data
 
-    def _attr_type_matches_annotation(self, attr: str, val: Any) -> bool:
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
         Called by QuamDict.to_dict to determine whether to add the __class__ key.
@@ -371,7 +372,7 @@ class QuamList(UserList, QuamBase):
         return super().extend(converted_iterable)
 
     # Quam methods
-    def _attr_type_matches_annotation(self, attr: str, val: Any) -> bool:
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
         Called by QuamList.to_dict to determine whether to add the __class__ key.
@@ -393,7 +394,7 @@ class QuamList(UserList, QuamBase):
                         include_defaults=include_defaults,
                     )
                 )
-                if not self._attr_type_matches_annotation(val=val, attr=None):
+                if not self._val_matches_attr_annotation(val=val, attr=None):
                     quam_list[-1]["__class__"] = get_full_class_path(val)
             else:
                 quam_list.append(val)
