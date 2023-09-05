@@ -1,89 +1,12 @@
 from __future__ import annotations
 import typing
-from typing import TYPE_CHECKING, Dict, get_type_hints, Any
-from dataclasses import MISSING
-from typeguard import check_type, TypeCheckError
+from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
+
+from quam_components.core.utils import get_dataclass_attr_annotations, validate_obj_type
 
 if TYPE_CHECKING:
     from quam_components.core import QuamBase
-
-
-def get_dataclass_attr_annotations(cls: type) -> Dict[str, Dict[str, type]]:
-    """Get the attributes and annotations of a dataclass
-
-    Args:
-        cls: The dataclass to get the attributes of.
-
-    Returns:
-        A dictionary where the keys are "required", "optional" and "allowed".
-            - "required": Required attributes of the class.
-            - "optional": Optional attributes of the class, i.e. with a default value.
-            - "allowed": allowed attributes of the class := "required" + "optional".
-        For each key, the values are dictionaries with the attribute names as keys
-        and the attribute types as values.
-    """
-    annotated_attrs = get_type_hints(cls)
-
-    annotated_attrs.pop("_quam", None)
-    annotated_attrs.pop("_references", None)
-    annotated_attrs.pop("_skip_attrs", None)
-
-    attr_annotations = {"required": {}, "optional": {}}
-    for attr, attr_type in annotated_attrs.items():
-        if hasattr(cls, attr):
-            attr_annotations["optional"][attr] = attr_type
-        elif attr in getattr(cls, "__dataclass_fields__", {}):
-            data_field = cls.__dataclass_fields__[attr]
-            if data_field.default_factory is not MISSING:
-                attr_annotations["optional"][attr] = attr_type
-            else:
-                attr_annotations["required"][attr] = attr_type
-        else:
-            attr_annotations["required"][attr] = attr_type
-    attr_annotations["allowed"] = {
-        **attr_annotations["required"],
-        **attr_annotations["optional"],
-    }
-    return attr_annotations
-
-
-def validate_obj_type(
-    elem, required_type: type, allow_none: bool = True, str_repr: str = ""
-) -> None:
-    """Validate whether the object is an instance of the correct type
-
-    References (strings starting with ":") are not checked.
-    None is always allowed.
-
-    Args:
-        elem: The object to validate the type of.
-        required_type: The required type of the object.
-        allow_none: Whether None is allowed as a value even if it's the wrong type.
-        str_repr: A string representation of the object, used for error messages.
-
-    Returns:
-        None
-
-    Raises:
-        TypeError if the type of the attribute is not the required type
-    """
-    # Do not check type if the value is a reference
-    if isinstance(elem, str) and elem.startswith(":"):
-        return
-    if elem is None and allow_none:
-        return
-    try:
-        check_type(elem, required_type)
-    except TypeCheckError as e:
-        if elem is None:
-            raise TypeError(
-                f"None is not allowed for required attribute {str_repr}"
-            ) from e
-        else:
-            raise TypeError(
-                f"Wrong type type({str_repr})={type(elem)} != {required_type}"
-            ) from e
 
 
 def instantiate_attrs_from_dict(
