@@ -25,3 +25,18 @@ def test_list_with_component_list_to_dict():
     l3 = QuamList([1, 2, [4, 5, 6]])
     assert isinstance(l3[2], QuamList)
     assert l3.to_dict() == [1, 2, [4, 5, 6]]
+
+
+def test_basic_dict_to_dict():
+    d = QuamDict({"a": 1, "b": 2, "c": 3})
+    assert d.to_dict() == {"a": 1, "b": 2, "c": 3}
+
+
+def test_dict_with_component_to_dict():
+    @dataclass
+    class QuamTest(QuamComponent):
+        int_val: int
+
+    c = QuamTest(42)
+    quam_dict = QuamDict({"a": c})
+    assert quam_dict.to_dict() == {"a": {"int_val": 42}}

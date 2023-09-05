@@ -269,7 +269,8 @@ class QuamList(UserList, QuamBase):
     def __init__(self, *args):
         # Apparently we need this, I think it's because of multiple inheritance
         super().__init__()
-        self.extend(*args)
+        if args:
+            self.extend(*args)
 
     def __eq__(self, value: object) -> bool:
         return super().__eq__(value)
