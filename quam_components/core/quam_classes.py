@@ -1,13 +1,28 @@
 from collections.abc import Iterable
 from pathlib import Path
 from copy import deepcopy
-from typing import Iterator, Union, Generator, ClassVar, Any, Dict, Self
+from typing import (
+    Iterator,
+    Union,
+    Generator,
+    ClassVar,
+    Any,
+    Dict,
+    Self,
+    get_type_hints,
+    get_origin,
+    get_args,
+)
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_class
+from quam_components.core.utils import (
+    get_full_class_path,
+    get_dataclass_attr_annotations,
+)
 from .qua_config_template import qua_config_template
 
 
@@ -20,11 +35,35 @@ __all__ = [
 ]
 
 
-def convert_dict_and_list(value):
+def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type:
+    """Get the type annotation for the values in a QuamDict or QuamList.
+
+    If the QuamDict is defined as Dict[str, int], this will return int.
+    If the QuamList is defined as List[int], this will return int.
+    In all other cases, this will return None.
+    """
+    if parent is None or parent_attr is None:
+        return None
+
+    annotated_attrs = get_type_hints(parent)
+    if parent_attr not in annotated_attrs:
+        return None
+
+    attr_annotation = annotated_attrs[parent_attr]
+    if get_origin(attr_annotation) == dict:
+        return get_args(attr_annotation)[1]
+    elif get_origin(attr_annotation) == list:
+        return get_args(attr_annotation)[0]
+    return None
+
+
+def convert_dict_and_list(value, parent=None, parent_attr=None):
     if isinstance(value, dict):
-        return QuamDict(**value)
+        value_annotation = _get_value_annotation(parent=parent, parent_attr=parent_attr)
+        return QuamDict(**value, value_annotation=value_annotation)
     elif type(value) == list:
-        return QuamList(value)
+        value_annotation = _get_value_annotation(parent=parent, parent_attr=parent_attr)
+        return QuamList(value, value_annotation=value_annotation)
     else:
         return value
 
@@ -65,6 +104,23 @@ class QuamBase(ReferenceClass):
 
         return False
 
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+        """Check whether the type of an attribute matches the annotation.
+
+        The attribute type must exactly match the annotation.
+        For dict and list, no additional type check of args is performed.
+        """
+        annotated_attrs = get_dataclass_attr_annotations(self)
+        if attr not in annotated_attrs["allowed"]:
+            return False
+
+        required_type = annotated_attrs["allowed"][attr]
+        if required_type == dict or get_origin(required_type) == dict:
+            return isinstance(val, (dict, QuamDict))
+        elif required_type == list or get_origin(required_type) == list:
+            return isinstance(val, (list, QuamList))
+        return type(val) == required_type
+
     def get_attrs(
         self, follow_references=False, include_defaults=True
     ) -> Dict[str, Any]:
@@ -97,6 +153,8 @@ class QuamBase(ReferenceClass):
                     follow_references=follow_references,
                     include_defaults=include_defaults,
                 )
+                if not self._val_matches_attr_annotation(attr, val):
+                    quam_dict[attr]["__class__"] = get_full_class_path(val)
             else:
                 quam_dict[attr] = val
         return quam_dict
@@ -145,7 +203,7 @@ class QuamRoot(QuamBase):
         QuamComponent._quam = self
 
     def __setattr__(self, name, value):
-        converted_val = convert_dict_and_list(value)
+        converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
         super().__setattr__(name, converted_val)
 
     def save(self, path=None, content_mapping=None, include_defaults=False):
@@ -193,7 +251,7 @@ class QuamComponent(QuamBase):
     _quam: ClassVar[QuamRoot] = None
 
     def __setattr__(self, name, value):
-        converted_val = convert_dict_and_list(value)
+        converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
         super().__setattr__(name, converted_val)
 
     def apply_to_config(self, config: dict) -> None:
@@ -205,8 +263,11 @@ class QuamComponent(QuamBase):
 
 @dataclass
 class QuamDict(UserDict, QuamBase):
-    def __init__(self, dict=None, /, **kwargs):
+    _value_annotation: ClassVar[type] = None
+
+    def __init__(self, dict=None, /, value_annotation: type = None, **kwargs):
         self.__dict__["data"] = {}
+        self.__dict__["_value_annotation"] = value_annotation
         super().__init__(dict, **kwargs)
 
     def __getattr__(self, key):
@@ -236,7 +297,23 @@ class QuamDict(UserDict, QuamBase):
         # TODO implement reference kwargs
         return self.data
 
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+        """Check whether the type of an attribute matches the annotation.
+
+        Called by QuamDict.to_dict to determine whether to add the __class__ key.
+        For the QuamDict, we compare the type to the _value_annotation.
+        """
+        if isinstance(val, (QuamDict, QuamList)):
+            return True
+        if self._value_annotation is None:
+            return False
+        return type(val) == self._value_annotation
+
     def _attr_val_is_default(self, attr, val):
+        """Check whether the value of an attribute is the default value.
+
+        Since a QuamDict does not have any fixed attrs, this is always False.
+        """
         return False
 
     def get_unreferenced_value(self, attr: str) -> bool:
@@ -256,12 +333,18 @@ class QuamDict(UserDict, QuamBase):
 
 @dataclass
 class QuamList(UserList, QuamBase):
-    def __init__(self, *args):
-        # Apparently we need this, I think it's because of multiple inheritance
+    _value_annotation: ClassVar[type] = None
+
+    def __init__(self, *args, value_annotation: type = None):
+        self._value_annotation = value_annotation
+
+        # We manually add elements using extend instead of passing to super()
+        # To ensure that any dicts and lists get converted to QuamDict and QuamList
         super().__init__()
         if args:
             self.extend(*args)
 
+    # Overloading methods from UserList
     def __eq__(self, value: object) -> bool:
         return super().__eq__(value)
 
@@ -271,12 +354,6 @@ class QuamList(UserList, QuamBase):
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)
         super().__setitem__(i, converted_item)
-
-    def __setattr__(self, i, item):
-        if i == "data":
-            return super().__setattr__(i, item)
-        converted_item = convert_dict_and_list(item)
-        super().__setattr__(i, converted_item)
 
     def __iadd__(self, other: Iterable) -> Self:
         converted_other = [convert_dict_and_list(elem) for elem in other]
@@ -294,6 +371,19 @@ class QuamList(UserList, QuamBase):
         converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
         return super().extend(converted_iterable)
 
+    # Quam methods
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+        """Check whether the type of an attribute matches the annotation.
+
+        Called by QuamList.to_dict to determine whether to add the __class__ key.
+        For the QuamList, we compare the type to the _value_annotation.
+        """
+        if isinstance(val, (QuamDict, QuamList)):
+            return True
+        if self._value_annotation is None:
+            return False
+        return type(val) == self._value_annotation
+
     def to_dict(self, follow_references=False, include_defaults=False):
         quam_list = []
         for val in self.data:
@@ -304,6 +394,8 @@ class QuamList(UserList, QuamBase):
                         include_defaults=include_defaults,
                     )
                 )
+                if not self._val_matches_attr_annotation(val=val, attr=None):
+                    quam_list[-1]["__class__"] = get_full_class_path(val)
             else:
                 quam_list.append(val)
         return quam_list

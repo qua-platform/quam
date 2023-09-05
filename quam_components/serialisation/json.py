@@ -16,32 +16,13 @@ class JSONSerialiser(AbstractSerialiser):
         with open(path, "w") as f:
             json.dump(contents, f, indent=4)
 
-    def save(
-        self,
-        quam_obj: QuamRoot,
-        path: Union[Path, str] = None,
-        component_mapping: Dict[str, str] = None,
-        include_defaults: bool = False,
-    ):
+    def _parse_path(
+        self, path: Union[Path, str], component_mapping: Dict[str, str] = None
+    ) -> (Path, str):
+        """Parse the path to determine the folder and filename to save to.
+
+        See JSONSerialiser.save for details on allowed path types.
         """
-
-
-        No path, no component mapping -> save to default file
-        No path, component mapping -> Create folder, save to default file,
-            save components separately
-        JSON Path, no component mapping -> Save to json file
-        JSON Path, component mapping -> Save to json file, save components separately
-        Folder Path, no component mapping -> Create folder, save to default file
-        Folder Path, component mapping -> Create folder, save to default file,
-            save components separately
-
-        self.default_filename when component_mapping != None or no path provided
-        self.default_foldername when component_mapping != None and path is not a folder
-        """
-        component_mapping = component_mapping or self.component_mapping
-
-        contents = quam_obj.to_dict(include_defaults=include_defaults)
-
         if path is None:
             default_filename = self.default_filename
             if component_mapping:
@@ -56,6 +37,38 @@ class JSONSerialiser(AbstractSerialiser):
             folder = path
         else:
             raise ValueError(f"Path {path} is not a valid JSON path or folder.")
+
+        return Path(folder), default_filename
+
+    def save(
+        self,
+        quam_obj: QuamRoot,
+        path: Union[Path, str] = None,
+        component_mapping: Dict[str, str] = None,
+        include_defaults: bool = False,
+    ):
+        """Save a QuamRoot object to a JSON file.
+
+        The save location depends on the path provided and the component_mapping.
+            No path, no component mapping -> save to default file
+            No path, component mapping -> Create folder, save to default file,
+                save components separately
+            JSON Path, no component mapping -> Save to json file
+            JSON Path, component mapping -> Save to json file, save components
+                separately
+            Folder Path, no component mapping -> Create folder, save to default file
+            Folder Path, component mapping -> Create folder, save to default file,
+                save components separately
+
+            self.default_filename when component_mapping != None or no path provided
+            self.default_foldername when component_mapping != None and path is not a
+                folder
+        """
+        component_mapping = component_mapping or self.component_mapping
+
+        contents = quam_obj.to_dict(include_defaults=include_defaults)
+
+        folder, default_filename = self._parse_path(path, component_mapping)
 
         folder.mkdir(exist_ok=True)
 
