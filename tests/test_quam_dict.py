@@ -1,6 +1,7 @@
 import pytest
 from dataclasses import dataclass, field
 from quam_components.core.quam_classes import *
+from collections import UserDict
 
 
 @dataclass
@@ -12,8 +13,9 @@ def test_empty_quam_dict():
     quam_dict = QuamDict()
     assert isinstance(quam_dict, QuamBase)
     assert not isinstance(quam_dict, QuamComponent)
+    assert isinstance(quam_dict, UserDict)
 
-    assert quam_dict._attrs == {}
+    assert quam_dict.data == {}
     assert quam_dict._get_attr_names() == []
     assert quam_dict.get_attrs() == {}
     assert quam_dict.to_dict() == {}
@@ -31,7 +33,7 @@ def test_empty_quam_dict():
 
 def test_quam_dict_nonempty():
     quam_dict = QuamDict(val1=42)
-    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict.data == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     assert quam_dict.to_dict() == {"val1": 42}
@@ -44,12 +46,28 @@ def test_quam_dict_nonempty():
         assert not quam_dict._attr_val_is_default("val1", val)
 
 
+def test_quam_dict_adding_elements():
+    quam_dict = QuamDict()
+    quam_dict["a"] = 42
+    assert dict(quam_dict) == {"a": 42}
+    assert quam_dict.data == {"a": 42}
+
+    quam_dict["list"] = [1, 2, 3]
+    assert dict(quam_dict) == {"a": 42, "list": [1, 2, 3]}
+    assert isinstance(quam_dict["list"], QuamList)
+    assert quam_dict.data == {"a": 42, "list": [1, 2, 3]}
+    assert quam_dict.list == [1, 2, 3]
+
+    quam_dict.pop("list")
+    assert dict(quam_dict) == {"a": 42}
+
+
 def test_quam_dict_setattr():
     quam_dict = QuamDict()
 
     quam_dict.val1 = 42
     assert quam_dict.val1 == 42
-    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict.data == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     with pytest.raises(KeyError):
@@ -63,7 +81,7 @@ def test_quam_dict_setitem():
 
     quam_dict["val1"] = 42
     assert quam_dict.val1 == 42
-    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict.data == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     assert quam_dict.to_dict() == {"val1": 42}
