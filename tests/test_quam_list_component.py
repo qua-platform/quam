@@ -36,3 +36,19 @@ def test_quam_list_properties():
     quam_list2 = QuamList([4, 5, 6])
     assert list(quam_list2) == [4, 5, 6]
     assert quam_list2.data == [4, 5, 6]
+
+
+def test_quam_nested_list_instantiation_explicit():
+    quam_list = QuamList([1, 2, QuamList([3, 4, 5])])
+    assert list(quam_list) == [1, 2, [3, 4, 5]]
+    assert quam_list.data == [1, 2, [3, 4, 5]]
+    assert quam_list[2] == [3, 4, 5]
+    assert isinstance(quam_list[2], QuamList)
+
+
+def test_quam_nested_list_instantiation_implicit():
+    quam_list = QuamList([1, 2, [3, 4, 5]])
+    assert list(quam_list) == [1, 2, [3, 4, 5]]
+    assert quam_list.data == [1, 2, [3, 4, 5]]
+    assert quam_list[2] == [3, 4, 5]
+    assert isinstance(quam_list[2], QuamList)
