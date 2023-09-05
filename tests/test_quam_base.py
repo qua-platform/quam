@@ -172,19 +172,19 @@ def test_quam_dict_element():
     assert isinstance(elem, QuamBase)
     assert is_dataclass(elem)
     assert elem.a == 42
-    assert elem._attrs == {"a": 42}
+    assert elem.data == {"a": 42}
 
     elem.a = 43
     assert elem.a == 43
-    assert elem._attrs == {"a": 43}
+    assert elem.data == {"a": 43}
 
     elem.b = 44
     assert elem.b == 44
-    assert elem._attrs == {"a": 43, "b": 44}
+    assert elem.data == {"a": 43, "b": 44}
 
     elem["c"] = 45
     assert elem.c == 45
-    assert elem._attrs == {"a": 43, "b": 44, "c": 45}
+    assert elem.data == {"a": 43, "b": 44, "c": 45}
 
 
 def test_iterate_components_dict():
@@ -201,7 +201,7 @@ def test_nested_quam_dict_explicit():
     elem = QuamDict(subdict=QuamDict(a=42))
 
     assert elem.subdict.a == 42
-    assert elem.subdict._attrs == {"a": 42}
+    assert elem.subdict.data == {"a": 42}
     assert isinstance(elem.subdict, QuamDict)
 
 
@@ -209,7 +209,7 @@ def test_nested_quam_dict():
     elem = QuamDict(subdict=dict(a=42))
 
     assert elem.subdict.a == 42
-    assert elem.subdict._attrs == {"a": 42}
+    assert elem.subdict.data == {"a": 42}
     assert isinstance(elem.subdict, QuamDict)
 
     assert elem.to_dict() == {"subdict": {"a": 42}}

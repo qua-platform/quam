@@ -13,7 +13,7 @@ def test_empty_quam_dict():
     assert isinstance(quam_dict, QuamBase)
     assert not isinstance(quam_dict, QuamComponent)
 
-    assert quam_dict._attrs == {}
+    assert quam_dict.data == {}
     assert quam_dict._get_attr_names() == []
     assert quam_dict.get_attrs() == {}
     assert quam_dict.to_dict() == {}
@@ -31,7 +31,7 @@ def test_empty_quam_dict():
 
 def test_quam_dict_nonempty():
     quam_dict = QuamDict(val1=42)
-    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict.data == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     assert quam_dict.to_dict() == {"val1": 42}
@@ -49,7 +49,7 @@ def test_quam_dict_setattr():
 
     quam_dict.val1 = 42
     assert quam_dict.val1 == 42
-    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict.data == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     with pytest.raises(KeyError):
@@ -63,7 +63,7 @@ def test_quam_dict_setitem():
 
     quam_dict["val1"] = 42
     assert quam_dict.val1 == 42
-    assert quam_dict._attrs == {"val1": 42}
+    assert quam_dict.data == {"val1": 42}
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     assert quam_dict.to_dict() == {"val1": 42}

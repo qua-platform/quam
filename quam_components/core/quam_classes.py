@@ -3,7 +3,7 @@ from pathlib import Path
 from copy import deepcopy
 from typing import Iterator, Union, Generator, ClassVar, Any, Dict, Self
 from dataclasses import dataclass, fields, is_dataclass, MISSING
-from collections import UserList
+from collections import UserDict, UserList
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
@@ -204,29 +204,10 @@ class QuamComponent(QuamBase):
 
 
 @dataclass
-class QuamDict(QuamBase):
-    def __init__(self, **kwargs):
-        super().__init__()
-
-        self.__dict__["_attrs"] = {}
-        for key, val in kwargs.items():
-            self[key] = val
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-    def __iter__(self):
-        return iter(self._attrs)
-
-    def __setitem__(self, key, value):
-        if isinstance(value, dict):
-            value = QuamDict(**value)
-        # TODO Add logic for QuamListComponent here
-
-        self._attrs[key] = value
-
-    def __getitem__(self, key):
-        return self._attrs[key]
+class QuamDict(UserDict, QuamBase):
+    def __init__(self, dict=None, /, **kwargs):
+        self.__dict__["data"] = {}
+        super().__init__(dict, **kwargs)
 
     def __getattr__(self, key):
         try:
@@ -235,16 +216,25 @@ class QuamDict(QuamBase):
             raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        self[key] = value
+        if key == "data":
+            super().__setattr__(key, value)
+        else:
+            self[key] = value
 
+    # Overriding methods from UserDict
+    def __setitem__(self, key, value):
+        value = convert_dict_and_list(value)
+        super().__setitem__(key, value)
+
+    # QuAM methods
     def _get_attr_names(self):
-        return list(self._attrs.keys())
+        return list(self.data.keys())
 
     def get_attrs(
         self, follow_references=False, include_defaults=True
     ) -> Dict[str, Any]:
         # TODO implement reference kwargs
-        return self._attrs
+        return self.data
 
     def _attr_val_is_default(self, attr, val):
         return False
@@ -256,7 +246,7 @@ class QuamDict(QuamBase):
         if skip_elems is None:
             skip_elems = []
 
-        for attr_val in self._attrs.values():
+        for attr_val in self.data.values():
             if any(attr_val is elem for elem in skip_elems):
                 continue
 
