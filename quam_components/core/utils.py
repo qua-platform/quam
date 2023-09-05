@@ -2,6 +2,7 @@ from inspect import isclass
 from typing import Union, get_type_hints, Dict
 import dataclasses
 from typeguard import check_type, TypeCheckError
+import importlib
 
 
 def get_dataclass_attr_annotations(
@@ -95,3 +96,10 @@ def get_full_class_path(cls_or_obj: Union[type, object]) -> str:
         return class_name
     else:
         return f"{module_name}.{class_name}"
+
+
+def get_quam_class(class_str):
+    module_path, class_name = class_str.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    quam_class = getattr(module, class_name)
+    return quam_class

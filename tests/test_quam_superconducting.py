@@ -34,7 +34,7 @@ def test_create_quam_superconducting_referenced_build_config():
 
     assert hasattr(quam.wiring.qubits[0], "port_I")
 
-    qua_config = quam.build_config()
+    quam.build_config()
     print(quam.qubits[0].xy.mixer.port_I)
     assert quam.qubits[0].xy.mixer.port_I == 1
     assert quam.qubits[0].xy.mixer.port_Q == 2
@@ -45,7 +45,7 @@ def test_quam_superconducting_referenced(tmp_path):
     folder.mkdir(exist_ok=True)
     quam = create_quam_superconducting_referenced(num_qubits=3)
 
-    d = quam.qubits[0].to_dict()
+    quam.qubits[0].to_dict()
     quam.save(folder / "quam")
 
 

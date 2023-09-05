@@ -215,6 +215,13 @@ class QuamRoot(QuamBase):
             include_defaults=include_defaults,
         )
 
+    def to_dict(self, follow_references=False, include_defaults=False):
+        quam_dict = super().to_dict(follow_references, include_defaults)
+        # QuamRoot should always add __class__ because it is generally not
+        # quam_components.components.quam.QuAM
+        quam_dict["__class__"] = get_full_class_path(self)
+        return quam_dict
+
     @classmethod
     def load(
         cls,

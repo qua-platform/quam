@@ -3,7 +3,11 @@ import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
 
-from quam_components.core.utils import get_dataclass_attr_annotations, validate_obj_type
+from quam_components.core.utils import (
+    get_dataclass_attr_annotations,
+    validate_obj_type,
+    get_quam_class,
+)
 
 if TYPE_CHECKING:
     from quam_components.core import QuamBase
@@ -236,6 +240,8 @@ def instantiate_attrs(
     """
     instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
     for attr_name, attr_val in contents.items():
+        if attr_name == "__class__":
+            continue
         if attr_name not in attr_annotations["allowed"]:
             if not fix_attrs:
                 instantiated_attrs["extra"][attr_name] = attr_val
@@ -292,6 +298,9 @@ def instantiate_quam_class(
         QuamBase instance
     """
     str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
+
+    if "__class__" in contents:
+        quam_class = get_quam_class(contents["__class__"])
 
     if not isinstance(contents, dict):
         raise TypeError(
