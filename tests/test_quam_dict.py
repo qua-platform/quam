@@ -1,6 +1,7 @@
 import pytest
 from dataclasses import dataclass, field
 from quam_components.core.quam_classes import *
+from collections import UserDict
 
 
 @dataclass
@@ -12,6 +13,7 @@ def test_empty_quam_dict():
     quam_dict = QuamDict()
     assert isinstance(quam_dict, QuamBase)
     assert not isinstance(quam_dict, QuamComponent)
+    assert isinstance(quam_dict, UserDict)
 
     assert quam_dict.data == {}
     assert quam_dict._get_attr_names() == []
@@ -42,6 +44,22 @@ def test_quam_dict_nonempty():
 
     for val in [42, True, False, None]:
         assert not quam_dict._attr_val_is_default("val1", val)
+
+
+def test_quam_dict_adding_elements():
+    quam_dict = QuamDict()
+    quam_dict["a"] = 42
+    assert dict(quam_dict) == {"a": 42}
+    assert quam_dict.data == {"a": 42}
+
+    quam_dict["list"] = [1, 2, 3]
+    assert dict(quam_dict) == {"a": 42, "list": [1, 2, 3]}
+    assert isinstance(quam_dict["list"], QuamList)
+    assert quam_dict.data == {"a": 42, "list": [1, 2, 3]}
+    assert quam_dict.list == [1, 2, 3]
+
+    quam_dict.pop("list")
+    assert dict(quam_dict) == {"a": 42}
 
 
 def test_quam_dict_setattr():
