@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from quam_components.core import QuamRoot, QuamComponent, QuamDictComponent
+from quam_components.core import QuamRoot, QuamComponent, QuamDict
 
 
 @dataclass

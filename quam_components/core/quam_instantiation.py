@@ -6,7 +6,7 @@ from typeguard import check_type, TypeCheckError
 from inspect import isclass
 
 if TYPE_CHECKING:
-    from quam_components.core import QuamBase, QuamComponent
+    from quam_components.core import QuamBase
 
 
 def get_dataclass_attr_annotations(cls: type) -> Dict[str, Dict[str, type]]:
@@ -298,12 +298,12 @@ def instantiate_attrs(
     Dictionaries and lists are instantiated recursively
 
     Args:
-        attr_annotations: The attributes of the QuamComponent or QuamDictComponent
+        attr_annotations: The attributes of the QuamComponent or QuamDict
             together with their types. Grouped into "required", "optional" and "allowed"
-        contents: The attr contents of the QuamRoot, QuamComponent or QuamDictComponent.
+        contents: The attr contents of the QuamRoot, QuamComponent or QuamDict.
         fix_attrs: Whether to only allow attributes that have been defined in the
             class definition. If False, any attribute can be set.
-            QuamDictComponents are never fixed.
+            QuamDicts are never fixed.
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
         str_repr: A string representation of the object, used for error messages.
@@ -360,7 +360,7 @@ def instantiate_quam_class(
         contents: dict of attributes to instantiate the QuamBase with
         fix_attrs: Whether to only allow attributes that have been defined in the class
             definition. If False, any attribute can be set.
-            QuamDictComponents are never fixed.
+            QuamDicts are never fixed.
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
         str_repr: A string representation of the object, used for error messages.

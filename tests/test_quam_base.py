@@ -167,8 +167,9 @@ def test_iterate_components_nested():
 
 
 def test_quam_dict_element():
-    elem = QuamDictComponent(a=42)
-    assert isinstance(elem, QuamComponent)
+    elem = QuamDict(a=42)
+    assert not isinstance(elem, QuamComponent)
+    assert isinstance(elem, QuamBase)
     assert is_dataclass(elem)
     assert elem.a == 42
     assert elem._attrs == {"a": 42}
@@ -188,30 +189,28 @@ def test_quam_dict_element():
 
 def test_iterate_components_dict():
     elem = BareQuamComponent()
-    elem_dict = QuamDictComponent(a=42, b=elem)
+    elem_dict = QuamDict(a=42, b=elem)
 
     elems = list(elem_dict.iterate_components())
 
-    assert len(elems) == 2
-    assert all(isinstance(elem, QuamComponent) for elem in elems)
-    assert elems[0] is elem_dict
-    assert elems[1] is elem_dict.b
+    assert len(elems) == 1
+    assert elems[0] is elem_dict.b
 
 
 def test_nested_quam_dict_explicit():
-    elem = QuamDictComponent(subdict=QuamDictComponent(a=42))
+    elem = QuamDict(subdict=QuamDict(a=42))
 
     assert elem.subdict.a == 42
     assert elem.subdict._attrs == {"a": 42}
-    assert isinstance(elem.subdict, QuamDictComponent)
+    assert isinstance(elem.subdict, QuamDict)
 
 
 def test_nested_quam_dict():
-    elem = QuamDictComponent(subdict=dict(a=42))
+    elem = QuamDict(subdict=dict(a=42))
 
     assert elem.subdict.a == 42
     assert elem.subdict._attrs == {"a": 42}
-    assert isinstance(elem.subdict, QuamDictComponent)
+    assert isinstance(elem.subdict, QuamDict)
 
     assert elem.to_dict() == {"subdict": {"a": 42}}
 
@@ -288,13 +287,13 @@ def test_quam_setattr_quam_dict_component():
         quam_dict: dict = field(default_factory=dict)
 
     quam = TestQuamRoot()
-    assert isinstance(quam.quam_dict, QuamDictComponent)
+    assert isinstance(quam.quam_dict, QuamDict)
 
     quam.quam_dict = {"a": 42}
-    assert isinstance(quam.quam_dict, QuamDictComponent)
+    assert isinstance(quam.quam_dict, QuamDict)
     assert quam.quam_dict.a == 42
 
     quam.quam_dict = {"a": {"b": 43}}
-    assert isinstance(quam.quam_dict, QuamDictComponent)
-    assert isinstance(quam.quam_dict.a, QuamDictComponent)
+    assert isinstance(quam.quam_dict, QuamDict)
+    assert isinstance(quam.quam_dict.a, QuamDict)
     assert quam.quam_dict.a.b == 43

@@ -29,7 +29,7 @@ def test_create_quam_superconducting_simple_build_config():
 
 def test_create_quam_superconducting_referenced_build_config():
     quam = create_quam_superconducting_referenced(num_qubits=2)
-    assert isinstance(quam.wiring, QuamDictComponent)
+    assert isinstance(quam.wiring, QuamDict)
 
     assert hasattr(quam.wiring.qubits[0], "port_I")
 
