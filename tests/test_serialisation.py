@@ -57,15 +57,27 @@ def test_save_load_basic(tmp_path):
 
     assert quam_dict == {
         "int_val": 1,
-        "quam_component": {"int_val": 2},
-        "quam_component_separate": {"int_val": 3},
+        "quam_component": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 2,
+        },
+        "quam_component_separate": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 3,
+        },
     }
 
     contents, metadata = json_serialiser.load(json_file)
     assert contents == {
         "int_val": 1,
-        "quam_component": {"int_val": 2},
-        "quam_component_separate": {"int_val": 3},
+        "quam_component": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 2,
+        },
+        "quam_component_separate": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 3,
+        },
     }
     assert metadata["component_mapping"] == {}
     assert metadata["default_filename"] == "quam.json"
@@ -90,17 +102,34 @@ def test_save_load_basic_content_mapping(tmp_path):
 
     quam_dict = json.load(json_file.open("r"))
 
-    assert quam_dict == {"int_val": 1, "quam_component": {"int_val": 2}}
+    assert quam_dict == {
+        "int_val": 1,
+        "quam_component": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 2,
+        },
+    }
 
     tmp_file = tmp_path / "separate.json"
     quam_dict = json.load(tmp_file.open("r"))
-    assert quam_dict == {"quam_component_separate": {"int_val": 3}}
+    assert quam_dict == {
+        "quam_component_separate": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 3,
+        }
+    }
 
     contents, metadata = json_serialiser.load(tmp_path)
     assert contents == {
         "int_val": 1,
-        "quam_component": {"int_val": 2},
-        "quam_component_separate": {"int_val": 3},
+        "quam_component": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 2,
+        },
+        "quam_component_separate": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 3,
+        },
     }
     assert metadata["component_mapping"] == {
         "separate.json": ["quam_component_separate"]
@@ -128,17 +157,34 @@ def test_save_load_folder_content_mapping(tmp_path):
     json_file = json_folder / "state.json"
     quam_dict = json.load(json_file.open("r"))
 
-    assert quam_dict == {"int_val": 1, "quam_component": {"int_val": 2}}
+    assert quam_dict == {
+        "int_val": 1,
+        "quam_component": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 2,
+        },
+    }
 
     tmp_file = json_folder / "separate.json"
     quam_dict = json.load(tmp_file.open("r"))
-    assert quam_dict == {"quam_component_separate": {"int_val": 3}}
+    assert quam_dict == {
+        "quam_component_separate": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 3,
+        }
+    }
 
     contents, metadata = json_serialiser.load(json_folder)
     assert contents == {
         "int_val": 1,
-        "quam_component": {"int_val": 2},
-        "quam_component_separate": {"int_val": 3},
+        "quam_component": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 2,
+        },
+        "quam_component_separate": {
+            "__class__": "test_serialisation.QuamComponent1",
+            "int_val": 3,
+        },
     }
     assert metadata["component_mapping"] == {
         "separate.json": ["quam_component_separate"]

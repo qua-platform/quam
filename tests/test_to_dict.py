@@ -7,14 +7,17 @@ def test_basic_list_to_dict():
     assert l.to_dict() == [1, 2, 3]
 
 
-def test_list_with_component_to_dict():
-    @dataclass
-    class QuamTest(QuamComponent):
-        int_val: int
+@dataclass
+class QuamTest(QuamComponent):
+    int_val: int
 
+
+def test_list_with_component_to_dict():
     c = QuamTest(42)
     quam_list = QuamList([c])
-    assert quam_list.to_dict() == [{"int_val": 42}]
+    assert quam_list.to_dict() == [
+        {"int_val": 42, "__class__": "test_to_dict.QuamTest"}
+    ]
 
 
 def test_list_with_component_list_to_dict():
@@ -33,10 +36,8 @@ def test_basic_dict_to_dict():
 
 
 def test_dict_with_component_to_dict():
-    @dataclass
-    class QuamTest(QuamComponent):
-        int_val: int
-
     c = QuamTest(42)
     quam_dict = QuamDict({"a": c})
-    assert quam_dict.to_dict() == {"a": {"int_val": 42}}
+    assert quam_dict.to_dict() == {
+        "a": {"int_val": 42, "__class__": "test_to_dict.QuamTest"}
+    }

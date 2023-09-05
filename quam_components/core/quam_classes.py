@@ -114,6 +114,10 @@ class QuamBase(ReferenceClass):
             return False
 
         required_type = annotated_attrs["allowed"][attr]
+        if required_type == dict or get_origin(required_type) == dict:
+            return isinstance(val, (dict, QuamDict))
+        elif required_type == list or get_origin(required_type) == list:
+            return isinstance(val, (list, QuamList))
         return type(val) == required_type
 
     def get_attrs(
@@ -298,6 +302,8 @@ class QuamDict(UserDict, QuamBase):
         Called by QuamDict.to_dict to determine whether to add the __class__ key.
         For the QuamDict, we compare the type to the _value_annotation.
         """
+        if isinstance(val, (QuamDict, QuamList)):
+            return True
         if self._value_annotation is None:
             return False
         return type(val) == self._value_annotation
@@ -371,6 +377,8 @@ class QuamList(UserList, QuamBase):
         Called by QuamList.to_dict to determine whether to add the __class__ key.
         For the QuamList, we compare the type to the _value_annotation.
         """
+        if isinstance(val, (QuamDict, QuamList)):
+            return True
         if self._value_annotation is None:
             return False
         return type(val) == self._value_annotation
@@ -385,7 +393,7 @@ class QuamList(UserList, QuamBase):
                         include_defaults=include_defaults,
                     )
                 )
-                if not self._attr_type_matches_annotation(val, attr=None):
+                if not self._attr_type_matches_annotation(val=val, attr=None):
                     quam_list[-1]["__class__"] = get_full_class_path(val)
             else:
                 quam_list.append(val)

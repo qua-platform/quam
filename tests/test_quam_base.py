@@ -237,7 +237,11 @@ def test_quam_component_to_dict_nested():
     nested_elem = QuamBasicComponent(a=42, b="foo")
     elem = QuamNestedComponent(a=42, b="foo", c=nested_elem)
 
-    assert elem.to_dict() == {"a": 42, "b": "foo", "c": {"a": 42, "b": "foo"}}
+    assert elem.to_dict() == {
+        "a": 42,
+        "b": "foo",
+        "c": {"a": 42, "b": "foo", "__class__": "test_quam_base.QuamBasicComponent"},
+    }
 
 
 def test_to_dict_nondefault():
