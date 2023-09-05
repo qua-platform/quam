@@ -90,14 +90,15 @@ class QuamBase(ReferenceClass):
         attrs = self.get_attrs(
             follow_references=follow_references, include_defaults=include_defaults
         )
-        quam_dict = {
-            attr: to_dict(
-                val,
-                follow_references=follow_references,
-                include_defaults=include_defaults,
-            )
-            for attr, val in attrs.items()
-        }
+        quam_dict = {}
+        for attr, val in attrs.items():
+            if isinstance(val, QuamBase):
+                quam_dict[attr] = val.to_dict(
+                    follow_references=follow_references,
+                    include_defaults=include_defaults,
+                )
+            else:
+                quam_dict[attr] = val
         return quam_dict
 
     def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
@@ -239,15 +240,11 @@ class QuamDict(QuamBase):
     def _get_attr_names(self):
         return list(self._attrs.keys())
 
-    def to_dict(self, follow_references=False, include_defaults=True):
-        return {
-            key: to_dict(
-                val,
-                follow_references=follow_references,
-                include_defaults=include_defaults,
-            )
-            for key, val in self._attrs.items()
-        }
+    def get_attrs(
+        self, follow_references=False, include_defaults=True
+    ) -> Dict[str, Any]:
+        # TODO implement reference kwargs
+        return self._attrs
 
     def _attr_val_is_default(self, attr, val):
         return False
@@ -305,6 +302,20 @@ class QuamList(UserList, QuamBase):
         converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
         return super().extend(converted_iterable)
 
+    def to_dict(self, follow_references=False, include_defaults=False):
+        quam_list = []
+        for val in self.data:
+            if isinstance(val, QuamBase):
+                quam_list.append(
+                    val.to_dict(
+                        follow_references=follow_references,
+                        include_defaults=include_defaults,
+                    )
+                )
+            else:
+                quam_list.append(val)
+        return quam_list
+
     def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
         if skip_elems is None:
             skip_elems = []
@@ -315,23 +326,3 @@ class QuamList(UserList, QuamBase):
 
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
-
-
-def to_dict(
-    quam: Any, follow_references=False, include_defaults=False
-) -> Dict[str, Any]:
-    if isinstance(quam, QuamBase):
-        return quam.to_dict(
-            follow_references=follow_references, include_defaults=include_defaults
-        )
-    elif isinstance(quam, (list, QuamList)):
-        return [
-            to_dict(
-                elem,
-                follow_references=follow_references,
-                include_defaults=include_defaults,
-            )
-            for elem in quam
-        ]
-    else:
-        return quam
