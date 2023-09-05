@@ -20,10 +20,10 @@ def test_serialise_empty_quam_root(tmp_path):
 
     with open(file) as f:
         contents = json.load(f)
-        assert contents == {}
+        assert contents == {"__class__": "test_serialisation.BareQuamRoot"}
 
     contents, metadata = json_serialiser.load(file)
-    assert contents == {}
+    assert contents == {"__class__": "test_serialisation.BareQuamRoot"}
     assert metadata["component_mapping"] == {}
     assert metadata["default_filename"] == "quam2.json"
     assert metadata["default_foldername"] is None
@@ -56,6 +56,7 @@ def test_save_load_basic(tmp_path):
     quam_dict = json.load(json_file.open("r"))
 
     assert quam_dict == {
+        "__class__": "test_serialisation.QuamRoot1",
         "int_val": 1,
         "quam_component": {
             "__class__": "test_serialisation.QuamComponent1",
@@ -69,6 +70,7 @@ def test_save_load_basic(tmp_path):
 
     contents, metadata = json_serialiser.load(json_file)
     assert contents == {
+        "__class__": "test_serialisation.QuamRoot1",
         "int_val": 1,
         "quam_component": {
             "__class__": "test_serialisation.QuamComponent1",
@@ -103,6 +105,7 @@ def test_save_load_basic_content_mapping(tmp_path):
     quam_dict = json.load(json_file.open("r"))
 
     assert quam_dict == {
+        "__class__": "test_serialisation.QuamRoot1",
         "int_val": 1,
         "quam_component": {
             "__class__": "test_serialisation.QuamComponent1",
@@ -121,6 +124,7 @@ def test_save_load_basic_content_mapping(tmp_path):
 
     contents, metadata = json_serialiser.load(tmp_path)
     assert contents == {
+        "__class__": "test_serialisation.QuamRoot1",
         "int_val": 1,
         "quam_component": {
             "__class__": "test_serialisation.QuamComponent1",
@@ -158,6 +162,7 @@ def test_save_load_folder_content_mapping(tmp_path):
     quam_dict = json.load(json_file.open("r"))
 
     assert quam_dict == {
+        "__class__": "test_serialisation.QuamRoot1",
         "int_val": 1,
         "quam_component": {
             "__class__": "test_serialisation.QuamComponent1",
@@ -176,6 +181,7 @@ def test_save_load_folder_content_mapping(tmp_path):
 
     contents, metadata = json_serialiser.load(json_folder)
     assert contents == {
+        "__class__": "test_serialisation.QuamRoot1",
         "int_val": 1,
         "quam_component": {
             "__class__": "test_serialisation.QuamComponent1",
