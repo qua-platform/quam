@@ -69,6 +69,8 @@ def convert_dict_and_list(value, parent=None, parent_attr=None):
 
 
 class QuamBase(ReferenceClass):
+    parent: ClassVar["QuamBase"] = None
+
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
         # This means that we have to subclass this class and make it a dataclass
