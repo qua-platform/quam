@@ -26,6 +26,7 @@ def get_dataclass_attr_annotations(
     annotated_attrs.pop("_quam", None)
     annotated_attrs.pop("_references", None)
     annotated_attrs.pop("_skip_attrs", None)
+    annotated_attrs.pop("parent", None)
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():

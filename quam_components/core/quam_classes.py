@@ -69,6 +69,8 @@ def convert_dict_and_list(value, parent=None, parent_attr=None):
 
 
 class QuamBase(ReferenceClass):
+    parent: ClassVar["QuamBase"] = None
+
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
         # This means that we have to subclass this class and make it a dataclass
@@ -206,6 +208,9 @@ class QuamRoot(QuamBase):
         converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
         super().__setattr__(name, converted_val)
 
+        if isinstance(converted_val, QuamBase):
+            converted_val.__dict__["parent"] = self
+
     def save(self, path=None, content_mapping=None, include_defaults=False):
         serialiser = get_serialiser(self)
         serialiser.save(
@@ -260,6 +265,9 @@ class QuamComponent(QuamBase):
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
         super().__setattr__(name, converted_val)
+
+        if isinstance(converted_val, QuamBase):
+            converted_val.__dict__["parent"] = self
 
     def apply_to_config(self, config: dict) -> None:
         ...
