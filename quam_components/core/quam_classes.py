@@ -42,6 +42,9 @@ def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type
     If the QuamList is defined as List[int], this will return int.
     In all other cases, this will return None.
     """
+    if parent is None or parent_attr is None:
+        return None
+
     annotated_attrs = get_type_hints(parent)
     if parent_attr not in annotated_attrs:
         return None
@@ -145,7 +148,7 @@ class QuamBase(ReferenceClass):
                     follow_references=follow_references,
                     include_defaults=include_defaults,
                 )
-                if not self._attr_matches_annotation(self, attr, val):
+                if not self._attr_type_matches_annotation(attr, val):
                     quam_dict[attr]["__class__"] = get_full_class_path(val)
             else:
                 quam_dict[attr] = val
@@ -257,8 +260,9 @@ class QuamComponent(QuamBase):
 class QuamDict(UserDict, QuamBase):
     _value_annotation: ClassVar[type] = None
 
-    def __init__(self, dict=None, /, **kwargs):
+    def __init__(self, dict=None, /, value_annotation: type = None, **kwargs):
         self.__dict__["data"] = {}
+        self.__dict__["_value_annotation"] = value_annotation
         super().__init__(dict, **kwargs)
 
     def __getattr__(self, key):
@@ -324,7 +328,9 @@ class QuamDict(UserDict, QuamBase):
 class QuamList(UserList, QuamBase):
     _value_annotation: ClassVar[type] = None
 
-    def __init__(self, *args):
+    def __init__(self, *args, value_annotation: type = None):
+        self._value_annotation = value_annotation
+
         # We manually add elements using extend instead of passing to super()
         # To ensure that any dicts and lists get converted to QuamDict and QuamList
         super().__init__()
@@ -341,12 +347,6 @@ class QuamList(UserList, QuamBase):
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)
         super().__setitem__(i, converted_item)
-
-    def __setattr__(self, i, item):
-        if i == "data":
-            return super().__setattr__(i, item)
-        converted_item = convert_dict_and_list(item)
-        super().__setattr__(i, converted_item)
 
     def __iadd__(self, other: Iterable) -> Self:
         converted_other = [convert_dict_and_list(elem) for elem in other]
@@ -385,7 +385,7 @@ class QuamList(UserList, QuamBase):
                         include_defaults=include_defaults,
                     )
                 )
-                if not self._attr_matches_annotation(self, val, attr=None):
+                if not self._attr_type_matches_annotation(val, attr=None):
                     quam_list[-1]["__class__"] = get_full_class_path(val)
             else:
                 quam_list.append(val)
