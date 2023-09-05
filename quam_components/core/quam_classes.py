@@ -19,7 +19,10 @@ from collections import UserDict, UserList
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
 from quam_components.core.quam_instantiation import instantiate_quam_class
-from quam_components.utils import get_full_class_path, get_dataclass_annotations
+from quam_components.core.utils import (
+    get_full_class_path,
+    get_dataclass_attr_annotations,
+)
 from .qua_config_template import qua_config_template
 
 
@@ -102,7 +105,7 @@ class QuamBase(ReferenceClass):
 
         The attribute type must exactly match the annotation
         """
-        annotated_attrs = get_dataclass_annotations(self)
+        annotated_attrs = get_dataclass_attr_annotations(self)
         if attr not in annotated_attrs["allowed"]:
             return False
 
