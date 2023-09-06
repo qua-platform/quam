@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, ClassVar
 from dataclasses import dataclass, field
 
 from quam_components import QuamComponent
@@ -24,12 +24,9 @@ class XYChannel(QuamComponent):
     drag_coefficient: float = 0
     ac_stark_detuning: float = 0
 
-    qubit: "Transmon" = None  # Initialized after creating the qubit
-    _skip_attrs = ["qubit"]
-
     @property
     def pulse_mapping(self):
-        return {pulse: f"{pulse}_{self.qubit.name}_pulse" for pulse in self.pulses}
+        return {pulse: f"{pulse}_{self.parent.name}_pulse" for pulse in self.pulses}
 
     def calculate_pulses_waveforms(self):
         from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
@@ -42,8 +39,8 @@ class XYChannel(QuamComponent):
                 "operation": "control",
                 "length": self.pi_length,
                 "waveforms": {
-                    "I": f"{pulse_label}_I_{self.qubit.name}_wf",
-                    "Q": f"{pulse_label}_Q_{self.qubit.name}_wf",
+                    "I": f"{pulse_label}_I_{self.parent.name}_wf",
+                    "Q": f"{pulse_label}_Q_{self.parent.name}_wf",
                 },
             }
 
@@ -58,12 +55,12 @@ class XYChannel(QuamComponent):
                 detuning=self.ac_stark_detuning,
             )
             waveform_I = waveform if axis == "X" else waveform_derivative
-            waveforms[f"{pulse_label}_I_{self.qubit.name}_wf"] = {
+            waveforms[f"{pulse_label}_I_{self.parent.name}_wf"] = {
                 "type": "arbitrary",
                 "samples": waveform_I,
             }
             waveform_Q = waveform_derivative if axis == "X" else waveform
-            waveforms[f"{pulse_label}_Q_{self.qubit.name}_wf"] = {
+            waveforms[f"{pulse_label}_Q_{self.parent.name}_wf"] = {
                 "type": "arbitrary",
                 "samples": waveform_Q,
             }
@@ -72,7 +69,7 @@ class XYChannel(QuamComponent):
 
     def apply_to_config(self, config: dict):
         # Add XY to "elements"
-        config["elements"][f"{self.qubit.name}_xy"] = {
+        config["elements"][f"{self.parent.name}_xy"] = {
             "mixInputs": self.mixer.get_input_config(),
             "intermediate_frequency": self.mixer.intermediate_frequency,
             "operations": self.pulse_mapping,
@@ -100,16 +97,13 @@ class ZChannel(QuamComponent):
 
     controller: str = "con1"
 
-    qubit: "Transmon" = None  # Initialized after creating the qubit
-    _skip_attrs = ["qubit"]
-
     @property
     def pulse_mapping(self):
         pulse_mapping = {}
         for pulse in self.pulses:
             if pulse == "const_flux":
                 if self.pulse_length is not None and self.pulse_amplitude is not None:
-                    pulse_mapping[pulse] = f"const_flux_{self.qubit.name}_pulse"
+                    pulse_mapping[pulse] = f"const_flux_{self.parent.name}_pulse"
             else:
                 raise ValueError(f"Unknown pulse {pulse}")
         return pulse_mapping
@@ -126,10 +120,10 @@ class ZChannel(QuamComponent):
                     "operation": "control",
                     "length": self.pulse_length,
                     "waveforms": {
-                        "single": f"const_flux_{self.qubit.name}_wf",
+                        "single": f"const_flux_{self.parent.name}_wf",
                     },
                 }
-                waveforms[f"const_flux_{self.qubit.name}_wf"] = {
+                waveforms[f"const_flux_{self.parent.name}_wf"] = {
                     "type": "constant",
                     "sample": self.pulse_amplitude,
                 }
@@ -137,7 +131,7 @@ class ZChannel(QuamComponent):
         return pulses, waveforms
 
     def apply_to_config(self, config: dict):
-        config["elements"][f"{self.qubit.name}_z"] = {
+        config["elements"][f"{self.parent.name}_z"] = {
             "singleInput": {
                 "port": (self.controller, self.port),
             },
@@ -168,12 +162,6 @@ class Transmon(QuamComponent):
 
     xy: XYChannel = None
     z: ZChannel = None
-
-    def __post_init__(self):
-        if self.xy is not None:
-            self.xy.qubit = self
-        if self.z is not None:
-            self.z.qubit = self
 
     @property
     def name(self):

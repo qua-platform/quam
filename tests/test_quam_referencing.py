@@ -4,8 +4,13 @@ from dataclasses import dataclass
 from quam_components.core import *
 
 
+@dataclass
+class BareQuamComponent(QuamComponent):
+    pass
+
+
 def test_base_quam_component_reference():
-    quam_elem = QuamComponent()
+    quam_elem = BareQuamComponent()
     quam_elem.a = ":test"
     assert quam_elem._references == {"a": ":test"}
 
@@ -55,7 +60,7 @@ def test_basic_reference():
     assert quam_elem2.int_val == 1
 
     quam_elem2.int_val = ":quam_elem1"
-    assert list(iterate_quam_components(quam)) == [quam_elem1, quam_elem2]
+    assert list(quam.iterate_components()) == [quam_elem1, quam_elem2]
 
 
 def test_list_referencing():
@@ -83,12 +88,12 @@ def test_reference_dict_elem():
         quam_elem_dict: dict
         quam_elem2: QuamComponentTest
 
-    quam_elem_dict = QuamDictComponent(port_I=2)
+    quam_elem_dict = QuamDict(port_I=2)
     quam_elem2 = QuamComponentTest(int_val=":quam_elem_dict.port_I")
 
     assert quam_elem2._references == {"int_val": ":quam_elem_dict.port_I"}
 
-    quam = QuamRootTest(quam_elem_dict=quam_elem_dict, quam_elem2=quam_elem2)
+    QuamRootTest(quam_elem_dict=quam_elem_dict, quam_elem2=quam_elem2)
 
     assert quam_elem2.int_val == 2
 
