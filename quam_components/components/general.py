@@ -7,7 +7,7 @@ from quam_components.core import QuamComponent
 from quam_components.components.pulses import Pulse
 
 
-__all__ = ["LocalOscillator", "Mixer", "AnalogInput"]
+__all__ = ["LocalOscillator", "Mixer", "AnalogInput", "IQChannel", "SingleChannel"]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -155,7 +155,10 @@ class PulseEmitter(QuamComponent):
 @dataclass(kw_only=True, eq=False)
 class IQChannel(PulseEmitter):
     mixer: Mixer
-    name: str
+
+    @property
+    def name(self) -> str:
+        return f"{self.parent.name}_{self._get_parent_attr_name()}"
 
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
@@ -177,6 +180,10 @@ class SingleChannel(PulseEmitter):
     offset: float = 0
 
     controller: str = "con1"
+
+    @property
+    def name(self) -> str:
+        return f"{self.parent.name}_{self._get_parent_attr_name()}"
 
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
