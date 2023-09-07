@@ -118,8 +118,8 @@ class PulseEmitter(QuamComponent):
 
     def apply_to_config(self, config: dict):
         for label, pulse in self.pulses.items():
-            name = f"{self.name}_{label}"
-            pulse, waveform = pulse.calculate_pulse_waveform(name=name)
+            waveform = pulse.calculate_pulse_waveform()
+            pulse = pulse.get_pulse_config()
 
             if isinstance(waveform, numbers.Number):
                 wf_type = "constant"
@@ -130,21 +130,26 @@ class PulseEmitter(QuamComponent):
 
             # TODO check if these should be lists or if arrays are fine
             if is_complex:
-                config["waveforms"][f"{name}_wf_I"] = {
+                config["waveforms"][f"{self.name}_{label}_wf_I"] = {
                     "type": wf_type,
                     "sample": waveform.real,
                 }
-                config["waveforms"][f"{name}_wf_Q"] = {
+                config["waveforms"][f"{self.name}_{label}_wf_Q"] = {
                     "type": wf_type,
                     "sample": waveform.imag,
                 }
+                pulse["waveforms"] = {
+                    "I": f"{self.name}_{label}_wf_I",
+                    "Q": f"{self.name}_{label}_wf_Q",
+                }
             else:
-                config["waveforms"][f"{name}_wf"] = {
+                config["waveforms"][f"{self.name}_{label}_wf"] = {
                     "type": wf_type,
                     "sample": waveform,
                 }
+                pulse["waveforms"] = {"single": f"{self.name}_{label}_wf"}
 
-            config["pulses"][f"{name}_pulse"] = pulse
+            config["pulses"][f"{self.name}_{label}_pulse"] = pulse
 
 
 @dataclass(kw_only=True, eq=False)

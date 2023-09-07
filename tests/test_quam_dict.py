@@ -129,3 +129,8 @@ def test_quam_dict_getattr():
     assert quam_dict.val1 == 42
     assert hasattr(quam_dict, "val1")
     assert "val1" in quam_dict
+
+
+def test_quam_dict_get_attr_names():
+    quam_dict = QuamDict(val1=42)
+    assert quam_dict._get_attr_names() == ["val1"]
