@@ -1,8 +1,10 @@
+import numbers
 import numpy as np
-from typing import List, Union
+from typing import Dict, List, Union
 from dataclasses import dataclass, field
 
 from quam_components.core import QuamComponent
+from quam_components.components.pulses import Pulse
 
 
 __all__ = ["LocalOscillator", "Mixer", "AnalogInput"]
@@ -101,40 +103,64 @@ class AnalogInput(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class Pulse(QuamComponent):
-    ...
-
-
-@dataclass(kw_only=True, eq=False)
 class PulseEmitter(QuamComponent):
-    pulses: List[Union[str, Pulse]] = field(default_factory=lambda: [])
-    pulse_default: str = None
+    pulses: Dict[str, Pulse] = field(default_factory=dict)
 
-    def generate_waveforms_pulses(self):
-        for pulse in self.pulses:
-            if isinstance(pulse, str):
-                pulse = self.pulse_default
-            yield pulse.generate_waveform_pulse()
+    @property
+    def pulse_mapping(self):
+        return {
+            label: f"{self.name}_{label}_pulse" for label, pulse in self.pulses.items()
+        }
+
+    def play(self, pulse_name: str):
+        # pulse = self.pulses[pulse_name]
+        raise NotImplementedError
+
+    def apply_to_config(self, config: dict):
+        for label, pulse in self.pulses.items():
+            name = f"{self.name}_{label}"
+            pulse, waveform = pulse.calculate_pulse_waveform(name=name)
+
+            if isinstance(waveform, numbers.Number):
+                wf_type = "constant"
+                is_complex = isinstance(waveform, numbers.complex)
+            elif isinstance(waveform, (list, np.ndarray)):
+                wf_type = "arbitrary"
+                is_complex = np.iscomplexobj(waveform)
+
+            # TODO check if these should be lists or if arrays are fine
+            if is_complex:
+                config["waveforms"][f"{name}_wf_I"] = {
+                    "type": wf_type,
+                    "sample": waveform.real,
+                }
+                config["waveforms"][f"{name}_wf_Q"] = {
+                    "type": wf_type,
+                    "sample": waveform.imag,
+                }
+            else:
+                config["waveforms"][f"{name}_wf"] = {
+                    "type": wf_type,
+                    "sample": waveform,
+                }
+
+            config["pulses"][f"{name}_pulse"] = pulse
 
 
 @dataclass(kw_only=True, eq=False)
 class IQChannel(PulseEmitter):
     mixer: Mixer
-
-    name: str = "IQ"
+    name: str
 
     def apply_to_config(self, config: dict):
-        # Add XY to "elements"
-        config["elements"][f"{self.name}_xy"] = {
+        # Add pulses & waveforms
+        super().apply_to_config(config)
+
+        config["elements"][self.name] = {
             "mixInputs": self.mixer.get_input_config(),
             "intermediate_frequency": self.mixer.intermediate_frequency,
-            # "operations": ,
+            "operations": self.pulse_mapping,
         }
-        # TODO decide on "operations" for IQChannel
-
-        # pulses, waveforms = self.calculate_pulses_waveforms()
-        # config["pulses"].update(pulses)
-        # config["waveforms"].update(waveforms)
 
 
 @dataclass(kw_only=True, eq=False)
@@ -147,16 +173,16 @@ class SingleChannel(PulseEmitter):
 
     controller: str = "con1"
 
-    # TODO fix self.qubit.name
-
     def apply_to_config(self, config: dict):
-        config["elements"][f"{self.qubit.name}_z"] = {
+        # Add pulses & waveforms
+        super().apply_to_config(config)
+
+        config["elements"][self.name] = {
             "singleInput": {
                 "port": (self.controller, self.port),
             },
-            # "operations": self.pulse_mapping,
+            "operations": self.pulse_mapping,
         }
-        # TODO fix "operations"
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
         analog_output = analog_outputs[self.port] = {"offset": self.offset}
@@ -168,7 +194,3 @@ class SingleChannel(PulseEmitter):
         if self.filter_iir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
             output_filter["feedback"] = self.filter_iir_taps
-
-        # pulses, waveforms = self.calculate_pulses_waveforms()
-        # config["pulses"].update(pulses)
-        # config["waveforms"].update(waveforms)
