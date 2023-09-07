@@ -1,17 +1,19 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Callable, Dict, List, ClassVar
 import inspect
 import numpy as np
 
 from quam_components.core import QuamComponent
 
 
+__all__ = ["Pulse", "DragPulse"]
+
+
 @dataclass(kw_only=True, eq=False)
 class Pulse(QuamComponent):
-    operation: str
+    operation: ClassVar[str] = "control"
     length: int
 
-    integration_weights: Dict[str, List[float]] = None
     digital_marker: str = None
 
     def get_pulse_config(self):
@@ -22,22 +24,23 @@ class Pulse(QuamComponent):
             "operation": self.operation,
             "length": self.length,
         }
-
-        if self.operation == "measurement":
-            # TODO Verify that these settings are optional
-            if self.integration_weights is not None:
-                pulse_config["integration_weights"] = self.integration_weights
-            if self.digital_marker is not None:
-                pulse_config["digital_marker"] = self.digital_marker
+        if self.digital_marker is not None:
+            pulse_config["digital_marker"] = self.digital_marker
 
         return pulse_config
 
-    def calculate_waveform(self):
-        arg_names = inspect.signature(self.waveform_function).parameters.keys()
-        if arg_names[0] == "self":
-            arg_names = arg_names[1:]
+    def _get_waveform_kwargs(self, waveform_function: Callable = None):
+        if waveform_function is None:
+            waveform_function = self.waveform_function
 
-        kwargs = {attr: getattr(self, attr) for attr in arg_names}
+        return {
+            attr: getattr(self, attr)
+            for attr in inspect.signature(waveform_function).parameters.keys()
+            if attr not in ["self", "operation", "args", "kwargs"]
+        }
+
+    def calculate_waveform(self):
+        kwargs = self._get_waveform_kwargs()
         waveform = self.waveform_function(**kwargs)
 
         # Optionally convert IQ waveforms to complex waveform
@@ -49,8 +52,21 @@ class Pulse(QuamComponent):
 
         return waveform
 
-    def waveform_function(self, **kwargs):
+    @staticmethod
+    def waveform_function(**kwargs):
         raise NotImplementedError
+
+
+@dataclass
+class MeasurementPulse(Pulse):
+    operation: ClassVar[str] = "measurement"
+
+    integration_weights: str = None
+
+    def get_pulse_config(self):
+        pulse_config = super().get_pulse_config()
+        if self.integration_weights is not None:
+            pulse_config["integration_weights"] = self.integration_weights
 
 
 @dataclass(kw_only=True, eq=False)
@@ -64,4 +80,4 @@ class DragPulse(Pulse):
 
     from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 
-    waveform_function = drag_gaussian_pulse_waveforms
+    waveform_function: ClassVar = staticmethod(drag_gaussian_pulse_waveforms)
