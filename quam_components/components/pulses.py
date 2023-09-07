@@ -1,5 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, List, ClassVar
+from typing import Dict, List
+import inspect
+import numpy as np
+
 from quam_components.core import QuamComponent
 
 
@@ -10,8 +13,6 @@ class Pulse(QuamComponent):
 
     integration_weights: Dict[str, List[float]] = None
     digital_marker: str = None
-
-    waveform_properties: ClassVar[List[str]]
 
     def get_pulse_config(self):
         assert self.operation in ["control", "measurement"]
@@ -32,8 +33,35 @@ class Pulse(QuamComponent):
         return pulse_config
 
     def calculate_waveform(self):
-        kwargs = {attr: getattr(self, attr) for attr in self.waveform_properties}
-        return self.waveform_function(**kwargs)
+        arg_names = inspect.signature(self.waveform_function).parameters.keys()
+        if arg_names[0] == "self":
+            arg_names = arg_names[1:]
+
+        kwargs = {attr: getattr(self, attr) for attr in arg_names}
+        waveform = self.waveform_function(**kwargs)
+
+        # Optionally convert IQ waveforms to complex waveform
+        if isinstance(waveform, tuple) and len(waveform) == 2:
+            if isinstance(waveform[0], (list, np.ndarray)):
+                waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])
+            else:
+                waveform = waveform[0] + 1.0j * waveform[1]
+
+        return waveform
 
     def waveform_function(self, **kwargs):
         raise NotImplementedError
+
+
+@dataclass(kw_only=True, eq=False)
+class DragPulse(Pulse):
+    amplitude: float
+    sigma: float
+    alpha: float
+    anharmonicity: float
+    detuning: float = 0.0
+    subtracted: bool = True
+
+    from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
+
+    waveform_function = drag_gaussian_pulse_waveforms
