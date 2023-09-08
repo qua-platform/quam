@@ -118,38 +118,34 @@ class PulseEmitter(QuamComponent):
 
     def apply_to_config(self, config: dict):
         for label, pulse in self.pulses.items():
-            waveform = pulse.calculate_pulse_waveform()
-            pulse = pulse.get_pulse_config()
+            pulse_config = pulse.get_pulse_config()
+            config["pulses"][f"{self.name}_{label}_pulse"] = pulse_config
+
+            waveform = pulse.calculate_waveform()
 
             if isinstance(waveform, numbers.Number):
                 wf_type = "constant"
-                is_complex = isinstance(waveform, numbers.complex)
+                if isinstance(waveform, numbers.complex):
+                    waveforms = {"I": waveform.real, "Q": waveform.imag}
+                else:
+                    waveforms = {"single": waveform}
             elif isinstance(waveform, (list, np.ndarray)):
                 wf_type = "arbitrary"
-                is_complex = np.iscomplexobj(waveform)
+                if np.iscomplexobj(waveform):
+                    waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
+                else:
+                    waveforms = {"single": list(waveform)}
 
-            # TODO check if these should be lists or if arrays are fine
-            if is_complex:
-                config["waveforms"][f"{self.name}_{label}_wf_I"] = {
-                    "type": wf_type,
-                    "sample": waveform.real,
-                }
-                config["waveforms"][f"{self.name}_{label}_wf_Q"] = {
-                    "type": wf_type,
-                    "sample": waveform.imag,
-                }
-                pulse["waveforms"] = {
-                    "I": f"{self.name}_{label}_wf_I",
-                    "Q": f"{self.name}_{label}_wf_Q",
-                }
-            else:
-                config["waveforms"][f"{self.name}_{label}_wf"] = {
+            for suffix, waveform in waveforms.items():
+                waveform_name = f"{self.name}_{label}_wf"
+                if suffix != "single":
+                    waveform_name += f"_{suffix}"
+
+                config["waveforms"][waveform_name] = {
                     "type": wf_type,
                     "sample": waveform,
                 }
-                pulse["waveforms"] = {"single": f"{self.name}_{label}_wf"}
-
-            config["pulses"][f"{self.name}_{label}_pulse"] = pulse
+                pulse_config["waveforms"][suffix] = waveform_name
 
 
 @dataclass(kw_only=True, eq=False)

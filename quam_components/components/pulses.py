@@ -23,6 +23,7 @@ class Pulse(QuamComponent):
         pulse_config = {
             "operation": self.operation,
             "length": self.length,
+            "waveforms": {},
         }
         if self.digital_marker is not None:
             pulse_config["digital_marker"] = self.digital_marker
