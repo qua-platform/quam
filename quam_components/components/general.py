@@ -119,20 +119,52 @@ class PulseEmitter(QuamComponent):
             label: f"{self.name}_{label}_pulse" for label, pulse in self.pulses.items()
         }
 
-    def play(self, pulse_name: str):
-        # pulse = self.pulses[pulse_name]
-        raise NotImplementedError
+    def play(
+        self,
+        pulse_name: str,
+        amplitude_scale: float = None,
+        duration: int = None,
+        condition=None,
+        chirp=None,
+        truncate=None,
+        timestamp_stream=None,
+        continue_chirp: bool = False,
+        target: str = "",
+    ):
+        from qm.qua import play, amp
+        from qm.qua._dsl import _PulseAmp
+
+        full_pulse_name = self.pulse_mapping[pulse_name]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse = full_pulse_name * amplitude_scale
+        else:
+            pulse = full_pulse_name
+
+        play(
+            pulse=pulse,
+            element=self.name,
+            duration=duration,
+            condition=condition,
+            chirp=chirp,
+            truncate=truncate,
+            timestamp_stream=timestamp_stream,
+            continue_chirp=continue_chirp,
+            target=target,
+        )
 
     def apply_to_config(self, config: dict):
         for label, pulse in self.pulses.items():
             pulse_config = pulse.get_pulse_config()
             config["pulses"][f"{self.name}_{label}_pulse"] = pulse_config
 
+            # Calculate and add waveforms
             waveform = pulse.calculate_waveform()
-
             if isinstance(waveform, numbers.Number):
                 wf_type = "constant"
-                if isinstance(waveform, numbers.complex):
+                if isinstance(waveform, numbers.Complex):
                     waveforms = {"I": waveform.real, "Q": waveform.imag}
                 else:
                     waveforms = {"single": waveform}
@@ -153,6 +185,15 @@ class PulseEmitter(QuamComponent):
                     "sample": waveform,
                 }
                 pulse_config["waveforms"][suffix] = waveform_name
+
+            # Calculate and add integration weights
+            integration_weights = pulse.calculate_integration_weights()
+            if integration_weights:
+                pulse_config["integration_weights"] = {}
+                for label, weights in integration_weights.items():
+                    full_label = f"{self.name}_{label}_iw"
+                    config["integration_weights"][full_label] = weights
+                    pulse_config["integration_weights"][label] = full_label
 
 
 @dataclass(kw_only=True, eq=False)
