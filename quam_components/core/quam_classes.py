@@ -112,13 +112,14 @@ class QuamBase(ReferenceClass):
 
         return False
 
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+    @classmethod
+    def _val_matches_attr_annotation(cls, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
         The attribute type must exactly match the annotation.
         For dict and list, no additional type check of args is performed.
         """
-        annotated_attrs = get_dataclass_attr_annotations(self)
+        annotated_attrs = get_dataclass_attr_annotations(cls)
         if attr not in annotated_attrs["allowed"]:
             return False
 

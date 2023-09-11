@@ -1,4 +1,6 @@
 import pytest
+from dataclasses import dataclass
+from copy import deepcopy
 from quam_components.components import *
 
 
@@ -72,8 +74,33 @@ def test_transmon_add_pulse():
         ),
     )
     transmon.xy.pulses["X180"] = pulses.DragPulse(
-        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20
+        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, rotation_angle=0
     )
+
+    quam_dict = transmon.to_dict()
+    assert quam_dict == {
+        "id": 1,
+        "xy": {
+            "mixer": {
+                "id": 1,
+                "local_oscillator": {"frequency": 4600000000.0},
+                "port_I": 1,
+                "port_Q": 2,
+                "frequency_drive": 5000000000.0,
+            },
+            "pulses": {
+                "X180": {
+                    "__class__": "quam_components.components.pulses.DragPulse",
+                    "amplitude": 1,
+                    "sigma": 4,
+                    "alpha": 2,
+                    "anharmonicity": 200000000.0,
+                    "rotation_angle": 0.0,
+                    "length": 20,
+                }
+            },
+        },
+    }
 
     config = {"elements": {}, "pulses": {}, "waveforms": {}}
     transmon.xy.apply_to_config(config)
@@ -108,3 +135,86 @@ def test_transmon_add_pulse():
     assert list(config["waveforms"]) == ["q1_xy_X180_wf_I", "q1_xy_X180_wf_Q"]
     assert config["waveforms"]["q1_xy_X180_wf_I"] == {"type": "arbitrary", "sample": I}
     assert config["waveforms"]["q1_xy_X180_wf_Q"] == {"type": "arbitrary", "sample": Q}
+
+
+@dataclass
+class QuamTestSingle(QuamRoot):
+    qubit: Transmon
+
+
+quam_dict_single = {
+    "qubit": {
+        "id": 0,
+        # "xy": {
+        #     "pi_amp": 10e-3,
+        #     "pi_length": 40,
+        #     "anharmonicity": 200e6,
+        # }
+    },
+}
+
+quam_dict_single_nested = {
+    "qubit": {
+        "id": 0,
+        "xy": {
+            "pi_amp": 10e-3,
+            "pi_length": 40,
+            "anharmonicity": 200e6,
+        },
+    },
+}
+
+
+def test_instantiation_single_element():
+    quam = QuamTestSingle.load(quam_dict_single)
+
+    assert isinstance(quam.qubit, Transmon)
+    assert quam.qubit.id == 0
+    assert quam.qubit.xy is None
+
+    assert quam.qubit._quam is quam
+
+
+def test_instantiation_single_nested_element():
+    with pytest.raises(AttributeError):
+        quam = QuamTestSingle.load(quam_dict_single_nested)
+
+    quam_dict = deepcopy(quam_dict_single_nested)
+    quam_dict["qubit"]["xy"]["mixer"] = {
+        "id": 0,
+        "port_I": 0,
+        "port_Q": 1,
+        "frequency_drive": 5e9,
+        "local_oscillator": {"power": 10, "frequency": 6e9},
+    }
+    quam = QuamTestSingle.load(quam_dict)
+
+    assert quam.qubit.xy.mixer.id == 0
+    assert quam.qubit.xy.mixer.name == "mixer0"
+    assert quam.qubit.xy.mixer.local_oscillator.power == 10
+    assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
+
+    assert quam.qubit._quam is quam
+    assert quam.qubit.xy._quam is quam
+    assert quam.qubit.xy.mixer._quam is quam
+
+
+def test_instantiate_quam_dict():
+    @dataclass
+    class QuamTest(QuamRoot):
+        qubit: Transmon
+        wiring: dict
+
+    quam_dict = deepcopy(quam_dict_single_nested)
+    quam_dict["qubit"]["xy"]["mixer"] = {
+        "id": 0,
+        "port_I": ":wiring.port_I",
+        "port_Q": ":wiring.port_Q",
+        "frequency_drive": 5e9,
+        "local_oscillator": {"power": 10, "frequency": 6e9},
+    }
+    quam_dict["wiring"] = {
+        "port_I": 0,
+        "port_Q": 1,
+    }
+    QuamTest.load(quam_dict)

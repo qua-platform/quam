@@ -1,4 +1,5 @@
 import pytest
+from typing import Dict
 from dataclasses import dataclass, field
 from quam_components.core.quam_classes import *
 from collections import UserDict
@@ -134,3 +135,34 @@ def test_quam_dict_getattr():
 def test_quam_dict_get_attr_names():
     quam_dict = QuamDict(val1=42)
     assert quam_dict._get_attr_names() == ["val1"]
+
+
+def test_val_matches_annotation():
+    @dataclass
+    class TestQuamComponent(QuamComponent):
+        val_dict: dict
+        val_float: float
+        val_Dict: Dict
+        val_Dict_annotated: Dict[str, int]
+
+    assert TestQuamComponent._val_matches_attr_annotation("val_dict", {})
+    assert TestQuamComponent._val_matches_attr_annotation("val_dict", {1: 2})
+    assert TestQuamComponent._val_matches_attr_annotation("val_dict", QuamDict())
+    assert not TestQuamComponent._val_matches_attr_annotation("val_dict", 42)
+
+    assert not TestQuamComponent._val_matches_attr_annotation("val_float", {})
+    assert not TestQuamComponent._val_matches_attr_annotation("val_float", {1: 2})
+    assert not TestQuamComponent._val_matches_attr_annotation("val_float", QuamDict())
+    assert TestQuamComponent._val_matches_attr_annotation("val_float", 42.0)
+
+    assert TestQuamComponent._val_matches_attr_annotation("val_Dict", {})
+    assert TestQuamComponent._val_matches_attr_annotation("val_Dict", {1: 2})
+    assert TestQuamComponent._val_matches_attr_annotation("val_Dict", QuamDict())
+    assert not TestQuamComponent._val_matches_attr_annotation("val_Dict", 42)
+
+    assert TestQuamComponent._val_matches_attr_annotation("val_Dict_annotated", {})
+    assert TestQuamComponent._val_matches_attr_annotation("val_Dict_annotated", {1: 2})
+    assert TestQuamComponent._val_matches_attr_annotation(
+        "val_Dict_annotated", QuamDict()
+    )
+    assert not TestQuamComponent._val_matches_attr_annotation("val_Dict_annotated", 42)

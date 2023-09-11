@@ -7,7 +7,14 @@ from quam_components.core import QuamComponent
 from quam_components.components.pulses import Pulse
 
 
-__all__ = ["LocalOscillator", "Mixer", "AnalogInput", "IQChannel", "SingleChannel"]
+__all__ = [
+    "LocalOscillator",
+    "Mixer",
+    "AnalogInput",
+    "PulseEmitter",
+    "IQChannel",
+    "SingleChannel",
+]
 
 
 @dataclass(kw_only=True, eq=False)

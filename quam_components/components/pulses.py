@@ -72,6 +72,7 @@ class MeasurementPulse(Pulse):
 
 @dataclass(kw_only=True, eq=False)
 class DragPulse(Pulse):
+    rotation_angle: float
     amplitude: float
     sigma: float
     alpha: float
@@ -79,6 +80,32 @@ class DragPulse(Pulse):
     detuning: float = 0.0
     subtracted: bool = True
 
-    from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
+    @staticmethod
+    def waveform_function(
+        length,
+        amplitude,
+        sigma,
+        alpha,
+        anharmonicity,
+        detuning,
+        subtracted,
+        rotation_angle,
+    ):
+        from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 
-    waveform_function: ClassVar = staticmethod(drag_gaussian_pulse_waveforms)
+        I, Q = drag_gaussian_pulse_waveforms(
+            amplitude=amplitude,
+            length=length,
+            sigma=sigma,
+            alpha=alpha,
+            anharmonicity=anharmonicity,
+            detuning=detuning,
+            subtracted=subtracted,
+        )
+        I, Q = np.array(I), np.array(Q)
+
+        rotation_angle_rad = np.pi * rotation_angle / 180
+        I_rot = I * np.cos(rotation_angle_rad) - Q * np.sin(rotation_angle_rad)
+        Q_rot = I * np.sin(rotation_angle_rad) + Q * np.cos(rotation_angle_rad)
+
+        return I_rot + 1.0j * Q_rot
