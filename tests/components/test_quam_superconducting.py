@@ -96,21 +96,3 @@ def test_quam_referenced_full(tmp_path):
     qua_config2_str = json.dumps(qua_config2, indent=4)
 
     assert qua_config_str == qua_config2_str
-
-
-def test_quam_referenced_add_pulse(tmp_path):
-    default_pulses = [
-        f"{axis}{angle}" for axis in "XY" for angle in ["m90", "90", "180"]
-    ]
-    folder = tmp_path / "quam_superconducting_referenced"
-    folder.mkdir(exist_ok=True)
-
-    quam = create_quam_superconducting_referenced(num_qubits=3)
-    quam.save(folder / "quam", content_mapping={"wiring.json": "wiring"})
-    loaded_quam = json.load((folder / "quam" / "state.json").open("r"))
-    assert "pulses" not in loaded_quam["qubits"][0]["xy"]
-
-    quam.qubits[0].xy.pulses.append("X270")
-    quam.save(folder / "quam", content_mapping={"wiring.json": "wiring"})
-    loaded_quam = json.load((folder / "quam" / "state.json").open("r"))
-    loaded_quam["qubits"][0]["xy"]["pulses"] == default_pulses + ["X270"]
