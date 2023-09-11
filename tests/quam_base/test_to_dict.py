@@ -112,3 +112,21 @@ def test_to_dict_nondefault():
         "optional_val": 42,
         "optional_list": ["test"],
     }
+
+
+def test_omit_default_dict_field():
+    @dataclass
+    class QuamBasicComponent(QuamComponent):
+        d: dict = field(default_factory=dict)
+
+    quam_component = QuamBasicComponent()
+    assert quam_component.to_dict() == {}
+
+
+def test_omit_default_list_field():
+    @dataclass
+    class QuamBasicComponent(QuamComponent):
+        l: list = field(default_factory=list)
+
+    quam_component = QuamBasicComponent()
+    assert quam_component.to_dict() == {}

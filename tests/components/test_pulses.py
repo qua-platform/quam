@@ -45,8 +45,7 @@ def test_pulse_emitter():
     pulse_emitter = PulseEmitter()
     d = pulse_emitter.to_dict()
 
-    # Technically this should actually be empty, but since it's a factory I'll allow it
-    assert d == {"pulses": {}}
+    assert d == {}
 
 
 def test_IQ_channel():
@@ -54,4 +53,12 @@ def test_IQ_channel():
         mixer=Mixer(id=0, local_oscillator=None, port_I=0, port_Q=1, frequency_drive=0)
     )
     d = IQ_channel.to_dict()
-    assert d["pulses"] == {}
+    assert d == {
+        "mixer": {
+            "id": 0,
+            "local_oscillator": None,
+            "port_I": 0,
+            "port_Q": 1,
+            "frequency_drive": 0,
+        }
+    }
