@@ -6,7 +6,7 @@ import numpy as np
 from quam_components.core import QuamComponent
 
 
-__all__ = ["Pulse", "DragPulse"]
+__all__ = ["Pulse", "MeasurementPulse", "ReadoutPulse", "DragPulse"]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -78,36 +78,36 @@ class MeasurementPulse(Pulse):
 
 
 @dataclass(kw_only=True, eq=False)
-class ConstantReadoutPulse(MeasurementPulse):
+class ReadoutPulse(MeasurementPulse):
     amplitude: float
     rotation_angle: float = None
 
     def calculate_integration_weights(self):
         integration_weights = {
-            "cosine_weights": {
+            "cosine": {
                 "cosine": [(1.0, self.length)],
                 "sine": [(0.0, self.length)],
             },
-            "sine_weights": {
+            "sine": {
                 "cosine": [(0.0, self.length)],
                 "sine": [(1.0, self.length)],
             },
             # Why is there no minus cosine?
-            "minus_sine_weights": {
+            "minus_sine": {
                 "cosine": [(0.0, self.length)],
                 "sine": [(-1.0, self.length)],
             },
         }
         if self.rotation_angle is not None:
-            integration_weights["rotated_cosine_weights"] = {
+            integration_weights["rotated_cosine"] = {
                 "cosine": [(np.cos(self.rotation_angle), self.length)],
                 "sine": [(-np.sin(self.rotation_angle), self.length)],
             }
-            integration_weights["rotated_sine_weights"] = {
+            integration_weights["rotated_sine"] = {
                 "cosine": [(np.sin(self.rotation_angle), self.length)],
                 "sine": [(np.cos(self.rotation_angle), self.length)],
             }
-            integration_weights["rotated_minus_sine_weights"] = {
+            integration_weights["rotated_minus_sine"] = {
                 "cosine": [(-np.sin(self.rotation_angle), self.length)],
                 "sine": [(-np.cos(self.rotation_angle), self.length)],
             }

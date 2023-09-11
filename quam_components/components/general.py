@@ -164,7 +164,7 @@ class PulseEmitter(QuamComponent):
             waveform = pulse.calculate_waveform()
             if isinstance(waveform, numbers.Number):
                 wf_type = "constant"
-                if isinstance(waveform, numbers.complex):
+                if isinstance(waveform, numbers.Complex):
                     waveforms = {"I": waveform.real, "Q": waveform.imag}
                 else:
                     waveforms = {"single": waveform}
@@ -192,7 +192,7 @@ class PulseEmitter(QuamComponent):
                 pulse_config["integration_weights"] = {}
                 for label, weights in integration_weights.items():
                     full_label = f"{self.name}_{label}_iw"
-                    config["integration_weights"][full_label] = list(weights)
+                    config["integration_weights"][full_label] = weights
                     pulse_config["integration_weights"][label] = full_label
 
 
