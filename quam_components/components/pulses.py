@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, ClassVar
+from typing import Callable, ClassVar, Dict, List, Union
 import inspect
 import numpy as np
 
@@ -40,6 +40,10 @@ class Pulse(QuamComponent):
             if attr not in ["self", "operation", "args", "kwargs"]
         }
 
+    def calculate_integration_weights(self) -> Dict[str, np.ndarray]:
+        # Do nothing by default, allow subclasses to add integration weights
+        ...
+
     def calculate_waveform(self):
         kwargs = self._get_waveform_kwargs()
         waveform = self.waveform_function(**kwargs)
@@ -54,20 +58,64 @@ class Pulse(QuamComponent):
         return waveform
 
     @staticmethod
-    def waveform_function(**kwargs):
-        raise NotImplementedError
+    def waveform_function(**kwargs) -> List[Union[float, complex]]:
+        """Function that returns the waveform of the pulse.
+
+        Can be either a list of floats, a list of complex numbers, or a tuple of two
+        lists.
+        This function is called from `calculate_waveform` with the kwargs of the
+        dataclass instance as arguments. Each kwarg should therefore correspond to a
+        dataclass field.
+        """
+        raise NotImplementedError("Subclass pulses should implement this method")
 
 
 @dataclass
 class MeasurementPulse(Pulse):
     operation: ClassVar[str] = "measurement"
 
-    integration_weights: str = None
+    digital_marker: str = "ON"
 
-    def get_pulse_config(self):
-        pulse_config = super().get_pulse_config()
-        if self.integration_weights is not None:
-            pulse_config["integration_weights"] = self.integration_weights
+
+@dataclass
+class ConstantReadoutPulse(MeasurementPulse):
+    amplitude: float
+    rotation_angle: float = None
+
+    def calculate_integration_weights(self):
+        integration_weights = {
+            "cosine_weights": {
+                "cosine": [(1.0, self.length)],
+                "sine": [(0.0, self.length)],
+            },
+            "sine_weights": {
+                "cosine": [(0.0, self.length)],
+                "sine": [(1.0, self.length)],
+            },
+            # Why is there no minus cosine?
+            "minus_sine_weights": {
+                "cosine": [(0.0, self.length)],
+                "sine": [(-1.0, self.length)],
+            },
+        }
+        if self.rotation_angle is not None:
+            integration_weights["rotated_cosine_weights"] = {
+                "cosine": [(np.cos(self.rotation_angle), self.length)],
+                "sine": [(-np.sin(self.rotation_angle), self.length)],
+            }
+            integration_weights["rotated_sine_weights"] = {
+                "cosine": [(np.sin(self.rotation_angle), self.length)],
+                "sine": [(np.cos(self.rotation_angle), self.length)],
+            }
+            integration_weights["rotated_minus_sine_weights"] = {
+                "cosine": [(-np.sin(self.rotation_angle), self.length)],
+                "sine": [(-np.cos(self.rotation_angle), self.length)],
+            }
+        return integration_weights
+
+    def waveform_function(self, amplitude):
+        # This should probably be complex because the pulse needs I and Q
+        return complex(amplitude)
 
 
 @dataclass(kw_only=True, eq=False)
