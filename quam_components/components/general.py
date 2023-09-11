@@ -1,11 +1,20 @@
+import numbers
 import numpy as np
-from typing import List, Union
-from dataclasses import dataclass
+from typing import Dict, List, Union
+from dataclasses import dataclass, field
 
 from quam_components.core import QuamComponent
+from quam_components.components.pulses import Pulse
 
 
-__all__ = ["LocalOscillator", "Mixer", "AnalogInput"]
+__all__ = [
+    "LocalOscillator",
+    "Mixer",
+    "AnalogInput",
+    "PulseEmitter",
+    "IQChannel",
+    "SingleChannel",
+]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -69,11 +78,13 @@ class Mixer(QuamComponent):
     @staticmethod
     def IQ_imbalance(g: float, phi: float) -> List[float]:
         """
-        Creates the correction matrix for the mixer imbalance caused by the gain and phase imbalances, more information can
-        be seen here:
+        Creates the correction matrix for the mixer imbalance caused by the gain and
+        phase imbalances, more information can be seen here:
         https://docs.qualang.io/libs/examples/mixer-calibration/#non-ideal-mixer
-        :param g: relative gain imbalance between the I & Q ports. (unit-less), set to 0 for no gain imbalance.
-        :param phi: relative phase imbalance between the I & Q ports (radians), set to 0 for no phase imbalance.
+        :param g: relative gain imbalance between the I & Q ports. (unit-less),
+            set to 0 for no gain imbalance.
+        :param phi: relative phase imbalance between the I & Q ports (radians),
+            set to 0 for no phase imbalance.
         """
         c = np.cos(phi)
         s = np.sin(phi)
@@ -96,3 +107,105 @@ class AnalogInput(QuamComponent):
             "offset": self.offset,
             "gain_db": self.gain,
         }
+
+
+@dataclass(kw_only=True, eq=False)
+class PulseEmitter(QuamComponent):
+    pulses: Dict[str, Pulse] = field(default_factory=dict)
+
+    @property
+    def pulse_mapping(self):
+        return {
+            label: f"{self.name}_{label}_pulse" for label, pulse in self.pulses.items()
+        }
+
+    def play(self, pulse_name: str):
+        # pulse = self.pulses[pulse_name]
+        raise NotImplementedError
+
+    def apply_to_config(self, config: dict):
+        for label, pulse in self.pulses.items():
+            pulse_config = pulse.get_pulse_config()
+            config["pulses"][f"{self.name}_{label}_pulse"] = pulse_config
+
+            waveform = pulse.calculate_waveform()
+
+            if isinstance(waveform, numbers.Number):
+                wf_type = "constant"
+                if isinstance(waveform, numbers.complex):
+                    waveforms = {"I": waveform.real, "Q": waveform.imag}
+                else:
+                    waveforms = {"single": waveform}
+            elif isinstance(waveform, (list, np.ndarray)):
+                wf_type = "arbitrary"
+                if np.iscomplexobj(waveform):
+                    waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
+                else:
+                    waveforms = {"single": list(waveform)}
+
+            for suffix, waveform in waveforms.items():
+                waveform_name = f"{self.name}_{label}_wf"
+                if suffix != "single":
+                    waveform_name += f"_{suffix}"
+
+                config["waveforms"][waveform_name] = {
+                    "type": wf_type,
+                    "sample": waveform,
+                }
+                pulse_config["waveforms"][suffix] = waveform_name
+
+
+@dataclass(kw_only=True, eq=False)
+class IQChannel(PulseEmitter):
+    mixer: Mixer
+
+    @property
+    def name(self) -> str:
+        return f"{self.parent.name}_{self._get_parent_attr_name()}"
+
+    def apply_to_config(self, config: dict):
+        # Add pulses & waveforms
+        super().apply_to_config(config)
+
+        config["elements"][self.name] = {
+            "mixInputs": self.mixer.get_input_config(),
+            "intermediate_frequency": self.mixer.intermediate_frequency,
+            "operations": self.pulse_mapping,
+        }
+
+
+@dataclass(kw_only=True, eq=False)
+class SingleChannel(PulseEmitter):
+    port: int
+    filter_fir_taps: List[float] = None
+    filter_iir_taps: List[float] = None
+
+    offset: float = 0
+
+    controller: str = "con1"
+
+    @property
+    def name(self) -> str:
+        return f"{self.parent.name}_{self._get_parent_attr_name()}"
+
+    def apply_to_config(self, config: dict):
+        # Add pulses & waveforms
+        super().apply_to_config(config)
+
+        config["elements"][self.name] = {
+            "singleInput": {
+                "port": (self.controller, self.port),
+            },
+            "operations": self.pulse_mapping,
+        }
+
+        analog_outputs = config["controllers"][self.controller]["analog_outputs"]
+        analog_output = analog_outputs[self.port] = {"offset": self.offset}
+
+        if self.filter_fir_taps is not None:
+            output_filter = analog_output.setdefault("filter", {})
+            output_filter["feedforward"] = self.filter_fir_taps
+
+        if self.filter_iir_taps is not None:
+            output_filter = analog_output.setdefault("filter", {})
+            output_filter["feedback"] = self.filter_iir_taps

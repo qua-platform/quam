@@ -86,6 +86,12 @@ class QuamBase(ReferenceClass):
                     "Please make it a dataclass."
                 )
 
+    def _get_parent_attr_name(self) -> str:
+        if self.parent is not None:
+            for attr_name in self.parent._get_attr_names():
+                if getattr(self.parent, attr_name) is self:
+                    return attr_name
+
     def _get_attr_names(self):
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
@@ -106,13 +112,14 @@ class QuamBase(ReferenceClass):
 
         return False
 
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+    @classmethod
+    def _val_matches_attr_annotation(cls, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
         The attribute type must exactly match the annotation.
         For dict and list, no additional type check of args is performed.
         """
-        annotated_attrs = get_dataclass_attr_annotations(self)
+        annotated_attrs = get_dataclass_attr_annotations(cls)
         if attr not in annotated_attrs["allowed"]:
             return False
 

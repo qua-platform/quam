@@ -1,6 +1,5 @@
 import pytest
 from typing import List
-from copy import deepcopy
 from dataclasses import dataclass
 
 from quam_components.core import QuamRoot, QuamComponent
@@ -73,18 +72,6 @@ def test_get_dataclass_attributes_subdataclass():
     }
 
 
-quam_dict_single = {
-    "qubit": {
-        "id": 0,
-        # "xy": {
-        #     "pi_amp": 10e-3,
-        #     "pi_length": 40,
-        #     "anharmonicity": 200e6,
-        # }
-    },
-}
-
-
 def test_validate_standard_types():
     validate_obj_type(1, int)
     validate_obj_type(1.0, float)
@@ -129,11 +116,6 @@ def test_validate_typing_dict():
         validate_obj_type({"a": 1, "b": 2}, Dict[str, str])
 
     validate_obj_type(":reference", Dict[str, int])
-
-
-@dataclass
-class QuamTestSingle(QuamRoot):
-    qubit: Transmon
 
 
 @dataclass
@@ -290,52 +272,6 @@ def test_instantiate_attrs():
     assert attrs["extra"] == {"extra": 42}
 
 
-def test_instantiation_single_element():
-    quam = QuamTestSingle.load(quam_dict_single)
-
-    assert isinstance(quam.qubit, Transmon)
-    assert quam.qubit.id == 0
-    assert quam.qubit.xy is None
-
-    assert quam.qubit._quam is quam
-
-
-quam_dict_single_nested = {
-    "qubit": {
-        "id": 0,
-        "xy": {
-            "pi_amp": 10e-3,
-            "pi_length": 40,
-            "anharmonicity": 200e6,
-        },
-    },
-}
-
-
-def test_instantiation_single_nested_element():
-    with pytest.raises(AttributeError):
-        quam = QuamTestSingle.load(quam_dict_single_nested)
-
-    quam_dict = deepcopy(quam_dict_single_nested)
-    quam_dict["qubit"]["xy"]["mixer"] = {
-        "id": 0,
-        "port_I": 0,
-        "port_Q": 1,
-        "frequency_drive": 5e9,
-        "local_oscillator": {"power": 10, "frequency": 6e9},
-    }
-    quam = QuamTestSingle.load(quam_dict)
-
-    assert quam.qubit.xy.mixer.id == 0
-    assert quam.qubit.xy.mixer.name == "mixer0"
-    assert quam.qubit.xy.mixer.local_oscillator.power == 10
-    assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
-
-    assert quam.qubit._quam is quam
-    assert quam.qubit.xy._quam is quam
-    assert quam.qubit.xy.mixer._quam is quam
-
-
 def test_instantiate_wrong_type():
     class QuamTest(QuamRoot):
         qubit: Transmon
@@ -355,27 +291,6 @@ def test_instantiate_component_wrong_type():
         instantiate_quam_class(QuamTestComponent, {"test_str": 0})
 
     instantiate_quam_class(QuamTestComponent, {"test_str": 0}, validate_type=False)
-
-
-def test_instantiate_quam_dict():
-    @dataclass
-    class QuamTest(QuamRoot):
-        qubit: Transmon
-        wiring: dict
-
-    quam_dict = deepcopy(quam_dict_single_nested)
-    quam_dict["qubit"]["xy"]["mixer"] = {
-        "id": 0,
-        "port_I": ":wiring.port_I",
-        "port_Q": ":wiring.port_Q",
-        "frequency_drive": 5e9,
-        "local_oscillator": {"power": 10, "frequency": 6e9},
-    }
-    quam_dict["wiring"] = {
-        "port_I": 0,
-        "port_Q": 1,
-    }
-    QuamTest.load(quam_dict)
 
 
 def test_instantiation_fixed_attrs():
