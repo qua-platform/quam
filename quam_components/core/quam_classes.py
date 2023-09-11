@@ -309,6 +309,11 @@ class QuamDict(UserDict, QuamBase):
         value = convert_dict_and_list(value)
         super().__setitem__(key, value)
 
+    def __eq__(self, other) -> bool:
+        if isinstance(other, dict):
+            return self.data == other
+        return super().__eq__(other)
+
     # QuAM methods
     def _get_attr_names(self):
         return list(self.data.keys())

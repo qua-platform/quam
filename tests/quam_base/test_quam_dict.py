@@ -21,6 +21,9 @@ def test_empty_quam_dict():
     assert quam_dict.get_attrs() == {}
     assert quam_dict.to_dict() == {}
 
+    assert quam_dict == QuamDict()
+    assert quam_dict == {}
+
     with pytest.raises(AttributeError):
         quam_dict.nonexisting_attr
     with pytest.raises(KeyError):
@@ -38,6 +41,9 @@ def test_quam_dict_nonempty():
     assert quam_dict._get_attr_names() == ["val1"]
     assert quam_dict.get_attrs() == {"val1": 42}
     assert quam_dict.to_dict() == {"val1": 42}
+
+    assert quam_dict == QuamDict(val1=42)
+    assert quam_dict == {"val1": 42}
 
     assert quam_dict.val1 == 42
     assert quam_dict["val1"] == 42
