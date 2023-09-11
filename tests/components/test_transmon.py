@@ -2,6 +2,7 @@ import pytest
 from dataclasses import dataclass
 from copy import deepcopy
 from quam_components.components import *
+from quam_components.core import QuamRoot
 
 
 def test_basic_transmon():
@@ -142,26 +143,22 @@ class QuamTestSingle(QuamRoot):
     qubit: Transmon
 
 
-quam_dict_single = {
-    "qubit": {
-        "id": 0,
-        # "xy": {
-        #     "pi_amp": 10e-3,
-        #     "pi_length": 40,
-        #     "anharmonicity": 200e6,
-        # }
-    },
-}
+quam_dict_single = {"qubit": {"id": 0}}
+
 
 quam_dict_single_nested = {
     "qubit": {
         "id": 0,
         "xy": {
-            "pi_amp": 10e-3,
-            "pi_length": 40,
-            "anharmonicity": 200e6,
+            "mixer": {
+                "id": 0,
+                "port_I": 0,
+                "port_Q": 1,
+                "frequency_drive": 5e9,
+                "local_oscillator": {"power": 10, "frequency": 6e9},
+            }
         },
-    },
+    }
 }
 
 
@@ -176,18 +173,7 @@ def test_instantiation_single_element():
 
 
 def test_instantiation_single_nested_element():
-    with pytest.raises(AttributeError):
-        quam = QuamTestSingle.load(quam_dict_single_nested)
-
-    quam_dict = deepcopy(quam_dict_single_nested)
-    quam_dict["qubit"]["xy"]["mixer"] = {
-        "id": 0,
-        "port_I": 0,
-        "port_Q": 1,
-        "frequency_drive": 5e9,
-        "local_oscillator": {"power": 10, "frequency": 6e9},
-    }
-    quam = QuamTestSingle.load(quam_dict)
+    quam = QuamTestSingle.load(quam_dict_single_nested)
 
     assert quam.qubit.xy.mixer.id == 0
     assert quam.qubit.xy.mixer.name == "mixer0"

@@ -70,14 +70,14 @@ class Pulse(QuamComponent):
         raise NotImplementedError("Subclass pulses should implement this method")
 
 
-@dataclass
+@dataclass(kw_only=True, eq=False)
 class MeasurementPulse(Pulse):
     operation: ClassVar[str] = "measurement"
 
     digital_marker: str = "ON"
 
 
-@dataclass
+@dataclass(kw_only=True, eq=False)
 class ConstantReadoutPulse(MeasurementPulse):
     amplitude: float
     rotation_angle: float = None
