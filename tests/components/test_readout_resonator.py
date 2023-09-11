@@ -23,7 +23,6 @@ def test_empty_readout_resonator():
             "frequency_drive": 5100000000.0,
             "local_oscillator": {"frequency": 5000000000.0},
         },
-        "pulses": {},
     }
 
     cfg = {
