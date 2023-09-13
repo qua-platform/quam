@@ -8,7 +8,7 @@ from quam_components.components.pulses import Pulse
 
 
 try:
-    from qm.qua import play, amp
+    from qm.qua import play, amp, wait, align
 except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
 
@@ -143,9 +143,9 @@ class PulseEmitter(QuamComponent):
         if amplitude_scale is not None:
             if not isinstance(amplitude_scale, _PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
-            pulse = full_pulse_name * amplitude_scale
+            pulse = pulse_name * amplitude_scale
         else:
-            pulse = full_pulse_name
+            pulse = pulse_name
 
         # At the moment, self.name is not defined for PulseEmitter because it could
         # be a property or dataclass field in a subclass. Need to find elegant solution.
@@ -171,7 +171,7 @@ class PulseEmitter(QuamComponent):
             if waveform:
                 if isinstance(waveform, numbers.Number):
                     wf_type = "constant"
-                    if isinstance(waveform, numbers.Complex):
+                    if isinstance(waveform, complex):
                         waveforms = {"I": waveform.real, "Q": waveform.imag}
                     else:
                         waveforms = {"single": waveform}
@@ -209,6 +209,15 @@ class PulseEmitter(QuamComponent):
                     "samples": pulse.digital_marker
                 }
                 pulse_config["digital_marker"] = full_label
+
+    def wait(self, duration, *other_elements):
+        other_elements_str = [str(element) for element in other_elements]
+        wait(duration, self.name, *other_elements_str)
+
+    def align(self, *other_elements):
+        assert len(other_elements)
+        other_elements_str = [str(element) for element in other_elements]
+        align(self.name, *other_elements_str)
 
 
 @dataclass
