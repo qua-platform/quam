@@ -8,7 +8,6 @@ from typing import (
     ClassVar,
     Any,
     Dict,
-    Self,
     get_type_hints,
     get_origin,
     get_args,
@@ -240,7 +239,7 @@ class QuamRoot(QuamBase):
         filepath_or_dict: Union[str, Path, dict],
         validate_type: bool = True,
         fix_attrs: bool = True,
-    ) -> Self:
+    ):
         if isinstance(filepath_or_dict, dict):
             contents = filepath_or_dict
         else:
@@ -382,7 +381,7 @@ class QuamList(UserList, QuamBase):
         converted_item = convert_dict_and_list(item)
         super().__setitem__(i, converted_item)
 
-    def __iadd__(self, other: Iterable) -> Self:
+    def __iadd__(self, other: Iterable):
         converted_other = [convert_dict_and_list(elem) for elem in other]
         return super().__iadd__(converted_other)
 

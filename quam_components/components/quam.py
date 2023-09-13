@@ -10,7 +10,7 @@ from .resonators import *
 __all__ = ["QuAM"]
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class QuAM(QuamRoot):
     mixers: List[Mixer] = field(default_factory=list)
     qubits: List[Transmon] = field(default_factory=list)

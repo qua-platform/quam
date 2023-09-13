@@ -16,7 +16,7 @@ def test_base_quam_component_reference():
 
 
 def test_subclass_quam_component_reference():
-    @dataclass(kw_only=True, eq=False)
+    @dataclass
     class QuamComponentTest(QuamComponent):
         ...
 
@@ -25,7 +25,7 @@ def test_subclass_quam_component_reference():
     assert quam_elem._references == {"a": ":test"}
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class QuamComponentTest(QuamComponent):
     int_val: int
 
@@ -43,7 +43,7 @@ def test_quam_component_reference_during_initialization():
 
 
 def test_basic_reference():
-    @dataclass(kw_only=True, eq=False)
+    @dataclass
     class QuamRootTest(QuamRoot):
         quam_elem1: QuamComponentTest
         quam_elem2: QuamComponentTest
@@ -64,7 +64,7 @@ def test_basic_reference():
 
 
 def test_list_referencing():
-    @dataclass(kw_only=True, eq=False)
+    @dataclass
     class QuamRootTest(QuamRoot):
         quam_elems: List[QuamComponentTest]
         quam_elem2: QuamComponentTest
@@ -83,7 +83,7 @@ def test_list_referencing():
 
 
 def test_reference_dict_elem():
-    @dataclass(kw_only=True, eq=False)
+    @dataclass
     class QuamRootTest(QuamRoot):
         quam_elem_dict: dict
         quam_elem2: QuamComponentTest

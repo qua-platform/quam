@@ -6,15 +6,15 @@ import numpy as np
 from quam_components.core import QuamComponent
 
 
-__all__ = ["Pulse", "MeasurementPulse", "ReadoutPulse", "DragPulse"]
+__all__ = ["Pulse", "MeasurementPulse", "ReadoutPulse", "DragPulse", "SquarePulse"]
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class Pulse(QuamComponent):
     operation: ClassVar[str] = "control"
     length: int
 
-    digital_marker: Union[str, List[Tuple[int, int]]] = None
+    digital_marker: ClassVar[Union[str, List[Tuple[int, int]]]] = None
 
     def get_pulse_config(self):
         assert self.operation in ["control", "measurement"]
@@ -70,14 +70,14 @@ class Pulse(QuamComponent):
         raise NotImplementedError("Subclass pulses should implement this method")
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class MeasurementPulse(Pulse):
     operation: ClassVar[str] = "measurement"
 
-    digital_marker: str = "ON"
+    digital_marker: ClassVar[str] = "ON"
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class ReadoutPulse(MeasurementPulse):
     amplitude: float
     rotation_angle: float = None
@@ -118,7 +118,7 @@ class ReadoutPulse(MeasurementPulse):
         return complex(amplitude)
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class DragPulse(Pulse):
     rotation_angle: float
     amplitude: float
@@ -157,3 +157,12 @@ class DragPulse(Pulse):
         Q_rot = I * np.sin(rotation_angle_rad) + Q * np.cos(rotation_angle_rad)
 
         return I_rot + 1.0j * Q_rot
+
+
+@dataclass
+class SquarePulse(Pulse):
+    amplitude: float
+
+    @staticmethod
+    def waveform_function(length, amplitude):
+        return [amplitude] 

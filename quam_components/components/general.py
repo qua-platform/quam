@@ -22,13 +22,13 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class LocalOscillator(QuamComponent):
     power: float = None
     frequency: float = None
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class Mixer(QuamComponent):
     id: Union[int, str]
 
@@ -99,7 +99,7 @@ class Mixer(QuamComponent):
         ]
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class AnalogInput(QuamComponent):
     port: int
     offset: float = 0
@@ -114,9 +114,9 @@ class AnalogInput(QuamComponent):
         }
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class PulseEmitter(QuamComponent):
-    pulses: Dict[str, Pulse] = field(default_factory=dict)
+    pulses: Dict[str, Pulse]
 
     @property
     def pulse_mapping(self):
@@ -210,7 +210,7 @@ class PulseEmitter(QuamComponent):
                 pulse_config["digital_marker"] = full_label
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class IQChannel(PulseEmitter):
     mixer: Mixer
 
@@ -229,7 +229,7 @@ class IQChannel(PulseEmitter):
         }
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class SingleChannel(PulseEmitter):
     port: int
     filter_fir_taps: List[float] = None

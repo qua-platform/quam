@@ -7,7 +7,7 @@ from quam_components.components.general import IQChannel, SingleChannel
 __all__ = ["Transmon"]
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class Transmon(QuamComponent):
     id: int
 

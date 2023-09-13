@@ -7,7 +7,7 @@ from .general import Mixer, PulseEmitter
 __all__ = ["ReadoutResonator"]
 
 
-@dataclass(kw_only=True, eq=False)
+@dataclass
 class ReadoutResonator(PulseEmitter):
     id: Union[int, str]
     mixer: Mixer
