@@ -168,29 +168,30 @@ class PulseEmitter(QuamComponent):
 
             # Calculate and add waveforms
             waveform = pulse.calculate_waveform()
-            if isinstance(waveform, numbers.Number):
-                wf_type = "constant"
-                if isinstance(waveform, numbers.Complex):
-                    waveforms = {"I": waveform.real, "Q": waveform.imag}
-                else:
-                    waveforms = {"single": waveform}
-            elif isinstance(waveform, (list, np.ndarray)):
-                wf_type = "arbitrary"
-                if np.iscomplexobj(waveform):
-                    waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
-                else:
-                    waveforms = {"single": list(waveform)}
+            if waveform:
+                if isinstance(waveform, numbers.Number):
+                    wf_type = "constant"
+                    if isinstance(waveform, numbers.Complex):
+                        waveforms = {"I": waveform.real, "Q": waveform.imag}
+                    else:
+                        waveforms = {"single": waveform}
+                elif isinstance(waveform, (list, np.ndarray)):
+                    wf_type = "arbitrary"
+                    if np.iscomplexobj(waveform):
+                        waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
+                    else:
+                        waveforms = {"single": list(waveform)}
 
-            for suffix, waveform in waveforms.items():
-                waveform_name = f"{self.name}_{label}_wf"
-                if suffix != "single":
-                    waveform_name += f"_{suffix}"
+                for suffix, waveform in waveforms.items():
+                    waveform_name = f"{self.name}_{label}_wf"
+                    if suffix != "single":
+                        waveform_name += f"_{suffix}"
 
-                config["waveforms"][waveform_name] = {
-                    "type": wf_type,
-                    "sample": waveform,
-                }
-                pulse_config["waveforms"][suffix] = waveform_name
+                    config["waveforms"][waveform_name] = {
+                        "type": wf_type,
+                        "sample": waveform,
+                    }
+                    pulse_config["waveforms"][suffix] = waveform_name
 
             # Calculate and add integration weights
             integration_weights = pulse.calculate_integration_weights()

@@ -165,4 +165,4 @@ class SquarePulse(Pulse):
 
     @staticmethod
     def waveform_function(length, amplitude):
-        return [amplitude] 
+        return amplitude
