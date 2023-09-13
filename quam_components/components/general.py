@@ -7,6 +7,11 @@ from quam_components.core import QuamComponent
 from quam_components.components.pulses import Pulse
 
 
+try:
+    from qm.qua import play, amp
+except ImportError:
+    print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
+
 __all__ = [
     "LocalOscillator",
     "Mixer",
@@ -131,7 +136,6 @@ class PulseEmitter(QuamComponent):
         continue_chirp: bool = False,
         target: str = "",
     ):
-        from qm.qua import play, amp
         from qm.qua._dsl import _PulseAmp
 
         full_pulse_name = self.pulse_mapping[pulse_name]
@@ -143,6 +147,8 @@ class PulseEmitter(QuamComponent):
         else:
             pulse = full_pulse_name
 
+        # At the moment, self.name is not defined for PulseEmitter because it could
+        # be a property or dataclass field in a subclass. Need to find elegant solution.
         play(
             pulse=pulse,
             element=self.name,
