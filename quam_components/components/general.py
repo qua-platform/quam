@@ -201,6 +201,14 @@ class PulseEmitter(QuamComponent):
                     config["integration_weights"][full_label] = weights
                     pulse_config["integration_weights"][label] = full_label
 
+            # Add digital marker
+            if pulse.digital_marker:
+                full_label = f"{self.name}_{label}_dm"
+                config["digital_waveforms"][full_label] = {
+                    "samples": pulse.digital_marker
+                }
+                pulse_config["digital_marker"] = full_label
+
 
 @dataclass(kw_only=True, eq=False)
 class IQChannel(PulseEmitter):

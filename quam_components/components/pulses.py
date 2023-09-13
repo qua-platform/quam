@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, ClassVar, Dict, List, Union
+from typing import Callable, ClassVar, Dict, List, Union, Tuple
 import inspect
 import numpy as np
 
@@ -14,7 +14,7 @@ class Pulse(QuamComponent):
     operation: ClassVar[str] = "control"
     length: int
 
-    digital_marker: str = None
+    digital_marker: Union[str, List[Tuple[int, int]]] = None
 
     def get_pulse_config(self):
         assert self.operation in ["control", "measurement"]
