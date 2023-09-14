@@ -168,7 +168,7 @@ class PulseEmitter(QuamComponent):
 
             # Calculate and add waveforms
             waveform = pulse.calculate_waveform()
-            if waveform:
+            if waveform is not None:
                 if isinstance(waveform, numbers.Number):
                     wf_type = "constant"
                     if isinstance(waveform, complex):
@@ -189,8 +189,12 @@ class PulseEmitter(QuamComponent):
 
                     config["waveforms"][waveform_name] = {
                         "type": wf_type,
-                        "sample": waveform,
                     }
+                    if wf_type == "constant":
+                        config["waveforms"][waveform_name]["sample"] = waveform
+                    else:
+                        config["waveforms"][waveform_name]["samples"] = waveform
+                        
                     pulse_config["waveforms"][suffix] = waveform_name
 
             # Calculate and add integration weights

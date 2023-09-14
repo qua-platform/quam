@@ -177,10 +177,12 @@ class SquarePulse(Pulse):
 
 @dataclass
 class GaussianPulse(Pulse):
-    ampltiude: float
+    amplitude: float
     length: int
     sigma: float
+    subtracted: bool = True
 
+    @staticmethod
     def waveform_function(
         amplitude,
         length,
