@@ -6,7 +6,14 @@ import numpy as np
 from quam_components.core import QuamComponent
 
 
-__all__ = ["Pulse", "MeasurementPulse", "ReadoutPulse", "DragPulse", "SquarePulse"]
+__all__ = [
+    "Pulse",
+    "MeasurementPulse",
+    "ReadoutPulse",
+    "DragPulse",
+    "SquarePulse",
+    "GaussianPulse",
+]
 
 
 @dataclass
@@ -166,3 +173,25 @@ class SquarePulse(Pulse):
     @staticmethod
     def waveform_function(length, amplitude):
         return amplitude
+
+
+@dataclass
+class GaussianPulse(Pulse):
+    ampltiude: float
+    length: int
+    sigma: float
+
+    def waveform_function(
+        amplitude,
+        length,
+        sigma,
+        subtracted=True,
+    ):
+        t = np.arange(length, dtype=int)  # An array of size pulse length in ns
+        center = (length - 1) / 2
+        gauss_wave = amplitude * np.exp(
+            -((t - center) ** 2) / (2 * sigma**2)
+        )  # The gaussian function
+        if subtracted:
+            gauss_wave = gauss_wave - gauss_wave[-1]  # subtracted gaussian
+        return gauss_wave
