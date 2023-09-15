@@ -6,7 +6,7 @@ import numpy as np
 from quam_components.core import QuamComponent
 
 
-__all__ = ["Pulse", "MeasurementPulse", "ReadoutPulse", "DragPulse"]
+__all__ = ["Pulse", "ReadoutPulse", "DragPulse", "SquarePulse", "GaussianPulse"]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -71,16 +71,12 @@ class Pulse(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class MeasurementPulse(Pulse):
-    operation: ClassVar[str] = "measurement"
-
-    digital_marker: str = "ON"
-
-
-@dataclass(kw_only=True, eq=False)
-class ReadoutPulse(MeasurementPulse):
+class ReadoutPulse(Pulse):
     amplitude: float
     rotation_angle: float = None
+
+    operation: ClassVar[str] = "measurement"
+    digital_marker: str = "ON"
 
     def calculate_integration_weights(self):
         integration_weights = {
@@ -157,3 +153,35 @@ class DragPulse(Pulse):
         Q_rot = I * np.sin(rotation_angle_rad) + Q * np.cos(rotation_angle_rad)
 
         return I_rot + 1.0j * Q_rot
+
+
+@dataclass
+class SquarePulse(Pulse):
+    amplitude: float
+
+    @staticmethod
+    def waveform_function(amplitude):
+        return amplitude
+
+
+@dataclass
+class GaussianPulse(Pulse):
+    amplitude: float
+    length: int
+    sigma: float
+    subtracted: bool = True
+
+    @staticmethod
+    def waveform_function(
+        amplitude,
+        length,
+        sigma,
+        subtracted=True,
+    ):
+        t = np.arange(length, dtype=int)
+        center = (length - 1) / 2
+        gauss_wave = amplitude * np.exp(-((t - center) ** 2) / (2 * sigma**2))
+
+        if subtracted:
+            gauss_wave = gauss_wave - gauss_wave[-1]
+        return gauss_wave
