@@ -8,7 +8,7 @@ from quam_components.components.pulses import Pulse
 
 
 try:
-    from qm.qua import play, amp
+    from qm.qua import play, amp, wait, align
 except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
 
@@ -138,17 +138,16 @@ class PulseEmitter(QuamComponent):
     ):
         from qm.qua._dsl import _PulseAmp
 
-        full_pulse_name = self.pulse_mapping[pulse_name]
-
         if amplitude_scale is not None:
             if not isinstance(amplitude_scale, _PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
-            pulse = full_pulse_name * amplitude_scale
+            pulse = pulse_name * amplitude_scale
         else:
-            pulse = full_pulse_name
+            pulse = pulse_name
 
         # At the moment, self.name is not defined for PulseEmitter because it could
-        # be a property or dataclass field in a subclass. Need to find elegant solution.
+        # be a property or dataclass field in a subclass.
+        # # TODO Find elegant solution for PulseEmitter.name.
         play(
             pulse=pulse,
             element=self.name,
@@ -161,53 +160,73 @@ class PulseEmitter(QuamComponent):
             target=target,
         )
 
+    def _config_add_pulse_waveform(self, config, pulse_label: str, pulse: Pulse):
+        waveform = pulse.calculate_waveform()
+        if waveform is None:
+            return
+
+        pulse_config = config["pulses"][f"{self.name}_{pulse_label}_pulse"]
+
+        if isinstance(waveform, numbers.Number):
+            wf_type = "constant"
+            if isinstance(waveform, complex):
+                waveforms = {"I": waveform.real, "Q": waveform.imag}
+            else:
+                waveforms = {"single": waveform}
+
+        elif isinstance(waveform, (list, np.ndarray)):
+            wf_type = "arbitrary"
+            if np.iscomplexobj(waveform):
+                waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
+            else:
+                waveforms = {"single": list(waveform)}
+
+        for suffix, waveform in waveforms.items():
+            waveform_name = f"{self.name}_{pulse_label}_wf"
+            if suffix != "single":
+                waveform_name += f"_{suffix}"
+
+            sample_label = "sample" if wf_type == "constant" else "samples"
+
+            config["waveforms"][waveform_name] = {
+                "type": wf_type,
+                sample_label: waveform,
+            }
+            pulse_config["waveforms"][suffix] = waveform_name
+
+    def _config_add_pulse_integration_weights(
+        self, config: dict, pulse_label: str, pulse: Pulse
+    ):
+        integration_weights = pulse.calculate_integration_weights()
+        if not integration_weights:
+            return
+
+        pulse_config = config["pulses"][f"{self.name}_{pulse_label}_pulse"]
+        pulse_config["integration_weights"] = {}
+        for label, weights in integration_weights.items():
+            full_label = f"{self.name}_{label}_iw"
+            config["integration_weights"][full_label] = weights
+            pulse_config["integration_weights"][label] = full_label
+
+    def _config_add_pulse_digital_marker(self, config, pulse_label: str, pulse: Pulse):
+        if not pulse.digital_marker:
+            return
+
+        pulse_config = config["pulses"][f"{self.name}_{pulse_label}_pulse"]
+        full_label = f"{self.name}_{pulse_label}_dm"
+        config["digital_waveforms"][full_label] = {"samples": pulse.digital_marker}
+        pulse_config["digital_marker"] = full_label
+
     def apply_to_config(self, config: dict):
-        for label, pulse in self.pulses.items():
+        for pulse_label, pulse in self.pulses.items():
             pulse_config = pulse.get_pulse_config()
-            config["pulses"][f"{self.name}_{label}_pulse"] = pulse_config
+            config["pulses"][f"{self.name}_{pulse_label}_pulse"] = pulse_config
 
-            # Calculate and add waveforms
-            waveform = pulse.calculate_waveform()
-            if isinstance(waveform, numbers.Number):
-                wf_type = "constant"
-                if isinstance(waveform, numbers.Complex):
-                    waveforms = {"I": waveform.real, "Q": waveform.imag}
-                else:
-                    waveforms = {"single": waveform}
-            elif isinstance(waveform, (list, np.ndarray)):
-                wf_type = "arbitrary"
-                if np.iscomplexobj(waveform):
-                    waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
-                else:
-                    waveforms = {"single": list(waveform)}
+            self._config_add_pulse_waveform(config, pulse_label, pulse)
 
-            for suffix, waveform in waveforms.items():
-                waveform_name = f"{self.name}_{label}_wf"
-                if suffix != "single":
-                    waveform_name += f"_{suffix}"
+            self._config_add_pulse_integration_weights(config, pulse_label, pulse)
 
-                config["waveforms"][waveform_name] = {
-                    "type": wf_type,
-                    "sample": waveform,
-                }
-                pulse_config["waveforms"][suffix] = waveform_name
-
-            # Calculate and add integration weights
-            integration_weights = pulse.calculate_integration_weights()
-            if integration_weights:
-                pulse_config["integration_weights"] = {}
-                for label, weights in integration_weights.items():
-                    full_label = f"{self.name}_{label}_iw"
-                    config["integration_weights"][full_label] = weights
-                    pulse_config["integration_weights"][label] = full_label
-
-            # Add digital marker
-            if pulse.digital_marker:
-                full_label = f"{self.name}_{label}_dm"
-                config["digital_waveforms"][full_label] = {
-                    "samples": pulse.digital_marker
-                }
-                pulse_config["digital_marker"] = full_label
+            self._config_add_pulse_digital_marker(config, pulse_label, pulse)
 
 
 @dataclass(kw_only=True, eq=False)
