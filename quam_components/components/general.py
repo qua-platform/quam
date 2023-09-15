@@ -228,6 +228,21 @@ class PulseEmitter(QuamComponent):
 
             self._config_add_pulse_digital_marker(config, pulse_label, pulse)
 
+    def wait(self, duration, *other_elements):
+        other_elements_str = [
+            element if isinstance(element, str) else str(element)
+            for element in other_elements
+        ]
+        wait(duration, self.name, *other_elements_str)
+
+    def align(self, *other_elements):
+        assert len(other_elements)
+        other_elements_str = [
+            element if isinstance(element, str) else str(element)
+            for element in other_elements
+        ]
+        align(self.name, *other_elements_str)
+
 
 @dataclass(kw_only=True, eq=False)
 class IQChannel(PulseEmitter):
