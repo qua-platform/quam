@@ -1,6 +1,6 @@
 import functools
 from typing import List
-from dataclasses import dataclass, is_dataclass
+from dataclasses import dataclass, is_dataclass, fields
 import dataclasses
 
 
@@ -41,13 +41,25 @@ def handle_inherited_required_fields(cls):
 
     # Check if class (not parents) has required fields
     for attr in get_required_class_attrs(cls):
-        cls.__dict__[attr] = REQUIRED
+        setattr(cls, attr, REQUIRED)
 
 
 def quam_dataclass(cls):
     handle_inherited_required_fields(cls)
 
-    # @functools.wraps(cls)
+    post_init_method = getattr(cls, "__post_init__", None)
+
+    def __post_init__(self, *args, **kwargs):
+        for f in fields(self):
+            if getattr(self, f.name, None) is REQUIRED:
+                raise TypeError(
+                    f"Please provide {cls.__name__}.{f.name} as it is a required arg"
+                )
+
+        if post_init_method is not None:
+            post_init_method(self, *args, **kwargs)
+
+    cls.__post_init__ = __post_init__
     cls_dataclass = dataclass(cls, eq=False)
 
     return cls_dataclass

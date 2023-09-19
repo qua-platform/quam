@@ -2,7 +2,7 @@ from dataclasses import dataclass, is_dataclass, fields
 import pytest
 
 
-from quam_components.core.quam_dataclass import quam_dataclass
+from quam_components.core.quam_dataclass import quam_dataclass, REQUIRED
 
 
 def test_dataclass_inheritance_error():
@@ -59,3 +59,89 @@ def test_quam_dataclass_with_default():
     assert len(f) == 2
     assert f[0].name == "int_val"
     assert f[1].name == "int_val_optional"
+
+
+def test_dataclass_inheritance():
+    @quam_dataclass
+    class BaseClass:
+        int_val: int
+
+    @quam_dataclass
+    class DerivedClass(BaseClass):
+        int_val2: int
+
+    with pytest.raises(TypeError):
+        d = DerivedClass()
+    with pytest.raises(TypeError):
+        d = DerivedClass(42)
+
+    d = DerivedClass(42, 43)
+
+    f = fields(d)
+    assert len(f) == 2
+    assert f[0].name == "int_val"
+    assert f[1].name == "int_val2"
+
+
+def test_dataclass_inheritance_optional_derived():
+    @quam_dataclass
+    class BaseClass:
+        int_val: int
+
+    @quam_dataclass
+    class DerivedClass(BaseClass):
+        int_val2: int = 43
+
+    with pytest.raises(TypeError):
+        d = DerivedClass()
+
+    d = DerivedClass(42)
+
+    assert d.int_val == 42
+    assert d.int_val2 == 43
+    f = fields(d)
+    assert len(f) == 2
+    assert f[0].name == "int_val"
+    assert f[1].name == "int_val2"
+
+    d = DerivedClass(42, 44)
+
+    assert d.int_val == 42
+    assert d.int_val2 == 44
+    f = fields(d)
+    assert len(f) == 2
+    assert f[0].name == "int_val"
+    assert f[1].name == "int_val2"
+
+
+def test_dataclass_inheritance_optional_base():
+    @quam_dataclass
+    class BaseClass:
+        int_val: int = 42
+
+    @quam_dataclass
+    class DerivedClass(BaseClass):
+        int_val2: int
+        int_val3: int = 44
+
+    # TODO Raise error once REQUIRED is verified
+    with pytest.raises(TypeError):
+        d = DerivedClass()
+
+    with pytest.raises(TypeError):
+        d = DerivedClass(43)
+
+    d = DerivedClass(43, 45)
+    assert d.int_val == 43
+    assert d.int_val2 == 45
+    assert d.int_val3 == 44
+
+    d = DerivedClass(43, 45, 46)
+    assert d.int_val == 43
+    assert d.int_val2 == 45
+    assert d.int_val3 == 46
+
+    d = DerivedClass(int_val2=47)
+    assert d.int_val == 42
+    assert d.int_val2 == 47
+    assert d.int_val3 == 44
