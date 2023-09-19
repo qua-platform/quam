@@ -3,4 +3,4 @@
 *.pyc
 quam_components/examples/output
 additional
-.venv
+.venv*
