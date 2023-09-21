@@ -44,7 +44,10 @@ def handle_inherited_required_fields(cls):
         setattr(cls, attr, REQUIRED)
 
 
-def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True:
+def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
+    if cls is None:
+        return functools.partial(quam_dataclass, kw_only=kw_only, eq=eq)
+
     handle_inherited_required_fields(cls)
 
     post_init_method = getattr(cls, "__post_init__", None)
