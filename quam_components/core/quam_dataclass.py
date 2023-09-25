@@ -1,6 +1,5 @@
 import sys
 import functools
-from typing import List
 from dataclasses import dataclass, is_dataclass, fields
 import dataclasses
 
