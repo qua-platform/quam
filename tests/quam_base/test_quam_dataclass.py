@@ -5,6 +5,14 @@ import pytest
 from quam_components.core.quam_dataclass import quam_dataclass, REQUIRED
 
 
+import sys
+
+if sys.version_info.minor < 10:
+    from quam_components.core.quam_dataclass import quam_dataclass
+
+    setattr(sys.modules[__name__], "dataclass", quam_dataclass)
+
+
 def test_dataclass_inheritance_error():
     @dataclass
     class BaseDataClass:
@@ -145,30 +153,3 @@ def test_dataclass_inheritance_optional_base():
     assert d.int_val == 42
     assert d.int_val2 == 47
     assert d.int_val3 == 44
-
-
-import sys
-
-if sys.version_info.minor < 10:
-    from quam_components.core.quam_dataclass import quam_dataclass
-
-    setattr(sys.modules[__name__], "dataclass", quam_dataclass)
-else:
-    from dataclasses import dataclass
-
-
-def test_dataclass_annotations():
-    @dataclass
-    class C:
-        int_val: int
-
-    C()
-
-    @dataclass
-    class BaseClass:
-        int_val: int = 42
-
-    @dataclass
-    class DerivedClass(BaseClass):
-        int_val2: int
-        int_val3: int = 44

@@ -134,8 +134,8 @@ def test_transmon_add_pulse():
     )
 
     assert list(config["waveforms"]) == ["q1_xy_X180_wf_I", "q1_xy_X180_wf_Q"]
-    assert config["waveforms"]["q1_xy_X180_wf_I"] == {"type": "arbitrary", "sample": I}
-    assert config["waveforms"]["q1_xy_X180_wf_Q"] == {"type": "arbitrary", "sample": Q}
+    assert config["waveforms"]["q1_xy_X180_wf_I"] == {"type": "arbitrary", "samples": I}
+    assert config["waveforms"]["q1_xy_X180_wf_Q"] == {"type": "arbitrary", "samples": Q}
 
 
 @dataclass
