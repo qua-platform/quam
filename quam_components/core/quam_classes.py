@@ -35,21 +35,21 @@ __all__ = [
 ]
 
 
-def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type:
+def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
     """Get the type annotation for the values in a QuamDict or QuamList.
 
     If the QuamDict is defined as Dict[str, int], this will return int.
     If the QuamList is defined as List[int], this will return int.
     In all other cases, this will return None.
     """
-    if parent is None or parent_attr is None:
+    if cls_or_obj is None or attr is None:
         return None
 
-    annotated_attrs = get_type_hints(parent)
-    if parent_attr not in annotated_attrs:
+    annotated_attrs = get_type_hints(cls_or_obj)
+    if attr not in annotated_attrs:
         return None
 
-    attr_annotation = annotated_attrs[parent_attr]
+    attr_annotation = annotated_attrs[attr]
     if get_origin(attr_annotation) == dict:
         return get_args(attr_annotation)[1]
     elif get_origin(attr_annotation) == list:
@@ -57,12 +57,12 @@ def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type
     return None
 
 
-def convert_dict_and_list(value, parent=None, parent_attr=None):
+def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     if isinstance(value, dict):
-        value_annotation = _get_value_annotation(parent=parent, parent_attr=parent_attr)
+        value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamDict(**value, value_annotation=value_annotation)
     elif type(value) == list:
-        value_annotation = _get_value_annotation(parent=parent, parent_attr=parent_attr)
+        value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamList(value, value_annotation=value_annotation)
     else:
         return value
@@ -216,7 +216,7 @@ class QuamRoot(QuamBase):
         QuamComponent._quam = self
 
     def __setattr__(self, name, value):
-        converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
+        converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase):
@@ -274,7 +274,7 @@ class QuamComponent(QuamBase):
     _quam: ClassVar[QuamRoot] = None
 
     def __setattr__(self, name, value):
-        converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
+        converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase):
