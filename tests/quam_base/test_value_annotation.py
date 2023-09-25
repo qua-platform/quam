@@ -42,3 +42,36 @@ def test_value_annotation_list():
     assert _get_value_annotation(test_quam, "l1") is None
     assert _get_value_annotation(test_quam, "str_val") is None
     assert _get_value_annotation(test_quam, "l2") == int
+
+
+def test_value_annotation_bare_quam_component():
+    from typing import get_type_hints
+
+    @dataclass
+    class TestQuam(QuamComponent):
+        ...
+
+    test_quam = TestQuam()
+
+    assert list(get_type_hints(test_quam)) == ["_quam"]
+
+
+def test_value_annotation_bare_quam_root():
+    from typing import get_type_hints
+
+    @dataclass
+    class TestQuam(QuamRoot):
+        ...
+
+    test_quam = TestQuam()
+
+    get_type_hints(test_quam)
+
+
+def test_type_hints_empty_dataclass():
+    @dataclass
+    class C:
+        ...
+
+    from typing import get_type_hints
+    get_type_hints(C())
