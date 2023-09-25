@@ -158,24 +158,30 @@ def dataclass_patch(scope="function"):
 
 
 def test_patch_dataclass(dataclass_patch):
-    with pytest.raises(TypeError):
+    import sys
+
+    if sys.version_info.minor < 10:
+        with pytest.raises(TypeError):
+
+            @dataclass(kw_only=True)
+            class C:
+                ...
+
+        from quam_components.core.quam_dataclass import patch_dataclass
+
+        patch_dataclass(__name__)
 
         @dataclass(kw_only=True)
         class C:
             ...
 
-    from quam_components.core.quam_dataclass import patch_dataclass
 
-    patch_dataclass(__name__)
+def test_dataclass_patch_teardown(dataclass_patch):
+    import sys
 
-    @dataclass(kw_only=True)
-    class C:
-        ...
+    if sys.version_info.minor < 10:
+        with pytest.raises(TypeError):
 
-
-def test_unpatched_dataclass(dataclass_patch):
-    with pytest.raises(TypeError):
-
-        @dataclass(kw_only=True)
-        class C:
-            ...
+            @dataclass(kw_only=True)
+            class C:
+                ...
