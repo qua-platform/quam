@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 from quam_components.core import *
 
+patch_dataclass(__name__)
+
 
 @dataclass
 class BareQuamComponent(QuamComponent):

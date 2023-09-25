@@ -1,10 +1,13 @@
 from typing import List
 from dataclasses import dataclass, field
 
-from quam_components.core import QuamRoot
+from quam_components.core import QuamRoot, patch_dataclass
 from .general import *
 from .superconducting_qubits import *
 from .resonators import *
+
+
+patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = ["QuAM"]

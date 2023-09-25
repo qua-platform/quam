@@ -5,14 +5,6 @@ import pytest
 from quam_components.core.quam_dataclass import quam_dataclass, REQUIRED
 
 
-import sys
-
-if sys.version_info.minor < 10:
-    from quam_components.core.quam_dataclass import quam_dataclass
-
-    setattr(sys.modules[__name__], "dataclass", quam_dataclass)
-
-
 def test_dataclass_inheritance_error():
     @dataclass
     class BaseDataClass:
@@ -153,3 +145,37 @@ def test_dataclass_inheritance_optional_base():
     assert d.int_val == 42
     assert d.int_val2 == 47
     assert d.int_val3 == 44
+
+
+@pytest.fixture
+def dataclass_patch(scope="function"):
+    import sys
+
+    existing_dataclass = getattr(sys.modules[__name__], "dataclass", None)
+    yield
+    if existing_dataclass is not None:
+        setattr(sys.modules[__name__], "dataclass", existing_dataclass)
+
+
+def test_patch_dataclass(dataclass_patch):
+    with pytest.raises(TypeError):
+
+        @dataclass(kw_only=True)
+        class C:
+            ...
+
+    from quam_components.core.quam_dataclass import patch_dataclass
+
+    patch_dataclass(__name__)
+
+    @dataclass(kw_only=True)
+    class C:
+        ...
+
+
+def test_unpatched_dataclass(dataclass_patch):
+    with pytest.raises(TypeError):
+
+        @dataclass(kw_only=True)
+        class C:
+            ...

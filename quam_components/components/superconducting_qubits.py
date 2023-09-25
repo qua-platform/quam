@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
-from quam_components import QuamComponent
+from quam_components import QuamComponent, patch_dataclass
 from quam_components.components.general import IQChannel, SingleChannel
 
+patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 __all__ = ["Transmon"]
 

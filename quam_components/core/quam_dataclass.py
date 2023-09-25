@@ -1,7 +1,11 @@
+import sys
 import functools
 from typing import List
 from dataclasses import dataclass, is_dataclass, fields
 import dataclasses
+
+
+__all__ = ["quam_dataclass", "patch_dataclass"]
 
 
 class REQUIRED:
@@ -66,3 +70,8 @@ def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
     cls_dataclass = dataclass(cls, eq=False)
 
     return cls_dataclass
+
+
+def patch_dataclass(module_name):
+    if sys.version_info.minor < 10:
+        setattr(sys.modules[module_name], "dataclass", quam_dataclass)
