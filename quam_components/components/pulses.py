@@ -3,7 +3,9 @@ from typing import Callable, ClassVar, Dict, List, Union, Tuple
 import inspect
 import numpy as np
 
-from quam_components.core import QuamComponent
+from quam_components.core import QuamComponent, patch_dataclass
+
+patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = ["Pulse", "ReadoutPulse", "DragPulse", "SquarePulse", "GaussianPulse"]

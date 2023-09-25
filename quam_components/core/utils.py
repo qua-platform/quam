@@ -21,6 +21,8 @@ def get_dataclass_attr_annotations(
         For each key, the values are dictionaries with the attribute names as keys
         and the attribute types as values.
     """
+    from quam_components.core.quam_dataclass import REQUIRED
+
     annotated_attrs = get_type_hints(cls_or_obj)
 
     annotated_attrs.pop("_quam", None)
@@ -30,7 +32,9 @@ def get_dataclass_attr_annotations(
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
-        if hasattr(cls_or_obj, attr):
+        if getattr(cls_or_obj, attr, None) is REQUIRED:  # See "patch_dataclass()"
+            attr_annotations["required"][attr] = attr_type
+        elif hasattr(cls_or_obj, attr):
             attr_annotations["optional"][attr] = attr_type
         elif attr in getattr(cls_or_obj, "__dataclass_fields__", {}):
             data_field = cls_or_obj.__dataclass_fields__[attr]

@@ -1,7 +1,11 @@
 from typing import Union
 from dataclasses import dataclass
 
+from quam_components.core import patch_dataclass
+
 from .general import Mixer, PulseEmitter
+
+patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = ["ReadoutResonator"]

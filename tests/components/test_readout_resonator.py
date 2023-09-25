@@ -94,6 +94,7 @@ def test_readout_resonator_with_readout():
         "pulses": {},
         "waveforms": {},
         "integration_weights": {},
+        "digital_waveforms": {},
     }
     expected_cfg = {
         "elements": {
@@ -124,7 +125,7 @@ def test_readout_resonator_with_readout():
                     "sine": "res1_sine_iw",
                     "minus_sine": "res1_minus_sine_iw",
                 },
-                "digital_marker": "ON",
+                "digital_marker": "res1_readout_dm",
             }
         },
         "integration_weights": {
@@ -151,6 +152,7 @@ def test_readout_resonator_with_readout():
                 "sample": 0.0,
             },
         },
+        "digital_waveforms": {"res1_readout_dm": {"samples": "ON"}},
     }
     readout_resonator.apply_to_config(cfg)
     assert cfg == expected_cfg

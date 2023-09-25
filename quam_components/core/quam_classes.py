@@ -202,7 +202,7 @@ class QuamBase(ReferenceClass):
                 else:
                     elem = getattr(elem, component)
 
-        except AttributeError:
+        except Exception:
             return reference
         return elem
 
