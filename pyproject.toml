@@ -54,6 +54,7 @@ pyproject-flake8 = "^5.0.0"
 # typing-extensions = "^4.3.0"
 # coverage = "^6.4.4"
 ipykernel = "^6.24.0"
+pytest-cov = "^4.1.0"
 
 [tool.black]
 target-version = ["py38"]

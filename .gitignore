@@ -4,3 +4,4 @@
 quam_components/examples/output
 additional
 .venv*
+.coverage
