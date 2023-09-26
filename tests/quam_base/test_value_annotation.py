@@ -57,15 +57,16 @@ def test_value_annotation_bare_quam_component():
 
 
 def test_value_annotation_bare_quam_root():
-    from typing import get_type_hints
+    from quam_components.core.quam_classes import _get_value_annotation
 
     @dataclass
     class TestQuam(QuamRoot):
+        # attr: int = 1
         ...
 
-    test_quam = TestQuam()
+    assert _get_value_annotation(TestQuam, "attr") is None
 
-    get_type_hints(test_quam)
+    assert _get_value_annotation(TestQuam(), "attr") is None
 
 
 def test_type_hints_empty_dataclass():
@@ -73,5 +74,6 @@ def test_type_hints_empty_dataclass():
     class C:
         ...
 
-    from typing import get_type_hints
-    get_type_hints(C())
+    assert _get_value_annotation(C, "attr") is None
+
+    assert _get_value_annotation(C(), "attr") is None

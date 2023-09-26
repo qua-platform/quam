@@ -45,7 +45,9 @@ def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
     if cls_or_obj is None or attr is None:
         return None
 
-    annotated_attrs = get_type_hints(cls_or_obj)
+    cls = cls_or_obj if isinstance(cls_or_obj, type) else cls_or_obj.__class__
+
+    annotated_attrs = get_type_hints(cls)
     if attr not in annotated_attrs:
         return None
 
