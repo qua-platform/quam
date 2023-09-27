@@ -61,7 +61,6 @@ def test_value_annotation_bare_quam_root():
 
     @dataclass
     class TestQuam(QuamRoot):
-        # attr: int = 1
         ...
 
     assert _get_value_annotation(TestQuam, "attr") is None

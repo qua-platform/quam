@@ -11,10 +11,10 @@ def test_get_transmon_class_path():
 
 
 @dataclass
-class TestQuamComponent(QuamComponent):
+class QuamComponentTest(QuamComponent):
     str_val: str
 
 
 def test_get_local_class_path():
-    class_path = get_full_class_path(TestQuamComponent)
-    assert class_path == "test_get_full_class_path.TestQuamComponent"
+    class_path = get_full_class_path(QuamComponentTest)
+    assert class_path == "test_get_full_class_path.QuamComponentTest"

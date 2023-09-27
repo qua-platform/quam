@@ -121,7 +121,7 @@ def test_validate_typing_dict():
 
 
 @dataclass
-class TestQuamComponent(QuamComponent):
+class QuamComponentTest(QuamComponent):
     test_str: str
 
 
@@ -154,16 +154,16 @@ def test_instantiate_from_quam_component_typing_dict():
     with pytest.raises(AttributeError):
         instantiate_attrs_from_dict(
             attr_dict=quam_dict,
-            required_type=Dict[str, TestQuamComponent],
+            required_type=Dict[str, QuamComponentTest],
         )
 
     quam_dict = {"test_attr": {"test_str": "hello"}}
     obj = instantiate_attrs_from_dict(
         attr_dict=quam_dict,
-        required_type=Dict[str, TestQuamComponent],
+        required_type=Dict[str, QuamComponentTest],
     )
     assert isinstance(obj, dict)
-    assert isinstance(obj["test_attr"], TestQuamComponent)
+    assert isinstance(obj["test_attr"], QuamComponentTest)
     assert obj["test_attr"].test_str == "hello"
 
 
@@ -194,18 +194,18 @@ def test_instantiate_from_quam_component_typing_list():
     with pytest.raises(AttributeError):
         instantiate_attrs_from_list(
             attr_list=quam_list,
-            required_type=List[TestQuamComponent],
+            required_type=List[QuamComponentTest],
         )
 
     quam_list = [{"test_str": "hello"}, {"test_str": "world"}]
     obj = instantiate_attrs_from_list(
         attr_list=quam_list,
-        required_type=List[TestQuamComponent],
+        required_type=List[QuamComponentTest],
     )
     assert isinstance(obj, list)
-    assert isinstance(obj[0], TestQuamComponent)
+    assert isinstance(obj[0], QuamComponentTest)
     assert obj[0].test_str == "hello"
-    assert isinstance(obj[1], TestQuamComponent)
+    assert isinstance(obj[1], QuamComponentTest)
     assert obj[1].test_str == "world"
 
 
@@ -239,16 +239,16 @@ def test_instantiate_other_typing():
 def test_instantiate_quam_component_attr():
     contents = {}
     with pytest.raises(AttributeError):
-        instantiate_attr(contents, expected_type=TestQuamComponent)
+        instantiate_attr(contents, expected_type=QuamComponentTest)
 
     contents = {"test_str": "hello"}
-    obj = instantiate_attr(contents, expected_type=TestQuamComponent)
-    assert isinstance(obj, TestQuamComponent)
+    obj = instantiate_attr(contents, expected_type=QuamComponentTest)
+    assert isinstance(obj, QuamComponentTest)
     assert obj.test_str == "hello"
 
 
 def test_instantiate_attrs():
-    attr_annotations = get_dataclass_attr_annotations(TestQuamComponent)
+    attr_annotations = get_dataclass_attr_annotations(QuamComponentTest)
     assert attr_annotations["required"] == {"test_str": str}
 
     attrs = instantiate_attrs(

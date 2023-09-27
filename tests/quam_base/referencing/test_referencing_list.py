@@ -10,5 +10,9 @@ class BareQuamRoot(QuamRoot):
 
 def test_basic_list_reference():
     quam_root = BareQuamRoot()
-    quam_root.quam_dict = {}
-    assert isinstance(quam_root.quam_dict, QuamDict)
+    quam_root.quam_list = []
+    assert isinstance(quam_root.quam_list, QuamList)
+
+    quam_root.a = 42
+    quam_root.quam_list.append(":a")
+    assert quam_root.quam_list[0] == 42

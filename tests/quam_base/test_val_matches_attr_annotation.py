@@ -4,19 +4,19 @@ from quam_components.core.quam_classes import *
 
 
 @dataclass
-class TestQuam(QuamComponent):
+class QuamTest(QuamComponent):
     int_val: int
     str_val: str
 
 
 def test_attr_type_nonexisting():
-    test_quam = TestQuam(1, "test")
+    test_quam = QuamTest(1, "test")
     assert not test_quam._val_matches_attr_annotation("nonexisting", None)
     assert not test_quam._val_matches_attr_annotation("nonexisting", 123)
 
 
 def test_attr_type_basic():
-    test_quam = TestQuam(1, "test")
+    test_quam = QuamTest(1, "test")
     assert test_quam._val_matches_attr_annotation("int_val", 1)
     assert test_quam._val_matches_attr_annotation("str_val", "hi")
     assert not test_quam._val_matches_attr_annotation("int_val", "hi")
@@ -24,7 +24,7 @@ def test_attr_type_basic():
 
 
 @dataclass
-class TestQuam2(QuamComponent):
+class QuamTest2(QuamComponent):
     int_val: int
     str_val: str
     l1: list
@@ -34,7 +34,7 @@ class TestQuam2(QuamComponent):
 
 
 def test_attr_type_dict():
-    test_quam = TestQuam2(1, "test", [1, 2, 3], [1, 2, 3], {"a": 1}, {"a": 1})
+    test_quam = QuamTest2(1, "test", [1, 2, 3], [1, 2, 3], {"a": 1}, {"a": 1})
     assert test_quam._val_matches_attr_annotation("d1", {})
     assert test_quam._val_matches_attr_annotation("d2", {})
     assert not test_quam._val_matches_attr_annotation("d1", 42)
@@ -42,7 +42,7 @@ def test_attr_type_dict():
 
 
 def test_attr_type_list():
-    test_quam = TestQuam2(1, "test", [1, 2, 3], [1, 2, 3], {"a": 1}, {"a": 1})
+    test_quam = QuamTest2(1, "test", [1, 2, 3], [1, 2, 3], {"a": 1}, {"a": 1})
     assert test_quam._val_matches_attr_annotation("l1", [])
     assert test_quam._val_matches_attr_annotation("l2", [])
     assert not test_quam._val_matches_attr_annotation("l1", 42)
