@@ -18,7 +18,8 @@ from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
 from quam_components.serialisation import get_serialiser
-from quam_components.utils.reference_class import ReferenceClass, StringReference
+from quam_components.utils.reference_class import ReferenceClass
+from quam_components.utils import string_reference
 from quam_components.core.quam_instantiation import instantiate_quam_class
 from quam_components.core.utils import (
     get_full_class_path,
@@ -194,16 +195,28 @@ class QuamBase(ReferenceClass):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
     def _get_referenced_value(self, reference: str):
+        """Get the value of an attribute by reference
+
+        This function is used from the ReferenceClass class.
+
+        Returns:
+            The value of the attribute, or the reference if it is not a reference
+        """
+        if not string_reference.is_reference(reference):
+            return reference
+
+        if string_reference.is_absolute_reference(reference) and self._quam is None:
+            warnings.warn(
+                "No QuamRoot initialized, cannot retrieve reference {reference}"
+                " from {self.__class__.__name__}"
+            )
+            return reference
+
         try:
-            return StringReference.get_referenced_value(
+            return string_reference.get_referenced_value(
                 self, reference, root=self._quam
             )
         except ValueError:
-            if self._quam is None:
-                warnings.warn(
-                    "No QuamRoot initialized, cannot retrieve reference {reference}"
-                    " from {self.__class__.__name__}"
-                )
             return reference
 
 
@@ -381,10 +394,10 @@ class QuamList(UserList, QuamBase):
         elem = super().__getitem__(i)
         if isinstance(i, slice):
             for k, subelem in enumerate(elem):
-                if StringReference.is_reference(subelem):
+                if string_reference.is_reference(subelem):
                     elem[k] = self._get_referenced_value(subelem)
         else:
-            if StringReference.is_reference(elem):
+            if string_reference.is_reference(elem):
                 elem = self._get_referenced_value(elem)
         return elem
 
