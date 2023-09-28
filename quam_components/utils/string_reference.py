@@ -39,7 +39,6 @@ def split_next_attribute(
         - A string of the next attribute, i.e. until the first splitter
         - The remaining string from the first splitter
     """
-    # Determine the next splitter, either a dot or square brackets []
     splitter_idxs = {}
     for splitter in splitters:
         try:
@@ -71,7 +70,7 @@ def get_relative_reference_value(obj, string: str) -> Any:
     elif string.startswith("["):
         close_idx = string.index("]")
         key = string[1:close_idx]
-        key = key.lstrip("'\"").rstrip("'\"")
+        key = int(key) if key.isdigit() else key
         return get_relative_reference_value(obj[key], string[close_idx + 1 :])
     elif string.startswith("."):
         string = string[1:]

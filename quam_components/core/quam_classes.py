@@ -393,12 +393,11 @@ class QuamList(UserList, QuamBase):
     def __getitem__(self, i):
         elem = super().__getitem__(i)
         if isinstance(i, slice):
-            for k, subelem in enumerate(elem):
-                if string_reference.is_reference(subelem):
-                    elem[k] = self._get_referenced_value(subelem)
-        else:
-            if string_reference.is_reference(elem):
-                elem = self._get_referenced_value(elem)
+            # This automatically gets the referenced values
+            return list(elem)
+
+        if string_reference.is_reference(elem):
+            elem = self._get_referenced_value(elem)
         return elem
 
     def __setitem__(self, i, item):
