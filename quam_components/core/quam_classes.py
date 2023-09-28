@@ -207,8 +207,8 @@ class QuamBase(ReferenceClass):
 
         if string_reference.is_absolute_reference(reference) and self._quam is None:
             warnings.warn(
-                "No QuamRoot initialized, cannot retrieve reference {reference}"
-                " from {self.__class__.__name__}"
+                f"No QuamRoot initialized, cannot retrieve reference {reference}"
+                f" from {self.__class__.__name__}"
             )
             return reference
 
@@ -216,7 +216,8 @@ class QuamBase(ReferenceClass):
             return string_reference.get_referenced_value(
                 self, reference, root=self._quam
             )
-        except ValueError:
+        except ValueError as e:
+            warnings.warn(str(e))
             return reference
 
 
@@ -307,14 +308,23 @@ class QuamDict(UserDict, QuamBase):
     def __getattr__(self, key):
         try:
             return self[key]
-        except KeyError:
-            raise AttributeError(key)
+        except KeyError as e:
+            raise AttributeError(key) from e
 
     def __setattr__(self, key, value):
         if key == "data":
             super().__setattr__(key, value)
         else:
             self[key] = value
+
+    def __getitem__(self, i):
+        elem = super().__getitem__(i)
+        if string_reference.is_reference(elem):
+            try:
+                elem = self._get_referenced_value(elem)
+            except ValueError as e:
+                raise KeyError(str(e)) from e
+        return elem
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):

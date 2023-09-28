@@ -70,7 +70,7 @@ def get_relative_reference_value(obj, string: str) -> Any:
     elif string.startswith("["):
         close_idx = string.index("]")
         key = string[1:close_idx]
-        key = int(key) if key.isdigit() else key
+        key = int(key) if key.isdigit() else key.lstrip("'\"").rstrip("'\"")
         return get_relative_reference_value(obj[key], string[close_idx + 1 :])
     elif string.startswith("."):
         string = string[1:]
@@ -89,5 +89,5 @@ def get_referenced_value(obj, string: str, root=None) -> Any:
 
     try:
         return get_relative_reference_value(obj, string)
-    except (AttributeError, KeyError):
-        raise ValueError(f"String {string} is not a valid reference")
+    except (AttributeError, KeyError) as e:
+        raise ValueError(f"String {string} is not a valid reference, Error: {e}") from e
