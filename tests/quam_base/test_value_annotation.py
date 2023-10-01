@@ -1,4 +1,5 @@
 from typing import Dict, List
+import pytest
 from dataclasses import dataclass
 from quam_components.core.quam_classes import *
 from quam_components.core.quam_classes import _get_value_annotation
@@ -45,15 +46,14 @@ def test_value_annotation_list():
 
 
 def test_value_annotation_bare_quam_component():
-    from typing import get_type_hints
-
     @dataclass
     class TestQuam(QuamComponent):
         ...
 
     test_quam = TestQuam()
 
-    assert list(get_type_hints(test_quam)) == ["_quam"]
+    assert _get_value_annotation(test_quam, "attr") is None
+    assert _get_value_annotation(TestQuam, "attr") is None
 
 
 def test_value_annotation_bare_quam_root():

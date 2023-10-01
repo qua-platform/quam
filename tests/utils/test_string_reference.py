@@ -34,6 +34,10 @@ def test_split_next_attribute():
     assert split_next_attribute("a.b") == ("a", ".b")
     assert split_next_attribute("a[0]") == ("a", "[0]")
     assert split_next_attribute("a") == ("a", "")
+    assert split_next_attribute("quam_elems[3].int_val") == (
+        "quam_elems",
+        "[3].int_val",
+    )
 
 
 class DotDict(dict):

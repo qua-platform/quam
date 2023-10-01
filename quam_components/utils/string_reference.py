@@ -44,13 +44,12 @@ def split_next_attribute(
         try:
             splitter_idxs[splitter] = string.index(splitter)
         except ValueError:
-            splitter_idxs[splitter] = None
+            ...
 
-    if set(splitter_idxs.values()) == {None}:
+    if not splitter_idxs:
         return string, ""
 
-    next_splitter = min(key for key, val in splitter_idxs.items() if val is not None)
-    splitter_idx = splitter_idxs[next_splitter]
+    _, splitter_idx = min(splitter_idxs.items(), key=lambda elem: elem[1])
     return string[:splitter_idx], string[splitter_idx:]
 
 
