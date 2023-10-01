@@ -5,9 +5,7 @@ def is_reference(string: str) -> bool:
     """Check if a string is a reference, i.e. a string that starts with a colon"""
     if not isinstance(string, str):
         return False
-    if not string.startswith(":"):
-        return False
-    return True
+    return string.startswith((":/", ":./", ":../"))
 
 
 def is_absolute_reference(string: str) -> bool:
@@ -18,9 +16,7 @@ def is_absolute_reference(string: str) -> bool:
     """
     if not is_reference(string):
         return False
-    if string.startswith(":."):
-        return False
-    return True
+    return string.startswith(":/")
 
 
 def split_next_attribute(
@@ -58,7 +54,7 @@ def get_relative_reference_value(obj, string: str) -> Any:
 
     Performs recursive calls to get the value of nested references
     """
-    string = string.lstrip(":")
+    string = string.lstrip(":/")
 
     if not string:
         return obj
