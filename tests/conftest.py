@@ -26,4 +26,4 @@ def BareQuamComponent():
 def remove_quam_root():
     from quam_components.core import QuamBase
 
-    QuamBase._quam = None
+    QuamBase._root = None

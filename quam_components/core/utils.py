@@ -25,7 +25,7 @@ def get_dataclass_attr_annotations(
 
     annotated_attrs = get_type_hints(cls_or_obj)
 
-    annotated_attrs.pop("_quam", None)
+    annotated_attrs.pop("_root", None)
     annotated_attrs.pop("_references", None)
     annotated_attrs.pop("_skip_attrs", None)
     annotated_attrs.pop("parent", None)

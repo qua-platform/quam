@@ -40,10 +40,10 @@ class BareQuamComponent(QuamComponent):
 
 def test_update_quam_component_quam():
     quam_root = BareQuamRoot()
-    assert QuamComponent._quam is quam_root
+    assert QuamComponent._root is quam_root
 
     quam_component = BareQuamComponent()
-    assert quam_component._quam is quam_root
+    assert quam_component._root is quam_root
 
 
 @dataclass(eq=False)

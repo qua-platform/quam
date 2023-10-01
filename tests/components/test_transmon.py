@@ -169,7 +169,7 @@ def test_instantiation_single_element():
     assert quam.qubit.id == 0
     assert quam.qubit.xy is None
 
-    assert quam.qubit._quam is quam
+    assert quam.qubit._root is quam
 
 
 def test_instantiation_single_nested_element():
@@ -180,9 +180,9 @@ def test_instantiation_single_nested_element():
     assert quam.qubit.xy.mixer.local_oscillator.power == 10
     assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
 
-    assert quam.qubit._quam is quam
-    assert quam.qubit.xy._quam is quam
-    assert quam.qubit.xy.mixer._quam is quam
+    assert quam.qubit._root is quam
+    assert quam.qubit.xy._root is quam
+    assert quam.qubit.xy.mixer._root is quam
 
 
 def test_instantiate_quam_dict():

@@ -74,7 +74,7 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
 
 class QuamBase(ReferenceClass):
     parent: ClassVar["QuamBase"] = None
-    _quam: ClassVar["QuamRoot"] = None
+    _root: ClassVar["QuamRoot"] = None
 
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
@@ -208,7 +208,7 @@ class QuamBase(ReferenceClass):
         if not string_reference.is_reference(reference):
             return reference
 
-        if string_reference.is_absolute_reference(reference) and self._quam is None:
+        if string_reference.is_absolute_reference(reference) and self._root is None:
             warnings.warn(
                 f"No QuamRoot initialized, cannot retrieve reference {reference}"
                 f" from {self.__class__.__name__}"
@@ -217,7 +217,7 @@ class QuamBase(ReferenceClass):
 
         try:
             return string_reference.get_referenced_value(
-                self, reference, root=self._quam
+                self, reference, root=self._root
             )
         except ValueError as e:
             warnings.warn(str(e))
@@ -230,7 +230,7 @@ QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
 
 class QuamRoot(QuamBase):
     def __post_init__(self):
-        QuamBase._quam = self
+        QuamBase._root = self
 
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
