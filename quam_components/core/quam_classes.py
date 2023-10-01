@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+import warnings
 from pathlib import Path
 from copy import deepcopy
 from typing import (
@@ -18,6 +19,7 @@ from collections import UserDict, UserList
 
 from quam_components.serialisation import get_serialiser
 from quam_components.utils.reference_class import ReferenceClass
+from quam_components.utils import string_reference
 from quam_components.core.quam_instantiation import instantiate_quam_class
 from quam_components.core.utils import (
     get_full_class_path,
@@ -35,21 +37,23 @@ __all__ = [
 ]
 
 
-def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type:
+def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
     """Get the type annotation for the values in a QuamDict or QuamList.
 
     If the QuamDict is defined as Dict[str, int], this will return int.
     If the QuamList is defined as List[int], this will return int.
     In all other cases, this will return None.
     """
-    if parent is None or parent_attr is None:
+    if cls_or_obj is None or attr is None:
         return None
 
-    annotated_attrs = get_type_hints(parent)
-    if parent_attr not in annotated_attrs:
+    cls = cls_or_obj if isinstance(cls_or_obj, type) else cls_or_obj.__class__
+
+    annotated_attrs = get_type_hints(cls)
+    if attr not in annotated_attrs:
         return None
 
-    attr_annotation = annotated_attrs[parent_attr]
+    attr_annotation = annotated_attrs[attr]
     if get_origin(attr_annotation) == dict:
         return get_args(attr_annotation)[1]
     elif get_origin(attr_annotation) == list:
@@ -57,12 +61,12 @@ def _get_value_annotation(parent: Union[type, object], parent_attr: str) -> type
     return None
 
 
-def convert_dict_and_list(value, parent=None, parent_attr=None):
+def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     if isinstance(value, dict):
-        value_annotation = _get_value_annotation(parent=parent, parent_attr=parent_attr)
+        value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamDict(**value, value_annotation=value_annotation)
     elif type(value) == list:
-        value_annotation = _get_value_annotation(parent=parent, parent_attr=parent_attr)
+        value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamList(value, value_annotation=value_annotation)
     else:
         return value
@@ -70,6 +74,7 @@ def convert_dict_and_list(value, parent=None, parent_attr=None):
 
 class QuamBase(ReferenceClass):
     parent: ClassVar["QuamBase"] = None
+    _quam: ClassVar["QuamRoot"] = None
 
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
@@ -189,22 +194,34 @@ class QuamBase(ReferenceClass):
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
-    def _get_value_by_reference(self, reference: str):
-        assert reference.startswith(":")
-        reference_components = reference[1:].split(".")
+    def _is_reference(self, attr: str) -> bool:
+        return string_reference.is_reference(attr)
 
-        elem = self
-        try:
-            for component in reference_components:
-                if component.endswith("]"):
-                    component, index_str = component[:-1].split("[")
-                    elem = getattr(elem, component)[int(index_str)]
-                else:
-                    elem = getattr(elem, component)
+    def _get_referenced_value(self, reference: str):
+        """Get the value of an attribute by reference
 
-        except Exception:
+        This function is used from the ReferenceClass class.
+
+        Returns:
+            The value of the attribute, or the reference if it is not a reference
+        """
+        if not string_reference.is_reference(reference):
             return reference
-        return elem
+
+        if string_reference.is_absolute_reference(reference) and self._quam is None:
+            warnings.warn(
+                f"No QuamRoot initialized, cannot retrieve reference {reference}"
+                f" from {self.__class__.__name__}"
+            )
+            return reference
+
+        try:
+            return string_reference.get_referenced_value(
+                self, reference, root=self._quam
+            )
+        except ValueError as e:
+            warnings.warn(str(e))
+            return reference
 
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
@@ -213,10 +230,10 @@ QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
 
 class QuamRoot(QuamBase):
     def __post_init__(self):
-        QuamComponent._quam = self
+        QuamBase._quam = self
 
     def __setattr__(self, name, value):
-        converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
+        converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase):
@@ -271,10 +288,8 @@ class QuamRoot(QuamBase):
 
 
 class QuamComponent(QuamBase):
-    _quam: ClassVar[QuamRoot] = None
-
     def __setattr__(self, name, value):
-        converted_val = convert_dict_and_list(value, parent=self, parent_attr=name)
+        converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase):
@@ -282,9 +297,6 @@ class QuamComponent(QuamBase):
 
     def apply_to_config(self, config: dict) -> None:
         ...
-
-    def _get_value_by_reference(self, reference: str):
-        return self._quam._get_value_by_reference(reference)
 
 
 @dataclass
@@ -299,14 +311,23 @@ class QuamDict(UserDict, QuamBase):
     def __getattr__(self, key):
         try:
             return self[key]
-        except KeyError:
-            raise AttributeError(key)
+        except KeyError as e:
+            raise AttributeError(key) from e
 
     def __setattr__(self, key, value):
         if key == "data":
             super().__setattr__(key, value)
         else:
             self[key] = value
+
+    def __getitem__(self, i):
+        elem = super().__getitem__(i)
+        if string_reference.is_reference(elem):
+            try:
+                elem = self._get_referenced_value(elem)
+            except ValueError as e:
+                raise KeyError(str(e)) from e
+        return elem
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
@@ -381,6 +402,16 @@ class QuamList(UserList, QuamBase):
 
     def __repr__(self) -> str:
         return super().__repr__()
+
+    def __getitem__(self, i):
+        elem = super().__getitem__(i)
+        if isinstance(i, slice):
+            # This automatically gets the referenced values
+            return list(elem)
+
+        if string_reference.is_reference(elem):
+            elem = self._get_referenced_value(elem)
+        return elem
 
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)

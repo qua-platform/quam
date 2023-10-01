@@ -1,46 +1,39 @@
-from typing import Any, Dict
+from typing import Any
+
+
+__all__ = ["ReferenceClass"]
 
 
 class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
 
-    _references: Dict[str, str] = None  # Overwritten during __init__
-
-    @staticmethod
-    def _str_is_reference(__value: str) -> bool:
-        return __value.startswith(":")
-
-    def _get_value_by_reference(self, __name: str) -> Any:
+    def _get_referenced_value(self, attr: str) -> Any:
         """Get the value of an attribute by reference
 
         This function should generally be overwritten by subclasses
         """
-        return __name[1:]
+        raise NotImplementedError
+
+    def _is_reference(self, attr: str) -> bool:
+        """Check if an attribute is a reference
+
+        This function should generally be overwritten by subclasses
+        """
+        raise NotImplementedError
 
     def get_unreferenced_value(self, attr: str) -> bool:
         """Check if an attribute is a reference"""
         return super().__getattribute__(attr)
 
-    def __setattr__(self, __name: str, __value: Any) -> None:
-        if isinstance(__value, str) and self._str_is_reference(__value):
-            # print(f"Setting reference {__name} to {__value}")
-            self._references[__name] = __value
+    def __getattribute__(self, attr: str) -> Any:
+        attr_val = super().__getattribute__(attr)
 
-        elif __name in self._references:
-            # print(f"Removing reference {__name} -> {self._references[__name]}")
-            self._references.pop(__name)
+        if attr in ["_is_reference", "_get_referenced_value", "__post_init__"]:
+            return attr_val
 
-        super().__setattr__(__name, __value)
-
-    def __getattribute__(self, __name: str) -> Any:
-        references = super().__getattribute__("_references")
-        if references is None:
-            super().__setattr__("_references", {})
-            references = {}
-
-        if __name not in references:
-            return super().__getattribute__(__name)
-
-        reference = references[__name]
-        # print(f"Got reference {__name} -> {reference}")
-        return self._get_value_by_reference(reference)
+        try:
+            if self._is_reference(attr_val):
+                return self._get_referenced_value(attr_val)
+            return attr_val
+        except Exception:
+            return attr_val

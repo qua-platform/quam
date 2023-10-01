@@ -139,6 +139,9 @@ class PulseEmitter(QuamComponent):
     ):
         from qm.qua._dsl import _PulseAmp
 
+        if pulse_name not in self.pulses:
+            raise KeyError(f"Pulse {pulse_name} not found in {self.name}.")
+
         if amplitude_scale is not None:
             if not isinstance(amplitude_scale, _PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
