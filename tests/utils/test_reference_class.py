@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from typing import Any
+
+import pytest
 
 from quam_components.utils.reference_class import ReferenceClass
 
@@ -13,9 +16,29 @@ def test_set_non_reference_attribute():
     assert reference_obj.test == 42
 
 
-def test_set_reference_attribute():
+def test_base_reference_class():
     reference_obj = ReferenceClass()
 
+    with pytest.raises(NotImplementedError):
+        reference_obj._is_reference("a")
+
+    with pytest.raises(NotImplementedError):
+        reference_obj._get_referenced_value("a")
+
+    with pytest.raises(AttributeError):
+        reference_obj.a
+
+
+class SubReferenceClass(ReferenceClass):
+    def _is_reference(self, attr: str) -> bool:
+        return isinstance(attr, str) and attr.startswith(":")
+
+    def _get_referenced_value(self, attr: str) -> Any:
+        return attr[1:]
+
+
+def test_set_reference_attribute():
+    reference_obj = SubReferenceClass()
     reference_obj.a = ":b"
     assert reference_obj.a == "b"
 
@@ -27,7 +50,7 @@ def test_set_reference_attribute():
 
 
 @dataclass
-class SubReferenceDataClass(ReferenceClass):
+class SubReferenceDataClass(SubReferenceClass):
     a: float = 42
 
     def __post_init__(self) -> None:

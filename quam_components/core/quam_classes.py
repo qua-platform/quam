@@ -194,6 +194,9 @@ class QuamBase(ReferenceClass):
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
+    def _is_reference(self, attr: str) -> bool:
+        return string_reference.is_reference(attr)
+
     def _get_referenced_value(self, reference: str):
         """Get the value of an attribute by reference
 
