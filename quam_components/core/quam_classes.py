@@ -275,7 +275,7 @@ class QuamRoot(QuamBase):
             validate_type=validate_type,
         )
 
-    def build_config(self):
+    def generate_config(self):
         qua_config = deepcopy(qua_config_template)
 
         for quam_component in self.iterate_components():

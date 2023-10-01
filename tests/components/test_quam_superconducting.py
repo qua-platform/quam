@@ -15,7 +15,7 @@ def test_create_quam_superconducting_simple():
     assert len(quam_components) == 18  # Includes XY and Z channels
 
 
-def test_create_quam_superconducting_simple_build_config():
+def test_create_quam_superconducting_simple_generate_config():
     quam = create_quam_superconducting_simple(num_qubits=2)
     assert isinstance(quam, QuAM)
     assert isinstance(quam.local_oscillators[0], LocalOscillator)
@@ -24,17 +24,17 @@ def test_create_quam_superconducting_simple_build_config():
     assert isinstance(quam.resonators[0], ReadoutResonator)
     assert isinstance(quam.qubits[0].xy.mixer, Mixer)
 
-    qua_config = quam.build_config()
+    qua_config = quam.generate_config()
     assert isinstance(qua_config, dict)
 
 
-def test_create_quam_superconducting_referenced_build_config():
+def test_create_quam_superconducting_referenced_generate_config():
     quam = create_quam_superconducting_referenced(num_qubits=2)
     assert isinstance(quam.wiring, QuamDict)
 
     assert hasattr(quam.wiring.qubits[0], "port_I")
 
-    quam.build_config()
+    quam.generate_config()
     print(quam.qubits[0].xy.mixer.port_I)
     assert quam.qubits[0].xy.mixer.port_I == 1
     assert quam.qubits[0].xy.mixer.port_Q == 2
@@ -84,7 +84,7 @@ def test_quam_referenced_full(tmp_path):
     assert loaded_quam["wiring"]["qubits"][0]["port_I"] == 1
 
     qua_file = folder / "qua_config.json"
-    qua_config = quam.build_config()
+    qua_config = quam.generate_config()
     json.dump(qua_config, qua_file.open("w"), indent=4)
     qua_config_str = json.dumps(qua_config, indent=4)
 
@@ -92,7 +92,7 @@ def test_quam_referenced_full(tmp_path):
     assert quam.get_attrs().keys() == quam_loaded.get_attrs().keys()
 
     qua_file = folder / "qua_config2.json"
-    qua_config2 = quam.build_config()
+    qua_config2 = quam.generate_config()
     qua_config2_str = json.dumps(qua_config2, indent=4)
 
     assert qua_config_str == qua_config2_str

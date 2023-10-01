@@ -137,11 +137,11 @@ if __name__ == "__main__":
     quam.save(folder / "quam", content_mapping={"wiring.json": "wiring"})
 
     qua_file = folder / "qua_config.json"
-    qua_config = quam.build_config()
+    qua_config = quam.generate_config()
     json.dump(qua_config, qua_file.open("w"), indent=4)
 
     quam_loaded = QuAM.load(folder / "quam")
 
     qua_file = folder / "qua_config2.json"
-    qua_config = quam.build_config()
+    qua_config = quam.generate_config()
     json.dump(qua_config, qua_file.open("w"), indent=4)
