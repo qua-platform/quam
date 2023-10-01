@@ -20,3 +20,10 @@ def BareQuamComponent():
         ...
 
     return BareQuamComponent
+
+
+@pytest.fixture(scope="function", autouse=True)
+def remove_quam_root():
+    from quam_components.core import QuamBase
+
+    QuamBase._quam = None
