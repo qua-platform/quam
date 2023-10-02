@@ -1,12 +1,11 @@
 # QuAM Components
 
 
-## Installation instructions (Mac)
+## Installation instructions
 From the root folder run the following commands in terminal
 
 ```
-python3 -m venv venv-quam
-source venv-quam/bin/activate
-pip install poetry
-poetry install --with dev
+python3 -m venv .venv
+source .venv/bin/activate
+pip install .
 ```
