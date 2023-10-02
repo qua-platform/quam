@@ -85,6 +85,21 @@ max-line-length = 88
 # sequence = ["check-format", "lint", "test"]
 # help = "Run format and all checks on the code"
 
+[build-system]
+requires = ["poetry"]
+build-backend = "poetry.masonry.api"
+
+
+#### Alternative installation using setuptools instead of poetry
+### Must comment out previous [build-system]
+
+# [project]
+# name = "quam-components"
+# version = "0.1"
+
 # [build-system]
-# requires = ["poetry-core>=1.0.0"]
-# build-backend = "poetry.core.masonry.api"
+# requires = ["setuptools"]
+# build-backend = "setuptools.build_meta"
+
+# [tool.setuptools]
+# packages = ["quam_components"]
