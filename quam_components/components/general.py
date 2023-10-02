@@ -53,7 +53,7 @@ class Mixer(QuamComponent):
         return self.id if isinstance(self.id, str) else f"mixer{self.id}"
 
     @property
-    def frequency_drive(self):
+    def frequency_rf(self):
         return self.local_oscillator.frequency + self.intermediate_frequency
 
     def get_input_config(self):
