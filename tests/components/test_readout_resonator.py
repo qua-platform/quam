@@ -8,7 +8,7 @@ def test_empty_readout_resonator():
             id=1,
             port_I=1,
             port_Q=2,
-            frequency_drive=5.1e9,
+            intermediate_frequency=100e6,
             local_oscillator=LocalOscillator(frequency=5e9),
         ),
     )
@@ -20,7 +20,7 @@ def test_empty_readout_resonator():
             "id": 1,
             "port_I": 1,
             "port_Q": 2,
-            "frequency_drive": 5100000000.0,
+            "intermediate_frequency": 100000000.0,
             "local_oscillator": {"frequency": 5000000000.0},
         },
     }
@@ -62,7 +62,7 @@ def test_readout_resonator_with_readout():
             id=1,
             port_I=1,
             port_Q=2,
-            frequency_drive=5.1e9,
+            intermediate_frequency=100e6,
             local_oscillator=LocalOscillator(frequency=5e9),
         ),
     )
@@ -77,7 +77,7 @@ def test_readout_resonator_with_readout():
             "id": 1,
             "port_I": 1,
             "port_Q": 2,
-            "frequency_drive": 5100000000.0,
+            "intermediate_frequency": 100000000.0,
             "local_oscillator": {"frequency": 5000000000.0},
         },
         "pulses": {

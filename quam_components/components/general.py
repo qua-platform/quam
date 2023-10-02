@@ -38,7 +38,7 @@ class Mixer(QuamComponent):
     port_I: int
     port_Q: int
 
-    frequency_drive: float
+    intermediate_frequency: float
 
     offset_I: float = 0
     offset_Q: float = 0
@@ -53,8 +53,8 @@ class Mixer(QuamComponent):
         return self.id if isinstance(self.id, str) else f"mixer{self.id}"
 
     @property
-    def intermediate_frequency(self):
-        return self.frequency_drive - self.local_oscillator.frequency
+    def frequency_drive(self):
+        return self.local_oscillator.frequency + self.intermediate_frequency
 
     def get_input_config(self):
         return {

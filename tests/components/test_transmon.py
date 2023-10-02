@@ -9,7 +9,6 @@ def test_basic_transmon():
     transmon = Transmon(id=1)
     assert transmon.name == "q1"
     assert transmon.id == 1
-    assert transmon.frequency is None
     assert transmon.xy is None
     assert transmon.z is None
 
@@ -25,8 +24,8 @@ def test_transmon_xy():
                 id=1,
                 port_I=1,
                 port_Q=2,
-                frequency_drive=5e9,
                 local_oscillator=LocalOscillator(),
+                intermediate_frequency=100e6,
             )
         ),
     )
@@ -34,13 +33,12 @@ def test_transmon_xy():
     assert transmon.xy.name == "q1_xy"
     assert transmon.xy.mixer.name == "mixer1"
     assert not transmon.xy.pulses
-    assert transmon.frequency == None
-    assert transmon.xy.mixer.frequency_drive == 5e9
+    assert transmon.xy.mixer.intermediate_frequency == 100e6
     assert transmon.z is None
 
     config = {"elements": {}}
     with pytest.raises(TypeError):
-        transmon.xy.apply_to_config(config)
+        transmon.xy.mixer.frequency_drive
 
     transmon.xy.mixer.local_oscillator.frequency = 4.6e9
 
@@ -54,7 +52,7 @@ def test_transmon_xy():
                     "lo_frequency": 4600000000.0,
                     "mixer": "mixer1",
                 },
-                "intermediate_frequency": 400e6,
+                "intermediate_frequency": 100e6,
                 "operations": {},
             },
         }
@@ -69,8 +67,8 @@ def test_transmon_add_pulse():
                 id=1,
                 port_I=1,
                 port_Q=2,
-                frequency_drive=5e9,
                 local_oscillator=LocalOscillator(frequency=4.6e9),
+                intermediate_frequency=100e6,
             )
         ),
     )
@@ -87,7 +85,7 @@ def test_transmon_add_pulse():
                 "local_oscillator": {"frequency": 4600000000.0},
                 "port_I": 1,
                 "port_Q": 2,
-                "frequency_drive": 5000000000.0,
+                "intermediate_frequency": 100000000.0,
             },
             "pulses": {
                 "X180": {
@@ -114,7 +112,7 @@ def test_transmon_add_pulse():
                 "lo_frequency": 4600000000.0,
                 "mixer": "mixer1",
             },
-            "intermediate_frequency": 400e6,
+            "intermediate_frequency": 100e6,
             "operations": {"X180": "q1_xy_X180_pulse"},
         },
     }
@@ -154,7 +152,7 @@ quam_dict_single_nested = {
                 "id": 0,
                 "port_I": 0,
                 "port_Q": 1,
-                "frequency_drive": 5e9,
+                "intermediate_frequency": 100e6,
                 "local_oscillator": {"power": 10, "frequency": 6e9},
             }
         },
@@ -196,7 +194,7 @@ def test_instantiate_quam_dict():
         "id": 0,
         "port_I": ":wiring.port_I",
         "port_Q": ":wiring.port_Q",
-        "frequency_drive": 5e9,
+        "intermediate_frequency": 100e6,
         "local_oscillator": {"power": 10, "frequency": 6e9},
     }
     quam_dict["wiring"] = {

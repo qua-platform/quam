@@ -26,7 +26,7 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
             local_oscillator=local_oscillator_qubit,
             port_I=1,
             port_Q=2,
-            frequency_drive=5e9,
+            intermediate_frequency=100e6,
         )
         quam.mixers.append(mixer_qubit)
 
@@ -46,7 +46,7 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
             local_oscillator=local_oscillator_resonator,
             port_I=3,
             port_Q=4,
-            frequency_drive=5e9,
+            intermediate_frequency=100e6,
         )
         quam.mixers.append(resonator_mixer)
 
@@ -89,7 +89,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             local_oscillator=f":/local_oscillators[{idx}]",
             port_I=f":/wiring.qubits[{idx}].port_I",
             port_Q=f":/wiring.qubits[{idx}].port_Q",
-            frequency_drive=f":/qubits[{idx}].frequency",
+            intermediate_frequency=100e6,
         )
         quam.mixers.append(mixer_qubit)
 
@@ -97,7 +97,6 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             id=idx,
             xy=IQChannel(mixer=f":/mixers[{2*idx}]"),
             z=SingleChannel(port=f":/wiring.qubits[{idx}].port_Z"),
-            frequency=6.1e9,
         )
         quam.qubits.append(transmon)
 
@@ -110,14 +109,13 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             local_oscillator=f":/local_oscillators[{idx}]",
             port_I=f":/wiring.resonators[{idx}].port_I",
             port_Q=f":/wiring.resonators[{idx}].port_Q",
-            frequency_drive=f":/resonators[{idx}].frequency",
+            intermediate_frequency=100e6,
         )
         quam.mixers.append(resonator_mixer)
 
         readout_resonator = ReadoutResonator(
             id=idx,
             mixer=f":/mixers[{2*idx+1}]",
-            frequency=5.9e9,
         )
         quam.resonators.append(readout_resonator)
 
