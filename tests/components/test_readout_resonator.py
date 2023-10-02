@@ -8,10 +8,12 @@ def test_empty_readout_resonator():
             id=1,
             port_I=1,
             port_Q=2,
-            intermediate_frequency=100e6,
-            local_oscillator=LocalOscillator(frequency=5e9),
         ),
+        intermediate_frequency=100e6,
+        local_oscillator=LocalOscillator(frequency=5e9),
     )
+    assert readout_resonator.mixer.intermediate_frequency == 100e6
+    assert readout_resonator.mixer.local_oscillator == readout_resonator.local_oscillator
 
     d = readout_resonator.to_dict()
     assert d == {
@@ -20,9 +22,9 @@ def test_empty_readout_resonator():
             "id": 1,
             "port_I": 1,
             "port_Q": 2,
-            "intermediate_frequency": 100000000.0,
-            "local_oscillator": {"frequency": 5000000000.0},
         },
+        "intermediate_frequency": 100000000.0,
+        "local_oscillator": {"frequency": 5000000000.0},
     }
 
     cfg = {
@@ -33,7 +35,7 @@ def test_empty_readout_resonator():
     }
     expected_cfg = {
         "elements": {
-            "res1": {
+            "r1": {
                 "intermediate_frequency": 100000000.0,
                 "mixInputs": {
                     "I": ("con1", 1),
@@ -62,9 +64,9 @@ def test_readout_resonator_with_readout():
             id=1,
             port_I=1,
             port_Q=2,
-            intermediate_frequency=100e6,
-            local_oscillator=LocalOscillator(frequency=5e9),
         ),
+        intermediate_frequency=100e6,
+        local_oscillator=LocalOscillator(frequency=5e9),
     )
     readout_resonator.pulses["readout"] = pulses.ReadoutPulse(
         amplitude=0.1, length=1000
@@ -77,9 +79,9 @@ def test_readout_resonator_with_readout():
             "id": 1,
             "port_I": 1,
             "port_Q": 2,
-            "intermediate_frequency": 100000000.0,
-            "local_oscillator": {"frequency": 5000000000.0},
         },
+        "intermediate_frequency": 100000000.0,
+        "local_oscillator": {"frequency": 5000000000.0},
         "pulses": {
             "readout": {
                 "__class__": "quam_components.components.pulses.ReadoutPulse",
@@ -98,7 +100,7 @@ def test_readout_resonator_with_readout():
     }
     expected_cfg = {
         "elements": {
-            "res1": {
+            "r1": {
                 "intermediate_frequency": 100000000.0,
                 "mixInputs": {
                     "I": ("con1", 1),
@@ -106,53 +108,53 @@ def test_readout_resonator_with_readout():
                     "lo_frequency": 5000000000.0,
                     "mixer": "mixer1",
                 },
-                "operations": {"readout": "res1_readout_pulse"},
+                "operations": {"readout": "r1_readout_pulse"},
                 "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
                 "smearing": 0,
                 "time_of_flight": 24,
             }
         },
         "pulses": {
-            "res1_readout_pulse": {
+            "r1_readout_pulse": {
                 "operation": "measurement",
                 "length": 1000,
                 "waveforms": {
-                    "I": "res1_readout_wf_I",
-                    "Q": "res1_readout_wf_Q",
+                    "I": "r1_readout_wf_I",
+                    "Q": "r1_readout_wf_Q",
                 },
                 "integration_weights": {
-                    "cosine": "res1_cosine_iw",
-                    "sine": "res1_sine_iw",
-                    "minus_sine": "res1_minus_sine_iw",
+                    "cosine": "r1_cosine_iw",
+                    "sine": "r1_sine_iw",
+                    "minus_sine": "r1_minus_sine_iw",
                 },
-                "digital_marker": "res1_readout_dm",
+                "digital_marker": "r1_readout_dm",
             }
         },
         "integration_weights": {
-            "res1_cosine_iw": {
+            "r1_cosine_iw": {
                 "cosine": [(1.0, 1000)],
                 "sine": [(0.0, 1000)],
             },
-            "res1_sine_iw": {
+            "r1_sine_iw": {
                 "cosine": [(0.0, 1000)],
                 "sine": [(1.0, 1000)],
             },
-            "res1_minus_sine_iw": {
+            "r1_minus_sine_iw": {
                 "cosine": [(0.0, 1000)],
                 "sine": [(-1.0, 1000)],
             },
         },
         "waveforms": {
-            "res1_readout_wf_I": {
+            "r1_readout_wf_I": {
                 "type": "constant",
                 "sample": 0.1,
             },
-            "res1_readout_wf_Q": {
+            "r1_readout_wf_Q": {
                 "type": "constant",
                 "sample": 0.0,
             },
         },
-        "digital_waveforms": {"res1_readout_dm": {"samples": "ON"}},
+        "digital_waveforms": {"r1_readout_dm": {"samples": "ON"}},
     }
     readout_resonator.apply_to_config(cfg)
     assert cfg == expected_cfg
