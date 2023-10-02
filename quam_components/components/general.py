@@ -33,12 +33,11 @@ class LocalOscillator(QuamComponent):
 class Mixer(QuamComponent):
     id: Union[int, str]
 
-    local_oscillator: LocalOscillator
-
     port_I: int
     port_Q: int
 
-    intermediate_frequency: float
+    local_oscillator: LocalOscillator = ":../local_oscillator"
+    intermediate_frequency: float = ":../intermediate_frequency"
 
     offset_I: float = 0
     offset_Q: float = 0
@@ -251,6 +250,9 @@ class PulseEmitter(QuamComponent):
 @dataclass(kw_only=True, eq=False)
 class IQChannel(PulseEmitter):
     mixer: Mixer
+
+    local_oscillator: LocalOscillator = None
+    intermediate_frequency: float = None
 
     @property
     def name(self) -> str:

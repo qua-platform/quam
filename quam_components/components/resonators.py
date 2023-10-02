@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from quam_components.core import patch_dataclass
 
-from .general import Mixer, PulseEmitter
+from .general import Mixer, PulseEmitter, LocalOscillator
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
@@ -16,7 +16,8 @@ class ReadoutResonator(PulseEmitter):
     id: Union[int, str]
     mixer: Mixer
 
-    frequency: float = None
+    local_oscillator: LocalOscillator = None
+    intermediate_frequency: float = None
 
     time_of_flight: int = 24
     smearing: int = 0
@@ -25,7 +26,7 @@ class ReadoutResonator(PulseEmitter):
 
     @property
     def name(self):
-        return self.id if isinstance(self.id, str) else f"res{self.id}"
+        return self.id if isinstance(self.id, str) else f"r{self.id}"
 
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
@@ -33,7 +34,7 @@ class ReadoutResonator(PulseEmitter):
 
         config["elements"][self.name] = {
             "mixInputs": self.mixer.get_input_config(),
-            "intermediate_frequency": self.mixer.intermediate_frequency,
+            "intermediate_frequency": self.intermediate_frequency,
             "operations": self.pulse_mapping,
             "outputs": {  # TODO should this be hardcoded?
                 "out1": (self.controller, 1),
