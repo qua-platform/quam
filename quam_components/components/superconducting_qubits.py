@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Union
 
 from quam_components import QuamComponent, patch_dataclass
 from quam_components.components.general import IQChannel, SingleChannel
@@ -10,9 +11,7 @@ __all__ = ["Transmon"]
 
 @dataclass(kw_only=True, eq=False)
 class Transmon(QuamComponent):
-    id: int
-
-    frequency: float = None
+    id: Union[int, str]
 
     xy: IQChannel = None
     z: SingleChannel = None
