@@ -8,6 +8,7 @@ from quam_components.core.utils import (
     validate_obj_type,
     get_quam_class,
 )
+from quam_components.utils import string_reference
 
 if TYPE_CHECKING:
     from quam_components.core import QuamBase
@@ -110,13 +111,16 @@ def instantiate_attrs_from_list(
             continue
 
         if issubclass(required_subtype, QuamComponent):
-            instantiated_attr = instantiate_quam_class(
-                required_subtype,
-                attr_val,
-                fix_attrs=fix_attrs,
-                validate_type=validate_type,
-                str_repr=f"{str_repr}[{k}]",
-            )
+            if string_reference.is_reference(attr_val):
+                instantiated_attr = attr_val
+            else:
+                instantiated_attr = instantiate_quam_class(
+                    required_subtype,
+                    attr_val,
+                    fix_attrs=fix_attrs,
+                    validate_type=validate_type,
+                    str_repr=f"{str_repr}[{k}]",
+                )
         else:
             instantiated_attr = attr_val
         # Add custom __class__ QuamComponent logic here
@@ -174,7 +178,7 @@ def instantiate_attr(
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif isinstance(attr_val, dict) or typing.get_origin(expected_type) == dict:
+    elif isinstance(expected_type, dict) or typing.get_origin(expected_type) == dict:
         instantiated_attr = instantiate_attrs_from_dict(
             attr_dict=attr_val,
             required_type=expected_type,
@@ -182,7 +186,9 @@ def instantiate_attr(
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif isinstance(attr_val, list) or typing.get_origin(expected_type) == list:
+        if typing.get_origin(expected_type) == dict:
+            expected_type = dict
+    elif isinstance(expected_type, list) or typing.get_origin(expected_type) == list:
         instantiated_attr = instantiate_attrs_from_list(
             attr_list=attr_val,
             required_type=expected_type,
@@ -190,6 +196,8 @@ def instantiate_attr(
             validate_type=validate_type,
             str_repr=str_repr,
         )
+        if typing.get_origin(expected_type) == list:
+            expected_type = list
     elif typing.get_origin(expected_type) == typing.Union:
         assert all(
             t in [str, int, float, bool] for t in typing.get_args(expected_type)

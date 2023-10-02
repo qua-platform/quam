@@ -172,3 +172,13 @@ def test_val_matches_annotation():
         "val_Dict_annotated", QuamDict()
     )
     assert not TestQuamComponent._val_matches_attr_annotation("val_Dict_annotated", 42)
+
+def test_dict_parent(BareQuamComponent):
+    quam_dict = QuamDict({"a": BareQuamComponent()})
+    assert quam_dict["a"].parent == quam_dict
+
+    quam_dict["b"] = BareQuamComponent()
+    assert quam_dict["b"].parent == quam_dict
+
+    quam_dict.c = BareQuamComponent()
+    assert quam_dict.c.parent == quam_dict

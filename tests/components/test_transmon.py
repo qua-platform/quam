@@ -24,9 +24,9 @@ def test_transmon_xy():
                 id=1,
                 port_I=1,
                 port_Q=2,
-                local_oscillator=LocalOscillator(),
-                intermediate_frequency=100e6,
-            )
+            ),
+            local_oscillator=LocalOscillator(id=1, frequency=5e9),
+            intermediate_frequency=100e6,
         ),
     )
 
@@ -37,8 +37,6 @@ def test_transmon_xy():
     assert transmon.z is None
 
     config = {"elements": {}}
-    with pytest.raises(TypeError):
-        transmon.xy.mixer.frequency_rf
 
     transmon.xy.mixer.local_oscillator.frequency = 4.6e9
 
@@ -56,6 +54,7 @@ def test_transmon_xy():
                 },
                 "intermediate_frequency": 100e6,
                 "operations": {},
+                "oscillator": "lo1",
             },
         }
     }
@@ -69,9 +68,9 @@ def test_transmon_add_pulse():
                 id=1,
                 port_I=1,
                 port_Q=2,
-                local_oscillator=LocalOscillator(frequency=4.6e9),
-                intermediate_frequency=100e6,
-            )
+            ),
+            local_oscillator=LocalOscillator(id=2, frequency=4.6e9),
+            intermediate_frequency=100e6,
         ),
     )
     transmon.xy.pulses["X180"] = pulses.DragPulse(
@@ -84,11 +83,11 @@ def test_transmon_add_pulse():
         "xy": {
             "mixer": {
                 "id": 1,
-                "local_oscillator": {"frequency": 4600000000.0},
                 "port_I": 1,
                 "port_Q": 2,
-                "intermediate_frequency": 100000000.0,
             },
+            "local_oscillator": {"id": 2, "frequency": 4600000000.0},
+            "intermediate_frequency": 100000000.0,
             "pulses": {
                 "X180": {
                     "__class__": "quam_components.components.pulses.DragPulse",
@@ -116,6 +115,7 @@ def test_transmon_add_pulse():
             },
             "intermediate_frequency": 100e6,
             "operations": {"X180": "q1_xy_X180_pulse"},
+            "oscillator": "lo2",
         },
     }
 
@@ -154,9 +154,9 @@ quam_dict_single_nested = {
                 "id": 0,
                 "port_I": 0,
                 "port_Q": 1,
-                "intermediate_frequency": 100e6,
-                "local_oscillator": {"power": 10, "frequency": 6e9},
-            }
+            },
+            "intermediate_frequency": 100e6,
+            "local_oscillator": {"id": 1, "power": 10, "frequency": 6e9},
         },
     }
 }
@@ -194,10 +194,8 @@ def test_instantiate_quam_dict():
     quam_dict = deepcopy(quam_dict_single_nested)
     quam_dict["qubit"]["xy"]["mixer"] = {
         "id": 0,
-        "port_I": ":wiring.port_I",
-        "port_Q": ":wiring.port_Q",
-        "intermediate_frequency": 100e6,
-        "local_oscillator": {"power": 10, "frequency": 6e9},
+        "port_I": ":/wiring.port_I",
+        "port_Q": ":/wiring.port_Q",
     }
     quam_dict["wiring"] = {
         "port_I": 0,

@@ -92,8 +92,12 @@ def test_validate_standard_types():
 
 
 def test_validate_type_exceptions():
-    validate_obj_type(":reference", int)
-    validate_obj_type(":reference", str)
+    validate_obj_type(":/reference", int)
+    validate_obj_type(":/reference", str)
+    validate_obj_type(":./reference", int)
+    validate_obj_type(":./reference", str)
+    validate_obj_type(":../reference", int)
+    validate_obj_type(":../reference", str)
 
     validate_obj_type(None, int)
     validate_obj_type(None, str)
@@ -117,7 +121,9 @@ def test_validate_typing_dict():
     with pytest.raises(TypeError):
         validate_obj_type({"a": 1, "b": 2}, Dict[str, str])
 
-    validate_obj_type(":reference", Dict[str, int])
+    validate_obj_type(":/reference", Dict[str, int])
+    validate_obj_type(":./reference", Dict[str, int])
+    validate_obj_type(":../reference", Dict[str, int])
 
 
 @dataclass
@@ -210,11 +216,11 @@ def test_instantiate_from_quam_component_typing_list():
 
 
 def test_instantiate_attr_reference():
-    obj = instantiate_attr(attr_val=":reference", expected_type=str)
-    assert obj == ":reference"
+    obj = instantiate_attr(attr_val=":/reference", expected_type=str)
+    assert obj == ":/reference"
 
-    obj = instantiate_attr(attr_val=":reference", expected_type=int)
-    assert obj == ":reference"
+    obj = instantiate_attr(attr_val=":/reference", expected_type=int)
+    assert obj == ":/reference"
 
 
 def test_instantiate_attr_None():

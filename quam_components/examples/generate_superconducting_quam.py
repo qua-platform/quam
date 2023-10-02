@@ -18,7 +18,9 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
 
     for idx in range(num_qubits):
         # Create qubit components
-        local_oscillator_qubit = LocalOscillator(power=10, frequency=6e9)
+        local_oscillator_qubit = LocalOscillator(
+            id=f"lo_q{idx}", power=10, frequency=6e9
+        )
         quam.local_oscillators.append(local_oscillator_qubit)
 
         mixer_qubit = Mixer(
@@ -29,16 +31,19 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
             intermediate_frequency=100e6,
         )
         quam.mixers.append(mixer_qubit)
+        local_oscillator_qubit.mixer = mixer_qubit
 
         transmon = Transmon(
             id=idx,
-            xy=IQChannel(mixer=mixer_qubit),
+            xy=IQChannel(mixer=mixer_qubit, local_oscillator=local_oscillator_qubit),
             z=SingleChannel(port=5),
         )
         quam.qubits.append(transmon)
 
         # Create resonator components
-        local_oscillator_resonator = LocalOscillator(power=10, frequency=6e9)
+        local_oscillator_resonator = LocalOscillator(
+            id=f"lo_r{idx}", power=10, frequency=6e9
+        )
         quam.local_oscillators.append(local_oscillator_resonator)
 
         resonator_mixer = Mixer(
@@ -49,8 +54,11 @@ def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
             intermediate_frequency=100e6,
         )
         quam.mixers.append(resonator_mixer)
+        local_oscillator_resonator.mixer = resonator_mixer
 
-        readout_resonator = ReadoutResonator(id=idx, mixer=resonator_mixer)
+        readout_resonator = ReadoutResonator(
+            id=idx, mixer=resonator_mixer, local_oscillator=local_oscillator_resonator
+        )
         quam.resonators.append(readout_resonator)
 
     # Create analog inputs
@@ -81,43 +89,49 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
 
     for idx in range(num_qubits):
         # Create qubit components
-        local_oscillator_qubit = LocalOscillator(power=10, frequency=6e9)
-        quam.local_oscillators.append(local_oscillator_qubit)
+        local_oscillator_qubit = LocalOscillator(
+            id=f"lo_q{idx}", power=10, frequency=6e9
+        )
 
         mixer_qubit = Mixer(
             id=f"mixer_q{idx}",
-            local_oscillator=f":/local_oscillators[{idx}]",
             port_I=f":/wiring.qubits[{idx}].port_I",
             port_Q=f":/wiring.qubits[{idx}].port_Q",
             intermediate_frequency=100e6,
         )
-        quam.mixers.append(mixer_qubit)
 
         transmon = Transmon(
             id=idx,
-            xy=IQChannel(mixer=f":/mixers[{2*idx}]"),
+            xy=IQChannel(
+                mixer=mixer_qubit,
+                local_oscillator=local_oscillator_qubit,
+            ),
             z=SingleChannel(port=f":/wiring.qubits[{idx}].port_Z"),
         )
         quam.qubits.append(transmon)
+        quam.local_oscillators.append(f":/qubits[{idx}].xy.local_oscillator")
+        quam.mixers.append(f":/qubits[{idx}].xy.mixer")
 
         # Create resonator components
-        local_oscillator_resonator = LocalOscillator(power=10, frequency=6e9)
-        quam.local_oscillators.append(local_oscillator_resonator)
+        local_oscillator_resonator = LocalOscillator(
+            id=f"lo_r{idx}", power=10, frequency=6e9
+        )
 
         resonator_mixer = Mixer(
             id=f"mixer_r{idx}",
-            local_oscillator=f":/local_oscillators[{idx}]",
             port_I=f":/wiring.resonators[{idx}].port_I",
             port_Q=f":/wiring.resonators[{idx}].port_Q",
             intermediate_frequency=100e6,
         )
-        quam.mixers.append(resonator_mixer)
 
         readout_resonator = ReadoutResonator(
             id=idx,
-            mixer=f":/mixers[{2*idx+1}]",
+            mixer=resonator_mixer,
+            local_oscillator=local_oscillator_resonator,
         )
         quam.resonators.append(readout_resonator)
+        quam.local_oscillators.append(f":/resonators[{idx}].xy.local_oscillator")
+        quam.mixers.append(f":/resonators[{idx}].xy.mixer")
 
     # Create analog inputs
     quam.analog_inputs.append(AnalogInput(port=1))

@@ -4,6 +4,8 @@ import dataclasses
 from typeguard import check_type, TypeCheckError
 import importlib
 
+from quam_components.utils import string_reference
+
 
 def get_dataclass_attr_annotations(
     cls_or_obj: Union[type, object]
@@ -72,7 +74,7 @@ def validate_obj_type(
         TypeError if the type of the attribute is not the required type
     """
     # Do not check type if the value is a reference
-    if isinstance(elem, str) and elem.startswith(":"):
+    if string_reference.is_reference(elem):
         return
     if elem is None and allow_none:
         return

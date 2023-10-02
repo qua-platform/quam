@@ -25,8 +25,24 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class LocalOscillator(QuamComponent):
+    id: Union[int, str]
+
+    frequency: float
+
     power: float = None
-    frequency: float = None
+
+    mixer: "Mixer" = ":../mixer"
+
+    @property
+    def name(self):
+        return self.id if isinstance(self.id, str) else f"lo{self.id}"
+
+    def apply_to_config(self, config: dict):
+        config["oscillators"][self.name] = {
+            "mixer": self.mixer.name,
+            "lo_frequency": self.frequency,
+            "intermediate_frequency": self.mixer.intermediate_frequency,
+        }
 
 
 @dataclass(kw_only=True, eq=False)
@@ -263,6 +279,7 @@ class IQChannel(PulseEmitter):
         super().apply_to_config(config)
 
         config["elements"][self.name] = {
+            "oscillator": self.local_oscillator.name,
             "mixInputs": self.mixer.get_input_config(),
             "intermediate_frequency": self.mixer.intermediate_frequency,
             "operations": self.pulse_mapping,

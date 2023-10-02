@@ -334,6 +334,9 @@ class QuamDict(UserDict, QuamBase):
         value = convert_dict_and_list(value)
         super().__setitem__(key, value)
 
+        if isinstance(value, QuamBase):
+            value.__dict__["parent"] = self
+
     def __eq__(self, other) -> bool:
         if isinstance(other, dict):
             return self.data == other
@@ -417,20 +420,35 @@ class QuamList(UserList, QuamBase):
         converted_item = convert_dict_and_list(item)
         super().__setitem__(i, converted_item)
 
+        if isinstance(converted_item, QuamBase):
+            converted_item.__dict__["parent"] = self
+
     def __iadd__(self, other: Iterable):
         converted_other = [convert_dict_and_list(elem) for elem in other]
         return super().__iadd__(converted_other)
 
     def append(self, item: Any) -> None:
         converted_item = convert_dict_and_list(item)
+
+        if isinstance(converted_item, QuamBase):
+            converted_item.__dict__["parent"] = self
+
         return super().append(converted_item)
 
     def insert(self, i: int, item: Any) -> None:
         converted_item = convert_dict_and_list(item)
+
+        if isinstance(converted_item, QuamBase):
+            converted_item.__dict__["parent"] = self
+
         return super().insert(i, converted_item)
 
     def extend(self, iterable: Iterator) -> None:
         converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
+        for converted_item in converted_iterable:
+            if isinstance(converted_item, QuamBase):
+                converted_item.__dict__["parent"] = self
+
         return super().extend(converted_iterable)
 
     # Quam methods

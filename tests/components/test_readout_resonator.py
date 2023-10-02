@@ -10,10 +10,12 @@ def test_empty_readout_resonator():
             port_Q=2,
         ),
         intermediate_frequency=100e6,
-        local_oscillator=LocalOscillator(frequency=5e9),
+        local_oscillator=LocalOscillator(id=2, frequency=5e9),
     )
     assert readout_resonator.mixer.intermediate_frequency == 100e6
-    assert readout_resonator.mixer.local_oscillator == readout_resonator.local_oscillator
+    assert (
+        readout_resonator.mixer.local_oscillator == readout_resonator.local_oscillator
+    )
 
     d = readout_resonator.to_dict()
     assert d == {
@@ -24,7 +26,7 @@ def test_empty_readout_resonator():
             "port_Q": 2,
         },
         "intermediate_frequency": 100000000.0,
-        "local_oscillator": {"frequency": 5000000000.0},
+        "local_oscillator": {"id": 2, "frequency": 5000000000.0},
     }
 
     cfg = {
@@ -66,7 +68,7 @@ def test_readout_resonator_with_readout():
             port_Q=2,
         ),
         intermediate_frequency=100e6,
-        local_oscillator=LocalOscillator(frequency=5e9),
+        local_oscillator=LocalOscillator(id=2, frequency=5e9),
     )
     readout_resonator.pulses["readout"] = pulses.ReadoutPulse(
         amplitude=0.1, length=1000
@@ -81,7 +83,7 @@ def test_readout_resonator_with_readout():
             "port_Q": 2,
         },
         "intermediate_frequency": 100000000.0,
-        "local_oscillator": {"frequency": 5000000000.0},
+        "local_oscillator": {"id": 2, "frequency": 5000000000.0},
         "pulses": {
             "readout": {
                 "__class__": "quam_components.components.pulses.ReadoutPulse",

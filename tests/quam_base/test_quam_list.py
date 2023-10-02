@@ -52,3 +52,17 @@ def test_quam_nested_list_instantiation_implicit():
     assert quam_list.data == [1, 2, [3, 4, 5]]
     assert quam_list[2] == [3, 4, 5]
     assert isinstance(quam_list[2], QuamList)
+
+
+def test_list_parent(BareQuamComponent):
+    quam_list = QuamList([BareQuamComponent()])
+    assert quam_list[0].parent is quam_list
+
+    quam_list.append(BareQuamComponent())
+    assert quam_list[1].parent is quam_list
+
+    quam_list.extend([BareQuamComponent(), BareQuamComponent()])
+    assert quam_list[2].parent is quam_list
+
+    quam_list[0] = BareQuamComponent()
+    assert quam_list[0].parent is quam_list

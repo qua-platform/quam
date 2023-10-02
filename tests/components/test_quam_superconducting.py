@@ -18,6 +18,13 @@ def test_create_quam_superconducting_simple():
 def test_create_quam_superconducting_simple_generate_config():
     quam = create_quam_superconducting_simple(num_qubits=2)
     assert isinstance(quam, QuAM)
+    assert quam.parent is None
+    assert quam.qubits[0].xy.name == "q0_xy"
+    assert quam.qubits[0].parent == quam.qubits
+    assert quam.qubits[0].xy.parent == quam.qubits[0]
+    assert quam.qubits[0].xy.mixer.parent == quam.qubits[0].xy
+    assert quam.qubits[0].xy.mixer.local_oscillator.parent == quam.qubits[0].xy
+
     assert isinstance(quam.local_oscillators[0], LocalOscillator)
     assert isinstance(quam.mixers[0], Mixer)
     assert isinstance(quam.qubits[0], Transmon)
@@ -72,10 +79,12 @@ def test_quam_referenced_full(tmp_path):
     assert len(loaded_quam["resonators"]) == 3
     assert len(loaded_quam["mixers"]) == 6
     assert len(loaded_quam["local_oscillators"]) == 6
-    assert loaded_quam["qubits"][0]["xy"]["mixer"] == ":/mixers[0]"
-    assert loaded_quam["mixers"][0]["local_oscillator"] == ":/local_oscillators[0]"
-    assert loaded_quam["mixers"][0]["port_I"] == ":/wiring.qubits[0].port_I"
-    assert loaded_quam["mixers"][0]["intermediate_frequency"] == 100e6
+    assert loaded_quam["mixers"][0] == ":/qubits[0].xy.mixer"
+    assert loaded_quam["local_oscillators"][0] == ":/qubits[0].xy.local_oscillator"
+    assert (
+        loaded_quam["qubits"][0]["xy"]["mixer"]["port_I"] == ":/wiring.qubits[0].port_I"
+    )
+    assert loaded_quam["qubits"][0]["xy"]["mixer"]["intermediate_frequency"] == 100e6
 
     loaded_quam = json.load((folder / "quam" / "wiring.json").open("r"))
     assert set(loaded_quam.keys()) == set(["wiring"])
