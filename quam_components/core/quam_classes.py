@@ -9,6 +9,7 @@ from typing import (
     ClassVar,
     Any,
     Dict,
+    Sequence,
     TypeVar,
     get_type_hints,
     get_origin,
@@ -241,13 +242,20 @@ class QuamRoot(QuamBase):
         if isinstance(converted_val, QuamBase):
             converted_val.__dict__["parent"] = self
 
-    def save(self, path=None, content_mapping=None, include_defaults=False):
+    def save(
+        self,
+        path: Union[Path, str] = None,
+        content_mapping: Dict[str, str] = None,
+        include_defaults: bool = False,
+        ignore: Sequence[str] = None,
+    ):
         serialiser = self.serialiser()
         serialiser.save(
             quam_obj=self,
             path=path,
             component_mapping=content_mapping,
             include_defaults=include_defaults,
+            ignore=ignore,
         )
 
     def to_dict(self, follow_references=False, include_defaults=False):

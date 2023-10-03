@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Dict, Any, TYPE_CHECKING
+from typing import Union, Dict, Any, TYPE_CHECKING, Sequence
 from pathlib import Path
 import json
 
@@ -48,6 +48,7 @@ class JSONSerialiser(AbstractSerialiser):
         path: Union[Path, str] = None,
         component_mapping: Dict[str, str] = None,
         include_defaults: bool = False,
+        ignore: Sequence[str] = None,
     ):
         """Save a QuamRoot object to a JSON file.
 
@@ -69,6 +70,10 @@ class JSONSerialiser(AbstractSerialiser):
         component_mapping = component_mapping or self.component_mapping
 
         contents = quam_obj.to_dict(include_defaults=include_defaults)
+
+        # TODO This should ideally go to the QuamRoot.to_dict method
+        for key in ignore or []:
+            contents.pop(key)
 
         folder, default_filename = self._parse_path(path, component_mapping)
 
