@@ -11,7 +11,7 @@ class AbstractSerialiser:
         self,
         path: Union[Path, str],
         quam_obj: Union[QuamRoot, QuamComponent],
-        component_mapping: Dict[str, str] = None,
+        content_mapping: Dict[str, str] = None,
     ):
         raise NotImplementedError
 

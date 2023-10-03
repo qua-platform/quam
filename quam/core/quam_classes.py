@@ -253,7 +253,7 @@ class QuamRoot(QuamBase):
         serialiser.save(
             quam_obj=self,
             path=path,
-            component_mapping=content_mapping,
+            content_mapping=content_mapping,
             include_defaults=include_defaults,
             ignore=ignore,
         )

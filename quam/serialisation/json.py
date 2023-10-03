@@ -12,14 +12,16 @@ if TYPE_CHECKING:
 class JSONSerialiser(AbstractSerialiser):
     default_filename = "state.json"
     default_foldername = "quam"
-    component_mapping = {}
+    content_mapping = {}
 
     def _save_dict_to_json(self, contents: Dict[str, Any], path: Path):
         with open(path, "w") as f:
             json.dump(contents, f, indent=4)
 
     def _parse_path(
-        self, path: Union[Path, str], component_mapping: Dict[str, str] = None
+        self,
+        path: Union[Path, str],
+        content_mapping: Dict[Union[Path, str], Sequence[str]] = None,
     ) -> (Path, str):
         """Parse the path to determine the folder and filename to save to.
 
@@ -27,11 +29,11 @@ class JSONSerialiser(AbstractSerialiser):
         """
         if path is None:
             default_filename = self.default_filename
-            if not component_mapping:
+            if not content_mapping:
                 folder = Path(".")
-            elif not all(isinstance(elem, Path) for elem in component_mapping):
+            elif not all(isinstance(elem, Path) for elem in content_mapping):
                 folder = Path(".")
-            elif not all(elem.is_absolute() for elem in component_mapping):
+            elif not all(elem.is_absolute() for elem in content_mapping):
                 folder = Path(".")
             else:
                 folder = self.default_foldername
@@ -50,13 +52,13 @@ class JSONSerialiser(AbstractSerialiser):
         self,
         quam_obj: QuamRoot,
         path: Union[Path, str] = None,
-        component_mapping: Dict[Union[Path, str], str] = None,
+        content_mapping: Dict[Union[Path, str], Sequence[str]] = None,
         include_defaults: bool = False,
         ignore: Sequence[str] = None,
     ):
         """Save a QuamRoot object to a JSON file.
 
-        The save location depends on the path provided and the component_mapping.
+        The save location depends on the path provided and the content_mapping.
             No path, no component mapping -> save to default file
             No path, component mapping -> Create folder, save to default file,
                 save components separately
@@ -67,11 +69,12 @@ class JSONSerialiser(AbstractSerialiser):
             Folder Path, component mapping -> Create folder, save to default file,
                 save components separately
 
-            self.default_filename when component_mapping != None or no path provided
-            self.default_foldername when component_mapping != None and path is not a
+            self.default_filename when content_mapping != None or no path provided
+            self.default_foldername when content_mapping != None and path is not a
                 folder
         """
-        component_mapping = component_mapping or self.component_mapping
+        content_mapping = content_mapping or self.content_mapping
+        content_mapping = content_mapping.copy()
 
         contents = quam_obj.to_dict(include_defaults=include_defaults)
 
@@ -79,14 +82,19 @@ class JSONSerialiser(AbstractSerialiser):
         for key in ignore or []:
             contents.pop(key)
 
-        folder, default_filename = self._parse_path(path, component_mapping)
+        folder, default_filename = self._parse_path(path, content_mapping)
 
         folder.mkdir(exist_ok=True)
 
-        component_mapping = component_mapping.copy()
-        for component_file, components in component_mapping.items():
+        content_mapping = content_mapping.copy()
+        for component_file, components in content_mapping.items():
             if isinstance(components, str):
                 components = [components]
+
+            if ignore is not None:
+                components = [elem for elem in components if elem not in ignore]
+            if not components:
+                continue
 
             subcomponents = {}
             for component in components:
@@ -107,7 +115,7 @@ class JSONSerialiser(AbstractSerialiser):
         path = Path(path)
         contents = {}
         metadata = {
-            "component_mapping": {},
+            "content_mapping": {},
             "default_filename": None,
             "default_foldername": None,
         }
@@ -135,8 +143,6 @@ class JSONSerialiser(AbstractSerialiser):
                 if file.name == self.default_filename:
                     metadata["default_filename"] = file.name
                 else:
-                    metadata["component_mapping"][file.name] = list(
-                        file_contents.keys()
-                    )
+                    metadata["content_mapping"][file.name] = list(file_contents.keys())
 
         return contents, metadata
