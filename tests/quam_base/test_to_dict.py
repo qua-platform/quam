@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
-from quam_components.core.quam_classes import *
+from quam.core.quam_classes import *
 
 
 def test_basic_list_to_dict():

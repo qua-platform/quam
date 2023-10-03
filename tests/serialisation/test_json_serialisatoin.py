@@ -3,8 +3,8 @@ import json
 
 import pytest
 
-from quam_components.serialisation import JSONSerialiser
-from quam_components.core import QuamRoot, QuamComponent
+from quam.serialisation import JSONSerialiser
+from quam.core import QuamRoot, QuamComponent
 
 
 @dataclass

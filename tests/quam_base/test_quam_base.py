@@ -2,7 +2,7 @@ from typing import List
 from dataclasses import dataclass, fields, is_dataclass, field
 import pytest
 
-from quam_components.core import *
+from quam.core import *
 
 
 def test_error_create_base_classes_directly():
@@ -95,10 +95,10 @@ def test_iterate_quam_component_duplicate():
         quam_elem1: QuamComponent
         quam_elem2: QuamComponent
 
-    quam_components = [BareQuamComponent(), BareQuamComponent()]
-    elem = QuamTest(quam_elem1=quam_components[0], quam_elem2=quam_components[1])
+    components = [BareQuamComponent(), BareQuamComponent()]
+    elem = QuamTest(quam_elem1=components[0], quam_elem2=components[1])
     elems = list(elem.iterate_components())
-    assert elems == quam_components
+    assert elems == components
 
     quam_component = BareQuamComponent()
     elem = QuamTest(quam_elem1=quam_component, quam_elem2=quam_component)
@@ -111,10 +111,10 @@ def test_iterate_quam_component_list_duplicate():
     class QuamTest(QuamRoot):
         quam_list: List[QuamComponent]
 
-    quam_components = [BareQuamComponent(), BareQuamComponent()]
-    elem = QuamTest(quam_list=quam_components)
+    components = [BareQuamComponent(), BareQuamComponent()]
+    elem = QuamTest(quam_list=components)
     elems = list(elem.iterate_components())
-    assert elems == quam_components
+    assert elems == components
 
     quam_component = BareQuamComponent()
     elem = QuamTest(quam_list=[quam_component, quam_component])

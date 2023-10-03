@@ -3,7 +3,7 @@ from typing import Union, Dict, TYPE_CHECKING
 from pathlib import Path
 
 if TYPE_CHECKING:
-    from quam_components.core import QuamRoot, QuamComponent
+    from quam.core import QuamRoot, QuamComponent
 
 
 class AbstractSerialiser:

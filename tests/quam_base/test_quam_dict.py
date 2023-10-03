@@ -1,7 +1,7 @@
 import pytest
 from typing import Dict
 from dataclasses import dataclass, field
-from quam_components.core.quam_classes import *
+from quam.core.quam_classes import *
 from collections import UserDict
 
 

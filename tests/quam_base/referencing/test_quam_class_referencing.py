@@ -2,7 +2,7 @@ from typing import List
 from dataclasses import dataclass
 import pytest
 
-from quam_components.core import *
+from quam.core import *
 
 patch_dataclass(__name__)
 

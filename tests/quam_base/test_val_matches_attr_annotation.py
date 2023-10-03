@@ -1,6 +1,6 @@
 from typing import Dict, List
 from dataclasses import dataclass
-from quam_components.core.quam_classes import *
+from quam.core.quam_classes import *
 
 
 @dataclass

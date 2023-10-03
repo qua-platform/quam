@@ -3,15 +3,15 @@ import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
 
-from quam_components.core.utils import (
+from quam.core.utils import (
     get_dataclass_attr_annotations,
     validate_obj_type,
     get_quam_class,
 )
-from quam_components.utils import string_reference
+from quam.utils import string_reference
 
 if TYPE_CHECKING:
-    from quam_components.core import QuamBase
+    from quam.core import QuamBase
 
 
 def instantiate_attrs_from_dict(
@@ -40,7 +40,7 @@ def instantiate_attrs_from_dict(
     Returns:
         A dictionary with the instantiated attributes.
     """
-    from quam_components.core import QuamComponent  # noqa: F811
+    from quam.core import QuamComponent  # noqa: F811
 
     if typing.get_origin(required_type) == dict:
         required_subtype = typing.get_args(required_type)[1]
@@ -97,7 +97,7 @@ def instantiate_attrs_from_list(
     Returns:
         A list with the instantiated attributes.
     """
-    from quam_components.core import QuamComponent  # noqa: F811
+    from quam.core import QuamComponent  # noqa: F811
 
     if typing.get_origin(required_type) == list:
         required_subtype = typing.get_args(required_type)[0]
@@ -163,7 +163,7 @@ def instantiate_attr(
     Returns:
         The instantiated attribute.
     """
-    from quam_components.core import QuamComponent  # noqa: F811
+    from quam.core import QuamComponent  # noqa: F811
 
     if isinstance(attr_val, str) and attr_val.startswith(":"):
         # Value is a reference, add without instantiating

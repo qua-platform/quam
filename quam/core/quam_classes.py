@@ -18,11 +18,11 @@ from typing import (
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
-from quam_components.serialisation import AbstractSerialiser, JSONSerialiser
-from quam_components.utils.reference_class import ReferenceClass
-from quam_components.utils import string_reference
-from quam_components.core.quam_instantiation import instantiate_quam_class
-from quam_components.core.utils import (
+from quam.serialisation import AbstractSerialiser, JSONSerialiser
+from quam.utils.reference_class import ReferenceClass
+from quam.utils import string_reference
+from quam.core.quam_instantiation import instantiate_quam_class
+from quam.core.utils import (
     get_full_class_path,
     get_dataclass_attr_annotations,
 )
@@ -261,7 +261,7 @@ class QuamRoot(QuamBase):
     def to_dict(self, follow_references=False, include_defaults=False):
         quam_dict = super().to_dict(follow_references, include_defaults)
         # QuamRoot should always add __class__ because it is generally not
-        # quam_components.components.quam.QuAM
+        # quam.components.quam.QuAM
         quam_dict["__class__"] = get_full_class_path(self)
         return quam_dict
 

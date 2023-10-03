@@ -3,8 +3,8 @@ import numpy as np
 from typing import Dict, List, Union
 from dataclasses import dataclass, field
 
-from quam_components.core import QuamComponent, patch_dataclass
-from quam_components.components.pulses import Pulse
+from quam.core import QuamComponent, patch_dataclass
+from quam.components.pulses import Pulse
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 

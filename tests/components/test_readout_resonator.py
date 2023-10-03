@@ -1,4 +1,4 @@
-from quam_components.components import *
+from quam.components import *
 
 
 def test_empty_readout_resonator():
@@ -86,7 +86,7 @@ def test_readout_resonator_with_readout():
         "local_oscillator": {"id": 2, "frequency": 5000000000.0},
         "pulses": {
             "readout": {
-                "__class__": "quam_components.components.pulses.ReadoutPulse",
+                "__class__": "quam.components.pulses.ReadoutPulse",
                 "amplitude": 0.1,
                 "length": 1000,
             }

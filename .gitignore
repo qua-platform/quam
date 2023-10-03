@@ -1,7 +1,7 @@
 .DS_Store
 .vscode
 *.pyc
-quam_components/examples/output
+quam/examples/output
 additional
 .venv*
 .coverage

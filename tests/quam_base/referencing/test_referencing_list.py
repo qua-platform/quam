@@ -1,5 +1,5 @@
-from quam_components.core import *
-from quam_components.utils.string_reference import *
+from quam.core import *
+from quam.utils.string_reference import *
 
 from dataclasses import dataclass
 

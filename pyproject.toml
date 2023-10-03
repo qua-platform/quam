@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quam-components"
-packages = [{ include = "quam_components" }]
+packages = [{ include = "quam" }]
 include = ["LICENSE.md"]
 exclude = ["**/tests/**", "**/conftest.py/**"]
 version = "0.1.0"
@@ -102,4 +102,4 @@ build-backend = "poetry.masonry.api"
 # build-backend = "setuptools.build_meta"
 
 # [tool.setuptools]
-# packages = ["quam_components"]
+# packages = ["quam"]

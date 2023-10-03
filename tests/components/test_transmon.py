@@ -1,8 +1,8 @@
 import pytest
 from dataclasses import dataclass
 from copy import deepcopy
-from quam_components.components import *
-from quam_components.core import QuamRoot
+from quam.components import *
+from quam.core import QuamRoot
 
 
 def test_basic_transmon():
@@ -90,7 +90,7 @@ def test_transmon_add_pulse():
             "intermediate_frequency": 100000000.0,
             "pulses": {
                 "X180": {
-                    "__class__": "quam_components.components.pulses.DragPulse",
+                    "__class__": "quam.components.pulses.DragPulse",
                     "amplitude": 1,
                     "sigma": 4,
                     "alpha": 2,

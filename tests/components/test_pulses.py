@@ -1,6 +1,6 @@
 import numpy as np
 
-from quam_components.components import *
+from quam.components import *
 
 
 def test_drag_pulse():

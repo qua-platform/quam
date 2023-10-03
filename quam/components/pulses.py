@@ -3,7 +3,7 @@ from typing import Callable, ClassVar, Dict, List, Union, Tuple
 import inspect
 import numpy as np
 
-from quam_components.core import QuamComponent, patch_dataclass
+from quam.core import QuamComponent, patch_dataclass
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 

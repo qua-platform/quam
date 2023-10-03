@@ -1,5 +1,5 @@
 import pytest
-from quam_components.utils.string_reference import *
+from quam.utils.string_reference import *
 
 
 def test_is_reference():

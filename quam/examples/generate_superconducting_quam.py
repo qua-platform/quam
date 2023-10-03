@@ -1,8 +1,8 @@
 from pathlib import Path
 import json
 
-from quam_components.components import *
-from quam_components.core import QuamRoot
+from quam.components import *
+from quam.core import QuamRoot
 
 
 def create_quam_superconducting_simple(num_qubits: int) -> QuamRoot:
@@ -140,9 +140,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
 
 
 if __name__ == "__main__":
-    folder = Path(
-        "quam-components/quam_components/examples/quam_superconducting_referenced"
-    )
+    folder = Path("quam-components/quam/examples/quam_superconducting_referenced")
     folder.mkdir(exist_ok=True)
 
     quam = create_quam_superconducting_referenced(num_qubits=3)

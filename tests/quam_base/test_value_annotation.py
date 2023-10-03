@@ -1,8 +1,8 @@
 from typing import Dict, List
 import pytest
 from dataclasses import dataclass
-from quam_components.core.quam_classes import *
-from quam_components.core.quam_classes import _get_value_annotation
+from quam.core.quam_classes import *
+from quam.core.quam_classes import _get_value_annotation
 
 
 def test_value_annotation_nonexisting():
@@ -57,7 +57,7 @@ def test_value_annotation_bare_quam_component():
 
 
 def test_value_annotation_bare_quam_root():
-    from quam_components.core.quam_classes import _get_value_annotation
+    from quam.core.quam_classes import _get_value_annotation
 
     @dataclass
     class TestQuam(QuamRoot):

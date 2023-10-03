@@ -4,7 +4,7 @@ import dataclasses
 from typeguard import check_type, TypeCheckError
 import importlib
 
-from quam_components.utils import string_reference
+from quam.utils import string_reference
 
 
 def get_dataclass_attr_annotations(
@@ -23,7 +23,7 @@ def get_dataclass_attr_annotations(
         For each key, the values are dictionaries with the attribute names as keys
         and the attribute types as values.
     """
-    from quam_components.core.quam_dataclass import REQUIRED
+    from quam.core.quam_dataclass import REQUIRED
 
     annotated_attrs = get_type_hints(cls_or_obj)
 

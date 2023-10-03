@@ -1,5 +1,5 @@
 from collections import UserList
-from quam_components.core import *
+from quam.core import *
 
 
 def test_quam_list_inheritance():

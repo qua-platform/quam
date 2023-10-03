@@ -1,7 +1,7 @@
 from typing import Union
 from dataclasses import dataclass
 
-from quam_components.core import patch_dataclass
+from quam.core import patch_dataclass
 
 from .general import Mixer, PulseEmitter, LocalOscillator
 

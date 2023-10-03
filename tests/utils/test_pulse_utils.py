@@ -1,4 +1,4 @@
-from quam_components.utils.pulse import pulse_str_to_axis_axis_angle
+from quam.utils.pulse import pulse_str_to_axis_axis_angle
 
 
 def test_pulse_str_to_axis_angle():

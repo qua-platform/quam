@@ -1,6 +1,6 @@
-from quam_components.examples.generate_superconducting_quam import *
-from quam_components.components import *
-from quam_components.core import *
+from quam.examples.generate_superconducting_quam import *
+from quam.components import *
+from quam.core import *
 
 
 def test_create_quam_superconducting_simple():
@@ -11,8 +11,8 @@ def test_create_quam_superconducting_simple():
     assert len(quam.mixers) == 4
     assert len(quam.local_oscillators) == 4
 
-    quam_components = list(quam.iterate_components())
-    assert len(quam_components) == 18  # Includes XY and Z channels
+    components = list(quam.iterate_components())
+    assert len(components) == 18  # Includes XY and Z channels
 
 
 def test_create_quam_superconducting_simple_generate_config():
@@ -74,7 +74,7 @@ def test_quam_referenced_full(tmp_path):
             "__class__",
         ]
     )
-    assert loaded_quam["__class__"] == "quam_components.components.quam.QuAM"
+    assert loaded_quam["__class__"] == "quam.components.quam.QuAM"
     assert len(loaded_quam["qubits"]) == 3
     assert len(loaded_quam["resonators"]) == 3
     assert len(loaded_quam["mixers"]) == 6
