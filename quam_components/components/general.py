@@ -255,12 +255,14 @@ class PulseEmitter(QuamComponent):
         wait(duration, self.name, *other_elements_str)
 
     def align(self, *other_elements):
-        assert len(other_elements)
-        other_elements_str = [
-            element if isinstance(element, str) else str(element)
-            for element in other_elements
-        ]
-        align(self.name, *other_elements_str)
+        if not other_elements:
+            align()
+        else:
+            other_elements_str = [
+                element if isinstance(element, str) else str(element)
+                for element in other_elements
+            ]
+            align(self.name, *other_elements_str)
 
 
 @dataclass(kw_only=True, eq=False)
