@@ -1,7 +1,9 @@
-from typing import Union, Dict
+from __future__ import annotations
+from typing import Union, Dict, TYPE_CHECKING
 from pathlib import Path
 
-from quam_components.core import QuamRoot, QuamComponent
+if TYPE_CHECKING:
+    from quam_components.core import QuamRoot, QuamComponent
 
 
 class AbstractSerialiser:

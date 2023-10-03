@@ -1,10 +1,12 @@
-from typing import Union, Dict, Any
+from __future__ import annotations
+from typing import Union, Dict, Any, TYPE_CHECKING
 from pathlib import Path
 import json
 
 from quam_components.serialisation.base import AbstractSerialiser
 
-from quam_components.core import QuamRoot
+if TYPE_CHECKING:
+    from quam_components.core import QuamRoot
 
 
 class JSONSerialiser(AbstractSerialiser):

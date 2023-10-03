@@ -17,7 +17,7 @@ from typing import (
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
-from quam_components.serialisation import get_serialiser
+from quam_components.serialisation import AbstractSerialiser, JSONSerialiser
 from quam_components.utils.reference_class import ReferenceClass
 from quam_components.utils import string_reference
 from quam_components.core.quam_instantiation import instantiate_quam_class
@@ -229,6 +229,8 @@ QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
 
 
 class QuamRoot(QuamBase):
+    serialiser: AbstractSerialiser = JSONSerialiser
+
     def __post_init__(self):
         QuamBase._root = self
 
@@ -240,7 +242,7 @@ class QuamRoot(QuamBase):
             converted_val.__dict__["parent"] = self
 
     def save(self, path=None, content_mapping=None, include_defaults=False):
-        serialiser = get_serialiser(self)
+        serialiser = self.serialiser()
         serialiser.save(
             quam_obj=self,
             path=path,
@@ -265,7 +267,7 @@ class QuamRoot(QuamBase):
         if isinstance(filepath_or_dict, dict):
             contents = filepath_or_dict
         else:
-            serialiser = get_serialiser(filepath_or_dict)
+            serialiser = cls.serialiser()
             contents, _ = serialiser.load(filepath_or_dict)
 
         return instantiate_quam_class(
