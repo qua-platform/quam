@@ -27,10 +27,14 @@ class JSONSerialiser(AbstractSerialiser):
         """
         if path is None:
             default_filename = self.default_filename
-            if component_mapping:
-                folder = self.default_foldername
-            else:
+            if not component_mapping:
                 folder = Path(".")
+            elif not all(isinstance(elem, Path) for elem in component_mapping):
+                folder = Path(".")
+            elif not all(elem.is_absolute() for elem in component_mapping):
+                folder = Path(".")
+            else:
+                folder = self.default_foldername
         elif path.suffix == ".json":
             default_filename = path.name
             folder = path.parent
@@ -46,7 +50,7 @@ class JSONSerialiser(AbstractSerialiser):
         self,
         quam_obj: QuamRoot,
         path: Union[Path, str] = None,
-        component_mapping: Dict[str, str] = None,
+        component_mapping: Dict[Union[Path, str], str] = None,
         include_defaults: bool = False,
         ignore: Sequence[str] = None,
     ):
@@ -80,7 +84,7 @@ class JSONSerialiser(AbstractSerialiser):
         folder.mkdir(exist_ok=True)
 
         component_mapping = component_mapping.copy()
-        for component_filename, components in component_mapping.items():
+        for component_file, components in component_mapping.items():
             if isinstance(components, str):
                 components = [components]
 
@@ -88,7 +92,11 @@ class JSONSerialiser(AbstractSerialiser):
             for component in components:
                 subcomponents[component] = contents.pop(component)
 
-            self._save_dict_to_json(subcomponents, folder / component_filename)
+            if isinstance(component_file, Path) and component_file.is_absolute():
+                component_filepath = component_file
+            else:
+                component_filepath = folder / component_file
+            self._save_dict_to_json(subcomponents, component_filepath)
 
         self._save_dict_to_json(contents, folder / default_filename)
 
