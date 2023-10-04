@@ -1,6 +1,6 @@
 import numbers
 import numpy as np
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple
 from dataclasses import dataclass, field
 
 from quam.core import QuamComponent, patch_dataclass
@@ -18,8 +18,9 @@ __all__ = [
     "Mixer",
     "AnalogInput",
     "PulseEmitter",
-    "IQChannel",
     "SingleChannel",
+    "IQChannel",
+    "InOutIQChannel",
 ]
 
 
@@ -28,31 +29,16 @@ class LocalOscillator(QuamComponent):
     id: Union[int, str]
 
     frequency: float
-
     power: float = None
-
-    mixer: "Mixer" = ":../mixer"
 
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"lo{self.id}"
 
-    def apply_to_config(self, config: dict):
-        config["oscillators"][self.name] = {
-            "mixer": self.mixer.name,
-            "lo_frequency": self.frequency,
-            "intermediate_frequency": self.mixer.intermediate_frequency,
-        }
-
 
 @dataclass(kw_only=True, eq=False)
 class Mixer(QuamComponent):
-    id: Union[int, str]
-
-    port_I: int
-    port_Q: int
-
-    local_oscillator: LocalOscillator = ":../local_oscillator"
+    local_oscillator_frequency: LocalOscillator = ":../local_oscillator.frequency"
     intermediate_frequency: float = ":../intermediate_frequency"
 
     offset_I: float = 0
@@ -61,23 +47,14 @@ class Mixer(QuamComponent):
     correction_gain: float = 0
     correction_phase: float = 0
 
-    controller: str = "con1"
-
     @property
     def name(self):
-        return self.id if isinstance(self.id, str) else f"mixer{self.id}"
+        parent_id = self._get_referenced_value(":../id")
+        return f"mixer_{parent_id}"
 
     @property
     def frequency_rf(self):
         return self.local_oscillator.frequency + self.intermediate_frequency
-
-    def get_input_config(self):
-        return {
-            "I": (self.controller, self.port_I),
-            "Q": (self.controller, self.port_Q),
-            "lo_frequency": self.local_oscillator.frequency,
-            "mixer": self.name,
-        }
 
     def apply_to_config(self, config: dict):
         correction_matrix = self.IQ_imbalance(
@@ -87,14 +64,10 @@ class Mixer(QuamComponent):
         config["mixers"][self.name] = [
             {
                 "intermediate_frequency": self.intermediate_frequency,
-                "lo_frequency": self.local_oscillator.frequency,
+                "lo_frequency": self.local_oscillator_frequency,
                 "correction": correction_matrix,
             }
         ]
-
-        analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_outputs[self.port_I] = {"offset": self.offset_I}
-        analog_outputs[self.port_Q] = {"offset": self.offset_Q}
 
     @staticmethod
     def IQ_imbalance(g: float, phi: float) -> List[float]:
@@ -136,9 +109,7 @@ class PulseEmitter(QuamComponent):
 
     @property
     def pulse_mapping(self):
-        return {
-            label: f"{self.name}_{label}_pulse" for label, pulse in self.pulses.items()
-        }
+        return {label: f"{self.name}${label}$pulse" for label in self.pulses}
 
     def play(
         self,
@@ -184,7 +155,7 @@ class PulseEmitter(QuamComponent):
         if waveform is None:
             return
 
-        pulse_config = config["pulses"][f"{self.name}_{pulse_label}_pulse"]
+        pulse_config = config["pulses"][f"{self.name}${pulse_label}$pulse"]
 
         if isinstance(waveform, numbers.Number):
             wf_type = "constant"
@@ -201,7 +172,7 @@ class PulseEmitter(QuamComponent):
                 waveforms = {"single": list(waveform)}
 
         for suffix, waveform in waveforms.items():
-            waveform_name = f"{self.name}_{pulse_label}_wf"
+            waveform_name = f"{self.name}${pulse_label}$wf"
             if suffix != "single":
                 waveform_name += f"_{suffix}"
 
@@ -220,10 +191,10 @@ class PulseEmitter(QuamComponent):
         if not integration_weights:
             return
 
-        pulse_config = config["pulses"][f"{self.name}_{pulse_label}_pulse"]
+        pulse_config = config["pulses"][f"{self.name}${pulse_label}$pulse"]
         pulse_config["integration_weights"] = {}
         for label, weights in integration_weights.items():
-            full_label = f"{self.name}_{label}_iw"
+            full_label = f"{self.name}${label}$iw"
             config["integration_weights"][full_label] = weights
             pulse_config["integration_weights"][label] = full_label
 
@@ -231,15 +202,15 @@ class PulseEmitter(QuamComponent):
         if not pulse.digital_marker:
             return
 
-        pulse_config = config["pulses"][f"{self.name}_{pulse_label}_pulse"]
-        full_label = f"{self.name}_{pulse_label}_dm"
+        pulse_config = config["pulses"][f"{self.name}${pulse_label}$pulse"]
+        full_label = f"{self.name}${pulse_label}$dm"
         config["digital_waveforms"][full_label] = {"samples": pulse.digital_marker}
         pulse_config["digital_marker"] = full_label
 
     def apply_to_config(self, config: dict):
         for pulse_label, pulse in self.pulses.items():
             pulse_config = pulse.get_pulse_config()
-            config["pulses"][f"{self.name}_{pulse_label}_pulse"] = pulse_config
+            config["pulses"][f"{self.name}${pulse_label}$pulse"] = pulse_config
 
             self._config_add_pulse_waveform(config, pulse_label, pulse)
 
@@ -266,37 +237,12 @@ class PulseEmitter(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class IQChannel(PulseEmitter):
-    mixer: Mixer
-
-    local_oscillator: LocalOscillator = None
-    intermediate_frequency: float = None
-
-    @property
-    def name(self) -> str:
-        return f"{self.parent.name}_{self._get_parent_attr_name()}"
-
-    def apply_to_config(self, config: dict):
-        # Add pulses & waveforms
-        super().apply_to_config(config)
-
-        config["elements"][self.name] = {
-            "oscillator": self.local_oscillator.name,
-            "mixInputs": self.mixer.get_input_config(),
-            "intermediate_frequency": self.mixer.intermediate_frequency,
-            "operations": self.pulse_mapping,
-        }
-
-
-@dataclass(kw_only=True, eq=False)
 class SingleChannel(PulseEmitter):
-    port: int
+    output_port: int
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
     offset: float = 0
-
-    controller: str = "con1"
 
     @property
     def name(self) -> str:
@@ -308,13 +254,13 @@ class SingleChannel(PulseEmitter):
 
         config["elements"][self.name] = {
             "singleInput": {
-                "port": (self.controller, self.port),
+                "port": self.output_port,
             },
             "operations": self.pulse_mapping,
         }
 
         analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_output = analog_outputs[self.port] = {"offset": self.offset}
+        analog_output = analog_outputs[self.output_port] = {"offset": self.offset}
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
@@ -323,3 +269,63 @@ class SingleChannel(PulseEmitter):
         if self.filter_iir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
             output_filter["feedback"] = self.filter_iir_taps
+
+
+@dataclass(kw_only=True, eq=False)
+class IQChannel(PulseEmitter):
+    output_port_I: Tuple[str, int]
+    output_port_Q: Tuple[str, int]
+
+    mixer: Mixer
+    local_oscillator: LocalOscillator
+
+    intermediate_frequency: float = None
+
+    @property
+    def name(self) -> str:
+        return f"{self.parent.name}_{self._get_parent_attr_name()}"
+
+    def apply_to_config(self, config: dict):
+        # Add pulses & waveforms
+        super().apply_to_config(config)
+
+        config["elements"][self.name] = {
+            "mixInputs": {
+                "I": self.output_port_I,
+                "Q": self.output_port_Q,
+                "lo_frequency": self.local_oscillator.frequency,
+                "mixer": self.mixer.name,
+            },
+            "intermediate_frequency": self.mixer.intermediate_frequency,
+            "operations": self.pulse_mapping,
+        }
+
+        output_I = config["controllers"][self.output_port_I[0]]["analog_outputs"]
+        output_I[self.output_port_I[1]] = {"offset": self.mixer.offset_I}
+
+        output_Q = config["controllers"][self.output_port_Q[0]]["analog_outputs"]
+        output_Q[self.output_port_Q[1]] = {"offset": self.mixer.offset_Q}
+
+
+@dataclass(kw_only=True, eq=False)
+class InOutIQChannel(IQChannel):
+    time_of_flight: int = 24
+    smearing: int = 0
+
+    input_port_I: Tuple[str, int]
+    input_port_Q: Tuple[str, int]
+
+    @property
+    def name(self):
+        return self.id if isinstance(self.id, str) else f"r{self.id}"
+
+    def apply_to_config(self, config: dict):
+        # Add pulses & waveforms
+        super().apply_to_config(config)
+
+        config["elements"][self.name]["outputs"] = {
+            "out1": self.input_port_I,
+            "out2": self.input_port_Q,
+        }
+        config["elements"][self.name]["smearing"] = self.smearing
+        config["elements"][self.name]["time_of_flight"] = self.time_of_flight
