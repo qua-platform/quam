@@ -49,7 +49,7 @@ class Mixer(QuamComponent):
 
     @property
     def name(self):
-        parent_id = self._get_referenced_value(":../id")
+        parent_id = self._get_referenced_value(":../name")
         return f"mixer_{parent_id}"
 
     @property
@@ -238,7 +238,7 @@ class PulseEmitter(QuamComponent):
 
 @dataclass(kw_only=True, eq=False)
 class SingleChannel(PulseEmitter):
-    output_port: int
+    output_port: Tuple[str, int]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
@@ -259,8 +259,8 @@ class SingleChannel(PulseEmitter):
             "operations": self.pulse_mapping,
         }
 
-        analog_outputs = config["controllers"][self.controller]["analog_outputs"]
-        analog_output = analog_outputs[self.output_port] = {"offset": self.offset}
+        analog_outputs = config["controllers"][self.output_port[0]]["analog_outputs"]
+        analog_output = analog_outputs[self.output_port[1]] = {"offset": self.offset}
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
