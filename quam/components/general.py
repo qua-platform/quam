@@ -1,6 +1,6 @@
 import numbers
 import numpy as np
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Optional
 from dataclasses import dataclass, field
 
 from quam.core import QuamComponent, patch_dataclass
@@ -51,10 +51,6 @@ class Mixer(QuamComponent):
     def name(self):
         parent_id = self._get_referenced_value(":../name")
         return f"mixer_{parent_id}"
-
-    @property
-    def frequency_rf(self):
-        return self.local_oscillator.frequency + self.intermediate_frequency
 
     def apply_to_config(self, config: dict):
         correction_matrix = self.IQ_imbalance(
@@ -279,11 +275,15 @@ class IQChannel(PulseEmitter):
     mixer: Mixer
     local_oscillator: LocalOscillator
 
-    intermediate_frequency: float = None
+    intermediate_frequency: float = 0.0
 
     @property
     def name(self) -> str:
         return f"{self.parent.name}_{self._get_parent_attr_name()}"
+
+    @property
+    def frequency_rf(self):
+        return self.local_oscillator.frequency + self.intermediate_frequency
 
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
@@ -296,7 +296,7 @@ class IQChannel(PulseEmitter):
                 "lo_frequency": self.local_oscillator.frequency,
                 "mixer": self.mixer.name,
             },
-            "intermediate_frequency": self.mixer.intermediate_frequency,
+            "intermediate_frequency": self.intermediate_frequency,
             "operations": self.pulse_mapping,
         }
 
@@ -315,6 +315,12 @@ class InOutIQChannel(IQChannel):
     input_port_I: Tuple[str, int]
     input_port_Q: Tuple[str, int]
 
+    input_offset_I: float = 0.0
+    input_offset_Q: float = 0.0
+
+    input_gain: Optional[float] = None
+
+
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"r{self.id}"
@@ -329,3 +335,12 @@ class InOutIQChannel(IQChannel):
         }
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
+
+        input_I = config["controllers"][self.input_port_I[0]]["analog_inputs"]
+        input_I[self.input_port_I[1]] = {"offset": self.input_offset_I}
+        input_Q = config["controllers"][self.input_port_Q[0]]["analog_inputs"]
+        input_Q[self.input_port_Q[1]] = {"offset": self.input_offset_Q}
+        if self.input_gain is not None:
+            input_I[self.input_port_I[1]]['gain_db'] = self.input_gain
+            input_I[self.input_port_Q[1]]['gain_db'] = self.input_gain
+
