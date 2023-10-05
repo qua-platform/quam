@@ -1,3 +1,4 @@
+import inspect
 import sys
 import functools
 from dataclasses import dataclass, is_dataclass, fields
@@ -39,7 +40,11 @@ def handle_inherited_required_fields(cls):
         return
 
     # Check if class (not parents) has required fields
-    required_attrs = [attr for attr in cls.__annotations__ if attr not in cls.__dict__]
+    attrs = inspect.signature(cls).parameters
+
+    required_attrs = [
+        key for key, val in attrs.items() if val.default is inspect._empty
+    ]
     for attr in required_attrs:
         setattr(cls, attr, REQUIRED)
 
