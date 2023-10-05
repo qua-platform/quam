@@ -105,7 +105,7 @@ class PulseEmitter(QuamComponent):
 
     @property
     def pulse_mapping(self):
-        return {label: f"{self.name}${label}$pulse" for label in self.pulses}
+        return {label: pulse.full_name for label, pulse in self.pulses}
 
     def play(
         self,
