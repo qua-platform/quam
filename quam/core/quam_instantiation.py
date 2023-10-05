@@ -203,6 +203,9 @@ def instantiate_attr(
             t in [str, int, float, bool] for t in typing.get_args(expected_type)
         ), "Currently only Union[str, int, float, bool] is supported"
         instantiated_attr = attr_val
+
+    elif typing.get_origin(expected_type) == typing.Tuple:
+        instantiated_attr = attr_val
     elif typing.get_origin(expected_type) is not None and validate_type:
         raise TypeError(
             f"Instantiation for type {expected_type} in {str_repr} not implemented"
