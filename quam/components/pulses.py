@@ -126,58 +126,59 @@ class Pulse(QuamComponent, ABC):
             self._config_add_digital_markers(config)
 
 
-# @dataclass(kw_only=True, eq=False)
-# class BaseReadoutPulse(Pulse, ABC):
-#     operation: ClassVar[str] = "measurement"
-#
-#     integration_weights: Union[List[Tuple[complex, int]], List[Tuple[float, int]]]
-#     @abstractmethod
-#     @staticmethod
-#     def integration_weights_function():
+@dataclass(kw_only=True, eq=False)
+class ReadoutPulse(Pulse, ABC):
+    operation: ClassVar[str] = "measurement"
+    digital_marker: str = "ON"
+
+    @property
+    def iw_real_name(self):
+        return f"{self.full_name}$iw_real"
+
+    @property
+    def iw_imag_name(self):
+        return f"{self.full_name}$iw_imag"
+
+    @abstractmethod
+    def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
+        ...
+
+    def _config_add_integration_weights(self, config: dict):
+        iw = self.integration_weights_function()
+
+        if not isinstance(iw, (list, np.ndarray)):
+            raise ValueError("unsupported return type")
+
+        config["integration_weights"][self.iw_real_name] = {
+            "cosine": [(sample.real, length) for sample, length in iw],
+            "sine": [(sample.imag, length) for sample, length in iw],
+        }
+        config["integration_weights"][self.iw_imag_name] = {
+            "cosine": [(-sample.imag, length) for sample, length in iw],
+            "sine": [(sample.real, length) for sample, length in iw],
+        }
+
+        config["pulses"][self.pulse_name]["integration_weights"] = {
+            "real": self.iw_real_name,
+            "imag": self.iw_imag_name,
+        }
+
+    def apply_to_config(self, config: dict) -> None:
+        super().apply_to_config(config)
+        self._config_add_integration_weights(config)
 
 
-# @dataclass(kw_only=True, eq=False)
-# class ReadoutPulse(Pulse):
-#     amplitude: float
-#     rotation_angle: float = None
-#
-#     operation: ClassVar[str] = "measurement"
-#     digital_marker: str = "ON"
-#
-#     def calculate_integration_weights(self):
-#         integration_weights = {
-#             "cosine": {
-#                 "cosine": [(1.0, self.length)],
-#                 "sine": [(0.0, self.length)],
-#             },
-#             "sine": {
-#                 "cosine": [(0.0, self.length)],
-#                 "sine": [(1.0, self.length)],
-#             },
-#             # Why is there no minus cosine?
-#             "minus_sine": {
-#                 "cosine": [(0.0, self.length)],
-#                 "sine": [(-1.0, self.length)],
-#             },
-#         }
-#         if self.rotation_angle is not None:
-#             integration_weights["rotated_cosine"] = {
-#                 "cosine": [(np.cos(self.rotation_angle), self.length)],
-#                 "sine": [(-np.sin(self.rotation_angle), self.length)],
-#             }
-#             integration_weights["rotated_sine"] = {
-#                 "cosine": [(np.sin(self.rotation_angle), self.length)],
-#                 "sine": [(np.cos(self.rotation_angle), self.length)],
-#             }
-#             integration_weights["rotated_minus_sine"] = {
-#                 "cosine": [(-np.sin(self.rotation_angle), self.length)],
-#                 "sine": [(-np.cos(self.rotation_angle), self.length)],
-#             }
-#         return integration_weights
-#
-#     def waveform_function(self, amplitude):
-#         # This should probably be complex because the pulse needs I and Q
-#         return complex(amplitude)
+@dataclass(kw_only=True, eq=False)
+class ConstantReadoutPulse(ReadoutPulse):
+    amplitude: Union[complex, float]
+    rotation_angle: float = 0.0
+
+    def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
+        return [(np.exp(1j*self.rotation_angle), self.length)]
+
+    def waveform_function(self):
+        # This should probably be complex because the pulse needs I and Q
+        return complex(self.amplitude)
 
 
 @dataclass(kw_only=True, eq=False)
