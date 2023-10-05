@@ -34,8 +34,16 @@ def get_dataclass_attr_annotations(
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
+        # TODO Try to combine with third elif statement
         if getattr(cls_or_obj, attr, None) is REQUIRED:  # See "patch_dataclass()"
-            attr_annotations["required"][attr] = attr_type
+            if attr not in getattr(cls_or_obj, "__dataclass_fields__", {}):
+                attr_annotations["required"][attr] = attr_type
+            else:
+                field_attr = cls_or_obj.__dataclass_fields__[attr]
+                if field_attr.default_factory is not dataclasses.MISSING:
+                    attr_annotations["optional"][attr] = attr_type
+                else:
+                    attr_annotations["required"][attr] = attr_type
         elif hasattr(cls_or_obj, attr):
             attr_annotations["optional"][attr] = attr_type
         elif attr in getattr(cls_or_obj, "__dataclass_fields__", {}):
