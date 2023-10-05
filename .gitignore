@@ -5,3 +5,4 @@ quam/examples/output
 additional
 .venv*
 .coverage
+.idea
