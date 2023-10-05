@@ -41,6 +41,8 @@ def handle_inherited_required_fields(cls):
 
     # Check if class (not parents) has required fields
     attrs = inspect.signature(cls).parameters
+    # Remove all attrs that are from parent classes
+    attrs = {k: v for k, v in attrs.items() if k in cls.__annotations__}
 
     required_attrs = [
         key for key, val in attrs.items() if val.default is inspect._empty
