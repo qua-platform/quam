@@ -31,12 +31,9 @@ def handle_inherited_required_fields(cls):
     if not is_dataclass(cls):
         return
 
-    # print(f"class {cls} has parent dataclasses")
-
     # Check if dataclass has default fields
     fields_required = dataclass_has_default_fields(cls)
     if not fields_required:
-        # print(f"Parent of {cls} have no required fields")
         return
 
     # Check if class (not parents) has required fields
