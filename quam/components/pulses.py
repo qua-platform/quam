@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import numbers
 from typing import Callable, ClassVar, Dict, List, Union, Tuple
 import inspect
 import numpy as np
@@ -18,19 +19,23 @@ class Pulse(QuamComponent):
 
     digital_marker: Union[str, List[Tuple[int, int]]] = None
 
-    def get_pulse_config(self):
-        assert self.operation in ["control", "measurement"]
-        assert isinstance(self.length, int)
+    @property
+    def full_name(self):
+        name = self._get_parent_attr_name()
+        pulse_emitter = self._get_referenced_value(":../../")
+        return f"{pulse_emitter.name}${name}"
 
-        pulse_config = {
-            "operation": self.operation,
-            "length": self.length,
-            "waveforms": {},
-        }
-        if self.digital_marker is not None:
-            pulse_config["digital_marker"] = self.digital_marker
+    @property
+    def pulse_name(self):
+        return f"{self.full_name}$pulse"
 
-        return pulse_config
+    @property
+    def waveform_name(self):
+        return f"{self.full_name}$wf"
+
+    @property
+    def digital_marker_name(self):
+        return f"{self.full_name}$dm"
 
     def _get_waveform_kwargs(self, waveform_function: Callable = None):
         if waveform_function is None:
@@ -70,6 +75,68 @@ class Pulse(QuamComponent):
         dataclass field.
         """
         raise NotImplementedError("Subclass pulses should implement this method")
+
+    def _config_add_pulse(self, config):
+        assert self.operation in ["control", "measurement"]
+        assert isinstance(self.length, int)
+
+        pulse_config = config["pulses"][self.pulse_name] = {
+            "operation": self.operation,
+            "length": self.length,
+            "waveforms": {},
+        }
+        if self.digital_marker is not None:
+            pulse_config["digital_marker"] = self.digital_marker
+
+        return pulse_config
+
+    def _config_add_waveforms(self, config):
+        pulse_config = config["pulses"][self.pulse_name]
+
+        waveform = self.calculate_waveform()
+        if waveform is None:
+            return
+
+        if isinstance(waveform, numbers.Number):
+            wf_type = "constant"
+            if isinstance(waveform, complex):
+                waveforms = {"I": waveform.real, "Q": waveform.imag}
+            else:
+                waveforms = {"single": waveform}
+
+        elif isinstance(waveform, (list, np.ndarray)):
+            wf_type = "arbitrary"
+            if np.iscomplexobj(waveform):
+                waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
+            else:
+                waveforms = {"single": list(waveform)}
+
+        for suffix, waveform in waveforms.items():
+            waveform_name = self.waveform_name
+            if suffix != "single":
+                waveform_name += f"${suffix}"
+
+            sample_label = "sample" if wf_type == "constant" else "samples"
+
+            config["waveforms"][waveform_name] = {
+                "type": wf_type,
+                sample_label: waveform,
+            }
+            pulse_config["waveforms"][suffix] = waveform_name
+
+    def _config_add_digital_markers(self, config):
+        pulse_config = config["pulses"][self.pulse_name]
+        config["digital_waveforms"][self.digital_marker_name] = {
+            "samples": self.digital_marker
+        }
+        pulse_config["digital_marker"] = self.digital_marker_name
+
+    def apply_to_config(self, config: dict) -> None:
+        self._config_add_pulse(config)
+        self._config_add_waveforms(config)
+
+        if self.digital_marker:
+            self._config_add_digital_markers(config)
 
 
 @dataclass(kw_only=True, eq=False)

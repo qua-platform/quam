@@ -146,40 +146,7 @@ class PulseEmitter(QuamComponent):
             target=target,
         )
 
-    def _config_add_pulse_waveform(self, config, pulse_label: str, pulse: Pulse):
-        waveform = pulse.calculate_waveform()
-        if waveform is None:
-            return
-
-        pulse_config = config["pulses"][f"{self.name}${pulse_label}$pulse"]
-
-        if isinstance(waveform, numbers.Number):
-            wf_type = "constant"
-            if isinstance(waveform, complex):
-                waveforms = {"I": waveform.real, "Q": waveform.imag}
-            else:
-                waveforms = {"single": waveform}
-
-        elif isinstance(waveform, (list, np.ndarray)):
-            wf_type = "arbitrary"
-            if np.iscomplexobj(waveform):
-                waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
-            else:
-                waveforms = {"single": list(waveform)}
-
-        for suffix, waveform in waveforms.items():
-            waveform_name = f"{self.name}${pulse_label}$wf"
-            if suffix != "single":
-                waveform_name += f"_{suffix}"
-
-            sample_label = "sample" if wf_type == "constant" else "samples"
-
-            config["waveforms"][waveform_name] = {
-                "type": wf_type,
-                sample_label: waveform,
-            }
-            pulse_config["waveforms"][suffix] = waveform_name
-
+    # TODO Move to ReadoutPulse
     def _config_add_pulse_integration_weights(
         self, config: dict, pulse_label: str, pulse: Pulse
     ):
@@ -193,26 +160,6 @@ class PulseEmitter(QuamComponent):
             full_label = f"{self.name}${label}$iw"
             config["integration_weights"][full_label] = weights
             pulse_config["integration_weights"][label] = full_label
-
-    def _config_add_pulse_digital_marker(self, config, pulse_label: str, pulse: Pulse):
-        if not pulse.digital_marker:
-            return
-
-        pulse_config = config["pulses"][f"{self.name}${pulse_label}$pulse"]
-        full_label = f"{self.name}${pulse_label}$dm"
-        config["digital_waveforms"][full_label] = {"samples": pulse.digital_marker}
-        pulse_config["digital_marker"] = full_label
-
-    def apply_to_config(self, config: dict):
-        for pulse_label, pulse in self.pulses.items():
-            pulse_config = pulse.get_pulse_config()
-            config["pulses"][f"{self.name}${pulse_label}$pulse"] = pulse_config
-
-            self._config_add_pulse_waveform(config, pulse_label, pulse)
-
-            self._config_add_pulse_integration_weights(config, pulse_label, pulse)
-
-            self._config_add_pulse_digital_marker(config, pulse_label, pulse)
 
     def wait(self, duration, *other_elements):
         other_elements_str = [
@@ -320,7 +267,6 @@ class InOutIQChannel(IQChannel):
 
     input_gain: Optional[float] = None
 
-
     @property
     def name(self):
         return self.id if isinstance(self.id, str) else f"r{self.id}"
@@ -341,6 +287,5 @@ class InOutIQChannel(IQChannel):
         input_Q = config["controllers"][self.input_port_Q[0]]["analog_inputs"]
         input_Q[self.input_port_Q[1]] = {"offset": self.input_offset_Q}
         if self.input_gain is not None:
-            input_I[self.input_port_I[1]]['gain_db'] = self.input_gain
-            input_I[self.input_port_Q[1]]['gain_db'] = self.input_gain
-
+            input_I[self.input_port_I[1]]["gain_db"] = self.input_gain
+            input_I[self.input_port_Q[1]]["gain_db"] = self.input_gain
