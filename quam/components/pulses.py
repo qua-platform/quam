@@ -131,13 +131,20 @@ class ReadoutPulse(Pulse, ABC):
     operation: ClassVar[str] = "measurement"
     digital_marker: str = "ON"
 
-    @property
-    def iw_real_name(self):
-        return f"{self.full_name}$iw_real"
+    threshold: int = 0.0
+    rus_exit_threshold: int = 0.0
 
     @property
-    def iw_imag_name(self):
-        return f"{self.full_name}$iw_imag"
+    def iw1_name(self):
+        return f"{self.full_name}$iw1"
+
+    @property
+    def iw2_name(self):
+        return f"{self.full_name}$iw2"
+
+    @property
+    def iw3_name(self):
+        return f"{self.full_name}$iw3"
 
     @abstractmethod
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
@@ -149,18 +156,23 @@ class ReadoutPulse(Pulse, ABC):
         if not isinstance(iw, (list, np.ndarray)):
             raise ValueError("unsupported return type")
 
-        config["integration_weights"][self.iw_real_name] = {
+        config["integration_weights"][self.iw1_name] = {
             "cosine": [(sample.real, length) for sample, length in iw],
-            "sine": [(sample.imag, length) for sample, length in iw],
+            "sine": [(-sample.imag, length) for sample, length in iw],
         }
-        config["integration_weights"][self.iw_imag_name] = {
-            "cosine": [(-sample.imag, length) for sample, length in iw],
+        config["integration_weights"][self.iw2_name] = {
+            "cosine": [(sample.imag, length) for sample, length in iw],
             "sine": [(sample.real, length) for sample, length in iw],
+        }
+        config["integration_weights"][self.iw3_name] = {
+            "cosine": [(-sample.imag, length) for sample, length in iw],
+            "sine": [(-sample.real, length) for sample, length in iw],
         }
 
         config["pulses"][self.pulse_name]["integration_weights"] = {
-            "real": self.iw_real_name,
-            "imag": self.iw_imag_name,
+            "iw1": self.iw1_name,
+            "iw2": self.iw2_name,
+            "iw3": self.iw3_name
         }
 
     def apply_to_config(self, config: dict) -> None:
