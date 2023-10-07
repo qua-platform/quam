@@ -231,3 +231,23 @@ def test_quam_setattr_quam_dict_component():
     assert isinstance(quam.quam_dict, QuamDict)
     assert isinstance(quam.quam_dict.a, QuamDict)
     assert quam.quam_dict.a.b == 43
+
+
+def test_parent_attr_name(BareQuamComponent):
+    inner_quam_component = BareQuamComponent()
+    assert inner_quam_component.parent is None
+    with pytest.raises(AttributeError):
+        inner_quam_component._get_parent_attr_name()
+
+    @dataclass
+    class OuterQuamComponent(QuamComponent):
+        quam_component: QuamComponent
+
+    outer_quam_component = OuterQuamComponent(quam_component=inner_quam_component)
+    assert outer_quam_component.quam_component is inner_quam_component
+    assert inner_quam_component.parent is outer_quam_component
+    assert inner_quam_component._get_parent_attr_name() == "quam_component"
+
+    outer_quam_component.quam_component = None
+    with pytest.raises(AttributeError):
+        inner_quam_component._get_parent_attr_name()

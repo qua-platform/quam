@@ -93,10 +93,23 @@ class QuamBase(ReferenceClass):
                 )
 
     def _get_parent_attr_name(self) -> str:
-        if self.parent is not None:
-            for attr_name in self.parent._get_attr_names():
-                if getattr(self.parent, attr_name) is self:
-                    return attr_name
+        """Get the attribute name of parent that matchis this object
+
+        Raises:
+            AttributeError if not found
+        """
+        if self.parent is None:
+            raise AttributeError(
+                "Could not find parent parent attribute that matches object"
+                f"because object has no parent. Object={self}"
+            )
+        for attr_name in self.parent._get_attr_names():
+            if getattr(self.parent, attr_name) is self:
+                return attr_name
+        else:
+            raise AttributeError(
+                "Could not find parent parent attribute that matches object {self}"
+            )
 
     def _get_attr_names(self):
         assert is_dataclass(self)
