@@ -98,6 +98,23 @@ class Pulse(QuamComponent, ABC):
         else:
             raise ValueError("unsupported return type")
 
+        # Add check that waveform type (single or IQ) matches parent
+        parent_channel = getattr(getattr(self, "parent", None), "parent", None)
+        from quam.components import SingleChannel, IQChannel
+
+        parent_is_channel = isinstance(parent_channel, (IQChannel, SingleChannel))
+        if parent_channel is not None and parent_is_channel:
+            if "single" in waveforms and isinstance(parent_channel, IQChannel):
+                raise ValueError(
+                    "Waveform type 'single' not allowed for IQChannel"
+                    f" '{parent_channel.name}'"
+                )
+            elif "I" in waveforms and isinstance(parent_channel, SingleChannel):
+                raise ValueError(
+                    "Waveform type 'IQ' not allowed for SingleChannel"
+                    f" '{parent_channel.name}'"
+                )
+
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
             if suffix != "single":

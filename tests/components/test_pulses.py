@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from quam.components import *
 
@@ -51,3 +52,46 @@ def test_IQ_channel():
         "intermediate_frequency": 100e6,
         "local_oscillator": None,
     }
+
+
+def test_single_pulse_IQ_channel():
+    IQ_channel = IQChannel(
+        id="IQ",
+        mixer=Mixer(),
+        local_oscillator=None,
+        output_port_I=0,
+        output_port_Q=1,
+        intermediate_frequency=100e6,
+    )
+    IQ_channel.pulses["X180"] = pulses.GaussianPulse(length=16, amplitude=1, sigma=12)
+
+    cfg = {"pulses": {}, "waveforms": {}}
+    pulse = IQ_channel.pulses["X180"]
+
+    with pytest.raises(ValueError) as exc_info:
+        pulse.apply_to_config(cfg)
+    error_message = "Waveform type 'single' not allowed for IQChannel 'IQ'"
+    assert str(exc_info.value) == error_message
+
+
+def test_IQ_pulse_single_channel():
+    single_channel = SingleChannel(
+        id="single",
+        output_port=0,
+    )
+    single_channel.pulses["X180"] = pulses.DragPulse(
+        length=16,
+        rotation_angle=0,
+        amplitude=1,
+        sigma=12,
+        alpha=0.1,
+        anharmonicity=200e6,
+    )
+
+    cfg = {"pulses": {}, "waveforms": {}}
+    pulse = single_channel.pulses["X180"]
+
+    with pytest.raises(ValueError) as exc_info:
+        pulse.apply_to_config(cfg)
+    error_message = "Waveform type 'IQ' not allowed for SingleChannel 'single'"
+    assert str(exc_info.value) == error_message

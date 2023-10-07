@@ -45,7 +45,7 @@ class Mixer(QuamComponent):
         parent_id = self._get_referenced_value(":../name")
         if string_reference.is_reference(parent_id):
             raise AttributeError(f"Mixer.parent must be defined for {self}")
-        return f"mixer_{parent_id}"
+        return f"{parent_id}$mixer"
 
     def apply_to_config(self, config: dict):
         correction_matrix = self.IQ_imbalance(
@@ -167,8 +167,13 @@ class SingleChannel(PulseEmitter):
 
     offset: float = 0
 
+    id: Union[str, int] = None
+
     @property
     def name(self) -> str:
+        if self.id is not None:
+            return self.id if isinstance(self.id, str) else f"IQ{self.id}"
+
         return f"{self.parent.name}_{self._get_parent_attr_name()}"
 
     def apply_to_config(self, config: dict):
@@ -207,11 +212,19 @@ class IQChannel(PulseEmitter):
 
     intermediate_frequency: float = 0.0
 
+    id: Union[str, int] = None
+
     @property
     def name(self) -> str:
+        if self.id is not None:
+            return self.id if isinstance(self.id, str) else f"IQ{self.id}"
+
         if self.parent is None:
-            raise ValueError("IQchannel.parent must be defined for it to have a name.")
-        return f"{self.parent.name}_{self._get_parent_attr_name()}"
+            raise ValueError(
+                "IQchannel.parent or IQchannel.id must be defined for it to have a"
+                " name."
+            )
+        return f"{self.parent.name}${self._get_parent_attr_name()}"
 
     @property
     def frequency_rf(self):
