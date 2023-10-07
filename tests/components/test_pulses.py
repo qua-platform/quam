@@ -22,8 +22,6 @@ def test_drag_pulse():
         "subtracted": True,
     }
 
-    from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
-
     waveform = drag_pulse.calculate_waveform()
     assert len(waveform) == 20
     assert isinstance(waveform, np.ndarray)

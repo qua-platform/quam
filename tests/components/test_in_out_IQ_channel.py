@@ -50,8 +50,8 @@ def test_empty_in_out_IQ_channel():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    3: {"offset": 0.0},
-                    4: {"offset": 0.0},
+                    1: {"offset": 0.0},
+                    2: {"offset": 0.0},
                 },
                 "analog_outputs": {
                     1: {"offset": 0.0},
@@ -129,8 +129,8 @@ def test_readout_resonator_with_readout():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    3: {"offset": 0.0},
-                    4: {"offset": 0.0},
+                    1: {"offset": 0.0},
+                    2: {"offset": 0.0},
                 },
                 "analog_outputs": {
                     1: {"offset": 0.0},

@@ -1,6 +1,4 @@
-import pytest
 from dataclasses import dataclass
-from copy import deepcopy
 from quam.components import *
 from quam.core import QuamRoot
 

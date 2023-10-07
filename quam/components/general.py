@@ -1,4 +1,3 @@
-import numbers
 import numpy as np
 from typing import Dict, List, Union, Tuple, Optional
 from dataclasses import dataclass, field
@@ -176,14 +175,13 @@ class SingleChannel(PulseEmitter):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
+        controller_name, port = self.output_port
+
         config["elements"][self.name] = {
-            "singleInput": {
-                "port": self.output_port,
-            },
+            "singleInput": {"port": (controller_name, port)},
             "operations": self.pulse_mapping,
         }
 
-        controller_name, port = self.output_port
         controller = config["controllers"].setdefault(
             controller_name,
             {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
@@ -222,11 +220,12 @@ class IQChannel(PulseEmitter):
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
         super().apply_to_config(config)
+        output_ports = {"I": tuple(self.output_port_I), "Q": tuple(self.output_port_Q)}
+        offsets = {"I": self.mixer.offset_I, "Q": self.mixer.offset_Q}
 
         config["elements"][self.name] = {
             "mixInputs": {
-                "I": self.output_port_I,
-                "Q": self.output_port_Q,
+                **output_ports,
                 "lo_frequency": self.local_oscillator.frequency,
                 "mixer": self.mixer.name,
             },
@@ -234,14 +233,13 @@ class IQChannel(PulseEmitter):
             "operations": self.pulse_mapping,
         }
 
-        output_ports = [self.output_port_I, self.output_port_Q]
-        offsets = [self.mixer.offset_I, self.mixer.offset_Q]
-        for (controller_name, port), offset in zip(output_ports, offsets):
+        for I_or_Q in ["I", "Q"]:
+            controller_name, port = output_ports[I_or_Q]
             controller = config["controllers"].setdefault(
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
             )
-            controller["analog_outputs"][port] = {"offset": offset}
+            controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
 
 
 @dataclass(kw_only=True, eq=False)
@@ -269,21 +267,23 @@ class InOutIQChannel(IQChannel):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
+        output_ports = {"I": tuple(self.output_port_I), "Q": tuple(self.output_port_Q)}
+        offsets = {"I": self.mixer.offset_I, "Q": self.mixer.offset_Q}
+
         config["elements"][self.name]["outputs"] = {
-            "out1": self.input_port_I,
-            "out2": self.input_port_Q,
+            "out1": tuple(self.input_port_I),
+            "out2": tuple(self.input_port_Q),
         }
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
-        input_ports = [self.input_port_I, self.input_port_Q]
-        offsets = [self.input_offset_I, self.input_offset_Q]
-        for (controller_name, port), offset in zip(input_ports, offsets):
+        for I_or_Q in ["I", "Q"]:
+            controller_name, port = output_ports[I_or_Q]
             controller = config["controllers"].setdefault(
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
             )
-            controller["analog_inputs"][port] = {"offset": offset}
+            controller["analog_inputs"][port] = {"offset": offsets[I_or_Q]}
 
             if self.input_gain is not None:
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain
