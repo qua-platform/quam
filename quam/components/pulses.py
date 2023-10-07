@@ -112,11 +112,21 @@ class Pulse(QuamComponent, ABC):
             pulse_config["waveforms"][suffix] = waveform_name
 
     def _config_add_digital_markers(self, config):
-        pulse_config = config["pulses"][self.pulse_name]
-        config["digital_waveforms"][self.digital_marker_name] = {
-            "samples": self.digital_marker
-        }
-        pulse_config["digital_marker"] = self.digital_marker_name
+        if isinstance(self.digital_marker, str):
+            # Use a common config digital marker
+            if self.digital_marker not in config["digital_waveforms"]:
+                raise KeyError(
+                    "{self.name}.digital_marker={self.digital_marker} not in"
+                    " config['digital_waveforms']"
+                )
+            digital_marker_name = self.digital_marker
+        else:
+            config["digital_waveforms"][self.digital_marker_name] = {
+                "samples": self.digital_marker
+            }
+            digital_marker_name = self.digital_marker_name
+
+        config["pulses"][self.pulse_name]["digital_marker"] = digital_marker_name
 
     def apply_to_config(self, config: dict) -> None:
         self._config_add_pulse(config)
@@ -172,7 +182,7 @@ class ReadoutPulse(Pulse, ABC):
         config["pulses"][self.pulse_name]["integration_weights"] = {
             "iw1": self.iw1_name,
             "iw2": self.iw2_name,
-            "iw3": self.iw3_name
+            "iw3": self.iw3_name,
         }
 
     def apply_to_config(self, config: dict) -> None:
@@ -186,7 +196,7 @@ class ConstantReadoutPulse(ReadoutPulse):
     rotation_angle: float = 0.0
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        return [(np.exp(1j*self.rotation_angle), self.length)]
+        return [(np.exp(1j * self.rotation_angle), self.length)]
 
     def waveform_function(self):
         # This should probably be complex because the pulse needs I and Q
@@ -242,7 +252,9 @@ class GaussianPulse(Pulse):
     def waveform_function(self):
         t = np.arange(self.length, dtype=int)
         center = (self.length - 1) / 2
-        gauss_wave = self.amplitude * np.exp(-((t - center) ** 2) / (2 * self.sigma**2))
+        gauss_wave = self.amplitude * np.exp(
+            -((t - center) ** 2) / (2 * self.sigma**2)
+        )
 
         if self.subtracted:
             gauss_wave = gauss_wave - gauss_wave[-1]

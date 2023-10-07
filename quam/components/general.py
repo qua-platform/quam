@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 
 from quam.core import QuamComponent, patch_dataclass
 from quam.components.pulses import Pulse
+from quam.utils import string_reference
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
@@ -16,7 +17,6 @@ except ImportError:
 __all__ = [
     "LocalOscillator",
     "Mixer",
-    "AnalogInput",
     "PulseEmitter",
     "SingleChannel",
     "IQChannel",
@@ -50,6 +50,8 @@ class Mixer(QuamComponent):
     @property
     def name(self):
         parent_id = self._get_referenced_value(":../name")
+        if string_reference.is_reference(parent_id):
+            raise AttributeError(f"Mixer.parent must be defined for {self}")
         return f"mixer_{parent_id}"
 
     def apply_to_config(self, config: dict):
@@ -265,6 +267,8 @@ class InOutIQChannel(IQChannel):
 
     @property
     def name(self):
+        if string_reference.is_reference(self.id):
+            raise AttributeError("InOutIQChannel.id must be defined have a parent")
         return self.id if isinstance(self.id, str) else f"r{self.id}"
 
     def apply_to_config(self, config: dict):

@@ -19,7 +19,13 @@ def test_empty_in_out_IQ_channel():
     assert mixer.offset_I == 0
     assert mixer.offset_Q == 0
 
+    with pytest.raises(AttributeError):
+        mixer.name
     assert readout_resonator.id == ":../id"  # parent not defined
+    with pytest.raises(AttributeError):
+        readout_resonator.name
+
+    readout_resonator.id = 1
 
     d = readout_resonator.to_dict()
     assert d == {
@@ -30,6 +36,7 @@ def test_empty_in_out_IQ_channel():
         "input_port_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "local_oscillator": {"id": 2, "frequency": 5000000000.0},
+        "id": 1,
     }
 
     cfg = {
@@ -40,6 +47,19 @@ def test_empty_in_out_IQ_channel():
         "integration_weights": {},
     }
     expected_cfg = {
+        "controllers": {
+            "con1": {
+                "analog_inputs": {
+                    3: {"offset": 0.0},
+                    4: {"offset": 0.0},
+                },
+                "analog_outputs": {
+                    1: {"offset": 0.0},
+                    2: {"offset": 0.0},
+                },
+                "digital_outputs": {},
+            }
+        },
         "elements": {
             "r1": {
                 "intermediate_frequency": 100000000.0,
@@ -47,10 +67,10 @@ def test_empty_in_out_IQ_channel():
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "mixer1",
+                    "mixer": "mixer_r1",
                 },
                 "operations": {},
-                "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
+                "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
                 "time_of_flight": 24,
             }
@@ -64,33 +84,33 @@ def test_empty_in_out_IQ_channel():
 
 
 def test_readout_resonator_with_readout():
-    readout_resonator = ReadoutResonator(
+    readout_resonator = InOutIQChannel(
         id=1,
-        mixer=Mixer(
-            id=1,
-            port_I=1,
-            port_Q=2,
-        ),
+        mixer=Mixer(),
+        output_port_I=("con1", 1),
+        output_port_Q=("con1", 2),
+        input_port_I=("con1", 3),
+        input_port_Q=("con1", 4),
         intermediate_frequency=100e6,
         local_oscillator=LocalOscillator(id=2, frequency=5e9),
     )
-    readout_resonator.pulses["readout"] = pulses.ReadoutPulse(
+    readout_resonator.pulses["readout"] = pulses.ConstantReadoutPulse(
         amplitude=0.1, length=1000
     )
 
     d = readout_resonator.to_dict()
     assert d == {
-        "id": 1,
-        "mixer": {
-            "id": 1,
-            "port_I": 1,
-            "port_Q": 2,
-        },
+        "mixer": {},
+        "output_port_I": ("con1", 1),
+        "output_port_Q": ("con1", 2),
+        "input_port_I": ("con1", 3),
+        "input_port_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "local_oscillator": {"id": 2, "frequency": 5000000000.0},
+        "id": 1,
         "pulses": {
             "readout": {
-                "__class__": "quam.components.pulses.ReadoutPulse",
+                "__class__": "quam.components.pulses.ConstantReadoutPulse",
                 "amplitude": 0.1,
                 "length": 1000,
             }
@@ -98,6 +118,7 @@ def test_readout_resonator_with_readout():
     }
 
     cfg = {
+        "controllers": {},
         "elements": {},
         "pulses": {},
         "waveforms": {},
@@ -105,6 +126,19 @@ def test_readout_resonator_with_readout():
         "digital_waveforms": {},
     }
     expected_cfg = {
+        "controllers": {
+            "con1": {
+                "analog_inputs": {
+                    3: {"offset": 0.0},
+                    4: {"offset": 0.0},
+                },
+                "analog_outputs": {
+                    1: {"offset": 0.0},
+                    2: {"offset": 0.0},
+                },
+                "digital_outputs": {},
+            }
+        },
         "elements": {
             "r1": {
                 "intermediate_frequency": 100000000.0,
@@ -112,55 +146,61 @@ def test_readout_resonator_with_readout():
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "mixer1",
+                    "mixer": "mixer_r1",
                 },
-                "operations": {"readout": "r1_readout_pulse"},
-                "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
+                "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
                 "time_of_flight": 24,
+                "operations": {"readout": "r1$readout$pulse"},
             }
         },
-        "pulses": {
-            "r1_readout_pulse": {
-                "operation": "measurement",
-                "length": 1000,
-                "waveforms": {
-                    "I": "r1_readout_wf_I",
-                    "Q": "r1_readout_wf_Q",
-                },
-                "integration_weights": {
-                    "cosine": "r1_cosine_iw",
-                    "sine": "r1_sine_iw",
-                    "minus_sine": "r1_minus_sine_iw",
-                },
-                "digital_marker": "r1_readout_dm",
-            }
-        },
-        "integration_weights": {
-            "r1_cosine_iw": {
-                "cosine": [(1.0, 1000)],
-                "sine": [(0.0, 1000)],
-            },
-            "r1_sine_iw": {
-                "cosine": [(0.0, 1000)],
-                "sine": [(1.0, 1000)],
-            },
-            "r1_minus_sine_iw": {
-                "cosine": [(0.0, 1000)],
-                "sine": [(-1.0, 1000)],
-            },
-        },
-        "waveforms": {
-            "r1_readout_wf_I": {
-                "type": "constant",
-                "sample": 0.1,
-            },
-            "r1_readout_wf_Q": {
-                "type": "constant",
-                "sample": 0.0,
-            },
-        },
-        "digital_waveforms": {"r1_readout_dm": {"samples": "ON"}},
+        "pulses": {},
+        "integration_weights": {},
+        "waveforms": {},
+        "digital_waveforms": {},
     }
     readout_resonator.apply_to_config(cfg)
+    assert cfg == expected_cfg
+
+    cfg = {
+        "controllers": {},
+        "elements": {},
+        "pulses": {},
+        "waveforms": {},
+        "integration_weights": {},
+        "digital_waveforms": {},
+    }
+
+    with pytest.raises(KeyError):
+        readout_resonator.pulses["readout"].apply_to_config(cfg)
+
+    cfg["digital_waveforms"]["ON"] = {"samples": [(1, 0)]}
+    readout_resonator.pulses["readout"].apply_to_config(cfg)
+    expected_cfg = {
+        "controllers": {},
+        "digital_waveforms": {"ON": {"samples": [(1, 0)]}},
+        "elements": {},
+        "integration_weights": {
+            "r1$readout$iw1": {"cosine": [(1.0, 1000)], "sine": [(-0.0, 1000)]},
+            "r1$readout$iw2": {"cosine": [(0.0, 1000)], "sine": [(1.0, 1000)]},
+            "r1$readout$iw3": {"cosine": [(-0.0, 1000)], "sine": [(-1.0, 1000)]},
+        },
+        "pulses": {
+            "r1$readout$pulse": {
+                "digital_marker": "ON",
+                "integration_weights": {
+                    "iw1": "r1$readout$iw1",
+                    "iw2": "r1$readout$iw2",
+                    "iw3": "r1$readout$iw3",
+                },
+                "length": 1000,
+                "operation": "measurement",
+                "waveforms": {"I": "r1$readout$wf$I", "Q": "r1$readout$wf$Q"},
+            }
+        },
+        "waveforms": {
+            "r1$readout$wf$I": {"sample": 0.1, "type": "constant"},
+            "r1$readout$wf$Q": {"sample": 0.0, "type": "constant"},
+        },
+    }
     assert cfg == expected_cfg
