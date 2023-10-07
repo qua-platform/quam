@@ -85,21 +85,6 @@ class Mixer(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class AnalogInput(QuamComponent):
-    port: int
-    offset: float = 0
-    gain: float = 0
-
-    controller: str = "con1"
-
-    def apply_to_config(self, config: dict) -> None:
-        config["controllers"][self.controller]["analog_inputs"][self.port] = {
-            "offset": self.offset,
-            "gain_db": self.gain,
-        }
-
-
-@dataclass(kw_only=True, eq=False)
 class PulseEmitter(QuamComponent):
     pulses: Dict[str, Pulse] = field(default_factory=dict)
 
@@ -202,8 +187,12 @@ class SingleChannel(PulseEmitter):
             "operations": self.pulse_mapping,
         }
 
-        analog_outputs = config["controllers"][self.output_port[0]]["analog_outputs"]
-        analog_output = analog_outputs[self.output_port[1]] = {"offset": self.offset}
+        controller_name, port = self.output_port
+        controller = config["controllers"].setdefault(
+            controller_name,
+            {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
+        )
+        analog_output = controller["analog_outputs"][port] = {"offset": self.offset}
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
@@ -226,6 +215,8 @@ class IQChannel(PulseEmitter):
 
     @property
     def name(self) -> str:
+        if self.parent is None:
+            raise ValueError("IQchannel.parent must be defined for it to have a name.")
         return f"{self.parent.name}_{self._get_parent_attr_name()}"
 
     @property
@@ -247,20 +238,25 @@ class IQChannel(PulseEmitter):
             "operations": self.pulse_mapping,
         }
 
-        output_I = config["controllers"][self.output_port_I[0]]["analog_outputs"]
-        output_I[self.output_port_I[1]] = {"offset": self.mixer.offset_I}
-
-        output_Q = config["controllers"][self.output_port_Q[0]]["analog_outputs"]
-        output_Q[self.output_port_Q[1]] = {"offset": self.mixer.offset_Q}
+        output_ports = [self.output_port_I, self.output_port_Q]
+        offsets = [self.mixer.offset_I, self.mixer.offset_Q]
+        for (controller_name, port), offset in zip(output_ports, offsets):
+            controller = config["controllers"].setdefault(
+                controller_name,
+                {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
+            )
+            controller["analog_outputs"][port] = {"offset": offset}
 
 
 @dataclass(kw_only=True, eq=False)
 class InOutIQChannel(IQChannel):
-    time_of_flight: int = 24
-    smearing: int = 0
-
     input_port_I: Tuple[str, int]
     input_port_Q: Tuple[str, int]
+
+    id: Union[int, str] = ":../id"
+
+    time_of_flight: int = 24
+    smearing: int = 0
 
     input_offset_I: float = 0.0
     input_offset_Q: float = 0.0
@@ -282,10 +278,14 @@ class InOutIQChannel(IQChannel):
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
-        input_I = config["controllers"][self.input_port_I[0]]["analog_inputs"]
-        input_I[self.input_port_I[1]] = {"offset": self.input_offset_I}
-        input_Q = config["controllers"][self.input_port_Q[0]]["analog_inputs"]
-        input_Q[self.input_port_Q[1]] = {"offset": self.input_offset_Q}
-        if self.input_gain is not None:
-            input_I[self.input_port_I[1]]["gain_db"] = self.input_gain
-            input_I[self.input_port_Q[1]]["gain_db"] = self.input_gain
+        input_ports = [self.input_port_I, self.input_port_Q]
+        offsets = [self.input_offset_I, self.input_offset_Q]
+        for (controller_name, port), offset in zip(input_ports, offsets):
+            controller = config["controllers"].setdefault(
+                controller_name,
+                {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
+            )
+            controller["analog_inputs"][port] = {"offset": offset}
+
+            if self.input_gain is not None:
+                controller["analog_inputs"][port]["gain_db"] = self.input_gain

@@ -1,35 +1,39 @@
+import pytest
 from quam.components import *
 
 
-def test_empty_readout_resonator():
-    readout_resonator = ReadoutResonator(
-        id=1,
-        mixer=Mixer(
-            id=1,
-            port_I=1,
-            port_Q=2,
-        ),
+def test_empty_in_out_IQ_channel():
+    readout_resonator = InOutIQChannel(
+        mixer=Mixer(),
+        output_port_I=("con1", 1),
+        output_port_Q=("con1", 2),
+        input_port_I=("con1", 3),
+        input_port_Q=("con1", 4),
         intermediate_frequency=100e6,
         local_oscillator=LocalOscillator(id=2, frequency=5e9),
     )
-    assert readout_resonator.mixer.intermediate_frequency == 100e6
-    assert (
-        readout_resonator.mixer.local_oscillator == readout_resonator.local_oscillator
-    )
+
+    mixer = readout_resonator.mixer
+    assert mixer.local_oscillator_frequency == 5e9
+    assert mixer.intermediate_frequency == 100e6
+    assert mixer.offset_I == 0
+    assert mixer.offset_Q == 0
+
+    assert readout_resonator.id == ":../id"  # parent not defined
 
     d = readout_resonator.to_dict()
     assert d == {
-        "id": 1,
-        "mixer": {
-            "id": 1,
-            "port_I": 1,
-            "port_Q": 2,
-        },
+        "mixer": {},
+        "output_port_I": ("con1", 1),
+        "output_port_Q": ("con1", 2),
+        "input_port_I": ("con1", 3),
+        "input_port_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "local_oscillator": {"id": 2, "frequency": 5000000000.0},
     }
 
     cfg = {
+        "controllers": {},
         "elements": {},
         "pulses": {},
         "waveforms": {},

@@ -39,21 +39,17 @@ def test_pulse_emitter():
 
 def test_IQ_channel():
     IQ_channel = IQChannel(
-        mixer=Mixer(
-            id=0,
-            local_oscillator=None,
-            port_I=0,
-            port_Q=1,
-            intermediate_frequency=100e6,
-        )
+        mixer=Mixer(),
+        local_oscillator=None,
+        output_port_I=0,
+        output_port_Q=1,
+        intermediate_frequency=100e6,
     )
     d = IQ_channel.to_dict()
     assert d == {
-        "mixer": {
-            "id": 0,
-            "local_oscillator": None,
-            "port_I": 0,
-            "port_Q": 1,
-            "intermediate_frequency": 100e6,
-        }
+        "mixer": {},
+        "output_port_I": 0,
+        "output_port_Q": 1,
+        "intermediate_frequency": 100e6,
+        "local_oscillator": None,
     }

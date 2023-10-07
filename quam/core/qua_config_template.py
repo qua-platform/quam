@@ -1,8 +1,6 @@
 qua_config_template = {
     "version": 1,
-    "controllers": {
-        "con1": {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}}
-    },
+    "controllers": {},
     "elements": {},
     "pulses": {
         "const_pulse": {
