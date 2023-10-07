@@ -26,14 +26,8 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class LocalOscillator(QuamComponent):
-    id: Union[int, str]
-
     frequency: float
     power: float = None
-
-    @property
-    def name(self):
-        return self.id if isinstance(self.id, str) else f"lo{self.id}"
 
 
 @dataclass(kw_only=True, eq=False)
