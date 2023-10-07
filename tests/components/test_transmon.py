@@ -20,56 +20,59 @@ def test_transmon_xy():
     transmon = Transmon(
         id=1,
         xy=IQChannel(
-            mixer=Mixer(
-                id=1,
-                port_I=1,
-                port_Q=2,
-            ),
-            local_oscillator=LocalOscillator(id=1, frequency=5e9),
+            mixer=Mixer(),
+            output_port_I=("con1", 1),
+            output_port_Q=("con1", 2),
+            local_oscillator=LocalOscillator(frequency=5e9),
             intermediate_frequency=100e6,
         ),
     )
 
     assert transmon.xy.name == "q1_xy"
-    assert transmon.xy.mixer.name == "mixer1"
+    assert transmon.xy.mixer.name == "mixer_q1_xy"
     assert not transmon.xy.pulses
     assert transmon.xy.mixer.intermediate_frequency == 100e6
     assert transmon.z is None
 
-    config = {"elements": {}}
+    cfg = {"controllers": {}, "elements": {}}
 
-    transmon.xy.mixer.local_oscillator.frequency = 4.6e9
+    transmon.xy.mixer.local_oscillator_frequency = 5e9
 
-    assert transmon.xy.frequency_rf == 4.7e9
+    assert transmon.xy.frequency_rf == 5.1e9
 
-    transmon.xy.apply_to_config(config)
-    assert config == {
+    transmon.xy.apply_to_config(cfg)
+    expected_cfg = {
         "elements": {
             "q1_xy": {
                 "mixInputs": {
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
-                    "lo_frequency": 4600000000.0,
-                    "mixer": "mixer1",
+                    "lo_frequency": 5000000000.0,
+                    "mixer": "mixer_q1_xy",
                 },
                 "intermediate_frequency": 100e6,
                 "operations": {},
-                "oscillator": "lo1",
             },
-        }
+        },
+        "controllers": {
+            "con1": {
+                "analog_outputs": {1: {"offset": 0.0}, 2: {"offset": 0.0}},
+                "digital_outputs": {},
+                "analog_inputs": {},
+            }
+        },
     }
+    assert cfg == expected_cfg
 
 
 def test_transmon_add_pulse():
     transmon = Transmon(
         id=1,
         xy=IQChannel(
-            mixer=Mixer(
-                id=1,
-                port_I=1,
-                port_Q=2,
-            ),
-            local_oscillator=LocalOscillator(id=2, frequency=4.6e9),
+            mixer=Mixer(),
+            output_port_I=("con1", 1),
+            output_port_Q=("con1", 2),
+            local_oscillator=LocalOscillator(frequency=5e9),
             intermediate_frequency=100e6,
         ),
     )
@@ -78,16 +81,14 @@ def test_transmon_add_pulse():
     )
 
     quam_dict = transmon.to_dict()
-    assert quam_dict == {
+    expected_quam_dict = {
         "id": 1,
         "xy": {
-            "mixer": {
-                "id": 1,
-                "port_I": 1,
-                "port_Q": 2,
-            },
-            "local_oscillator": {"id": 2, "frequency": 4600000000.0},
+            "mixer": {},
+            "local_oscillator": {"frequency": 5000000000.0},
             "intermediate_frequency": 100000000.0,
+            "output_port_I": ("con1", 1),
+            "output_port_Q": ("con1", 2),
             "pulses": {
                 "X180": {
                     "__class__": "quam.components.pulses.DragPulse",
@@ -101,41 +102,59 @@ def test_transmon_add_pulse():
             },
         },
     }
+    assert quam_dict == expected_quam_dict
 
-    config = {"elements": {}, "pulses": {}, "waveforms": {}}
+    config = {"controllers": {}, "elements": {}, "pulses": {}, "waveforms": {}}
     transmon.xy.apply_to_config(config)
 
-    assert config["elements"] == {
-        "q1_xy": {
-            "mixInputs": {
-                "I": ("con1", 1),
-                "Q": ("con1", 2),
-                "lo_frequency": 4600000000.0,
-                "mixer": "mixer1",
-            },
-            "intermediate_frequency": 100e6,
-            "operations": {"X180": "q1_xy_X180_pulse"},
-            "oscillator": "lo2",
+    assert config == {
+        "controllers": {
+            "con1": {
+                "analog_outputs": {1: {"offset": 0.0}, 2: {"offset": 0.0}},
+                "digital_outputs": {},
+                "analog_inputs": {},
+            }
         },
+        "elements": {
+            "q1_xy": {
+                "mixInputs": {
+                    "I": ("con1", 1),
+                    "Q": ("con1", 2),
+                    "lo_frequency": 5000000000.0,
+                    "mixer": "mixer_q1_xy",
+                },
+                "intermediate_frequency": 100e6,
+                "operations": {"X180": "q1_xy$X180$pulse"},
+            },
+        },
+        "pulses": {},
+        "waveforms": {},
     }
 
-    assert config["pulses"] == {
-        "q1_xy_X180_pulse": {
-            "operation": "control",
-            "length": 20,
-            "waveforms": {"I": "q1_xy_X180_wf_I", "Q": "q1_xy_X180_wf_Q"},
-        }
-    }
+    config = {"controllers": {}, "elements": {}, "pulses": {}, "waveforms": {}}
+    transmon.xy.pulses["X180"].apply_to_config(config)
 
     from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 
     I, Q = drag_gaussian_pulse_waveforms(
         amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20
     )
-
-    assert list(config["waveforms"]) == ["q1_xy_X180_wf_I", "q1_xy_X180_wf_Q"]
-    assert config["waveforms"]["q1_xy_X180_wf_I"] == {"type": "arbitrary", "samples": I}
-    assert config["waveforms"]["q1_xy_X180_wf_Q"] == {"type": "arbitrary", "samples": Q}
+    expected_cfg = {
+        "controllers": {},
+        "elements": {},
+        "pulses": {
+            "q1_xy$X180$pulse": {
+                "operation": "control",
+                "length": 20,
+                "waveforms": {"I": "q1_xy$X180$wf$I", "Q": "q1_xy$X180$wf$Q"},
+            },
+        },
+        "waveforms": {
+            "q1_xy$X180$wf$I": {"type": "arbitrary", "samples": I},
+            "q1_xy$X180$wf$Q": {"type": "arbitrary", "samples": Q},
+        },
+    }
+    assert config == expected_cfg
 
 
 @dataclass
@@ -150,13 +169,11 @@ quam_dict_single_nested = {
     "qubit": {
         "id": 0,
         "xy": {
-            "mixer": {
-                "id": 0,
-                "port_I": 0,
-                "port_Q": 1,
-            },
+            "mixer": {},
+            "output_port_I": ("con1", 0),
+            "output_port_Q": ("con1", 1),
             "intermediate_frequency": 100e6,
-            "local_oscillator": {"id": 1, "power": 10, "frequency": 6e9},
+            "local_oscillator": {"power": 10, "frequency": 6e9},
         },
     }
 }
@@ -175,30 +192,9 @@ def test_instantiation_single_element():
 def test_instantiation_single_nested_element():
     quam = QuamTestSingle.load(quam_dict_single_nested)
 
-    assert quam.qubit.xy.mixer.id == 0
-    assert quam.qubit.xy.mixer.name == "mixer0"
-    assert quam.qubit.xy.mixer.local_oscillator.power == 10
-    assert quam.qubit.xy.mixer.local_oscillator.frequency == 6e9
+    assert quam.qubit.xy.mixer.name == "mixer_q0_xy"
+    assert quam.qubit.xy.mixer.local_oscillator_frequency == 6e9
 
     assert quam.qubit._root is quam
     assert quam.qubit.xy._root is quam
     assert quam.qubit.xy.mixer._root is quam
-
-
-def test_instantiate_quam_dict():
-    @dataclass
-    class QuamTest(QuamRoot):
-        qubit: Transmon
-        wiring: dict
-
-    quam_dict = deepcopy(quam_dict_single_nested)
-    quam_dict["qubit"]["xy"]["mixer"] = {
-        "id": 0,
-        "port_I": ":/wiring.port_I",
-        "port_Q": ":/wiring.port_Q",
-    }
-    quam_dict["wiring"] = {
-        "port_I": 0,
-        "port_Q": 1,
-    }
-    QuamTest.load(quam_dict)
