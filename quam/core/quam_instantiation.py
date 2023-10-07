@@ -206,7 +206,7 @@ def instantiate_attr(
         instantiated_attr = attr_val
 
     elif typing.get_origin(expected_type) == tuple:
-        instantiated_attr = attr_val
+        instantiated_attr = tuple(attr_val)
     elif typing.get_origin(expected_type) is not None and validate_type:
         raise TypeError(
             f"Instantiation for type {expected_type} in {str_repr} not implemented"
@@ -330,7 +330,7 @@ def instantiate_quam_class(
     )
 
     quam_component = quam_class(
-        **instantiated_attrs["required"], **instantiated_attrs["optional"]
+        **{**instantiated_attrs["required"], **instantiated_attrs["optional"]}
     )
 
     if fix_attrs:
