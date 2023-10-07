@@ -10,7 +10,7 @@ def test_empty_in_out_IQ_channel():
         input_port_I=("con1", 3),
         input_port_Q=("con1", 4),
         intermediate_frequency=100e6,
-        local_oscillator=LocalOscillator(id=2, frequency=5e9),
+        local_oscillator=LocalOscillator(frequency=5e9),
     )
 
     mixer = readout_resonator.mixer
@@ -35,7 +35,7 @@ def test_empty_in_out_IQ_channel():
         "input_port_I": ("con1", 3),
         "input_port_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
-        "local_oscillator": {"id": 2, "frequency": 5000000000.0},
+        "local_oscillator": {"frequency": 5000000000.0},
         "id": 1,
     }
 
@@ -92,7 +92,7 @@ def test_readout_resonator_with_readout():
         input_port_I=("con1", 3),
         input_port_Q=("con1", 4),
         intermediate_frequency=100e6,
-        local_oscillator=LocalOscillator(id=2, frequency=5e9),
+        local_oscillator=LocalOscillator(frequency=5e9),
     )
     readout_resonator.pulses["readout"] = pulses.ConstantReadoutPulse(
         amplitude=0.1, length=1000
@@ -106,7 +106,7 @@ def test_readout_resonator_with_readout():
         "input_port_I": ("con1", 3),
         "input_port_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
-        "local_oscillator": {"id": 2, "frequency": 5000000000.0},
+        "local_oscillator": {"frequency": 5000000000.0},
         "id": 1,
         "pulses": {
             "readout": {
