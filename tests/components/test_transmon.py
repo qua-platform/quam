@@ -28,7 +28,7 @@ def test_transmon_xy():
 
     assert transmon.xy.name == "q1$xy"
     assert transmon.xy.mixer.name == "q1$xy$mixer"
-    assert not transmon.xy.pulses
+    assert not transmon.xy.operations
     assert transmon.xy.mixer.intermediate_frequency == 100e6
     assert transmon.z is None
 
@@ -74,7 +74,7 @@ def test_transmon_add_pulse():
             intermediate_frequency=100e6,
         ),
     )
-    transmon.xy.pulses["X180"] = pulses.DragPulse(
+    transmon.xy.operations["X180"] = pulses.DragPulse(
         amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, rotation_angle=0
     )
 
@@ -87,7 +87,7 @@ def test_transmon_add_pulse():
             "intermediate_frequency": 100000000.0,
             "output_port_I": ("con1", 1),
             "output_port_Q": ("con1", 2),
-            "pulses": {
+            "operations": {
                 "X180": {
                     "__class__": "quam.components.pulses.DragPulse",
                     "amplitude": 1,
@@ -130,7 +130,7 @@ def test_transmon_add_pulse():
     }
 
     config = {"controllers": {}, "elements": {}, "pulses": {}, "waveforms": {}}
-    transmon.xy.pulses["X180"].apply_to_config(config)
+    transmon.xy.operations["X180"].apply_to_config(config)
 
     from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 

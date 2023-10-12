@@ -94,7 +94,7 @@ def test_readout_resonator_with_readout():
         intermediate_frequency=100e6,
         local_oscillator=LocalOscillator(frequency=5e9),
     )
-    readout_resonator.pulses["readout"] = pulses.ConstantReadoutPulse(
+    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
         amplitude=0.1, length=1000
     )
 
@@ -108,7 +108,7 @@ def test_readout_resonator_with_readout():
         "intermediate_frequency": 100000000.0,
         "local_oscillator": {"frequency": 5000000000.0},
         "id": 1,
-        "pulses": {
+        "operations": {
             "readout": {
                 "__class__": "quam.components.pulses.ConstantReadoutPulse",
                 "amplitude": 0.1,
@@ -172,10 +172,10 @@ def test_readout_resonator_with_readout():
     }
 
     with pytest.raises(KeyError):
-        readout_resonator.pulses["readout"].apply_to_config(cfg)
+        readout_resonator.operations["readout"].apply_to_config(cfg)
 
     cfg["digital_waveforms"]["ON"] = {"samples": [(1, 0)]}
-    readout_resonator.pulses["readout"].apply_to_config(cfg)
+    readout_resonator.operations["readout"].apply_to_config(cfg)
     expected_cfg = {
         "controllers": {},
         "digital_waveforms": {"ON": {"samples": [(1, 0)]}},

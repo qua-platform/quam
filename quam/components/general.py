@@ -81,11 +81,11 @@ class Mixer(QuamComponent):
 
 @dataclass(kw_only=True, eq=False)
 class Channel(QuamComponent):
-    pulses: Dict[str, Pulse] = field(default_factory=dict)
+    operations: Dict[str, Pulse] = field(default_factory=dict)
 
     @property
     def pulse_mapping(self):
-        return {label: pulse.pulse_name for label, pulse in self.pulses.items()}
+        return {label: pulse.pulse_name for label, pulse in self.operations.items()}
 
     def play(
         self,
@@ -101,7 +101,7 @@ class Channel(QuamComponent):
     ):
         from qm.qua._dsl import _PulseAmp
 
-        if pulse_name not in self.pulses:
+        if pulse_name not in self.operations:
             raise KeyError(f"Pulse {pulse_name} not found in {self.name}.")
 
         if amplitude_scale is not None:

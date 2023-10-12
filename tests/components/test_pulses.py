@@ -63,10 +63,12 @@ def test_single_pulse_IQ_channel():
         output_port_Q=1,
         intermediate_frequency=100e6,
     )
-    IQ_channel.pulses["X180"] = pulses.GaussianPulse(length=16, amplitude=1, sigma=12)
+    IQ_channel.operations["X180"] = pulses.GaussianPulse(
+        length=16, amplitude=1, sigma=12
+    )
 
     cfg = {"pulses": {}, "waveforms": {}}
-    pulse = IQ_channel.pulses["X180"]
+    pulse = IQ_channel.operations["X180"]
 
     with pytest.raises(ValueError) as exc_info:
         pulse.apply_to_config(cfg)
@@ -79,7 +81,7 @@ def test_IQ_pulse_single_channel():
         id="single",
         output_port=0,
     )
-    single_channel.pulses["X180"] = pulses.DragPulse(
+    single_channel.operations["X180"] = pulses.DragPulse(
         length=16,
         rotation_angle=0,
         amplitude=1,
@@ -89,7 +91,7 @@ def test_IQ_pulse_single_channel():
     )
 
     cfg = {"pulses": {}, "waveforms": {}}
-    pulse = single_channel.pulses["X180"]
+    pulse = single_channel.operations["X180"]
 
     with pytest.raises(ValueError) as exc_info:
         pulse.apply_to_config(cfg)
