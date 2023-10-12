@@ -16,7 +16,7 @@ except ImportError:
 __all__ = [
     "LocalOscillator",
     "Mixer",
-    "PulseEmitter",
+    "Channel",
     "SingleChannel",
     "IQChannel",
     "InOutIQChannel",
@@ -80,7 +80,7 @@ class Mixer(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class PulseEmitter(QuamComponent):
+class Channel(QuamComponent):
     pulses: Dict[str, Pulse] = field(default_factory=dict)
 
     @property
@@ -111,9 +111,9 @@ class PulseEmitter(QuamComponent):
         else:
             pulse = pulse_name
 
-        # At the moment, self.name is not defined for PulseEmitter because it could
+        # At the moment, self.name is not defined for Channel because it could
         # be a property or dataclass field in a subclass.
-        # # TODO Find elegant solution for PulseEmitter.name.
+        # # TODO Find elegant solution for Channel.name.
         play(
             pulse=pulse,
             element=self.name,
@@ -160,7 +160,7 @@ class PulseEmitter(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class SingleChannel(PulseEmitter):
+class SingleChannel(Channel):
     output_port: Tuple[str, int]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
@@ -203,7 +203,7 @@ class SingleChannel(PulseEmitter):
 
 
 @dataclass(kw_only=True, eq=False)
-class IQChannel(PulseEmitter):
+class IQChannel(Channel):
     output_port_I: Tuple[str, int]
     output_port_Q: Tuple[str, int]
 

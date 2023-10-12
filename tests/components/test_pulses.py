@@ -29,9 +29,9 @@ def test_drag_pulse():
     assert np.iscomplexobj(waveform)
 
 
-def test_pulse_emitter():
-    pulse_emitter = PulseEmitter()
-    d = pulse_emitter.to_dict()
+def test_channel():
+    channel = Channel()
+    d = channel.to_dict()
 
     assert d == {}
 

@@ -22,8 +22,8 @@ class Pulse(QuamComponent, ABC):
     @property
     def full_name(self):
         name = self._get_parent_attr_name()
-        pulse_emitter = self._get_referenced_value(":../../")
-        return f"{pulse_emitter.name}${name}"
+        channel = self._get_referenced_value(":../../")
+        return f"{channel.name}${name}"
 
     @property
     def pulse_name(self):
