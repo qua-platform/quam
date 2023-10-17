@@ -1,8 +1,7 @@
 from dataclasses import dataclass, is_dataclass, fields, field
 import pytest
 
-from quam.core.quam_dataclass import quam_dataclass, REQUIRED
-from quam.core.utils import get_dataclass_attr_annotations
+from quam.utils.dataclass import get_dataclass_attr_annotations, quam_dataclass
 
 
 def test_dataclass_inheritance_error():
@@ -167,7 +166,7 @@ def test_patch_dataclass(dataclass_patch):
             class C:
                 ...
 
-        from quam.core.quam_dataclass import patch_dataclass
+        from quam.utils import patch_dataclass
 
         patch_dataclass(__name__)
 

@@ -1,8 +1,8 @@
 from typing import List
 from dataclasses import dataclass
-import pytest
 
 from quam.core import *
+from quam.utils import patch_dataclass
 
 patch_dataclass(__name__)
 

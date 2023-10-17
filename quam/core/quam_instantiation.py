@@ -3,12 +3,12 @@ import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
 
-from quam.core.utils import (
+from quam.utils import (
+    string_reference,
     get_dataclass_attr_annotations,
+    get_class_from_path,
     validate_obj_type,
-    get_quam_class,
 )
-from quam.utils import string_reference
 
 if TYPE_CHECKING:
     from quam.core import QuamBase
@@ -312,7 +312,7 @@ def instantiate_quam_class(
     str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
 
     if "__class__" in contents:
-        quam_class = get_quam_class(contents["__class__"])
+        quam_class = get_class_from_path(contents["__class__"])
 
     if not isinstance(contents, dict):
         raise TypeError(

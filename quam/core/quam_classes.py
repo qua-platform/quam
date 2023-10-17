@@ -19,13 +19,13 @@ from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
 from quam.serialisation import AbstractSerialiser, JSONSerialiser
-from quam.utils.reference_class import ReferenceClass
-from quam.utils import string_reference
-from quam.core.quam_instantiation import instantiate_quam_class
-from quam.core.utils import (
-    get_full_class_path,
+from quam.utils import (
     get_dataclass_attr_annotations,
+    ReferenceClass,
+    string_reference,
+    get_full_class_path,
 )
+from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
 
 

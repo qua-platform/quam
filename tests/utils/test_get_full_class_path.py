@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from quam.core import *
-from quam.core.utils import get_full_class_path
+from quam.utils import get_full_class_path
 
 
 def test_get_transmon_class_path():

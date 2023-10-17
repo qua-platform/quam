@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from quam.core import *
 from quam.core.quam_instantiation import *
-from quam.core.utils import get_full_class_path
+from quam.utils import get_full_class_path
 
 
 @dataclass

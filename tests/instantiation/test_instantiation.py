@@ -2,9 +2,14 @@ import pytest
 from typing import List
 from dataclasses import dataclass
 
-from quam.core import QuamRoot, QuamComponent, patch_dataclass
+from quam.core import QuamRoot, QuamComponent
 from quam.components.superconducting_qubits import Transmon
 from quam.core.quam_instantiation import *
+from quam.utils import (
+    get_dataclass_attr_annotations,
+    patch_dataclass,
+    validate_obj_type,
+)
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 

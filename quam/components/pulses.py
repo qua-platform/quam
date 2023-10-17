@@ -4,7 +4,8 @@ import numbers
 from typing import ClassVar, List, Union, Tuple
 import numpy as np
 
-from quam.core import QuamComponent, patch_dataclass
+from quam.core import QuamComponent
+from quam.utils import patch_dataclass
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 

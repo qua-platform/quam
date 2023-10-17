@@ -2,9 +2,9 @@ import numpy as np
 from typing import Dict, List, Union, Tuple, Optional
 from dataclasses import dataclass, field
 
-from quam.core import QuamComponent, patch_dataclass
+from quam.core import QuamComponent
 from quam.components.pulses import Pulse
-from quam.utils import string_reference
+from quam.utils import string_reference, patch_dataclass
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 

@@ -1,7 +1,8 @@
 from typing import List
 from dataclasses import dataclass, field
 
-from quam.core import QuamRoot, patch_dataclass
+from quam.core import QuamRoot
+from quam.utils import patch_dataclass
 from .general import *
 from .superconducting_qubits import *
 

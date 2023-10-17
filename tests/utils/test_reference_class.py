@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from quam.utils.reference_class import ReferenceClass
+from quam.utils import ReferenceClass
 
 
 def test_instantiate_reference_class():
