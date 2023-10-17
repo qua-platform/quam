@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from quam.core import QuamComponent
 from quam.components.pulses import Pulse
 from quam.utils import string_reference, patch_dataclass
+from quam.utils.string_reference import DELIMITER
 
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
@@ -46,7 +47,7 @@ class Mixer(QuamComponent):
         parent_id = self._get_referenced_value("#../name")
         if string_reference.is_reference(parent_id):
             raise AttributeError(f"Mixer.parent must be defined for {self}")
-        return f"{parent_id}$mixer"
+        return f"{parent_id}{DELIMITER}mixer"
 
     def apply_to_config(self, config: dict):
         correction_matrix = self.IQ_imbalance(
@@ -126,21 +127,6 @@ class Channel(QuamComponent):
             continue_chirp=continue_chirp,
             target=target,
         )
-
-    # TODO Move to ReadoutPulse
-    def _config_add_pulse_integration_weights(
-        self, config: dict, pulse_label: str, pulse: Pulse
-    ):
-        integration_weights = pulse.calculate_integration_weights()
-        if not integration_weights:
-            return
-
-        pulse_config = config["pulses"][f"{self.name}${pulse_label}$pulse"]
-        pulse_config["integration_weights"] = {}
-        for label, weights in integration_weights.items():
-            full_label = f"{self.name}${label}$iw"
-            config["integration_weights"][full_label] = weights
-            pulse_config["integration_weights"][label] = full_label
 
     def wait(self, duration, *other_elements):
         other_elements_str = [
@@ -225,7 +211,7 @@ class IQChannel(Channel):
                 "IQchannel.parent or IQchannel.id must be defined for it to have a"
                 " name."
             )
-        return f"{self.parent.name}${self._get_parent_attr_name()}"
+        return f"{self.parent.name}{DELIMITER}{self._get_parent_attr_name()}"
 
     @property
     def frequency_rf(self):

@@ -2,6 +2,9 @@ from typing import Sequence, Tuple, Any
 from collections import UserList, UserDict
 
 
+DELIMITER = "."
+
+
 def is_reference(string: str) -> bool:
     """Check if a string is a reference, i.e. a string that starts with a colon"""
     if not isinstance(string, str):

@@ -6,6 +6,7 @@ import numpy as np
 
 from quam.core import QuamComponent
 from quam.utils import patch_dataclass
+from quam.utils.string_reference import DELIMITER
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
@@ -24,19 +25,19 @@ class Pulse(QuamComponent, ABC):
     def full_name(self):
         name = self._get_parent_attr_name()
         channel = self._get_referenced_value("#../../")
-        return f"{channel.name}${name}"
+        return f"{channel.name}{DELIMITER}{name}"
 
     @property
     def pulse_name(self):
-        return f"{self.full_name}$pulse"
+        return f"{self.full_name}{DELIMITER}pulse"
 
     @property
     def waveform_name(self):
-        return f"{self.full_name}$wf"
+        return f"{self.full_name}{DELIMITER}wf"
 
     @property
     def digital_marker_name(self):
-        return f"{self.full_name}$dm"
+        return f"{self.full_name}{DELIMITER}dm"
 
     def calculate_waveform(self):
         waveform = self.waveform_function()
@@ -119,7 +120,7 @@ class Pulse(QuamComponent, ABC):
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
             if suffix != "single":
-                waveform_name += f"${suffix}"
+                waveform_name += f"{DELIMITER}{suffix}"
 
             sample_label = "sample" if wf_type == "constant" else "samples"
 
@@ -164,15 +165,15 @@ class ReadoutPulse(Pulse, ABC):
 
     @property
     def iw1_name(self):
-        return f"{self.full_name}$iw1"
+        return f"{self.full_name}{DELIMITER}iw1"
 
     @property
     def iw2_name(self):
-        return f"{self.full_name}$iw2"
+        return f"{self.full_name}{DELIMITER}iw2"
 
     @property
     def iw3_name(self):
-        return f"{self.full_name}$iw3"
+        return f"{self.full_name}{DELIMITER}iw3"
 
     @abstractmethod
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:

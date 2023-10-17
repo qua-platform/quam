@@ -67,7 +67,7 @@ def test_empty_in_out_IQ_channel():
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "r1$mixer",
+                    "mixer": "r1.mixer",
                 },
                 "operations": {},
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
@@ -146,12 +146,12 @@ def test_readout_resonator_with_readout():
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "r1$mixer",
+                    "mixer": "r1.mixer",
                 },
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
                 "time_of_flight": 24,
-                "operations": {"readout": "r1$readout$pulse"},
+                "operations": {"readout": "r1.readout.pulse"},
             }
         },
         "pulses": {},
@@ -181,26 +181,26 @@ def test_readout_resonator_with_readout():
         "digital_waveforms": {"ON": {"samples": [(1, 0)]}},
         "elements": {},
         "integration_weights": {
-            "r1$readout$iw1": {"cosine": [(1.0, 1000)], "sine": [(-0.0, 1000)]},
-            "r1$readout$iw2": {"cosine": [(0.0, 1000)], "sine": [(1.0, 1000)]},
-            "r1$readout$iw3": {"cosine": [(-0.0, 1000)], "sine": [(-1.0, 1000)]},
+            "r1.readout.iw1": {"cosine": [(1.0, 1000)], "sine": [(-0.0, 1000)]},
+            "r1.readout.iw2": {"cosine": [(0.0, 1000)], "sine": [(1.0, 1000)]},
+            "r1.readout.iw3": {"cosine": [(-0.0, 1000)], "sine": [(-1.0, 1000)]},
         },
         "pulses": {
-            "r1$readout$pulse": {
+            "r1.readout.pulse": {
                 "digital_marker": "ON",
                 "integration_weights": {
-                    "iw1": "r1$readout$iw1",
-                    "iw2": "r1$readout$iw2",
-                    "iw3": "r1$readout$iw3",
+                    "iw1": "r1.readout.iw1",
+                    "iw2": "r1.readout.iw2",
+                    "iw3": "r1.readout.iw3",
                 },
                 "length": 1000,
                 "operation": "measurement",
-                "waveforms": {"I": "r1$readout$wf$I", "Q": "r1$readout$wf$Q"},
+                "waveforms": {"I": "r1.readout.wf.I", "Q": "r1.readout.wf.Q"},
             }
         },
         "waveforms": {
-            "r1$readout$wf$I": {"sample": 0.1, "type": "constant"},
-            "r1$readout$wf$Q": {"sample": 0.0, "type": "constant"},
+            "r1.readout.wf.I": {"sample": 0.1, "type": "constant"},
+            "r1.readout.wf.Q": {"sample": 0.0, "type": "constant"},
         },
     }
     assert cfg == expected_cfg

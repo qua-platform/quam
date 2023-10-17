@@ -26,8 +26,8 @@ def test_transmon_xy():
         ),
     )
 
-    assert transmon.xy.name == "q1$xy"
-    assert transmon.xy.mixer.name == "q1$xy$mixer"
+    assert transmon.xy.name == "q1.xy"
+    assert transmon.xy.mixer.name == "q1.xy.mixer"
     assert not transmon.xy.operations
     assert transmon.xy.mixer.intermediate_frequency == 100e6
     assert transmon.z is None
@@ -41,12 +41,12 @@ def test_transmon_xy():
     transmon.xy.apply_to_config(cfg)
     expected_cfg = {
         "elements": {
-            "q1$xy": {
+            "q1.xy": {
                 "mixInputs": {
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "q1$xy$mixer",
+                    "mixer": "q1.xy.mixer",
                 },
                 "intermediate_frequency": 100e6,
                 "operations": {},
@@ -114,15 +114,15 @@ def test_transmon_add_pulse():
             }
         },
         "elements": {
-            "q1$xy": {
+            "q1.xy": {
                 "mixInputs": {
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "q1$xy$mixer",
+                    "mixer": "q1.xy.mixer",
                 },
                 "intermediate_frequency": 100e6,
-                "operations": {"X180": "q1$xy$X180$pulse"},
+                "operations": {"X180": "q1.xy.X180.pulse"},
             },
         },
         "pulses": {},
@@ -141,15 +141,15 @@ def test_transmon_add_pulse():
         "controllers": {},
         "elements": {},
         "pulses": {
-            "q1$xy$X180$pulse": {
+            "q1.xy.X180.pulse": {
                 "operation": "control",
                 "length": 20,
-                "waveforms": {"I": "q1$xy$X180$wf$I", "Q": "q1$xy$X180$wf$Q"},
+                "waveforms": {"I": "q1.xy.X180.wf.I", "Q": "q1.xy.X180.wf.Q"},
             },
         },
         "waveforms": {
-            "q1$xy$X180$wf$I": {"type": "arbitrary", "samples": I},
-            "q1$xy$X180$wf$Q": {"type": "arbitrary", "samples": Q},
+            "q1.xy.X180.wf.I": {"type": "arbitrary", "samples": I},
+            "q1.xy.X180.wf.Q": {"type": "arbitrary", "samples": Q},
         },
     }
     assert config == expected_cfg
@@ -190,7 +190,7 @@ def test_instantiation_single_element():
 def test_instantiation_single_nested_element():
     quam = QuamTestSingle.load(quam_dict_single_nested)
 
-    assert quam.qubit.xy.mixer.name == "q0$xy$mixer"
+    assert quam.qubit.xy.mixer.name == "q0.xy.mixer"
     assert quam.qubit.xy.mixer.local_oscillator_frequency == 6e9
 
     assert quam.qubit._root is quam
