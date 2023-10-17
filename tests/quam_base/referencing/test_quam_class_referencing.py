@@ -58,7 +58,7 @@ def test_basic_reference():
         quam_elem2: QuamComponentTest
 
     quam_elem1 = QuamComponentTest(int_val=1)
-    quam_elem2 = QuamComponentTest(int_val="#/quam_elem1.int_val")
+    quam_elem2 = QuamComponentTest(int_val="#/quam_elem1/int_val")
 
     quam = QuamRootTest(quam_elem1=quam_elem1, quam_elem2=quam_elem2)
 
@@ -76,7 +76,7 @@ def test_list_referencing():
         quam_elem2: QuamComponentTest
 
     quam_elems = [QuamComponentTest(int_val=k) for k in range(5)]
-    quam_elem2 = QuamComponentTest(int_val="#/quam_elems[3].int_val")
+    quam_elem2 = QuamComponentTest(int_val="#/quam_elems/3/int_val")
 
     quam = QuamRootTest(quam_elems=quam_elems, quam_elem2=quam_elem2)
 
@@ -93,7 +93,7 @@ def test_reference_dict_elem():
         quam_elem2: QuamComponentTest
 
     quam_elem_dict = QuamDict(port_I=2)
-    quam_elem2 = QuamComponentTest(int_val="#/quam_elem_dict.port_I")
+    quam_elem2 = QuamComponentTest(int_val="#/quam_elem_dict/port_I")
 
     QuamRootTest(quam_elem_dict=quam_elem_dict, quam_elem2=quam_elem2)
 

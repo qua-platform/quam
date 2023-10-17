@@ -6,6 +6,7 @@ from quam.core import QuamComponent
 from quam.components.pulses import Pulse
 from quam.utils import string_reference, patch_dataclass
 
+
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 try:
@@ -31,7 +32,7 @@ class LocalOscillator(QuamComponent):
 
 @dataclass(kw_only=True, eq=False)
 class Mixer(QuamComponent):
-    local_oscillator_frequency: LocalOscillator = "#../local_oscillator.frequency"
+    local_oscillator_frequency: float = "#../local_oscillator/frequency"
     intermediate_frequency: float = "#../intermediate_frequency"
 
     offset_I: float = 0

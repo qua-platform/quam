@@ -38,13 +38,13 @@ def test_referencing_to_dict():
 
     assert list(quam_root.quam_dict.keys()) == ["a", "b"]
 
-    assert quam_root._get_referenced_value("#/quam_dict['a']") == 42
-    assert quam_root.quam_dict._get_referenced_value("#/quam_dict['a']") == 42
-    assert quam_root._get_referenced_value("#/quam_dict['b']") == 43
-    assert quam_root.quam_dict._get_referenced_value("#./['b']") == 43
+    assert quam_root._get_referenced_value("#/quam_dict/a") == 42
+    assert quam_root.quam_dict._get_referenced_value("#/quam_dict/a") == 42
+    assert quam_root._get_referenced_value("#/quam_dict/b") == 43
+    assert quam_root.quam_dict._get_referenced_value("#./b") == 43
 
     quam_root.quam_dict["a"] = 44
     assert quam_root.quam_dict["a"] == 44
-    assert quam_root._get_referenced_value("#/quam_dict['a']") == 44
-    assert quam_root.quam_dict._get_referenced_value("#/quam_dict['a']") == 44
-    assert quam_root.quam_dict._get_referenced_value("#./['a']") == 44
+    assert quam_root._get_referenced_value("#/quam_dict/a") == 44
+    assert quam_root.quam_dict._get_referenced_value("#/quam_dict/a") == 44
+    assert quam_root.quam_dict._get_referenced_value("#./a") == 44

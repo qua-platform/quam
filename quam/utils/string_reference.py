@@ -1,4 +1,5 @@
 from typing import Sequence, Tuple, Any
+from collections import UserList, UserDict
 
 
 def is_reference(string: str) -> bool:
@@ -19,34 +20,26 @@ def is_absolute_reference(string: str) -> bool:
     return string.startswith("#/")
 
 
-def split_next_attribute(
-    string: str, splitters: Sequence[str] = ".["
-) -> Tuple[str, str]:
-    """Get the next attribute of a reference string, i.e. until a splitter
-
-    A splitter is usually either a dot or an opening square bracket
+def split_next_attribute(string: str, splitter: str = "/") -> Tuple[str, str]:
+    """Get the next attribute of a reference string, i.e. until a splitter (default: /)
 
     Args:
         string: string to split
-        splitters: a sequence of characters to split on, e.g. "." and "["
-
+        splitter:  splitter to split the string at (default: "/")
     Returns:
         A tuple consisting of:
         - A string of the next attribute, i.e. until the first splitter
         - The remaining string from the first splitter
     """
-    splitter_idxs = {}
-    for splitter in splitters:
-        try:
-            splitter_idxs[splitter] = string.index(splitter)
-        except ValueError:
-            ...
+    string = string.lstrip("#/")
 
-    if not splitter_idxs:
-        return string, ""
+    if not len(string):
+        return "", ""
 
-    _, splitter_idx = min(splitter_idxs.items(), key=lambda elem: elem[1])
-    return string[:splitter_idx], string[splitter_idx:]
+    if splitter in string:
+        return tuple(string.split(splitter, 1))
+
+    return string, ""
 
 
 def get_relative_reference_value(obj, string: str) -> Any:
@@ -62,17 +55,23 @@ def get_relative_reference_value(obj, string: str) -> Any:
         return get_relative_reference_value(obj.parent, string[3:])
     elif string.startswith("./"):
         return get_relative_reference_value(obj, string[2:])
-    elif string.startswith("["):
-        close_idx = string.index("]")
-        key = string[1:close_idx]
-        key = int(key) if key.isdigit() else key.lstrip("'\"").rstrip("'\"")
-        return get_relative_reference_value(obj[key], string[close_idx + 1 :])
-    elif string.startswith("."):
-        string = string[1:]
 
     next_attr, remaining_string = split_next_attribute(string)
 
-    return get_relative_reference_value(getattr(obj, next_attr), remaining_string)
+    if next_attr.isdigit() and isinstance(obj, (list, UserList)):
+        try:
+            obj_attr = obj[int(next_attr)]
+        except KeyError as e:
+            raise AttributeError(f"Object {obj} has no attribute {next_attr}") from e
+    elif isinstance(obj, (dict, UserDict)):
+        try:
+            obj_attr = obj[next_attr]
+        except KeyError as e:
+            raise AttributeError(f"Object {obj} has no attribute {next_attr}") from e
+    else:
+        obj_attr = getattr(obj, next_attr)
+
+    return get_relative_reference_value(obj_attr, remaining_string)
 
 
 def get_referenced_value(obj, string: str, root=None) -> Any:

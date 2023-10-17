@@ -40,16 +40,19 @@ def test_is_absolute_reference():
 
 
 def test_split_next_attribute():
+    assert split_next_attribute("#/a") == ("a", "")
+    assert split_next_attribute("#/") == ("", "")
+    assert split_next_attribute("#") == ("", "")
+    assert split_next_attribute("/") == ("", "")
     assert split_next_attribute("") == ("", "")
 
     assert split_next_attribute("a") == ("a", "")
-    assert split_next_attribute("a.b") == ("a", ".b")
-    assert split_next_attribute("a[0]") == ("a", "[0]")
-    assert split_next_attribute("a") == ("a", "")
-    assert split_next_attribute("quam_elems[3].int_val") == (
-        "quam_elems",
-        "[3].int_val",
-    )
+    assert split_next_attribute("a.b") == ("a.b", "")
+    assert split_next_attribute("a[0]") == ("a[0]", "")
+    assert split_next_attribute("a/b") == ("a", "b")
+    assert split_next_attribute("/a") == ("a", "")
+    assert split_next_attribute("a/") == ("a", "")
+    assert split_next_attribute("a/b/c") == ("a", "b/c")
 
 
 class DotDict(dict):
@@ -87,24 +90,25 @@ def test_get_relative_reference_value():
 
     assert get_relative_reference_value(root.nested, "a") == 3
 
-    assert get_relative_reference_value(root, "#nested.a") == 3
-    assert get_relative_reference_value(root, "#./nested.a") == 3
-    assert get_relative_reference_value(root, "#nested./a") == 3
-    assert get_relative_reference_value(root, "#nested['a']") == 3
-    assert get_relative_reference_value(root, '#nested["a"]') == 3
+    assert get_relative_reference_value(root, "#nested/a") == 3
+    assert get_relative_reference_value(root, "#./nested/a") == 3
+    assert get_relative_reference_value(root, "#nested/./a") == 3
+    assert get_relative_reference_value(root, "#nested/a") == 3
+    assert get_relative_reference_value(root, "#nested/a") == 3
+    assert get_relative_reference_value(root, "#nested/././a") == 3
 
     with pytest.raises(AttributeError):
-        assert get_relative_reference_value(root, "#nested../a") == 1
+        assert get_relative_reference_value(root, "#nested/../a") == 1
 
     root.nested.parent = root
-    assert get_relative_reference_value(root, "#nested../a") == 1
+    assert get_relative_reference_value(root, "#nested/../a") == 1
     assert get_relative_reference_value(root.nested, "../a") == 1
     assert get_relative_reference_value(root.nested, "./a") == 3
     assert get_relative_reference_value(root.nested, "././a") == 3
 
     root.nested.nested2 = DotDict({"a": 5})
-    assert get_relative_reference_value(root.nested, "./nested2.a") == 5
-    assert get_relative_reference_value(root, "#./nested.nested2.a") == 5
+    assert get_relative_reference_value(root.nested, "./nested2/a") == 5
+    assert get_relative_reference_value(root, "#./nested/nested2/a") == 5
 
 
 def test_get_referenced_value():

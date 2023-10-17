@@ -1,6 +1,6 @@
 def test_relative_list_referencing(BareQuamRoot):
     root = BareQuamRoot()
-    root.l = [1, 2, 3, "#./[0]"]
+    root.l = [1, 2, 3, "#./0"]
     assert root.l[3] == 1
 
     root.l.append("#../")
