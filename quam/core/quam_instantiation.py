@@ -206,7 +206,9 @@ def instantiate_attr(
         instantiated_attr = attr_val
 
     elif typing.get_origin(expected_type) == tuple:
-        instantiated_attr = tuple(attr_val)
+        if isinstance(attr_val, list):
+            attr_val = tuple(attr_val)
+        instantiated_attr = attr_val
     elif typing.get_origin(expected_type) is not None and validate_type:
         raise TypeError(
             f"Instantiation for type {expected_type} in {str_repr} not implemented"
