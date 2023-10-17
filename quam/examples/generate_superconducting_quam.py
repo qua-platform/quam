@@ -40,29 +40,29 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             id=idx,
             xy=IQChannel(
                 mixer=Mixer(),
-                output_port_I=f":/wiring.qubits[{idx}].port_I",
-                output_port_Q=f":/wiring.qubits[{idx}].port_Q",
+                output_port_I=f"#/wiring.qubits[{idx}].port_I",
+                output_port_Q=f"#/wiring.qubits[{idx}].port_Q",
                 local_oscillator=LocalOscillator(power=10, frequency=6e9),
                 intermediate_frequency=100e6,
             ),
-            z=SingleChannel(output_port=f":/wiring.qubits[{idx}].port_Z"),
+            z=SingleChannel(output_port=f"#/wiring.qubits[{idx}].port_Z"),
         )
         quam.qubits.append(transmon)
-        quam.local_oscillators.append(f":/qubits[{idx}].xy.local_oscillator")
-        quam.mixers.append(f":/qubits[{idx}].xy.mixer")
+        quam.local_oscillators.append(f"#/qubits[{idx}].xy.local_oscillator")
+        quam.mixers.append(f"#/qubits[{idx}].xy.mixer")
 
     readout_resonator = InOutIQChannel(
         id=idx,
-        output_port_I=":/wiring.resonators[0].output_port_I",
-        output_port_Q=":/wiring.resonators[0].output_port_Q",
-        input_port_I=":/wiring.resonators[0].input_port_I",
-        input_port_Q=":/wiring.resonators[0].input_port_Q",
+        output_port_I="#/wiring.resonators[0].output_port_I",
+        output_port_Q="#/wiring.resonators[0].output_port_Q",
+        input_port_I="#/wiring.resonators[0].input_port_I",
+        input_port_Q="#/wiring.resonators[0].input_port_Q",
         mixer=Mixer(),
         local_oscillator=LocalOscillator(power=10, frequency=6e9),
     )
     quam.resonators.append(readout_resonator)
-    quam.local_oscillators.append(":/wiring.resonators[0].xy.local_oscillator")
-    quam.mixers.append(":/wiring.resonators[0].xy.mixer")
+    quam.local_oscillators.append("#/wiring.resonators[0].xy.local_oscillator")
+    quam.mixers.append("#/wiring.resonators[0].xy.mixer")
     return quam
 
 

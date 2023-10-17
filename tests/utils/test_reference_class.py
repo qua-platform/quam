@@ -31,7 +31,7 @@ def test_base_reference_class():
 
 class SubReferenceClass(ReferenceClass):
     def _is_reference(self, attr: str) -> bool:
-        return isinstance(attr, str) and attr.startswith(":")
+        return isinstance(attr, str) and attr.startswith("#")
 
     def _get_referenced_value(self, attr: str) -> Any:
         return attr[1:]
@@ -39,10 +39,10 @@ class SubReferenceClass(ReferenceClass):
 
 def test_set_reference_attribute():
     reference_obj = SubReferenceClass()
-    reference_obj.a = ":b"
+    reference_obj.a = "#b"
     assert reference_obj.a == "b"
 
-    reference_obj.a = ":c"
+    reference_obj.a = "#c"
     assert reference_obj.a == "c"
 
     reference_obj.a = 42
@@ -61,9 +61,9 @@ def test_reference_dataclass():
     sub_reference_class = SubReferenceDataClass()
     assert sub_reference_class.a == 42
 
-    sub_reference_class.c = ":d"
+    sub_reference_class.c = "#d"
     assert sub_reference_class.c == "d"
 
-    sub_reference_class.a = ":b"
+    sub_reference_class.a = "#b"
     assert sub_reference_class.a == "b"
     assert sub_reference_class.c == "d"

@@ -31,8 +31,8 @@ class LocalOscillator(QuamComponent):
 
 @dataclass(kw_only=True, eq=False)
 class Mixer(QuamComponent):
-    local_oscillator_frequency: LocalOscillator = ":../local_oscillator.frequency"
-    intermediate_frequency: float = ":../intermediate_frequency"
+    local_oscillator_frequency: LocalOscillator = "#../local_oscillator.frequency"
+    intermediate_frequency: float = "#../intermediate_frequency"
 
     offset_I: float = 0
     offset_Q: float = 0
@@ -42,7 +42,7 @@ class Mixer(QuamComponent):
 
     @property
     def name(self):
-        parent_id = self._get_referenced_value(":../name")
+        parent_id = self._get_referenced_value("#../name")
         if string_reference.is_reference(parent_id):
             raise AttributeError(f"Mixer.parent must be defined for {self}")
         return f"{parent_id}$mixer"
@@ -260,7 +260,7 @@ class InOutIQChannel(IQChannel):
     input_port_I: Tuple[str, int]
     input_port_Q: Tuple[str, int]
 
-    id: Union[int, str] = ":../id"
+    id: Union[int, str] = "#../id"
 
     time_of_flight: int = 24
     smearing: int = 0

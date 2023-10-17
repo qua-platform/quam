@@ -21,7 +21,7 @@ def test_empty_in_out_IQ_channel():
 
     with pytest.raises(AttributeError):
         mixer.name
-    assert readout_resonator.id == ":../id"  # parent not defined
+    assert readout_resonator.id == "#../id"  # parent not defined
     with pytest.raises(AttributeError):
         readout_resonator.name
 
