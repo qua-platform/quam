@@ -1,8 +1,8 @@
-from dataclasses import dataclass, is_dataclass, fields
+from dataclasses import dataclass, is_dataclass, fields, field
 import pytest
 
-
 from quam.core.quam_dataclass import quam_dataclass, REQUIRED
+from quam.core.utils import get_dataclass_attr_annotations
 
 
 def test_dataclass_inheritance_error():
@@ -185,3 +185,34 @@ def test_dataclass_patch_teardown(dataclass_patch):
             @dataclass(kw_only=True)
             class C:
                 ...
+
+
+def test_subsubclass_default_factory():
+    """This bug was found quite late, and has been fixed.
+    It only occurred with Python < 3.10.
+
+    In this case, dataclass C has a keyword arg, and so class C2 cannot have args.
+    patch_dataclass therefore gives the default REQUIRED to attr2
+    Next, class C3 has the same attr but with a default_factory.
+    Because it has a default_factory, it isn't included in C3.__dict__
+    As a result, getattr(C3, "attr2") won't return 2, but instead REQUIRED.
+    """
+
+    @quam_dataclass
+    class C:
+        attr: int = 2
+
+    @quam_dataclass
+    class C2(C):
+        attr2: int  # Adds REQUIRED default
+
+    @quam_dataclass
+    class C3(C2):
+        attr2: int = field(default_factory=lambda: 2)
+
+    attr_annotations = get_dataclass_attr_annotations(C3)
+    assert attr_annotations == {
+        "required": {},
+        "optional": {"attr": int, "attr2": int},
+        "allowed": {"attr": int, "attr2": int},
+    }
