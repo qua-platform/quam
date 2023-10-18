@@ -21,7 +21,7 @@ def test_empty_in_out_IQ_channel():
 
     with pytest.raises(AttributeError):
         mixer.name
-    assert readout_resonator.id == "#../id"  # parent not defined
+    assert readout_resonator.id is None
     with pytest.raises(AttributeError):
         readout_resonator.name
 
@@ -39,13 +39,14 @@ def test_empty_in_out_IQ_channel():
         "id": 1,
     }
 
-    cfg = {
+    bare_cfg = {
         "controllers": {},
         "elements": {},
         "pulses": {},
         "waveforms": {},
         "integration_weights": {},
     }
+    cfg = bare_cfg.copy()
     expected_cfg = {
         "controllers": {
             "con1": {
@@ -61,13 +62,13 @@ def test_empty_in_out_IQ_channel():
             }
         },
         "elements": {
-            "r1": {
+            "IQ1": {
                 "intermediate_frequency": 100000000.0,
                 "mixInputs": {
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "r1.mixer",
+                    "mixer": "IQ1.mixer",
                 },
                 "operations": {},
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
@@ -81,6 +82,18 @@ def test_empty_in_out_IQ_channel():
     }
     readout_resonator.apply_to_config(cfg)
     assert cfg == expected_cfg
+
+    cfg = bare_cfg.copy()
+    readout_resonator._default_label = "res"
+    readout_resonator.apply_to_config(cfg)
+    expected_cfg["elements"]["res1"] = expected_cfg["elements"].pop("IQ1")
+    expected_cfg["elements"]["res1"]["mixInputs"]["mixer"] = "IQ1.mixer"
+
+    cfg = bare_cfg.copy()
+    readout_resonator.id = "resonator_1"
+    readout_resonator.apply_to_config(cfg)
+    expected_cfg["elements"]["resonator_1"] = expected_cfg["elements"].pop("res1")
+    expected_cfg["elements"]["resonator_1"]["mixInputs"]["mixer"] = "resonator_1.mixer"
 
 
 def test_readout_resonator_with_readout():
@@ -140,18 +153,18 @@ def test_readout_resonator_with_readout():
             }
         },
         "elements": {
-            "r1": {
+            "IQ1": {
                 "intermediate_frequency": 100000000.0,
                 "mixInputs": {
                     "I": ("con1", 1),
                     "Q": ("con1", 2),
                     "lo_frequency": 5000000000.0,
-                    "mixer": "r1.mixer",
+                    "mixer": "IQ1.mixer",
                 },
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
                 "time_of_flight": 24,
-                "operations": {"readout": "r1.readout.pulse"},
+                "operations": {"readout": "IQ1.readout.pulse"},
             }
         },
         "pulses": {},
@@ -181,26 +194,26 @@ def test_readout_resonator_with_readout():
         "digital_waveforms": {"ON": {"samples": [(1, 0)]}},
         "elements": {},
         "integration_weights": {
-            "r1.readout.iw1": {"cosine": [(1.0, 1000)], "sine": [(-0.0, 1000)]},
-            "r1.readout.iw2": {"cosine": [(0.0, 1000)], "sine": [(1.0, 1000)]},
-            "r1.readout.iw3": {"cosine": [(-0.0, 1000)], "sine": [(-1.0, 1000)]},
+            "IQ1.readout.iw1": {"cosine": [(1.0, 1000)], "sine": [(-0.0, 1000)]},
+            "IQ1.readout.iw2": {"cosine": [(0.0, 1000)], "sine": [(1.0, 1000)]},
+            "IQ1.readout.iw3": {"cosine": [(-0.0, 1000)], "sine": [(-1.0, 1000)]},
         },
         "pulses": {
-            "r1.readout.pulse": {
+            "IQ1.readout.pulse": {
                 "digital_marker": "ON",
                 "integration_weights": {
-                    "iw1": "r1.readout.iw1",
-                    "iw2": "r1.readout.iw2",
-                    "iw3": "r1.readout.iw3",
+                    "iw1": "IQ1.readout.iw1",
+                    "iw2": "IQ1.readout.iw2",
+                    "iw3": "IQ1.readout.iw3",
                 },
                 "length": 1000,
                 "operation": "measurement",
-                "waveforms": {"I": "r1.readout.wf.I", "Q": "r1.readout.wf.Q"},
+                "waveforms": {"I": "IQ1.readout.wf.I", "Q": "IQ1.readout.wf.Q"},
             }
         },
         "waveforms": {
-            "r1.readout.wf.I": {"sample": 0.1, "type": "constant"},
-            "r1.readout.wf.Q": {"sample": 0.0, "type": "constant"},
+            "IQ1.readout.wf.I": {"sample": 0.1, "type": "constant"},
+            "IQ1.readout.wf.Q": {"sample": 0.0, "type": "constant"},
         },
     }
     assert cfg == expected_cfg

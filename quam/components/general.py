@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Dict, List, Union, Tuple, Optional
+from typing import ClassVar, Dict, List, Union, Tuple, Optional
 from dataclasses import dataclass, field
 
 from quam.core import QuamComponent
@@ -85,6 +85,29 @@ class Mixer(QuamComponent):
 class Channel(QuamComponent):
     operations: Dict[str, Pulse] = field(default_factory=dict)
 
+    id: Union[str, int] = None
+    _default_label: ClassVar[str] = "ch"
+
+    @property
+    def name(self) -> str:
+        cls_name = self.__class__.__name__
+
+        if self.id is not None:
+            if str_ref.is_reference(self.id):
+                raise AttributeError(
+                    f"{cls_name}.parent or {cls_name}.id needed to define"
+                    f" {cls_name}.name"
+                )
+            if isinstance(self.id, str):
+                return self.id
+            else:
+                return f"{self._default_label}{self.id}"
+        if self.parent is None:
+            raise AttributeError(
+                f"{cls_name}.parent or {cls_name}.id needed to define {cls_name}.name"
+            )
+        return f"{self.parent.name}{str_ref.DELIMITER}{self._get_parent_attr_name()}"
+
     @property
     def pulse_mapping(self):
         return {label: pulse.pulse_name for label, pulse in self.operations.items()}
@@ -154,15 +177,6 @@ class SingleChannel(Channel):
 
     offset: float = 0
 
-    id: Union[str, int] = None
-
-    @property
-    def name(self) -> str:
-        if self.id is not None:
-            return self.id if isinstance(self.id, str) else f"IQ{self.id}"
-
-        return f"{self.parent.name}_{self._get_parent_attr_name()}"
-
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
         super().apply_to_config(config)
@@ -199,19 +213,7 @@ class IQChannel(Channel):
 
     intermediate_frequency: float = 0.0
 
-    id: Union[str, int] = None
-
-    @property
-    def name(self) -> str:
-        if self.id is not None:
-            return self.id if isinstance(self.id, str) else f"IQ{self.id}"
-
-        if self.parent is None:
-            raise ValueError(
-                "IQchannel.parent or IQchannel.id must be defined for it to have a"
-                " name."
-            )
-        return f"{self.parent.name}{str_ref.DELIMITER}{self._get_parent_attr_name()}"
+    _default_label: ClassVar[str] = "IQ"
 
     @property
     def frequency_rf(self):
@@ -247,8 +249,6 @@ class InOutIQChannel(IQChannel):
     input_port_I: Tuple[str, int]
     input_port_Q: Tuple[str, int]
 
-    id: Union[int, str] = "#../id"
-
     time_of_flight: int = 24
     smearing: int = 0
 
@@ -257,11 +257,7 @@ class InOutIQChannel(IQChannel):
 
     input_gain: Optional[float] = None
 
-    @property
-    def name(self):
-        if str_ref.is_reference(self.id):
-            raise AttributeError("InOutIQChannel.id must be defined have a parent")
-        return self.id if isinstance(self.id, str) else f"r{self.id}"
+    _default_label: ClassVar[str] = "IQ"
 
     def apply_to_config(self, config: dict):
         # Add pulses & waveforms
