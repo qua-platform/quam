@@ -11,7 +11,14 @@ from quam.utils.string_reference import DELIMITER
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
-__all__ = ["Pulse", "DragPulse", "SquarePulse", "GaussianPulse"]
+__all__ = [
+    "Pulse",
+    "ReadoutPulse",
+    "ConstantReadoutPulse",
+    "DragPulse",
+    "SquarePulse",
+    "GaussianPulse",
+]
 
 
 @dataclass(kw_only=True, eq=False)
@@ -164,16 +171,12 @@ class ReadoutPulse(Pulse, ABC):
     rus_exit_threshold: int = 0.0
 
     @property
-    def iw1_name(self):
-        return f"{self.full_name}{DELIMITER}iw1"
+    def integration_weights_names(self):
+        return [f"{self.full_name}{DELIMITER}iw{k}" for k in [1, 2, 3]]
 
     @property
-    def iw2_name(self):
-        return f"{self.full_name}{DELIMITER}iw2"
-
-    @property
-    def iw3_name(self):
-        return f"{self.full_name}{DELIMITER}iw3"
+    def integration_weights_mapping(self):
+        return dict(zip(["iw1", "iw2", "iw3"], self.integration_weights_names))
 
     @abstractmethod
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
@@ -185,24 +188,21 @@ class ReadoutPulse(Pulse, ABC):
         if not isinstance(iw, (list, np.ndarray)):
             raise ValueError("unsupported return type")
 
-        config["integration_weights"][self.iw1_name] = {
+        config["integration_weights"][self.integration_weights_names[0]] = {
             "cosine": [(sample.real, length) for sample, length in iw],
             "sine": [(-sample.imag, length) for sample, length in iw],
         }
-        config["integration_weights"][self.iw2_name] = {
+        config["integration_weights"][self.integration_weights_names[1]] = {
             "cosine": [(sample.imag, length) for sample, length in iw],
             "sine": [(sample.real, length) for sample, length in iw],
         }
-        config["integration_weights"][self.iw3_name] = {
+        config["integration_weights"][self.integration_weights_names[2]] = {
             "cosine": [(-sample.imag, length) for sample, length in iw],
             "sine": [(-sample.real, length) for sample, length in iw],
         }
 
-        config["pulses"][self.pulse_name]["integration_weights"] = {
-            "iw1": self.iw1_name,
-            "iw2": self.iw2_name,
-            "iw3": self.iw3_name,
-        }
+        pulse_config = config["pulses"][self.pulse_name]
+        pulse_config["integration_weights"] = self.integration_weights_mapping
 
     def apply_to_config(self, config: dict) -> None:
         super().apply_to_config(config)
