@@ -1,13 +1,16 @@
-[tool.poetry]
-name = "quam-components"
-packages = [{ include = "quam" }]
-include = ["LICENSE.md"]
-exclude = ["**/tests/**", "**/conftest.py/**"]
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quam"
 version = "0.1.0"
-description = "Quantum Abstract Machine (QuAM) software development kit (SDK) facilitates development of abstraction layers in experiments."
-authors = ["Serwan Asaad <serwan.asaad@quantum-machines.co>"]
-license = "BSD-3-Clause"
-maintainers = ["Serwan Asaad <serwan.asaad@quantum-machines.co>"]
+description = "Quantum Abstract Machine (QuAM) facilitates development of abstraction layers in experiments."
+authors = [
+    { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
+]
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.8"
 readme = "README.md"
 
 classifiers = [
@@ -28,33 +31,33 @@ keywords = [
     "abstraction-library",
 ]
 
-documentation = "https://entropy-lab.io/latest/quam_sdk"
-repository = "https://github.com/entropy-lab/quam-sdk"
+dependencies = [
+    "numpy >= 1.21.2",
+    "qualang-tools >= 0.15.0",
+    "typeguard >= 4.0.0",
+]
+# "jsonschema = ^4.14.0",
+# "pydantic = ^1.9.2",
+# "rich = ^12.5.1",
+# "rich-click = ^1.6.1",
+# "pyyaml = ^6.0",
 
-[tool.poetry.dependencies]
-python = ">=3.8,<4.0"
-numpy = "^1.21.2"
-# jsonschema = "^4.14.0"
-# pydantic = "^1.9.2"
-# rich = "^12.5.1"
-# rich-click = "^1.6.1"
-# pyyaml = "^6.0"
-qualang-tools = "^0.15.0"
-typeguard = "^4.0.0"
+[project.urls]
+Homepage = "https://github.com/entropy-lab/quam"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.1.2"
-black = "^23.7.0"
-# pytest-cov = "^3.0.0"
-# black = "^22.3.0"
-flake8 = "^5.0.1"
-pyproject-flake8 = "^5.0.0"
+[project.optional-dependencies]
+dev = [
+    "pytest >= 7.1.2",
+    "black >= 23.7.0",
+    "flake8 >= 5.0.1",
+    "pyproject-flake8 >= 5.0.0",
+    "ipykernel >= 6.24.0",
+    "pytest-cov >= 4.1.0",
+]
 # flake8-bugbear = "^22.4.25"
 # poethepoet = "^0.10.0"
 # typing-extensions = "^4.3.0"
 # coverage = "^6.4.4"
-ipykernel = "^6.24.0"
-pytest-cov = "^4.1.0"
 
 [tool.black]
 target-version = ["py38"]
@@ -64,10 +67,12 @@ preview = true
 [tool.flake8]
 max-line-length = 88
 
+[tool.setuptools]
+packages = ["quam"]
+
 # [tool.poe.tasks.check-format]
 # cmd = "black . --check --line-length 80"
 # help = "Format source files according to the style rules"
-
 
 # [tool.poe.tasks.format]
 # cmd = "black . --line-length 80"
@@ -84,22 +89,3 @@ max-line-length = 88
 # [tool.poe.tasks.check]
 # sequence = ["check-format", "lint", "test"]
 # help = "Run format and all checks on the code"
-
-[build-system]
-requires = ["poetry"]
-build-backend = "poetry.masonry.api"
-
-
-#### Alternative installation using setuptools instead of poetry
-### Must comment out previous [build-system]
-
-# [project]
-# name = "quam-components"
-# version = "0.1"
-
-# [build-system]
-# requires = ["setuptools"]
-# build-backend = "setuptools.build_meta"
-
-# [tool.setuptools]
-# packages = ["quam"]
