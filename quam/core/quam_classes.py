@@ -87,7 +87,7 @@ class ParentDescriptor:
             instance.__dict__.pop("parent", None)
             return
 
-        if "parent" in instance.__dict__:
+        if "parent" in instance.__dict__ and instance.__dict__["parent"] is not value:
             cls = instance.__class__.__name__
             raise AttributeError(
                 f"Cannot overwrite parent attribute of {cls}. "
@@ -275,7 +275,7 @@ class QuamRoot(QuamBase):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
-        if isinstance(converted_val, QuamBase):
+        if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
 
     def save(
@@ -338,7 +338,7 @@ class QuamComponent(QuamBase):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
-        if isinstance(converted_val, QuamBase):
+        if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
 
     def apply_to_config(self, config: dict) -> None:
@@ -361,7 +361,7 @@ class QuamDict(UserDict, QuamBase):
             raise AttributeError(key) from e
 
     def __setattr__(self, key, value):
-        if key == "data":
+        if key in ["data", "parent"]:
             super().__setattr__(key, value)
         else:
             self[key] = value

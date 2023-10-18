@@ -29,6 +29,25 @@ def test_parent_descriptor():
     assert c.__dict__["parent"] == 43
 
 
+def test_duplicate_parent_descriptor():
+    class C:
+        parent = ParentDescriptor()
+
+    c = C()
+    assert c.parent is None
+
+    c.parent = 42
+    assert c.parent == 42
+    assert c.__dict__["parent"] == 42
+
+    with pytest.raises(AttributeError):
+        c.parent = 43
+
+    c.parent = 42
+    assert c.parent == 42
+    assert c.__dict__["parent"] == 42
+
+
 def test_double_parent_descriptor():
     class C:
         parent = ParentDescriptor()
@@ -50,8 +69,8 @@ def test_double_parent_descriptor():
     assert d.parent is None
 
 
-@pytest.mark.parametrize("cls", [QuamBase, QuamRoot, QuamComponent])
-def test_quam_parent(cls):
+@pytest.mark.parametrize("cls", [QuamBase, QuamRoot, QuamComponent, QuamDict, QuamList])
+def test_parent_quam_class(cls):
     @dataclass
     class C(cls):
         ...
@@ -62,3 +81,69 @@ def test_quam_parent(cls):
 
     c.parent = 42
     assert c.parent == 42
+
+
+@pytest.mark.parametrize("child_cls", [QuamDict, QuamList])
+@pytest.mark.parametrize("parent_cls", [QuamRoot, QuamComponent])
+def test_quam_parent_child_dict(parent_cls, child_cls):
+    @dataclass
+    class C(parent_cls):
+        ...
+
+    d = child_cls()
+    assert d.parent is None
+
+    c = C()
+    c.d = d
+    assert d.parent is c
+
+    with pytest.raises(AttributeError):
+        C().d = d
+
+    c.d = d  # Shouldn't raise error
+
+
+def test_dict_parent(BareQuamComponent, BareQuamRoot):
+    quam_dict = QuamDict()
+
+    quam_component = BareQuamComponent()
+    assert quam_component.parent is None
+
+    quam_dict["quam_component"] = quam_component
+    assert quam_component.parent is quam_dict
+    quam_dict["quam_component"] = quam_component  # Shouldn't raise error
+
+    quam_root = BareQuamRoot()
+    assert quam_root.parent is None
+    quam_dict["quam_root"] = quam_root
+    assert quam_root.parent is quam_dict
+    quam_dict["quam_root"] = quam_root  # Shouldn't raise error
+
+    quam_dict2 = QuamDict()
+    with pytest.raises(AttributeError):
+        quam_dict2["quam_component"] = quam_component
+    with pytest.raises(AttributeError):
+        quam_dict2["quam_root"] = quam_root
+
+
+def test_list_parent(BareQuamComponent, BareQuamRoot):
+    quam_list = QuamList()
+
+    quam_component = BareQuamComponent()
+    assert quam_component.parent is None
+
+    quam_list.append(quam_component)
+    assert quam_component.parent is quam_list
+    quam_list.append(quam_component)  # Shouldn't raise error
+
+    quam_root = BareQuamRoot()
+    assert quam_root.parent is None
+    quam_list.append(quam_root)
+    assert quam_root.parent is quam_list
+    quam_list.append(quam_root)  # Shouldn't raise error
+
+    quam_list2 = QuamList()
+    with pytest.raises(AttributeError):
+        quam_list2.append(quam_component)
+    with pytest.raises(AttributeError):
+        quam_list2.append(quam_root)
