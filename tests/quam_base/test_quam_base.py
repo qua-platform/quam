@@ -155,14 +155,27 @@ def test_iterate_components_nested():
         quam_elem_list=[BareQuamComponent(), BareQuamComponent()],
     )
 
+    with pytest.raises(AttributeError):
+        test_quam = NestedQuamTest(
+            int_val=42,
+            quam_elem=quam_component,
+            quam_elem_list=[quam_component, quam_component],
+        )
+
+    quam_component.parent = None
+    quam_component2 = QuamComponentTest(
+        int_val=42,
+        quam_elem=BareQuamComponent(),
+        quam_elem_list=[BareQuamComponent(), BareQuamComponent()],
+    )
     test_quam = NestedQuamTest(
         int_val=42,
         quam_elem=quam_component,
-        quam_elem_list=[quam_component, quam_component],
+        quam_elem_list=[quam_component2, quam_component2],
     )
 
     elems = list(test_quam.iterate_components())
-    assert len(elems) == 4
+    assert len(elems) == 8
     assert all(isinstance(elem, QuamComponent) for elem in elems)
 
 

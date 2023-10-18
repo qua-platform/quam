@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple, Any
+from typing import Tuple, Any
 from collections import UserList, UserDict
 
 
