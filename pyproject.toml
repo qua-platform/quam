@@ -36,11 +36,6 @@ dependencies = [
     "qualang-tools >= 0.15.0",
     "typeguard >= 4.0.0",
 ]
-# "jsonschema = ^4.14.0",
-# "pydantic = ^1.9.2",
-# "rich = ^12.5.1",
-# "rich-click = ^1.6.1",
-# "pyyaml = ^6.0",
 
 [project.urls]
 Homepage = "https://github.com/entropy-lab/quam"
@@ -54,10 +49,6 @@ dev = [
     "ipykernel >= 6.24.0",
     "pytest-cov >= 4.1.0",
 ]
-# flake8-bugbear = "^22.4.25"
-# poethepoet = "^0.10.0"
-# typing-extensions = "^4.3.0"
-# coverage = "^6.4.4"
 
 [tool.black]
 target-version = ["py38"]
@@ -69,6 +60,23 @@ max-line-length = 88
 
 [tool.setuptools]
 packages = ["quam"]
+
+
+# Previous quam settings
+
+### Extra required dependencies
+# "jsonschema = ^4.14.0",
+# "pydantic = ^1.9.2",
+# "rich = ^12.5.1",
+# "rich-click = ^1.6.1",
+# "pyyaml = ^6.0",
+
+### Extra optional dependencies
+# flake8-bugbear = "^22.4.25"
+# poethepoet = "^0.10.0"
+# typing-extensions = "^4.3.0"
+# coverage = "^6.4.4"
+
 
 # [tool.poe.tasks.check-format]
 # cmd = "black . --check --line-length 80"
