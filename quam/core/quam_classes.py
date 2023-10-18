@@ -73,8 +73,31 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
         return value
 
 
+class ParentDescriptor:
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+
+        if "parent" in instance.__dict__:
+            return instance.__dict__["parent"]
+        return None
+
+    def __set__(self, instance, value):
+        if value is None:
+            instance.__dict__.pop("parent", None)
+            return
+
+        if "parent" in instance.__dict__:
+            cls = instance.__class__.__name__
+            raise AttributeError(
+                f"Cannot overwrite parent attribute of {cls}. "
+                f"To modify {cls}.parent, first set {cls}.parent = None"
+            )
+        instance.__dict__["parent"] = value
+
+
 class QuamBase(ReferenceClass):
-    parent: ClassVar["QuamBase"] = None
+    parent: ClassVar["QuamBase"] = ParentDescriptor()
     _root: ClassVar["QuamRoot"] = None
 
     def __init__(self):
@@ -253,7 +276,7 @@ class QuamRoot(QuamBase):
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase):
-            converted_val.__dict__["parent"] = self
+            converted_val.parent = self
 
     def save(
         self,
@@ -316,7 +339,7 @@ class QuamComponent(QuamBase):
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase):
-            converted_val.__dict__["parent"] = self
+            converted_val.parent = self
 
     def apply_to_config(self, config: dict) -> None:
         ...
@@ -358,7 +381,7 @@ class QuamDict(UserDict, QuamBase):
         super().__setitem__(key, value)
 
         if isinstance(value, QuamBase):
-            value.__dict__["parent"] = self
+            value.parent = self
 
     def __eq__(self, other) -> bool:
         if isinstance(other, dict):
@@ -444,7 +467,7 @@ class QuamList(UserList, QuamBase):
         super().__setitem__(i, converted_item)
 
         if isinstance(converted_item, QuamBase):
-            converted_item.__dict__["parent"] = self
+            converted_item.parent = self
 
     def __iadd__(self, other: Iterable):
         converted_other = [convert_dict_and_list(elem) for elem in other]
@@ -454,7 +477,7 @@ class QuamList(UserList, QuamBase):
         converted_item = convert_dict_and_list(item)
 
         if isinstance(converted_item, QuamBase):
-            converted_item.__dict__["parent"] = self
+            converted_item.parent = self
 
         return super().append(converted_item)
 
@@ -462,7 +485,7 @@ class QuamList(UserList, QuamBase):
         converted_item = convert_dict_and_list(item)
 
         if isinstance(converted_item, QuamBase):
-            converted_item.__dict__["parent"] = self
+            converted_item.parent = self
 
         return super().insert(i, converted_item)
 
@@ -470,7 +493,7 @@ class QuamList(UserList, QuamBase):
         converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
         for converted_item in converted_iterable:
             if isinstance(converted_item, QuamBase):
-                converted_item.__dict__["parent"] = self
+                converted_item.parent = self
 
         return super().extend(converted_iterable)
 
