@@ -124,3 +124,23 @@ def test_get_referenced_value():
 
     with pytest.raises(ValueError):
         get_referenced_value(root.nested, "#./f", root)
+
+
+def test_delimiter():
+    from quam.components import IQChannel, Transmon
+
+    transmon = Transmon(
+        id=1,
+        xy=IQChannel(
+            output_port_I=None, output_port_Q=None, mixer=None, local_oscillator=None
+        ),
+    )
+    assert transmon.xy.name == "q1.xy"
+
+    import quam
+
+    try:
+        quam.utils.string_reference.DELIMITER = "$"
+        assert transmon.xy.name == "q1$xy"
+    finally:
+        quam.utils.string_reference.DELIMITER = "."

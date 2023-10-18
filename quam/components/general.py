@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 
 from quam.core import QuamComponent
 from quam.components.pulses import Pulse
-from quam.utils import string_reference, patch_dataclass
-from quam.utils.string_reference import DELIMITER
+from quam.utils import patch_dataclass
+from quam.utils import string_reference as str_ref
 
 
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
@@ -45,9 +45,9 @@ class Mixer(QuamComponent):
     @property
     def name(self):
         parent_id = self._get_referenced_value("#../name")
-        if string_reference.is_reference(parent_id):
+        if str_ref.is_reference(parent_id):
             raise AttributeError(f"Mixer.parent must be defined for {self}")
-        return f"{parent_id}{DELIMITER}mixer"
+        return f"{parent_id}{str_ref.DELIMITER}mixer"
 
     def apply_to_config(self, config: dict):
         correction_matrix = self.IQ_imbalance(
@@ -211,7 +211,7 @@ class IQChannel(Channel):
                 "IQchannel.parent or IQchannel.id must be defined for it to have a"
                 " name."
             )
-        return f"{self.parent.name}{DELIMITER}{self._get_parent_attr_name()}"
+        return f"{self.parent.name}{str_ref.DELIMITER}{self._get_parent_attr_name()}"
 
     @property
     def frequency_rf(self):
@@ -259,7 +259,7 @@ class InOutIQChannel(IQChannel):
 
     @property
     def name(self):
-        if string_reference.is_reference(self.id):
+        if str_ref.is_reference(self.id):
             raise AttributeError("InOutIQChannel.id must be defined have a parent")
         return self.id if isinstance(self.id, str) else f"r{self.id}"
 
