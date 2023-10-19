@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from quam.components import *
+from quam.components.channels import IQChannel
 from quam.core import QuamRoot
 
 

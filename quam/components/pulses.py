@@ -8,6 +8,7 @@ from quam.core import QuamComponent
 from quam.utils import patch_dataclass
 from quam.utils import string_reference as str_ref
 
+
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
@@ -109,7 +110,7 @@ class Pulse(QuamComponent, ABC):
 
         # Add check that waveform type (single or IQ) matches parent
         parent_channel = getattr(getattr(self, "parent", None), "parent", None)
-        from quam.components import SingleChannel, IQChannel
+        from quam.components.channels import SingleChannel, IQChannel
 
         parent_is_channel = isinstance(parent_channel, (IQChannel, SingleChannel))
         if parent_channel is not None and parent_is_channel:

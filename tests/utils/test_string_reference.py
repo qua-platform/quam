@@ -1,4 +1,5 @@
 import pytest
+from quam.components.channels import IQChannel
 from quam.utils.string_reference import *
 
 
@@ -127,7 +128,7 @@ def test_get_referenced_value():
 
 
 def test_delimiter():
-    from quam.components import IQChannel, Transmon
+    from quam.components import Transmon
 
     transmon = Transmon(
         id=1,

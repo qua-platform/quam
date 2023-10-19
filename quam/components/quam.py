@@ -1,9 +1,10 @@
 from typing import List
 from dataclasses import dataclass, field
+from .channels import InOutIQChannel
 
 from quam.core import QuamRoot
 from quam.utils import patch_dataclass
-from .general import *
+from .hardware import *
 from .superconducting_qubits import *
 
 

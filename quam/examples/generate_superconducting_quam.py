@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 
 from quam.components import *
+from quam.components.channels import IQChannel, InOutIQChannel, SingleChannel
 from quam.core import QuamRoot
 
 

@@ -1,5 +1,6 @@
 import pytest
 from quam.components import *
+from quam.components.channels import InOutIQChannel
 
 
 def test_empty_in_out_IQ_channel():

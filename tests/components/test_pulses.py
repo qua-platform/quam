@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from quam.components import *
+from quam.components.channels import Channel, IQChannel, SingleChannel
 
 
 def test_drag_pulse():
