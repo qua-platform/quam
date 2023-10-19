@@ -25,14 +25,12 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             }
             for k in range(num_qubits)
         ],
-        "resonators": [
-            {
-                "output_port_I": ("con1", 1),
-                "output_port_Q": ("con1", 2),
-                "input_port_I": ("con1", 1),
-                "input_port_Q": ("con1", 2),
-            }
-        ],
+        "resonator": {
+            "output_port_I": ("con1", 1),
+            "output_port_Q": ("con1", 2),
+            "input_port_I": ("con1", 1),
+            "input_port_Q": ("con1", 2),
+        },
     }
 
     for idx in range(num_qubits):
@@ -52,18 +50,18 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         quam.local_oscillators.append(f"#/qubits/{idx}/xy/local_oscillator")
         quam.mixers.append(f"#/qubits/{idx}/xy/mixer")
 
-    readout_resonator = InOutIQChannel(
-        id=idx,
-        output_port_I="#/wiring/resonators/0/output_port_I",
-        output_port_Q="#/wiring/resonators/0/output_port_Q",
-        input_port_I="#/wiring/resonators/0/input_port_I",
-        input_port_Q="#/wiring/resonators/0/input_port_Q",
-        mixer=Mixer(),
-        local_oscillator=LocalOscillator(power=10, frequency=6e9),
-    )
-    quam.resonators.append(readout_resonator)
-    quam.local_oscillators.append("#/wiring/resonators/0/xy/local_oscillator")
-    quam.mixers.append("#/wiring/resonators/0/xy/mixer")
+        readout_resonator = InOutIQChannel(
+            id=idx,
+            output_port_I="#/wiring/resonator/output_port_I",
+            output_port_Q="#/wiring/resonator/output_port_Q",
+            input_port_I="#/wiring/resonator/input_port_I",
+            input_port_Q="#/wiring/resonator/input_port_Q",
+            mixer=Mixer(),
+            local_oscillator=LocalOscillator(power=10, frequency=6e9),
+        )
+        quam.resonators.append(readout_resonator)
+        quam.local_oscillators.append(f"#/resonators/{idx}/xy/local_oscillator")
+        quam.mixers.append(f"#/resonators/{idx}/xy/mixer")
     return quam
 
 

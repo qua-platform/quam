@@ -43,9 +43,8 @@ def test_quam_referenced_full(tmp_path):
     )
     assert loaded_quam["__class__"] == "quam.components.quam.QuAM"
     assert len(loaded_quam["qubits"]) == 3
-    assert len(loaded_quam["resonators"]) == 1
-    assert len(loaded_quam["mixers"]) == 4
-    assert len(loaded_quam["local_oscillators"]) == 4
+    assert len(loaded_quam["mixers"]) == 6
+    assert len(loaded_quam["local_oscillators"]) == 6
     assert loaded_quam["mixers"][0] == "#/qubits/0/xy/mixer"
     assert loaded_quam["local_oscillators"][0] == "#/qubits/0/xy/local_oscillator"
     assert loaded_quam["qubits"][0]["xy"]["output_port_I"] == "#/wiring/qubits/0/port_I"
@@ -54,7 +53,6 @@ def test_quam_referenced_full(tmp_path):
     loaded_quam = json.load((folder / "quam" / "wiring.json").open("r"))
     assert set(loaded_quam.keys()) == set(["wiring"])
     assert len(loaded_quam["wiring"]["qubits"]) == 3
-    assert len(loaded_quam["wiring"]["resonators"]) == 1
     assert loaded_quam["wiring"]["qubits"][0]["port_I"] == [
         "con1",
         3,
