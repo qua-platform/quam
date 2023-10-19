@@ -17,6 +17,7 @@ except ImportError:
 patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 __all__ = [
+    "Channel",
     "SingleChannel",
     "IQChannel",
     "InOutIQChannel",
