@@ -10,6 +10,7 @@ from quam.utils import string_reference as str_ref
 
 try:
     from qm.qua import align, amp, play, wait
+    from qm.qua._type_hinting import *
 except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
 
@@ -26,12 +27,14 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class Channel(QuamComponent):
-    """QuAM base component for a channel, can be output/input or both.
+    """Base QuAM component for a channel, can be output, input or both.
 
     Args:
-        operations: A dictionary of pulses to be played on this channel.
-        id: The id of the channel, used to generate the name.
-            Can be a string, or an integer in which case it will add _default_label
+        operationzs (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
     """
 
     operations: Dict[str, Pulse] = field(default_factory=dict)
@@ -66,15 +69,53 @@ class Channel(QuamComponent):
     def play(
         self,
         pulse_name: str,
-        amplitude_scale: float = None,
-        duration: int = None,
-        condition=None,
-        chirp=None,
-        truncate=None,
-        timestamp_stream=None,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        duration: QuaNumberType = None,
+        condition: QuaExpressionType = None,
+        chirp: ChirpType = None,
+        truncate: QuaNumberType = None,
+        timestamp_stream: StreamType = None,
         continue_chirp: bool = False,
         target: str = "",
     ):
+        """Play a pulse on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            duration (int): Duration of the pulse in units of the clock cycle (4ns).
+                If not provided, the default pulse duration will be used. It is possible
+                to dynamically change the duration of both constant and arbitrary
+                pulses. Arbitrary pulses can only be stretched, not compressed.
+            chirp (Union[(list[int], str), (int, str)]): Allows to perform
+                piecewise linear sweep of the element’s intermediate
+                frequency in time. Input should be a tuple, with the 1st
+                element being a list of rates and the second should be a
+                string with the units. The units can be either: ‘Hz/nsec’,
+                ’mHz/nsec’, ’uHz/nsec’, ’pHz/nsec’ or ‘GHz/sec’, ’MHz/sec’,
+                ’KHz/sec’, ’Hz/sec’, ’mHz/sec’.
+            truncate (Union[int, QUA variable of type int]): Allows playing
+                only part of the pulse, truncating the end. If provided,
+                will play only up to the given time in units of the clock
+                cycle (4ns).
+            condition (A logical expression to evaluate.): Will play analog
+                pulse only if the condition's value is true. Any digital
+                pulses associated with the operation will always play.
+            timestamp_stream (Union[str, _ResultSource]): (Supported from
+                QOP 2.2) Adding a `timestamp_stream` argument will save the
+                time at which the operation occurred to a stream. If the
+                `timestamp_stream` is a string ``label``, then the timestamp
+                handle can be retrieved with
+                [`qm._results.JobResults.get`][qm.results.streaming_result_fetcher.StreamingResultFetcher] with the same
+                ``label``.
+
+        Note:
+            The `element` argument from `qm.qua.play()`is not needed, as it is
+            automatically set to `self.name`.
+
+        """
         from qm.qua._dsl import _PulseAmp
 
         if pulse_name not in self.operations:
@@ -102,7 +143,31 @@ class Channel(QuamComponent):
             target=target,
         )
 
-    def wait(self, duration, *other_elements):
+    def wait(self, duration: QuaNumberType, *other_elements: Union[str, "Channel"]):
+        """Wait for the given duration on all provided elements without outputting anything.
+
+        Duration is in units of the clock cycle (4ns)
+
+        Args:
+            duration (Union[int,QUA variable of type int]): time to wait in
+                units of the clock cycle (4ns). Range: [4, $2^{31}-1$]
+                in steps of 1.
+            *other_elements (Union[str,sequence of str]): elements to wait on,
+                in addition to this channel
+
+        Warning:
+            In case the value of this is outside the range above, unexpected results may occur.
+
+        Note:
+            The current channel element is always included in the wait operation.
+
+        Note:
+            The purpose of the `wait` operation is to add latency. In most cases, the
+            latency added will be exactly the same as that specified by the QUA variable or
+            the literal used. However, in some cases an additional computational latency may
+            be added. If the actual wait time has significance, such as in characterization
+            experiments, the actual wait time should always be verified with a simulator.
+        """
         other_elements_str = [
             element if isinstance(element, str) else str(element)
             for element in other_elements
@@ -122,7 +187,23 @@ class Channel(QuamComponent):
 
 @dataclass(kw_only=True, eq=False)
 class SingleChannel(Channel):
+    """QuAM component for a single (not IQ) output channel.
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        output_port (Tuple[str, int]): Channel output port, a tuple of
+            (controller_name, port).
+        filter_fir_taps (List[float]): FIR filter taps for the output port.
+        filter_iir_taps (List[float]): IIR filter taps for the output port.
+        offset (float): DC offset for the output port.
+    """
+
     output_port: Tuple[str, int]
+    """Channel output port, a tuple of (controller_name, port)."""
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
@@ -156,6 +237,23 @@ class SingleChannel(Channel):
 
 @dataclass(kw_only=True, eq=False)
 class IQChannel(Channel):
+    """QuAM component for an IQ output channel.
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        output_port_I (Tuple[str, int]): Channel I output port, a tuple of
+            (controller_name, port).
+        output_port_Q (Tuple[str, int]): Channel Q output port, a tuple of
+            (controller_name, port).
+        mixer (Mixer): Mixer QuAM component.
+        local_oscillator (LocalOscillator): Local oscillator QuAM component.
+        intermediate_frequency (float): Intermediate frequency of the mixer.
+    """
+
     output_port_I: Tuple[str, int]
     output_port_Q: Tuple[str, int]
 
@@ -197,6 +295,27 @@ class IQChannel(Channel):
 
 @dataclass(kw_only=True, eq=False)
 class InOutIQChannel(IQChannel):
+    """QuAM component for an IQ output channel.
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        input_port_I (Tuple[str, int]): Channel I input port, a tuple of
+            (controller_name, port). Port is usually 1 or 2.
+        input_port_Q (Tuple[str, int]): Channel Q input port, a tuple of
+            (controller_name, port). Port is usually 1 or 2.
+        output_port_I (Tuple[str, int]): Channel I output port, a tuple of
+            (controller_name, port).
+        output_port_Q (Tuple[str, int]): Channel Q output port, a tuple of
+            (controller_name, port).
+        mixer (Mixer): Mixer QuAM component.
+        local_oscillator (LocalOscillator): Local oscillator QuAM component.
+        intermediate_frequency (float): Intermediate frequency of the mixer.
+    """
+
     input_port_I: Tuple[str, int]
     input_port_Q: Tuple[str, int]
 
