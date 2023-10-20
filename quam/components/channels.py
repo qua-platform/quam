@@ -26,6 +26,14 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class Channel(QuamComponent):
+    """QuAM base component for a channel, can be output/input or both.
+
+    Args:
+        operations: A dictionary of pulses to be played on this channel.
+        id: The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add _default_label
+    """
+
     operations: Dict[str, Pulse] = field(default_factory=dict)
 
     id: Union[str, int] = None

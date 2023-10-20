@@ -149,6 +149,9 @@ def patch_dataclass(module_name):
 
     Patch is only applied when Python < 3.10.
     See quam_dataclass docs for details.
+
+    This function should be called at the top of a file, before dataclasses are defined:
+    >>>  
     """
     if sys.version_info.minor < 10:
         setattr(sys.modules[module_name], "dataclass", quam_dataclass)
