@@ -821,7 +821,7 @@ class QuamList(UserList, QuamBase):
         return quam_list
 
     def iterate_components(
-        self, skip_elem: List[QuamBase] = None
+        self, skip_elems: List[QuamBase] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
