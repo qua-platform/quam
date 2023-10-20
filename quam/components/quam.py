@@ -16,7 +16,8 @@ __all__ = ["QuAM"]
 
 @dataclass(kw_only=True, eq=False)
 class QuAM(QuamRoot):
-    controller: str = "con1"
+    """Example QuAM root component."""
+
     mixers: List[Mixer] = field(default_factory=list)
     qubits: List[Transmon] = field(default_factory=list)
     resonators: List[InOutIQChannel] = field(default_factory=list)

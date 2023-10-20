@@ -84,7 +84,7 @@ def validate_obj_type(
             ) from e
 
 
-def get_class_from_path(class_str):
+def get_class_from_path(class_str) -> type:
     """Extract the class from a class path.
 
     Example:
@@ -94,7 +94,10 @@ def get_class_from_path(class_str):
         ```
 
     Args:
+        class_str: The class path, e.g. "quam.components.hardware.Mixer"
 
+    Returns:
+        Class object corresponding to the class path.
     """
     module_path, class_name = class_str.rsplit(".", 1)
     module = importlib.import_module(module_path)

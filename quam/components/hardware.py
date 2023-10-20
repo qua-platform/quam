@@ -18,12 +18,41 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class LocalOscillator(QuamComponent):
+    """QuAM component for a local oscillator.
+
+    Args:
+        frequency (float): The frequency of the local oscillator.
+            Used by the mixer to determine the intermediate frequency.
+        power (float, optional): The power of the local oscillator.
+            Not used for the QUA configuration
+    """
+
     frequency: float
     power: float = None
 
 
 @dataclass(kw_only=True, eq=False)
 class Mixer(QuamComponent):
+    """QuAM component for a mixer.
+
+    All properties are optional, so it can be instantiated as `Mixer()`.
+    For the default values, it is assumed that the mixer parent is an `IQChannel`
+    that has a `LocalOscillator`.
+
+    Args:
+        local_oscillator_frequency (float, optional): The frequency of the local
+            oscillator. Default is `#../local_oscillator/frequency`, meaning that
+            the frequency is extracted from the the local_oscillator of the parent.
+        intermediate_frequency (float, optional): The intermediate frequency of the
+            mixer. Default is `#../intermediate_frequency`, meaning that the frequency
+            references the intermediate_frequency of the parent.
+        offset_I (float, optional): The offset of the I channel. Default is 0.
+        offset_Q (float, optional): The offset of the Q channel. Default is 0.
+        correction_gain (float, optional): The gain imbalance of the mixer.
+            Default is 0, see `Mixer.IQ_imbalance` for details.
+        correction_phase (float, optional): The phase imbalance of the mixer in radians.
+    """
+
     local_oscillator_frequency: float = "#../local_oscillator/frequency"
     intermediate_frequency: float = "#../intermediate_frequency"
 
@@ -41,6 +70,11 @@ class Mixer(QuamComponent):
         return f"{parent_id}{str_ref.DELIMITER}mixer"
 
     def apply_to_config(self, config: dict):
+        """Adds this mixer to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         correction_matrix = self.IQ_imbalance(
             self.correction_gain, self.correction_phase
         )

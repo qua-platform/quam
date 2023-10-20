@@ -30,7 +30,7 @@ class Channel(QuamComponent):
     """Base QuAM component for a channel, can be output, input or both.
 
     Args:
-        operationzs (Dict[str, Pulse]): A dictionary of pulses to be played on this
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
             channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
@@ -40,7 +40,7 @@ class Channel(QuamComponent):
     operations: Dict[str, Pulse] = field(default_factory=dict)
 
     id: Union[str, int] = None
-    _default_label: ClassVar[str] = "ch"
+    _default_label: ClassVar[str] = "ch"  # Used to determine name from id
 
     @property
     def name(self) -> str:
@@ -90,12 +90,12 @@ class Channel(QuamComponent):
                 to dynamically change the duration of both constant and arbitrary
                 pulses. Arbitrary pulses can only be stretched, not compressed.
             chirp (Union[(list[int], str), (int, str)]): Allows to perform
-                piecewise linear sweep of the element’s intermediate
+                piecewise linear sweep of the element's intermediate
                 frequency in time. Input should be a tuple, with the 1st
                 element being a list of rates and the second should be a
-                string with the units. The units can be either: ‘Hz/nsec’,
-                ’mHz/nsec’, ’uHz/nsec’, ’pHz/nsec’ or ‘GHz/sec’, ’MHz/sec’,
-                ’KHz/sec’, ’Hz/sec’, ’mHz/sec’.
+                string with the units. The units can be either: 'Hz/nsec',
+                'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
+                'KHz/sec', 'Hz/sec', 'mHz/sec'.
             truncate (Union[int, QUA variable of type int]): Allows playing
                 only part of the pulse, truncating the end. If provided,
                 will play only up to the given time in units of the clock
@@ -203,13 +203,17 @@ class SingleChannel(Channel):
     """
 
     output_port: Tuple[str, int]
-    """Channel output port, a tuple of (controller_name, port)."""
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
     offset: float = 0
 
     def apply_to_config(self, config: dict):
+        """Adds this SingleChannel to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         # Add pulses & waveforms
         super().apply_to_config(config)
 
@@ -269,6 +273,11 @@ class IQChannel(Channel):
         return self.local_oscillator.frequency + self.intermediate_frequency
 
     def apply_to_config(self, config: dict):
+        """Adds this IQChannel to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         # Add pulses & waveforms
         super().apply_to_config(config)
         output_ports = {"I": tuple(self.output_port_I), "Q": tuple(self.output_port_Q)}
@@ -295,7 +304,10 @@ class IQChannel(Channel):
 
 @dataclass(kw_only=True, eq=False)
 class InOutIQChannel(IQChannel):
-    """QuAM component for an IQ output channel.
+    """QuAM component for an IQ channel with both input and output.
+
+    An example of such a channel is a readout resonator, where you may want to
+    apply a readout tone and then measure the response.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -311,7 +323,7 @@ class InOutIQChannel(IQChannel):
             (controller_name, port).
         output_port_Q (Tuple[str, int]): Channel Q output port, a tuple of
             (controller_name, port).
-        mixer (Mixer): Mixer QuAM component.
+        mixer (Mixer): Mixer QuAM component for the IQ output.
         local_oscillator (LocalOscillator): Local oscillator QuAM component.
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
@@ -330,6 +342,11 @@ class InOutIQChannel(IQChannel):
     _default_label: ClassVar[str] = "IQ"
 
     def apply_to_config(self, config: dict):
+        """Adds this InOutIQChannel to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         # Add pulses & waveforms
         super().apply_to_config(config)
 
