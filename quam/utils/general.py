@@ -1,6 +1,7 @@
 import importlib
+import warnings
 from inspect import isclass
-from typing import Union
+from typing import Any, Union
 
 from quam.utils import string_reference
 
@@ -10,7 +11,24 @@ __all__ = ["get_full_class_path", "validate_obj_type", "get_class_from_path"]
 
 
 def get_full_class_path(cls_or_obj: Union[type, object]) -> str:
-    """Returns the full path of a class or object, including the module name."""
+    """Returns the full path of a class or object, including the module name.
+
+    Example:
+    ```
+    from quam.components import Mixer
+    assert get_full_class_path(Mixer) == "quam.components.hardware.Mixer"
+    ```
+
+    Args:
+        cls_or_obj: The class or object to get the path of.
+
+    Returns:
+        The full path of the class or object. Generally this is of the form
+        "module_name.class_name".
+
+    Warnings:
+        If the module name cannot be determined, a warning is raised.
+    """
     if isclass(cls_or_obj):
         class_name = cls_or_obj.__qualname__
     else:
@@ -18,17 +36,22 @@ def get_full_class_path(cls_or_obj: Union[type, object]) -> str:
 
     module_name = cls_or_obj.__module__
     if module_name == "__main__" or module_name is None:
+        warnings.warn(
+            f"Could not determine the module of {class_name}, this may cause issues"
+            " when trying to load QuAM from a file. Please ensure that all QuAM"
+            " classes are defined in a Python module"
+        )
         return class_name
     else:
         return f"{module_name}.{class_name}"
 
 
 def validate_obj_type(
-    elem, required_type: type, allow_none: bool = True, str_repr: str = ""
+    elem: Any, required_type: type, allow_none: bool = True, str_repr: str = ""
 ) -> None:
     """Validate whether the object is an instance of the correct type
 
-    References (strings starting with ":") are not checked.
+    References (strings starting with "#") are not checked.
     None is always allowed.
 
     Args:
@@ -62,6 +85,17 @@ def validate_obj_type(
 
 
 def get_class_from_path(class_str):
+    """Extract the class from a class path.
+
+    Example:
+        ```
+        from quam.components import Mixer
+        assert get_class_from_path("quam.components.hardware.Mixer") == Mixer
+        ```
+
+    Args:
+
+    """
     module_path, class_name = class_str.rsplit(".", 1)
     module = importlib.import_module(module_path)
     quam_class = getattr(module, class_name)

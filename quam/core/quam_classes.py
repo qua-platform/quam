@@ -267,7 +267,7 @@ class QuamBase(ReferenceClass):
         return attrs
 
     def to_dict(
-        self, follow_references=False, include_defaults=False
+        self, follow_references: bool = False, include_defaults: bool = False
     ) -> Dict[str, Any]:
         """Convert this object to a dictionary.
 
@@ -301,7 +301,9 @@ class QuamBase(ReferenceClass):
                 quam_dict[attr] = val
         return quam_dict
 
-    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+    def iterate_components(
+        self, skip_elems: bool = None
+    ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
@@ -507,7 +509,7 @@ class QuamRoot(QuamBase):
 
         return qua_config
 
-    def get_unreferenced_value(self, attr):
+    def get_unreferenced_value(self, attr: str):
         return getattr(self, attr)
 
 
@@ -639,7 +641,7 @@ class QuamDict(UserDict, QuamBase):
             return False
         return type(val) == self._value_annotation
 
-    def _attr_val_is_default(self, attr, val):
+    def _attr_val_is_default(self, attr: str, val: Any):
         """Check whether the value of an attribute is the default value.
 
         Overrides parent method.
@@ -661,7 +663,9 @@ class QuamDict(UserDict, QuamBase):
 
         return self.__getattr__(attr)
 
-    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+    def iterate_components(
+        self, skip_elems: Sequence[QuamBase] = None
+    ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
@@ -780,7 +784,9 @@ class QuamList(UserList, QuamBase):
             return False
         return type(val) == self._value_annotation
 
-    def to_dict(self, follow_references=False, include_defaults=False) -> list:
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> list:
         """Convert this object to a list, usually as part of a dictionary representation.
 
         Args:
@@ -814,7 +820,9 @@ class QuamList(UserList, QuamBase):
                 quam_list.append(val)
         return quam_list
 
-    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+    def iterate_components(
+        self, skip_elem: List[QuamBase] = None
+    ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
