@@ -6,7 +6,10 @@ DELIMITER = "."
 
 
 def is_reference(string: str) -> bool:
-    """Check if a string is a reference, i.e. a string that starts with a colon"""
+    """Check if a string is a reference,
+
+    A reference should be a string that starts with "#/", "#./" or "#../"
+    """
     if not isinstance(string, str):
         return False
     return string.startswith(("#/", "#./", "#../"))
@@ -49,6 +52,15 @@ def get_relative_reference_value(obj, string: str) -> Any:
     """Get the value of a reference string relative to an object
 
     Performs recursive calls to get the value of nested references
+
+    Args:
+        string: The reference string
+
+    Returns:
+        The value of the reference string relative to the object
+
+    Raises:
+        AttributeError: If the object does not have the attribute
     """
     string = string.lstrip("#/")
 
@@ -78,6 +90,22 @@ def get_relative_reference_value(obj, string: str) -> Any:
 
 
 def get_referenced_value(obj, string: str, root=None) -> Any:
+    """Get the value of a reference string
+
+    A string reference is a string that starts with "#/", "#./" or "#../".
+    See documentation for details.
+
+    Args:
+        string: The reference string
+        root: The root object to start the search from (default: None)
+            Only relevant if the string is an absolute reference.
+
+    Returns:
+        The value that the reference string points to
+
+    Raises:
+        ValueError: If the string is not a valid reference
+    """
     if not is_reference(string):
         raise ValueError(f"String {string} is not a reference")
 

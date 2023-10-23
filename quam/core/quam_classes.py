@@ -8,6 +8,7 @@ from typing import (
     Generator,
     ClassVar,
     Any,
+    List,
     Dict,
     Sequence,
     TypeVar,
@@ -63,6 +64,7 @@ def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
 
 
 def convert_dict_and_list(value, cls_or_obj=None, attr=None):
+    """Convert a dict or list to a QuamDict or QuamList if possible."""
     if isinstance(value, dict):
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamDict(**value, value_annotation=value_annotation)
@@ -74,6 +76,21 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
 
 
 class ParentDescriptor:
+    """Descriptor for the parent attribute of QuamBase.
+
+    This descriptor is used to ensure that the parent attribute of a QuamBase
+    object is not overwritten. This is to prevent the following situation:
+
+    ```
+    parent1 = QuamBase()
+    parent2 = QuamBase()
+
+    child = QuamBase()
+    child.parent = parent1  # This is fine
+    child.parent = parent2  # This raises an AttributeError
+    ```
+    """
+
     def __get__(self, instance, owner):
         if instance is None:
             return self
@@ -97,6 +114,19 @@ class ParentDescriptor:
 
 
 class QuamBase(ReferenceClass):
+    """Base class for any QuAM component class.
+
+    args:
+        parent: The parent of this object. This is automatically set when adding
+            this object to another QuamBase object.
+        _root: The QuamRoot object. This is automatically set when instantiating
+            a QuamRoot object.
+
+    Note:
+        This class should not be used directly, but should generally be subclassed.
+        The subclasses should be dataclasses.
+    """
+
     parent: ClassVar["QuamBase"] = ParentDescriptor()
     _root: ClassVar["QuamRoot"] = None
 
@@ -116,10 +146,23 @@ class QuamBase(ReferenceClass):
                 )
 
     def _get_parent_attr_name(self) -> str:
-        """Get the attribute name of parent that matchis this object
+        """Get the attribute name of parent that matches this object
+
+        Returns:
+            The attribute name of parent that matches this object.
+
+        Example:
+            ```
+            @dataclass
+            class A(QuamBase):
+                attr: QuamBase = None
+
+            child = A()
+            parent = QuamBase(attr=child)
+            child._get_parent_attr_name()  # Returns "attr"
 
         Raises:
-            AttributeError if not found
+            AttributeError if not found.
         """
         if self.parent is None:
             raise AttributeError(
@@ -134,11 +177,29 @@ class QuamBase(ReferenceClass):
                 "Could not find parent parent attribute that matches object {self}"
             )
 
-    def _get_attr_names(self):
+    def _get_attr_names(self) -> List[str]:
+        """Get names of all dataclass attributes of this object.
+
+        Returns:
+            List of attribute names.
+
+        Raises:
+            AssertionError if not a dataclass.
+        """
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
 
-    def _attr_val_is_default(self, attr, val):
+    def _attr_val_is_default(self, attr: str, val: Any) -> bool:
+        """Check whether the value of an attribute is the default value.
+
+        Args:
+            attr: The name of the attribute.
+            val: The value of the attribute.
+
+        Returns:
+            True if the value is the default value, False otherwise.
+            False is also returned if the parent is not a dataclass
+        """
         if not is_dataclass(self):
             return False
 
@@ -173,8 +234,20 @@ class QuamBase(ReferenceClass):
         return type(val) == required_type
 
     def get_attrs(
-        self, follow_references=False, include_defaults=True
+        self, follow_references: bool = False, include_defaults: bool = True
     ) -> Dict[str, Any]:
+        """Get all attributes and corresponding values of this object.
+
+        Args:
+            follow_references: Whether to follow references when getting the value.
+                If False, the reference will be returned as a string.
+            include_defaults: Whether to include attributes that have the default
+                value.
+
+        Returns:
+            A dictionary of attribute names and values.
+
+        """
         attr_names = self._get_attr_names()
 
         skip_attrs = getattr(self, "_skip_attrs", [])
@@ -193,7 +266,25 @@ class QuamBase(ReferenceClass):
             }
         return attrs
 
-    def to_dict(self, follow_references=False, include_defaults=False):
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> Dict[str, Any]:
+        """Convert this object to a dictionary.
+
+        Args:
+            follow_references: Whether to follow references when getting the value.
+                If False, the reference will be returned as a string.
+            include_defaults: Whether to include attributes that have the default
+
+        Returns:
+            A dictionary representation of this object.
+            Any QuamBase objects will be recursively converted to dictionaries.
+
+        Note:
+            If the value of an attribute does not match the annotation, the
+            `"__class__"` key will be added to the dictionary. This is to ensure
+            that the object can be reconstructed when loading from a file.
+        """
         attrs = self.get_attrs(
             follow_references=follow_references, include_defaults=include_defaults
         )
@@ -210,7 +301,19 @@ class QuamBase(ReferenceClass):
                 quam_dict[attr] = val
         return quam_dict
 
-    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+    def iterate_components(
+        self, skip_elems: bool = None
+    ) -> Generator["QuamBase", None, None]:
+        """Iterate over all QuamBase objects in this object, including nested objects.
+
+        Args:
+            skip_elems: A list of QuamBase objects to skip.
+                This is used to prevent infinite loops when iterating over nested
+                objects.
+
+        Returns:
+            A generator of QuamBase objects.
+        """
         if skip_elems is None:
             skip_elems = []
 
@@ -232,15 +335,30 @@ class QuamBase(ReferenceClass):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
     def _is_reference(self, attr: str) -> bool:
+        """Check whether an attribute is a reference.
+
+        Args:
+            attr: The name of the attribute.
+
+        Returns:
+            True if the attribute is a reference, False otherwise.
+
+        Note:
+            This function is used from the ReferenceClass class.
+        """
         return string_reference.is_reference(attr)
 
-    def _get_referenced_value(self, reference: str):
+    def _get_referenced_value(self, reference: str) -> Any:
         """Get the value of an attribute by reference
 
-        This function is used from the ReferenceClass class.
+        Args:
+            reference: The reference to the attribute.
 
         Returns:
             The value of the attribute, or the reference if it is not a reference
+
+        Note:
+            This function is used from the ReferenceClass class.
         """
         if not string_reference.is_reference(reference):
             return reference
@@ -266,6 +384,25 @@ QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
 
 
 class QuamRoot(QuamBase):
+    """Base class for the root of a QuAM object.
+
+    This class should be subclassed and made a dataclass.
+
+    Args:
+        serialiser: The serialiser class to use for saving and loading.
+            The default is to use the `JSONSerialiser`, but this can be changed.
+
+    Note:
+        This class should not be used directly, but should generally be subclassed and
+        made a dataclass. The dataclass fields should correspond to the QuAM root
+        structure.
+
+    Note:
+        Upon instantiating a `QuamRoot` object, it sets the class attribute
+        `QuamBase._root` to itself. This is used such that any references with an
+        absolute path are resolved from the root.
+    """
+
     serialiser: AbstractSerialiser = JSONSerialiser
 
     def __post_init__(self):
@@ -285,6 +422,18 @@ class QuamRoot(QuamBase):
         include_defaults: bool = False,
         ignore: Sequence[str] = None,
     ):
+        """Save the entire QuamRoot object to a file. This includes nested objects.
+
+        Args:
+            path: The path to save the file to. If None, the path will be saved to
+                `state.json`.
+            content_mapping: A dictionary of paths to save to and a list of attributes
+                to save to that path. This can be used to save different parts of the
+                QuamRoot object to different files.
+            include_defaults: Whether to include attributes that have the default
+                value.
+            ignore: A list of attributes to ignore.
+        """
         serialiser = self.serialiser()
         serialiser.save(
             quam_obj=self,
@@ -294,7 +443,17 @@ class QuamRoot(QuamBase):
             ignore=ignore,
         )
 
-    def to_dict(self, follow_references=False, include_defaults=False):
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> Dict[str, Any]:
+        """Convert this object to a dictionary.
+
+        Args:
+            follow_references: Whether to follow references when getting the value.
+                If False, the reference will be returned as a string.
+            include_defaults: Whether to include attributes that have the default
+                value.
+        """
         quam_dict = super().to_dict(follow_references, include_defaults)
         # QuamRoot should always add __class__ because it is generally not
         # quam.components.quam.QuAM
@@ -308,6 +467,18 @@ class QuamRoot(QuamBase):
         validate_type: bool = True,
         fix_attrs: bool = True,
     ) -> QuamRootType:
+        """Load a QuamRoot object from a file.
+
+        Args:
+            filepath_or_dict: The path to the file/folder to load, or a dictionary.
+                The dictionary would be the result from a call to `QuamRoot.save()`
+            validate_type: Whether to validate the type of all attributes while loading.
+            fix_attrs: Whether attributes can be added to QuamBase objects that are not
+                defined as dataclass fields.
+
+        Returns:
+            A QuamRoot object instantiated from the file/folder/dict.
+        """
         if isinstance(filepath_or_dict, dict):
             contents = filepath_or_dict
         else:
@@ -321,7 +492,16 @@ class QuamRoot(QuamBase):
             validate_type=validate_type,
         )
 
-    def generate_config(self):
+    def generate_config(self) -> Dict[str, Any]:
+        """Generate the QUA configuration from the QuAM object.
+
+        Returns:
+            A dictionary with the QUA configuration.
+
+        Note:
+            This function collects all the nested QuamComponent objects and calls
+            `QuamComponent.apply_to_config` on them.
+        """
         qua_config = deepcopy(qua_config_template)
 
         for quam_component in self.iterate_components():
@@ -329,11 +509,21 @@ class QuamRoot(QuamBase):
 
         return qua_config
 
-    def get_unreferenced_value(self, attr):
+    def get_unreferenced_value(self, attr: str):
         return getattr(self, attr)
 
 
 class QuamComponent(QuamBase):
+    """Base class for any QuAM component class.
+
+    Examples of QuamComponent classes are [`Mixer`][quam.components.hardware.Mixer],
+    [`LocalOscillator`][quam.components.hardware.LocalOscillator],
+    [`Pulse`][quam.components.pulses.Pulse], etc.
+
+    Note:
+        This class should be subclassed and made a dataclass.
+    """
+
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
@@ -342,11 +532,44 @@ class QuamComponent(QuamBase):
             converted_val.parent = self
 
     def apply_to_config(self, config: dict) -> None:
+        """Add information to the QUA configuration, such as pulses and waveforms.
+
+        Args:
+            config: The QUA configuration dictionary. Initially this is a nearly empty
+                dictionary, but
+
+        Note:
+            This function is called by
+            [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config].
+
+        Note:
+            The config has a starting template, defined at [`quam.core.qua_config_template`][]
+        """
         ...
 
 
 @dataclass
 class QuamDict(UserDict, QuamBase):
+    """A QuAM dictionary class.
+
+    Any dict added to a `QuamBase` object is automatically converted to a `QuamDict`.
+    The `QuamDict` adds the following functionalities to a dict:
+    - Values can be references (see below)
+    - Keys can also be accessed through attributes (e.g. `d.a` instead of `d["a"]`)
+
+    # QuamDict references
+    QuamDict values can be references, which are strings that start with `#`. See the
+    documentation for details on references. An example is shown here:
+    ```
+    d = QuamDict({"a": 1, "b": "#./a"})
+    assert d["b"] == 1
+    ```
+
+    Warning:
+        This class is a subclass of `QuamBase`, but also of `UserDict`. As a result,
+        it can be used as a normal dictionary, but it is not a subclass of `dict`.
+    """
+
     _value_annotation: ClassVar[type] = None
 
     def __init__(self, dict=None, /, value_annotation: type = None, **kwargs):
@@ -401,8 +624,16 @@ class QuamDict(UserDict, QuamBase):
     def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
-        Called by QuamDict.to_dict to determine whether to add the __class__ key.
-        For the QuamDict, we compare the type to the _value_annotation.
+        Called by [`QuamDict.to_dict`][quam.core.quam_classes.QuamDict.to_dict] to
+        determine whether to add the __class__ key.
+
+        Args:
+            attr: The name of the attribute. Unused but added to match parent signature
+            val: The value of the attribute.
+
+        Note:
+            The attribute val is compared to `QuamDict._value_annotation`, which is set
+            when a dict is converted to a `QuamDict` using `convert_dict_and_list`.
         """
         if isinstance(val, (QuamDict, QuamList)):
             return True
@@ -410,17 +641,41 @@ class QuamDict(UserDict, QuamBase):
             return False
         return type(val) == self._value_annotation
 
-    def _attr_val_is_default(self, attr, val):
+    def _attr_val_is_default(self, attr: str, val: Any):
         """Check whether the value of an attribute is the default value.
 
+        Overrides parent method.
         Since a QuamDict does not have any fixed attrs, this is always False.
+
         """
         return False
 
     def get_unreferenced_value(self, attr: str) -> bool:
+        """Get the value of an attribute without following references.
+
+        Args:
+            attr: The name of the attribute.
+
+        Returns:
+            The value of the attribute. If the value is a reference, it returns the
+            reference string instead of the value it is referencing.
+        """
+
         return self.__getattr__(attr)
 
-    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+    def iterate_components(
+        self, skip_elems: Sequence[QuamBase] = None
+    ) -> Generator["QuamBase", None, None]:
+        """Iterate over all QuamBase objects in this object, including nested objects.
+
+        Args:
+            skip_elems: A list of QuamBase objects to skip.
+                This is used to prevent infinite loops when iterating over nested
+                objects.
+
+        Returns:
+            A generator of QuamBase objects.
+        """
         if skip_elems is None:
             skip_elems = []
 
@@ -434,6 +689,25 @@ class QuamDict(UserDict, QuamBase):
 
 @dataclass
 class QuamList(UserList, QuamBase):
+    """A QuAM list class.
+
+    Any list added to a `QuamBase` object is automatically converted to a `QuamList`.
+    The `QuamList` adds the following functionalities to a list:
+    - Elements can be references (see below)
+
+    # QuamList references
+    QuamList values can be references, which are strings that start with `#`. See the
+    documentation for details on references. An example is shown here:
+    ```
+    d = QuamList([1, "#./0"]])
+    assert d[1] == 1
+    ```
+
+    Warning:
+        This class is a subclass of `QuamBase`, but also of `UserList`. As a result,
+        it can be used as a normal list, but it is not a subclass of `list`.
+    """
+
     _value_annotation: ClassVar[type] = None
 
     def __init__(self, *args, value_annotation: type = None):
@@ -510,7 +784,27 @@ class QuamList(UserList, QuamBase):
             return False
         return type(val) == self._value_annotation
 
-    def to_dict(self, follow_references=False, include_defaults=False):
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> list:
+        """Convert this object to a list, usually as part of a dictionary representation.
+
+        Args:
+            follow_references: Whether to follow references when getting the value.
+                If False, the reference will be returned as a string.
+            include_defaults: Whether to include attributes that have the default
+                value.
+
+        Returns:
+            A list with the values of this object. Any QuamBase objects will be
+            recursively converted to dictionaries.
+
+        Note:
+            If the value of an attribute does not match the annotation of
+            `QuamList._value_annotation`, the `"__class__"` key will be added to the
+            dictionary. This is to ensure that the object can be reconstructed when
+            loading from a file.
+        """
         quam_list = []
         for val in self.data:
             if isinstance(val, QuamBase):
@@ -526,7 +820,19 @@ class QuamList(UserList, QuamBase):
                 quam_list.append(val)
         return quam_list
 
-    def iterate_components(self, skip_elems=None) -> Generator["QuamBase", None, None]:
+    def iterate_components(
+        self, skip_elems: List[QuamBase] = None
+    ) -> Generator["QuamBase", None, None]:
+        """Iterate over all QuamBase objects in this object, including nested objects.
+
+        Args:
+            skip_elems: A list of QuamBase objects to skip.
+                This is used to prevent infinite loops when iterating over nested
+                objects.
+
+        Returns:
+            A generator of QuamBase objects.
+        """
         if skip_elems is None:
             skip_elems = []
 

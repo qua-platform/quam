@@ -9,7 +9,7 @@ __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
 
 
 class REQUIRED:
-    """Flag used by quam_dataclass when a required dataclass arg needs to have a kwarg"""
+    """Flag used by `quam_dataclass` when a required dataclass arg needs a kwarg"""
 
     ...
 
@@ -147,11 +147,35 @@ def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
 def patch_dataclass(module_name):
     """Patch Python dataclass within a file to allow subclasses have args
 
-    Patch is only applied when Python < 3.10.
-    See quam_dataclass docs for details.
+    Note:
+        Patch is only applied when Python < 3.10.
 
-    This function should be called at the top of a file, before dataclasses are defined:
-    >>>  
+    Note:
+        This function should be called at the top of a file, before dataclasses are
+        defined:
+        ```
+        patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
+        ```
+
+    Prior to Python 3.10, it was not possible for a dataclass to be a subclass of
+    another dataclass when
+    - the parent dataclass has an arg with default
+    - the child dataclass has a required arg
+
+    From Python 3.10, this was fixed by including the flag @dataclass(kw_only=True).
+    To ensure QuAM remains compatible with Python <3.10, we include a method to patch
+    the dataclass such that it still works in the case described above.
+
+    We achieve this by first checking if the above condition is met. If so, all the
+    args without a default value receive a default REQUIRED flag. The post_init method
+    is then overridden such that an error is raised whenever an attribute still has
+    the REQUIRED flag after instantiation.
+
+    Note:
+        The python dataclass is patched in a non-standard way by calling `setattr`
+        on the module. This is done to ensure that the patch is not recognized by any
+        static analysis tools, such as mypy. This is necessary as mypy otherwise will
+        no longer recognize the dataclass as a dataclass.
     """
     if sys.version_info.minor < 10:
         setattr(sys.modules[module_name], "dataclass", quam_dataclass)

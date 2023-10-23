@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import numbers
-from typing import ClassVar, List, Union, Tuple
+from typing import Any, ClassVar, Dict, List, Union, Tuple
 import numpy as np
 
 from quam.core import QuamComponent
@@ -24,6 +24,39 @@ __all__ = [
 
 @dataclass(kw_only=True, eq=False)
 class Pulse(QuamComponent, ABC):
+    """QuAM base component for a pulse.
+
+    Pulses are added to a channel using
+    ```
+    channel.operations["pulse_name"] = pulse
+    ```
+
+    The `Pulse` class is an abstract base class, and should not be instantiated
+    directly. Instead, use one of the subclasses:
+    - `ConstantReadoutPulse`
+    - `DragPulse`
+    - `SquarePulse`
+    - `GaussianPulse`
+    or create a custom subclass. In this case, the method `waveform_function` should
+    be implemented.
+
+    Args:
+        operation (str): The operation of the pulse, either "control" or "measurement".
+            Default is "control".
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Can be a string, in which case it is a reference to a digital marker in the
+            config, or a list of tuples of (sample, length) pairs. Default is None.
+
+    Note:
+        The unique pulse label is automatically generated from the channel name and
+        the pulse name, the same for the waveform and digital marker names.
+        The pulse label is defined as `"{channel_name}.{pulse_name}.pulse"`.
+        The waveform label is defined as `"{channel_name}.{pulse_name}.wf"`.
+        The digital marker label is defined as `"{channel_name}.{pulse_name}.dm"`.
+
+    """
+
     operation: ClassVar[str] = "control"
     length: int
 
@@ -47,7 +80,22 @@ class Pulse(QuamComponent, ABC):
     def digital_marker_name(self):
         return f"{self.full_name}{str_ref.DELIMITER}dm"
 
-    def calculate_waveform(self):
+    def calculate_waveform(self) -> Union[float, complex, List[float], List[complex]]:
+        """Calculate the waveform of the pulse.
+
+        This function calls `Pulse.waveform_function`, which should generally be
+        subclassed, to generate the waveform.
+
+        This function then processes the results such that IQ waveforms are cast
+        into complex values.
+
+        Returns:
+            The processed waveform, which can be either
+            - a single float for a constant single-channel waveform,
+            - a single complex number for a constant IQ waveform,
+            - a list of floats for an arbitrary single-channel waveform,
+            - a list of complex numbers for an arbitrary IQ waveform,
+        """
         waveform = self.waveform_function()
 
         # Optionally convert IQ waveforms to complex waveform
@@ -60,18 +108,38 @@ class Pulse(QuamComponent, ABC):
         return waveform
 
     @abstractmethod
-    def waveform_function(self) -> List[Union[float, complex]]:
+    def waveform_function(
+        self,
+    ) -> Union[
+        float,
+        complex,
+        List[float],
+        List[complex],
+        Tuple[float, float],
+        Tuple[List[float], List[float]],
+    ]:
         """Function that returns the waveform of the pulse.
 
-        Can be either a list of floats, a list of complex numbers, or a tuple of two
-        lists.
-        This function is called from `calculate_waveform` with the kwargs of the
-        dataclass instance as arguments. Each kwarg should therefore correspond to a
-        dataclass field.
+        The waveform function should use the relevant parameters from the pulse, which
+        is passed as the only argument.
+
+        This function is called from `Pulse.calculate_waveform`
+
+        Returns:
+            The waveform of the pulse. Can be one of the following:
+            - a single float for a constant single-channel waveform,
+            - a single complex number for a constant IQ waveform,
+            - a list of floats for an arbitrary single-channel waveform,
+            - a list of complex numbers for an arbitrary IQ waveform,
+            - a tuple of floats or float lists for an arbitrary IQ waveform
         """
         ...
 
-    def _config_add_pulse(self, config):
+    def _config_add_pulse(self, config: Dict[str, Any]):
+        """Add the pulse to the config
+
+        The config entry is added to `config["pulses"][self.pulse_name]`
+        """
         assert self.operation in ["control", "measurement"]
         assert isinstance(self.length, int)
 
@@ -83,9 +151,18 @@ class Pulse(QuamComponent, ABC):
         if self.digital_marker is not None:
             pulse_config["digital_marker"] = self.digital_marker
 
-        return pulse_config
-
     def _config_add_waveforms(self, config):
+        """Add the waveform to the config
+
+        For a single waveform, the config entry is added to
+        `config["waveforms"]["{channel_name}.{pulse_name}.wf"]`.
+        For an IQ waveform, two config entries are added to
+        `config["waveforms"]["{channel_name}.{pulse_name}.wf.I"]` and with suffix `Q`.
+
+        Raises:
+            ValueError: If the waveform type (single or IQ) does not match the parent
+                channel type (SingleChannel, IQChannel, InOutIQChannel).
+        """
         pulse_config = config["pulses"][self.pulse_name]
 
         waveform = self.calculate_waveform()
@@ -139,6 +216,16 @@ class Pulse(QuamComponent, ABC):
             pulse_config["waveforms"][suffix] = waveform_name
 
     def _config_add_digital_markers(self, config):
+        """Add the digital marker to the config
+
+        The config entry is added to
+        `config["digital_waveforms"]["{channel_name}.{pulse_name}.dm"]` and also
+        registered in
+        `config["pulses"]["{channel_name}.{pulse_name}.pulse"]["digital_marker"]`.
+
+        If the digital marker is a string, it is assumed to be a reference to a
+        digital marker already defined in the config.
+        """
         if isinstance(self.digital_marker, str):
             # Use a common config digital marker
             if self.digital_marker not in config["digital_waveforms"]:
@@ -156,6 +243,11 @@ class Pulse(QuamComponent, ABC):
         config["pulses"][self.pulse_name]["digital_marker"] = digital_marker_name
 
     def apply_to_config(self, config: dict) -> None:
+        """Adds this pulse, waveform, and digital marker to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         self._config_add_pulse(config)
         self._config_add_waveforms(config)
 
@@ -165,9 +257,18 @@ class Pulse(QuamComponent, ABC):
 
 @dataclass(kw_only=True, eq=False)
 class ReadoutPulse(Pulse, ABC):
+    """QuAM abstract base component for a readout pulse.
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+    """
+
     operation: ClassVar[str] = "measurement"
     digital_marker: str = "ON"
 
+    # TODO Understand why the thresholds were added.
     threshold: int = 0.0
     rus_exit_threshold: int = 0.0
 
@@ -181,9 +282,11 @@ class ReadoutPulse(Pulse, ABC):
 
     @abstractmethod
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
+        """Abstract method to calculate the integration weights."""
         ...
 
     def _config_add_integration_weights(self, config: dict):
+        """Add the integration weights to the config"""
         iw = self.integration_weights_function()
 
         if not isinstance(iw, (list, np.ndarray)):
@@ -206,12 +309,29 @@ class ReadoutPulse(Pulse, ABC):
         pulse_config["integration_weights"] = self.integration_weights_mapping
 
     def apply_to_config(self, config: dict) -> None:
+        """Adds this readout pulse to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         super().apply_to_config(config)
         self._config_add_integration_weights(config)
 
 
 @dataclass(kw_only=True, eq=False)
 class ConstantReadoutPulse(ReadoutPulse):
+    """QuAM component for a constant readout pulse.
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+        amplitude (complex, float): The constant amplitude of the pulse.
+            Should be complex for an IQ channel, and float for a single channel.
+        rotation_angle (float, optional): The rotation angle for the integration weights
+            in degrees.
+    """
+
     amplitude: Union[complex, float]
     rotation_angle: float = 0.0
 
@@ -225,7 +345,30 @@ class ConstantReadoutPulse(ReadoutPulse):
 
 @dataclass(kw_only=True, eq=False)
 class DragPulse(Pulse):
-    rotation_angle: float
+    """Gaussian-based DRAG pulse that compensate for the leakage and AC stark shift.
+
+    These DRAG waveforms has been implemented following the next Refs.:
+    Chen et al. PRL, 116, 020501 (2016)
+    https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.020501
+    and Chen's thesis
+    https://web.physics.ucsb.edu/~martinisgroup/theses/Chen2018.pdf
+
+    Args:
+        length (int): The pulse length in ns.
+        axis_angle (float): The axis rotation angle for the pulse in degrees.
+        amplitude (float): The amplitude in volts.
+        sigma (float): The gaussian standard deviation.
+        alpha (float): The DRAG coefficient.
+        anharmonicity (float): f_21 - f_10 - The differences in energy between the 2-1
+            and the 1-0 energy levels, in Hz.
+        detuning (float): The frequency shift to correct for AC stark shift, in Hz.
+        subtracted (bool): If true, returns a subtracted Gaussian, such that the first
+            and last points will be at 0 volts. This reduces high-frequency components
+            due to the initial and final points offset. Default is true.
+
+    """
+
+    axis_angle: float
     amplitude: float
     sigma: float
     alpha: float
@@ -247,16 +390,25 @@ class DragPulse(Pulse):
         )
         I, Q = np.array(I), np.array(Q)
 
-        rotation_angle_rad = np.pi * self.rotation_angle / 180
-        I_rot = I * np.cos(rotation_angle_rad) - Q * np.sin(rotation_angle_rad)
-        Q_rot = I * np.sin(rotation_angle_rad) + Q * np.cos(rotation_angle_rad)
+        axis_angle_rad = np.pi * self.axis_angle / 180
+        I_rot = I * np.cos(axis_angle_rad) - Q * np.sin(axis_angle_rad)
+        Q_rot = I * np.sin(axis_angle_rad) + Q * np.cos(axis_angle_rad)
 
         return I_rot + 1.0j * Q_rot
 
 
 @dataclass(kw_only=True, eq=False)
 class SquarePulse(Pulse):
-    amplitude: float
+    """Square pulse QuAM component.
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+        amplitude (Union[floatm, complex]): The amplitude of the pulse in volts.
+            Either a float for a single channel, or a complex number for an IQ channel.
+    """
+
+    amplitude: Union[float, complex]
 
     def waveform_function(self):
         return self.amplitude
@@ -264,6 +416,18 @@ class SquarePulse(Pulse):
 
 @dataclass(kw_only=True, eq=False)
 class GaussianPulse(Pulse):
+    """Gaussian pulse QuAM component.
+
+    Args:
+        amplitude (float): The amplitude of the pulse in volts.
+        length (int): The length of the pulse in samples.
+        sigma (float): The standard deviation of the gaussian pulse.
+            Should generally be less than half the length of the pulse.
+        subtracted (bool): If true, returns a subtracted Gaussian, such that the first
+            and last points will be at 0 volts. This reduces high-frequency components
+            due to the initial and final points offset. Default is true.
+    """
+
     amplitude: float
     length: int
     sigma: float

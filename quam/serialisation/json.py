@@ -10,11 +10,31 @@ if TYPE_CHECKING:
 
 
 class JSONSerialiser(AbstractSerialiser):
+    """Serialiser for QuAM objects to JSON files.
+
+    Args:
+        default_filename: The default filename to save to when no filename is provided.
+        default_foldername: The default foldername to save to when no folder is
+            provided. Only used when saving components to separate files, i.e. when
+            `component_mapping` is provided.
+        content_mapping: A dictionary mapping filenames to the keys of the contents
+            to be saved to that file. If not provided, all contents are saved to the
+            default file, otherwise a folder is created and the default file is saved
+            to that folder, and the contents are saved to the files specified in the
+            mapping.
+    """
+
     default_filename = "state.json"
     default_foldername = "quam"
     content_mapping = {}
 
     def _save_dict_to_json(self, contents: Dict[str, Any], path: Path):
+        """Save a dictionary to a JSON file.
+
+        Args:
+            contents: The dictionary to save.
+            path: The path to save to.
+        """
         with open(path, "w") as f:
             json.dump(contents, f, indent=4)
 
@@ -26,6 +46,10 @@ class JSONSerialiser(AbstractSerialiser):
         """Parse the path to determine the folder and filename to save to.
 
         See JSONSerialiser.save for details on allowed path types.
+
+        Args:
+            path: The path to parse.
+            content_mapping: The content mapping to use.
         """
         if path is None:
             default_filename = self.default_filename
@@ -111,7 +135,17 @@ class JSONSerialiser(AbstractSerialiser):
     def load(
         self,
         path: Union[Path, str] = None,
-    ):
+    ) -> Dict[str, Any]:
+        """Load a dictionary representation of a QuamRoot object from a JSON file.
+
+        Args:
+            path: The path to load from. If a folder is provided, the contents from all
+                JSON files in that folder are loaded and merged into a dictionary.
+                If a JSON file is provided, the contents of that file are loaded.
+
+        Returns:
+            A dictionary representation of the QuamRoot object.
+        """
         path = Path(path)
         contents = {}
         metadata = {

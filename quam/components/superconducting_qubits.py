@@ -13,6 +13,8 @@ __all__ = ["Transmon"]
 
 @dataclass(kw_only=True, eq=False)
 class Transmon(QuamComponent):
+    """Example QuAM component for a transmon qubit."""
+
     id: Union[int, str]
 
     xy: IQChannel = None
