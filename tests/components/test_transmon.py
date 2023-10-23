@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from quam.components import *
+from quam.components.superconducting_qubits import *
 from quam.components.channels import IQChannel
 from quam.core import QuamRoot
 
@@ -76,7 +77,7 @@ def test_transmon_add_pulse():
         ),
     )
     transmon.xy.operations["X180"] = pulses.DragPulse(
-        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, rotation_angle=0
+        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
     )
 
     quam_dict = transmon.to_dict()
@@ -95,7 +96,7 @@ def test_transmon_add_pulse():
                     "sigma": 4,
                     "alpha": 2,
                     "anharmonicity": 200000000.0,
-                    "rotation_angle": 0.0,
+                    "axis_angle": 0.0,
                     "length": 20,
                 }
             },

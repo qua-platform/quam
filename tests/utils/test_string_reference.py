@@ -128,7 +128,7 @@ def test_get_referenced_value():
 
 
 def test_delimiter():
-    from quam.components import Transmon
+    from quam.components.superconducting_qubits import Transmon
 
     transmon = Transmon(
         id=1,

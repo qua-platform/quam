@@ -3,7 +3,7 @@ import json
 
 from quam.components import *
 from quam.components.channels import IQChannel, InOutIQChannel, SingleChannel
-from quam.components.superconducting_qubits import Transmon, QuAM
+from quam.components.superconducting_qubits import QuAM
 from quam.core import QuamRoot
 
 

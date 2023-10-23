@@ -1,3 +1,4 @@
+from quam.components.superconducting_qubits import QuAM
 from quam.examples.generate_superconducting_quam import *
 from quam.components import *
 from quam.core import *
@@ -41,7 +42,7 @@ def test_quam_referenced_full(tmp_path):
             "__class__",
         ]
     )
-    assert loaded_quam["__class__"] == "quam.components.quam.QuAM"
+    assert loaded_quam["__class__"] == "quam.components.superconducting_qubits.QuAM"
     assert len(loaded_quam["qubits"]) == 3
     assert len(loaded_quam["mixers"]) == 6
     assert len(loaded_quam["local_oscillators"]) == 6

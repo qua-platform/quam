@@ -7,14 +7,14 @@ from quam.components.channels import Channel, IQChannel, SingleChannel
 
 def test_drag_pulse():
     drag_pulse = pulses.DragPulse(
-        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, rotation_angle=0
+        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
     )
 
     assert drag_pulse.operation == "control"
     assert drag_pulse.length == 20
     assert drag_pulse.get_attrs() == {
         "length": 20,
-        "rotation_angle": 0.0,
+        "axis_angle": 0.0,
         "digital_marker": None,
         "amplitude": 1,
         "sigma": 4,
@@ -84,7 +84,7 @@ def test_IQ_pulse_single_channel():
     )
     single_channel.operations["X180"] = pulses.DragPulse(
         length=16,
-        rotation_angle=0,
+        axis_angle=0,
         amplitude=1,
         sigma=12,
         alpha=0.1,
