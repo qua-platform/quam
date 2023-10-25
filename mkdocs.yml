@@ -1,1 +1,26 @@
-site_name: My Docs
+site_name: QuAM (Quantum Abstract Machine) Documentation
+
+theme:
+  name: material
+  features:
+  - navigation.tabs
+  - navigation.sections
+  - toc.integrate
+  - search.suggest
+  - search.highlight
+  - content.tabs.link
+  - content.code.annotations
+  - content.code.copy
+  language: en
+
+plugins:
+- search
+- autorefs
+- gen-files:
+    scripts:
+    - docs/gen_ref_pages.py
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        paths: [src]
