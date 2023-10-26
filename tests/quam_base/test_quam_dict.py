@@ -173,6 +173,7 @@ def test_val_matches_annotation():
     )
     assert not TestQuamComponent._val_matches_attr_annotation("val_Dict_annotated", 42)
 
+
 def test_dict_parent(BareQuamComponent):
     quam_dict = QuamDict({"a": BareQuamComponent()})
     assert quam_dict["a"].parent == quam_dict
@@ -182,3 +183,9 @@ def test_dict_parent(BareQuamComponent):
 
     quam_dict.c = BareQuamComponent()
     assert quam_dict.c.parent == quam_dict
+
+
+def test_dict_nested():
+    quam_dict = QuamDict(nested={"nested2": {"a": 42}})
+    assert isinstance(quam_dict.nested, QuamDict)
+    assert isinstance(quam_dict.nested.nested2, QuamDict)
