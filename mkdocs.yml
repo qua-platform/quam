@@ -23,4 +23,15 @@ plugins:
     default_handler: python
     handlers:
       python:
-        paths: [src]
+        paths: [quam]
+
+markdown_extensions:
+  - pymdownx.blocks.tab:  # Add tabs to markdown using: === "title"
+      alternate_style: true  # Somehow this is required for tabs to work
+  - pymdownx.blocks.details  # Enable collapsible elements, e.g.: ??? tip "title"
+  - pymdownx.superfences  # Enable multiline code in tabs
+  - pymdownx.emoji:
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg

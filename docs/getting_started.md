@@ -1,0 +1,104 @@
+# Getting started
+
+## :one: Pre-requisites
+
+/// tab | For Windows
+- Windows 10 (build 1809 and later), or Windows 11
+- Python 3.9 or higher, we recommend Python 3.10 or higher
+    <!-- For Python 3.8 and 3.9, please see additional notes (TODO add note reference) -->
+- [Git version control system](https://git-scm.com/), or a Git GUI such as [GitHub Desktop](https://desktop.github.com/) or [GitKraken](https://www.gitkraken.com/)
+
+/// details | Using a virtual environment
+    type: tip
+
+It is recommended to install QuAM in a Python virtual environment.
+
+If using Anaconda, this can be done via
+
+```bash
+conda create -n {environment_name}  
+conda activate {environment_name}
+```
+
+Be sure to replace `{environment_name}` with a name of your choosing
+
+To create a virtual environment without Anaconda, open PowerShell :octicons-terminal-16:, navigate to
+a folder where you would like to create a virtual environment, and execute the 
+following command:
+
+```
+python -m venv {environment_name}  
+source {environment_name}\Scripts\Activate.ps1
+```
+///
+///
+
+/// tab | For MacOS
+- Tested on MacOS Ventura and MacOS Sonoma
+- Python 3.9 or higher, we recommend Python 3.10 or higher
+- [Git version control system](https://git-scm.com/), or a Git GUI such as [GitHub Desktop](https://desktop.github.com/) or [GitKraken](https://www.gitkraken.com/)
+
+/// details | Using a virtual environment
+    type: tip
+
+It is recommended to install QuAM in a Python virtual environment.  
+To create a virtual environment, open terminal :octicons-terminal-16:, navigate to a folder where you would like to create a virtual environment, and execute the following command:
+```
+python -m venv {environment_name}
+source {environment_name}/bin/activate
+```
+///
+///
+
+/// tab | For Linux
+- QuAM has not been tested on Linux. However, it should follow similar instructions as MacOS.
+///
+
+## :two: Installation
+To download and install QuAM using Git, open Powershell / terminal :octicons-terminal-16: in a desired installation folder and run the following command:
+```bash
+git clone https://github.com/qua-platform/quam.git
+pip3 install ./quam
+```
+/// details | Installation from a Git GUI
+    type: note
+
+If you're not using Git directly but a Git client, please clone the repository from <https://github.com/qua-platform/quam.git>.  
+Then open Powershell / terminal :octicons-terminal-16:, navigate to the downloaded folder `quam` and run
+
+```
+pip3 install .
+```
+///
+
+/// details | Error message "command not found: pip3"
+    type: warning
+
+In case the error message `command not found: pip3` is displayed, try using the alternative command
+```
+pip install ./quam
+```
+If this raises a similar error, it likely means that Python cannot be found. Please check that you have Python installed. If you've set up a virtual environment, please ensure that it has been activated (see `Pre-requisites`).
+///
+
+## :three: First usage
+
+
+### Overview of components
+#### quam.components.hardware
+- Mixer
+- LocalOscillator
+
+#### quam.components.channels
+- Channel
+- SingleChannel
+- IQChannel
+- InOutIQChannel
+
+#### quam.components.pulses
+- Pulse
+- ReadoutPulse
+- ConstantReadoutPulse
+- DragPulse
+- SquarePulse
+- GaussianPulse
