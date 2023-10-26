@@ -8,4 +8,6 @@ It does so by providing a framework that allows the creation of abstraction laye
 ## Key features
 - Standard set of QuAM components (e.g. Mixer, IQChannel) that allow you to digitally represent your quantum setup.
 - Automated generation of the QUA configuration from QuAM components
+- Framework for easily extending QuAM with custom classes.  
+  This allows you to build abstraction layers to manage even the most complex quantum setups.
 - Saving / loading your QuAM state.
