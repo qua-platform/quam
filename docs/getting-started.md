@@ -83,6 +83,8 @@ If this raises a similar error, it likely means that Python cannot be found. Ple
 
 ## :three: First usage
 
+QuAM comes with a range of standard QuAM components that can kick-start experimental setups. To see how these components are used, have a look at the [QuAM demonstration](#)
+
 
 ### Overview of components
 #### quam.components.hardware

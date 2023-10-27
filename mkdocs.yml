@@ -13,7 +13,16 @@ theme:
   - content.code.copy
   language: en
 
+nav:
+  - index.md
+  - getting-started.md
+  - demonstration/Quam-features.md
+  - quam-references.md
+
 plugins:
+- mkdocs-jupyter:
+    include:
+      - "*.ipynb"
 - search
 - autorefs
 - gen-files:
@@ -30,8 +39,6 @@ markdown_extensions:
       alternate_style: true  # Somehow this is required for tabs to work
   - pymdownx.blocks.details  # Enable collapsible elements, e.g.: ??? tip "title"
   - pymdownx.superfences  # Enable multiline code in tabs
-  - pymdownx.emoji:
-  - attr_list
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
