@@ -1,0 +1,103 @@
+{
+    "qubits": [
+        {
+            "id": 0,
+            "xy": {
+                "output_port_I": [
+                    "con1",
+                    3
+                ],
+                "output_port_Q": [
+                    "con1",
+                    4
+                ],
+                "mixer": {},
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                }
+            },
+            "z": {
+                "output_port": [
+                    "con1",
+                    5
+                ]
+            }
+        },
+        {
+            "id": 1,
+            "xy": {
+                "output_port_I": [
+                    "con1",
+                    6
+                ],
+                "output_port_Q": [
+                    "con1",
+                    7
+                ],
+                "mixer": {},
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                }
+            },
+            "z": {
+                "output_port": [
+                    "con1",
+                    8
+                ]
+            }
+        }
+    ],
+    "resonators": [
+        {
+            "id": 0,
+            "output_port_I": [
+                "con1",
+                1
+            ],
+            "output_port_Q": [
+                "con1",
+                2
+            ],
+            "mixer": {},
+            "local_oscillator": {
+                "frequency": 6000000000.0,
+                "power": 10
+            },
+            "input_port_I": [
+                "con1",
+                1
+            ],
+            "input_port_Q": [
+                "con1",
+                2
+            ]
+        },
+        {
+            "id": 1,
+            "output_port_I": [
+                "con1",
+                1
+            ],
+            "output_port_Q": [
+                "con1",
+                2
+            ],
+            "mixer": {},
+            "local_oscillator": {
+                "frequency": 6000000000.0,
+                "power": 10
+            },
+            "input_port_I": [
+                "con1",
+                1
+            ],
+            "input_port_Q": [
+                "con1",
+                2
+            ]
+        }
+    ],
+    "__class__": "quam.components.superconducting_qubits.QuAM"
+}

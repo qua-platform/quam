@@ -1,0 +1,111 @@
+{
+    "qubits": [
+        {
+            "id": 0,
+            "xy": {
+                "output_port_I": "#/wiring/qubits/0/output_port_I",
+                "output_port_Q": "#/wiring/qubits/0/output_port_Q",
+                "mixer": {},
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                }
+            },
+            "z": {
+                "output_port": "#/wiring/qubits/0/output_port_Z"
+            }
+        },
+        {
+            "id": 1,
+            "xy": {
+                "output_port_I": "#/wiring/qubits/1/output_port_I",
+                "output_port_Q": "#/wiring/qubits/1/output_port_Q",
+                "mixer": {},
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                }
+            },
+            "z": {
+                "output_port": "#/wiring/qubits/1/output_port_Z"
+            }
+        }
+    ],
+    "resonators": [
+        {
+            "id": 0,
+            "output_port_I": "#/wiring/resonator/output_port_I",
+            "output_port_Q": "#/wiring/resonator/output_port_Q",
+            "mixer": {},
+            "local_oscillator": {
+                "frequency": 6000000000.0,
+                "power": 10
+            },
+            "input_port_I": "#/wiring/resonator/input_port_I",
+            "input_port_Q": "#/wiring/resonator/input_port_Q"
+        },
+        {
+            "id": 1,
+            "output_port_I": "#/wiring/resonator/output_port_I",
+            "output_port_Q": "#/wiring/resonator/output_port_Q",
+            "mixer": {},
+            "local_oscillator": {
+                "frequency": 6000000000.0,
+                "power": 10
+            },
+            "input_port_I": "#/wiring/resonator/input_port_I",
+            "input_port_Q": "#/wiring/resonator/input_port_Q"
+        }
+    ],
+    "wiring": {
+        "qubits": [
+            {
+                "output_port_I": [
+                    "con1",
+                    3
+                ],
+                "output_port_Q": [
+                    "con1",
+                    4
+                ],
+                "output_port_Z": [
+                    "con1",
+                    5
+                ]
+            },
+            {
+                "output_port_I": [
+                    "con1",
+                    6
+                ],
+                "output_port_Q": [
+                    "con1",
+                    7
+                ],
+                "output_port_Z": [
+                    "con1",
+                    8
+                ]
+            }
+        ],
+        "resonator": {
+            "output_port_I": [
+                "con1",
+                1
+            ],
+            "output_port_Q": [
+                "con1",
+                2
+            ],
+            "input_port_I": [
+                "con1",
+                1
+            ],
+            "input_port_Q": [
+                "con1",
+                2
+            ]
+        }
+    },
+    "__class__": "quam.components.superconducting_qubits.QuAM"
+}

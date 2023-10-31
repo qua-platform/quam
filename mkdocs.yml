@@ -13,12 +13,12 @@ theme:
   - content.code.copy
   language: en
 
-# nav:
-#   - index.md
-#   - getting-started.md
-#   - demonstration.md
-#   - custom-components.md
-#   - quam-references.md
+nav:
+  - index.md
+  - getting-started.md
+  - demonstration.md
+  - custom-components.md
+  - quam-references.md
 
 plugins:
 # - mkdocs-jupyter:
