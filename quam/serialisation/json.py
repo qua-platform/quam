@@ -51,6 +51,9 @@ class JSONSerialiser(AbstractSerialiser):
             path: The path to parse.
             content_mapping: The content mapping to use.
         """
+        if isinstance(path, str):
+            path = Path(path)
+
         if path is None:
             default_filename = self.default_filename
             if not content_mapping:
