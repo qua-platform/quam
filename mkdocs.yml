@@ -1,0 +1,45 @@
+site_name: QuAM (Quantum Abstract Machine) Documentation
+
+theme:
+  name: material
+  features:
+  - navigation.tabs
+  - navigation.sections
+  - toc.integrate
+  - search.suggest
+  - search.highlight
+  - content.tabs.link
+  - content.code.annotations
+  - content.code.copy
+  language: en
+
+nav:
+  - index.md
+  - getting-started.md
+  - demonstration.md
+  - custom-components.md
+  - quam-references.md
+
+plugins:
+# - mkdocs-jupyter:
+#     include:
+#       - "*.ipynb"
+- search
+- autorefs  # Automatically link across pages
+- gen-files:  # Autogenerate code reference using mkdocstrings
+    scripts:
+    - docs/gen_ref_pages.py
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        paths: [quam]
+
+markdown_extensions:
+  - pymdownx.blocks.tab:  # Add tabs to markdown using: === "title"
+      alternate_style: true  # Somehow this is required for tabs to work
+  - pymdownx.blocks.details  # Enable collapsible elements, e.g.: ??? tip "title"
+  - pymdownx.superfences  # Enable multiline code in tabs
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
