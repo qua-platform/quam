@@ -2,6 +2,7 @@ import dataclasses
 from dataclasses import dataclass, fields, is_dataclass
 import functools
 import sys
+import warnings
 from typing import Dict, Union, get_type_hints
 
 
@@ -129,11 +130,13 @@ def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
     post_init_method = getattr(cls, "__post_init__", None)
 
     def __post_init__(self, *args, **kwargs):
-        for f in fields(self):
-            if getattr(self, f.name, None) is REQUIRED:
-                raise TypeError(
-                    f"Please provide {cls.__name__}.{f.name} as it is a required arg"
-                )
+        with warnings.catch_warnings():  # Ignore warnings of failed references
+            warnings.filterwarnings("ignore", category=UserWarning)
+            for f in fields(self):
+                if getattr(self, f.name, None) is REQUIRED:
+                    raise TypeError(
+                        f"Please provide {cls.__name__}.{f.name} as it is a required arg"
+                    )
 
         if post_init_method is not None:
             post_init_method(self, *args, **kwargs)
