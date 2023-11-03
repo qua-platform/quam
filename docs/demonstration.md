@@ -7,6 +7,7 @@ The standard QuAM components can be imported using
 
 ```python
 from quam.components import *
+from quam.components.superconducting_qubits import *
 ```
 
 Since we're starting from scratch, we will have to instantiate all QuAM components. This has to be done once, after which we will generally save and load QuAM from a file.
@@ -14,7 +15,7 @@ To begin, we create the top-level QuAM object, which inherits from [quam.core.qu
 
 We will call our top-level object `machine`:
 ```python
-machine = superconducting_qubits.QuAM()
+machine = QuAM()
 ```
 
 So far, this object `machine` is empty, so we'll populate it with objects.
@@ -31,7 +32,7 @@ Code editors with Python language support (e.g., VS Code, PyCharm) are very usef
 num_qubits = 2
 for idx in range(num_qubits):
     # Create qubit components
-    transmon = superconducting_qubits.Transmon(
+    transmon = Transmon(
         id=idx,
         xy=IQChannel(
             local_oscillator=LocalOscillator(power=10, frequency=6e9),
@@ -177,7 +178,7 @@ machine.save("state.json")
 This JSON file is a serialised representation of QuAM. As a result, QuAM can also be loaded from this JSON file:
 
 ```python
-loaded_quam = QuAM.load("state.json")
+loaded_machine = QuAM.load("state.json")
 ```
 
 ## Generating the QUA configuration
