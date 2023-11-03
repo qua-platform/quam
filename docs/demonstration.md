@@ -7,7 +7,7 @@ The standard QuAM components can be imported using
 
 ```python
 from quam.components import *
-from quam.components.superconducting_qubits import *
+from quam.components.superconducting_qubits import Transmon, QuAM
 ```
 
 Since we're starting from scratch, we will have to instantiate all QuAM components. This has to be done once, after which we will generally save and load QuAM from a file.
