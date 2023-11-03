@@ -189,3 +189,8 @@ def test_dict_nested():
     quam_dict = QuamDict(nested={"nested2": {"a": 42}})
     assert isinstance(quam_dict.nested, QuamDict)
     assert isinstance(quam_dict.nested.nested2, QuamDict)
+
+
+def test_quam_dict_repr():
+    quam_dict = QuamDict(val1=42, val2=43)
+    assert repr(quam_dict) == "{'val1': 42, 'val2': 43}"

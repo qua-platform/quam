@@ -611,6 +611,9 @@ class QuamDict(UserDict, QuamBase):
             return self.data == other
         return super().__eq__(other)
 
+    def __repr__(self) -> str:
+        return super().__repr__()
+
     # QuAM methods
     def _get_attr_names(self):
         return list(self.data.keys())
