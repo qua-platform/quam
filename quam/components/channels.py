@@ -350,7 +350,7 @@ class InOutIQChannel(IQChannel):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
-        output_ports = {"I": tuple(self.output_port_I), "Q": tuple(self.output_port_Q)}
+        input_ports = {"I": tuple(self.input_port_I), "Q": tuple(self.input_port_Q)}
         offsets = {"I": self.mixer.offset_I, "Q": self.mixer.offset_Q}
 
         config["elements"][self.name]["outputs"] = {
@@ -361,7 +361,7 @@ class InOutIQChannel(IQChannel):
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
         for I_or_Q in ["I", "Q"]:
-            controller_name, port = output_ports[I_or_Q]
+            controller_name, port = input_ports[I_or_Q]
             controller = config["controllers"].setdefault(
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},

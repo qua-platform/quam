@@ -6,6 +6,7 @@ additional
 .venv*
 .coverage
 .idea
+build
 
 dependency_links.txt
 PKG-INFO
