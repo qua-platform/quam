@@ -261,15 +261,16 @@ class IQChannel(Channel):
     output_port_I: Tuple[str, int]
     output_port_Q: Tuple[str, int]
 
-    mixer: Mixer
-    local_oscillator: LocalOscillator
+    frequency_converter_up: FrequencyConverter
+    mixer: Mixer = ":./frequency_converter_up.mixer"
+    local_oscillator: LocalOscillator = ":./frequency_converter_up.local_oscillator"
 
     intermediate_frequency: float = 0.0
 
     _default_label: ClassVar[str] = "IQ"
 
     @property
-    def frequency_rf(self):
+    def rf_frequency(self):
         return self.local_oscillator.frequency + self.intermediate_frequency
 
     def apply_to_config(self, config: dict):
@@ -328,6 +329,9 @@ class InOutIQChannel(IQChannel):
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
+    local_oscillator = LocalOscillator
+    frequency_converter_down: FrequencyConverter
+
     input_port_I: Tuple[str, int]
     input_port_Q: Tuple[str, int]
 
@@ -341,18 +345,24 @@ class InOutIQChannel(IQChannel):
 
     _default_label: ClassVar[str] = "IQ"
 
+    def __post_init__(self):
+        if self.frequency_converter_up.local_oscillator is None:
+            self.frequency_converter_up.local_oscillator = "../local_oscillator"
+        if self.frequency_converter_down.local_oscillator is None:
+            self.frequency_converter_down.local_oscillator = "../local_oscillator"
+
     def apply_to_config(self, config: dict):
         """Adds this InOutIQChannel to the QUA configuration.
 
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
-        # Add pulses & waveforms
         super().apply_to_config(config)
 
         input_ports = {"I": tuple(self.input_port_I), "Q": tuple(self.input_port_Q)}
-        offsets = {"I": self.mixer.offset_I, "Q": self.mixer.offset_Q}
+        offsets = {"I": self.input_offset_I, "Q": self.input_offset_Q}
 
+        # Note outputs instead of inputs because it's w.r.t. the QPU
         config["elements"][self.name]["outputs"] = {
             "out1": tuple(self.input_port_I),
             "out2": tuple(self.input_port_Q),

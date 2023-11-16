@@ -13,6 +13,7 @@ patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python <
 __all__ = [
     "LocalOscillator",
     "Mixer",
+    "FrequencyConverter",
 ]
 
 
@@ -54,7 +55,7 @@ class Mixer(QuamComponent):
     """
 
     local_oscillator_frequency: float = "#../local_oscillator/frequency"
-    intermediate_frequency: float = "#../intermediate_frequency"
+    intermediate_frequency: float = "#../../intermediate_frequency"
 
     offset_I: float = 0
     offset_Q: float = 0
@@ -64,7 +65,7 @@ class Mixer(QuamComponent):
 
     @property
     def name(self):
-        parent_id = self._get_referenced_value("#../name")
+        parent_id = self._get_referenced_value("#../../name")
         if str_ref.is_reference(parent_id):
             raise AttributeError(f"Mixer.parent must be defined for {self}")
         return f"{parent_id}{str_ref.DELIMITER}mixer"
@@ -104,3 +105,10 @@ class Mixer(QuamComponent):
         return [
             float(N * x) for x in [(1 - g) * c, (1 + g) * s, (1 - g) * s, (1 + g) * c]
         ]
+
+
+@dataclass(kw_only=True, eq=False)
+class FrequencyConverter(QuamComponent):
+    local_oscillator: LocalOscillator = None
+    mixer: Mixer = None
+    gain: float = None
