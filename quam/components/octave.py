@@ -118,7 +118,6 @@ class OctaveOld(QuamComponent):
 class OctaveFrequencyConverter(FrequencyConverter):
     channel: Union[str, int]
     octave: OctaveOld
-    arguments: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def frequency(self):
