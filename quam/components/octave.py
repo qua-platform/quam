@@ -16,6 +16,9 @@ from octave_sdk import RFInputLOSource
 from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
 
 
+__al__ = ["OctaveFrequencyConverter", "OctaveOld"]
+
+
 @dataclass(kw_only=True, eq=False)
 class OctaveFrequencyConverter(FrequencyConverter):
     channel: Union[str, int]
