@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from typing import List, Union, ClassVar, Dict
+from typing import List, Union, ClassVar, Dict, Any
 from dataclasses import dataclass, field
 
 from quam.core import QuamComponent
@@ -17,11 +17,6 @@ from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
 
 
 __al__ = ["OctaveFrequencyConverter", "OctaveOld"]
-
-
-@dataclass(kw_only=True, eq=False)
-class OctaveFrequencyConverter(FrequencyConverter):
-    channel: Union[str, int]
 
 
 @dataclass
@@ -117,3 +112,19 @@ class OctaveOld(QuamComponent):
     def set_gain(self, channel: str, gain: float):
         channel_qe = self._channel_to_qe[self.name, channel]
         self.octave.set_rf_output_gain(channel_qe, gain)
+
+
+@dataclass(kw_only=True, eq=False)
+class OctaveFrequencyConverter(FrequencyConverter):
+    channel: Union[str, int]
+    octave: OctaveOld
+    arguments: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def frequency(self):
+        return self.local_oscillator.frequency
+
+    def configure(self):
+        self.octave.set_frequency(channel=self.channel, frequency=self.frequency)
+        if self.gain is not None:
+            self.octave.set_gain(channel=self.channel, gain=self.gain)

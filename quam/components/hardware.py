@@ -28,7 +28,7 @@ class LocalOscillator(QuamComponent):
             Not used for the QUA configuration
     """
 
-    frequency: float
+    frequency: float = None
     power: float = None
 
 
