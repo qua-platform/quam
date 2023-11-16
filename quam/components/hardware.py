@@ -1,6 +1,6 @@
 import numpy as np
-from typing import List
-from dataclasses import dataclass
+from typing import List, Union
+from dataclasses import dataclass, field
 
 from quam.core import QuamComponent
 from quam.utils import patch_dataclass

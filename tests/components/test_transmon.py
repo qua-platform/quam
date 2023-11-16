@@ -38,7 +38,7 @@ def test_transmon_xy():
 
     transmon.xy.mixer.local_oscillator_frequency = 5e9
 
-    assert transmon.xy.frequency_rf == 5.1e9
+    assert transmon.xy.rf_frequency == 5.1e9
 
     transmon.xy.apply_to_config(cfg)
     expected_cfg = {
