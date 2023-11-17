@@ -80,7 +80,10 @@ def validate_obj_type(
             ) from e
         else:
             raise TypeError(
-                f"Wrong type type({str_repr})={type(elem)} != {required_type}"
+                "Wrong object type found during validation.\n"
+                f"Path: {str_repr}\n"
+                f"Required type: {required_type}\n"
+                f"Actual type: {type(elem)}, value: {elem}"
             ) from e
 
 

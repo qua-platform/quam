@@ -59,7 +59,7 @@ def instantiate_attrs_from_dict(
                 attr_val,
                 fix_attrs=fix_attrs,
                 validate_type=validate_type,
-                str_repr=f"{str_repr}[{attr_name}]",
+                str_repr=f'{str_repr}["{attr_name}"]',
             )
         else:
             instantiated_attr = attr_val
@@ -165,7 +165,7 @@ def instantiate_attr(
     """
     from quam.core import QuamComponent  # noqa: F811
 
-    if isinstance(attr_val, str) and attr_val.startswith(":"):
+    if string_reference.is_reference(attr_val):
         # Value is a reference, add without instantiating
         instantiated_attr = attr_val
     elif attr_val is None:
@@ -311,7 +311,9 @@ def instantiate_quam_class(
     Returns:
         QuamBase instance
     """
-    str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
+    if not str_repr:
+        str_repr = quam_class.__name__
+    # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
 
     if "__class__" in contents:
         quam_class = get_class_from_path(contents["__class__"])
