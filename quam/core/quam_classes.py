@@ -15,6 +15,7 @@ from typing import (
     get_type_hints,
     get_origin,
     get_args,
+    Optional,
 )
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
@@ -145,38 +146,6 @@ class QuamBase(ReferenceClass):
                     "Please make it a dataclass."
                 )
 
-    def _get_parent_attr_name(self) -> str:
-        """Get the attribute name of parent that matches this object
-
-        Returns:
-            The attribute name of parent that matches this object.
-
-        Example:
-            ```
-            @dataclass
-            class A(QuamBase):
-                attr: QuamBase = None
-
-            child = A()
-            parent = QuamBase(attr=child)
-            child._get_parent_attr_name()  # Returns "attr"
-
-        Raises:
-            AttributeError if not found.
-        """
-        if self.parent is None:
-            raise AttributeError(
-                "Could not find parent parent attribute that matches object"
-                f"because object has no parent. Object={self}"
-            )
-        for attr_name in self.parent._get_attr_names():
-            if getattr(self.parent, attr_name) is self:
-                return attr_name
-        else:
-            raise AttributeError(
-                "Could not find parent parent attribute that matches object {self}"
-            )
-
     def _get_attr_names(self) -> List[str]:
         """Get names of all dataclass attributes of this object.
 
@@ -188,6 +157,28 @@ class QuamBase(ReferenceClass):
         """
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
+
+    def get_attr_name(self, attr_val: Any) -> str:
+        """Get the name of an attribute that matches the value.
+
+        Args:
+            attr_val: The value of the attribute.
+
+        Returns:
+            The name of the attribute.
+
+        Raises:
+            AttributeError if not found.
+        """
+        for attr_name in self._get_attr_names():
+            if getattr(self, attr_name) is attr_val:
+                return attr_name
+        else:
+            raise AttributeError(
+                "Could not find name corresponding to attribute.\n"
+                f"attribute: {attr_val}\n"
+                f"obj: {self}"
+            )
 
     def _attr_val_is_default(self, attr: str, val: Any) -> bool:
         """Check whether the value of an attribute is the default value.
@@ -211,7 +202,11 @@ class QuamBase(ReferenceClass):
         if field.default is not MISSING:
             return val == field.default
         elif field.default_factory is not MISSING:
-            return val == field.default_factory()
+            try:
+                default_val = field.default_factory()
+                return val == default_val
+            except TypeError:
+                return False
 
         return False
 
@@ -232,6 +227,19 @@ class QuamBase(ReferenceClass):
         elif required_type == list or get_origin(required_type) == list:
             return isinstance(val, (list, QuamList))
         return type(val) == required_type
+
+    def get_reference(self) -> Optional[str]:
+        """Get the reference path of this object.
+
+        Returns:
+            The reference path of this object.
+        """
+
+        if self.parent is None:
+            raise AttributeError(
+                "Unable to extract reference path. Parent must be defined for {self}"
+            )
+        return f"{self.parent.get_reference()}/{self.parent.get_attr_name(self)}"
 
     def get_attrs(
         self, follow_references: bool = False, include_defaults: bool = True
@@ -414,6 +422,9 @@ class QuamRoot(QuamBase):
 
         if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
+
+    def get_reference(self):
+        return "#"
 
     def save(
         self,
@@ -787,6 +798,17 @@ class QuamList(UserList, QuamBase):
             return False
         return type(val) == self._value_annotation
 
+    def get_attr_name(self, attr_val: Any) -> str:
+        for k, elem in enumerate(self.data):
+            if elem is attr_val:
+                return str(k)
+        else:
+            raise AttributeError(
+                "Could not find name corresponding to attribute"
+                f"attribute: {attr_val}\n"
+                f"obj: {self}"
+            )
+
     def to_dict(
         self, follow_references: bool = False, include_defaults: bool = False
     ) -> list:
@@ -845,3 +867,8 @@ class QuamList(UserList, QuamBase):
 
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
+
+    def get_attrs(
+        self, follow_references: bool = False, include_defaults: bool = True
+    ) -> Dict[str, Any]:
+        raise NotImplementedError("QuamList does not have attributes")

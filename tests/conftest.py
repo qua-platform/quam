@@ -7,8 +7,7 @@ from quam.core import *
 @pytest.fixture
 def BareQuamRoot():
     @dataclass
-    class BareQuamRoot(QuamRoot):
-        ...
+    class BareQuamRoot(QuamRoot): ...
 
     return BareQuamRoot
 
@@ -16,8 +15,7 @@ def BareQuamRoot():
 @pytest.fixture
 def BareQuamComponent():
     @dataclass
-    class BareQuamComponent(QuamComponent):
-        ...
+    class BareQuamComponent(QuamComponent): ...
 
     return BareQuamComponent
 

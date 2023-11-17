@@ -1,4 +1,6 @@
 from collections import UserList
+import pytest
+
 from quam.core import *
 
 
@@ -66,3 +68,9 @@ def test_list_parent(BareQuamComponent):
 
     quam_list[0] = BareQuamComponent()
     assert quam_list[0].parent is quam_list
+
+
+def test_list_get_attrs_error():
+    quam_list = QuamList()
+    with pytest.raises(NotImplementedError):
+        quam_list.get_attrs()

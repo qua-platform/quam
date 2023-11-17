@@ -64,7 +64,7 @@ class Pulse(QuamComponent, ABC):
 
     @property
     def full_name(self):
-        name = self._get_parent_attr_name()
+        name = self.parent.get_attr_name(self)
         channel = self._get_referenced_value("#../../")
         return f"{channel.name}{str_ref.DELIMITER}{name}"
 
@@ -436,9 +436,7 @@ class GaussianPulse(Pulse):
     def waveform_function(self):
         t = np.arange(self.length, dtype=int)
         center = (self.length - 1) / 2
-        gauss_wave = self.amplitude * np.exp(
-            -((t - center) ** 2) / (2 * self.sigma**2)
-        )
+        gauss_wave = self.amplitude * np.exp(-((t - center) ** 2) / (2 * self.sigma**2))
 
         if self.subtracted:
             gauss_wave = gauss_wave - gauss_wave[-1]
