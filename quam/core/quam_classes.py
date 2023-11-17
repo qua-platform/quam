@@ -202,7 +202,11 @@ class QuamBase(ReferenceClass):
         if field.default is not MISSING:
             return val == field.default
         elif field.default_factory is not MISSING:
-            return val == field.default_factory()
+            try:
+                default_val = field.default_factory()
+                return val == default_val
+            except TypeError:
+                return False
 
         return False
 
@@ -235,10 +239,7 @@ class QuamBase(ReferenceClass):
             raise AttributeError(
                 "Unable to extract reference path. Parent must be defined for {self}"
             )
-        return (
-            f"{self.parent.get_reference()}{string_reference.DELIMITER}"
-            f"{self.parent.get_attr_name(self)}"
-        )
+        return f"{self.parent.get_reference()}/{self.parent.get_attr_name(self)}"
 
     def get_attrs(
         self, follow_references: bool = False, include_defaults: bool = True
