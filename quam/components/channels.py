@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
-from quam.components.hardware import LocalOscillator, Mixer
+from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
 from quam.components.pulses import Pulse
 from quam.core import QuamComponent
 from quam.utils import patch_dataclass

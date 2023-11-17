@@ -1,11 +1,9 @@
-import numpy as np
 import os
-from typing import List, Union, ClassVar, Dict, Any
+from typing import Union, ClassVar, Dict
 from dataclasses import dataclass, field
 
 from quam.core import QuamComponent
-from quam.utils import patch_dataclass
-from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
+from quam.components.hardware import FrequencyConverter
 
 
 from qm.QuantumMachinesManager import QuantumMachinesManager
@@ -14,9 +12,13 @@ from qm.octave.qm_octave import QmOctave
 
 from octave_sdk import RFInputLOSource
 from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
+from quam.utils import patch_dataclass
 
 
-__al__ = ["OctaveFrequencyConverter", "OctaveOld"]
+patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
+
+
+__all__ = ["OctaveOldFrequencyConverter", "OctaveOld"]
 
 
 @dataclass
@@ -115,7 +117,7 @@ class OctaveOld(QuamComponent):
 
 
 @dataclass(kw_only=True, eq=False)
-class OctaveFrequencyConverter(FrequencyConverter):
+class OctaveOldFrequencyConverter(FrequencyConverter):
     channel: Union[str, int]
     octave: OctaveOld
 
