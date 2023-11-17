@@ -259,7 +259,7 @@ def test_parent_attr_name(BareQuamComponent):
     outer_quam_component = OuterQuamComponent(quam_component=inner_quam_component)
     assert outer_quam_component.quam_component is inner_quam_component
     assert inner_quam_component.parent is outer_quam_component
-    assert inner_quam_component.parent.get_attr_name() == "quam_component"
+    assert inner_quam_component.parent.get_attr_name(inner_quam_component) == "quam_component"
 
     outer_quam_component.quam_component = None
     with pytest.raises(AttributeError):

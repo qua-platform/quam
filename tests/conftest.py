@@ -7,8 +7,7 @@ from quam.core import *
 @pytest.fixture
 def BareQuamRoot():
     @dataclass
-    class BareQuamRoot(QuamRoot):
-        ...
+    class BareQuamRoot(QuamRoot): ...
 
     return BareQuamRoot
 
@@ -16,8 +15,7 @@ def BareQuamRoot():
 @pytest.fixture
 def BareQuamComponent():
     @dataclass
-    class BareQuamComponent(QuamComponent):
-        ...
+    class BareQuamComponent(QuamComponent): ...
 
     return BareQuamComponent
 
@@ -27,3 +25,10 @@ def remove_quam_root():
     from quam.core import QuamBase
 
     QuamBase._root = None
+
+
+@pytest.fixture(scope="function", autouse=True)
+def autoset_string_reference_delimiter():
+    from quam.utils import string_reference as sr
+
+    sr.DELIMITER = "/"

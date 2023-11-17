@@ -224,19 +224,19 @@ class QuamBase(ReferenceClass):
             return isinstance(val, (list, QuamList))
         return type(val) == required_type
 
-    def get_reference_path(self) -> Optional[str]:
+    def get_reference(self) -> Optional[str]:
         """Get the reference path of this object.
 
         Returns:
             The reference path of this object.
         """
 
-        if self.parent is not None:
-            raise ValueError(
+        if self.parent is None:
+            raise AttributeError(
                 "Unable to extract reference path. Parent must be defined for {self}"
             )
         return (
-            f"{self.parent.reference_path}{string_reference.DELIMITER}"
+            f"{self.parent.get_reference()}{string_reference.DELIMITER}"
             f"{self.parent.get_attr_name(self)}"
         )
 
@@ -422,8 +422,7 @@ class QuamRoot(QuamBase):
         if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
 
-    @property
-    def reference_path(self):
+    def get_reference(self):
         return "#"
 
     def save(
@@ -799,7 +798,7 @@ class QuamList(UserList, QuamBase):
         return type(val) == self._value_annotation
 
     def get_attr_name(self, attr_val: Any) -> str:
-        for k, elem in self.data:
+        for k, elem in enumerate(self.data):
             if elem is attr_val:
                 return str(k)
         else:
