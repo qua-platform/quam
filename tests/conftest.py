@@ -25,10 +25,3 @@ def remove_quam_root():
     from quam.core import QuamBase
 
     QuamBase._root = None
-
-
-@pytest.fixture(scope="function", autouse=True)
-def autoset_string_reference_delimiter():
-    from quam.utils import string_reference as sr
-
-    sr.DELIMITER = "/"
