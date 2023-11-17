@@ -5,16 +5,16 @@ from quam.components.channels import InOutIQChannel
 
 def test_empty_in_out_IQ_channel():
     readout_resonator = InOutIQChannel(
-        mixer=Mixer(),
+        frequency_converter_up=FrequencyConverter(),
+        frequency_converter_down=FrequencyConverter(mixer=None),
         output_port_I=("con1", 1),
         output_port_Q=("con1", 2),
         input_port_I=("con1", 3),
         input_port_Q=("con1", 4),
         intermediate_frequency=100e6,
-        local_oscillator=LocalOscillator(frequency=5e9),
     )
 
-    mixer = readout_resonator.mixer
+    mixer = readout_resonator.frequency_converted_up.mixer
     assert mixer.local_oscillator_frequency == 5e9
     assert mixer.intermediate_frequency == 100e6
     assert mixer.offset_I == 0

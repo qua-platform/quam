@@ -262,8 +262,8 @@ class IQChannel(Channel):
     output_port_Q: Tuple[str, int]
 
     frequency_converter_up: FrequencyConverter
-    mixer: Mixer = ":./frequency_converter_up.mixer"
-    local_oscillator: LocalOscillator = ":./frequency_converter_up.local_oscillator"
+    mixer: Mixer = "#./frequency_converter_up/mixer"
+    local_oscillator: LocalOscillator = "#./frequency_converter_up/local_oscillator"
 
     intermediate_frequency: float = 0.0
 
@@ -329,7 +329,7 @@ class InOutIQChannel(IQChannel):
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
-    local_oscillator = LocalOscillator
+    local_oscillator: LocalOscillator = field(default_factory=LocalOscillator)
     frequency_converter_down: FrequencyConverter
 
     input_port_I: Tuple[str, int]
@@ -347,9 +347,9 @@ class InOutIQChannel(IQChannel):
 
     def __post_init__(self):
         if self.frequency_converter_up.local_oscillator is None:
-            self.frequency_converter_up.local_oscillator = "../local_oscillator"
+            self.frequency_converter_up.local_oscillator = "#../local_oscillator"
         if self.frequency_converter_down.local_oscillator is None:
-            self.frequency_converter_down.local_oscillator = "../local_oscillator"
+            self.frequency_converter_down.local_oscillator = "#../local_oscillator"
 
     def apply_to_config(self, config: dict):
         """Adds this InOutIQChannel to the QUA configuration.

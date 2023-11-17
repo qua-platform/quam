@@ -109,6 +109,6 @@ class Mixer(QuamComponent):
 
 @dataclass(kw_only=True, eq=False)
 class FrequencyConverter(QuamComponent):
-    local_oscillator: LocalOscillator = field(default_factory=LocalOscillator)
-    mixer: Mixer = field(default_factory=Mixer)
+    local_oscillator: LocalOscillator = None
+    mixer: Mixer = None
     gain: float = None
