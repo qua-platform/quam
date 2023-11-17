@@ -321,7 +321,7 @@ def instantiate_quam_class(
     if not isinstance(contents, dict):
         raise TypeError(
             f"contents must be a dict, not {type(contents)}, could not instantiate"
-            f" {str_repr}"
+            f" {str_repr}. Contents: {contents}"
         )
     attr_annotations = get_dataclass_attr_annotations(quam_class)
 
