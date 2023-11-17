@@ -60,7 +60,7 @@ class Channel(QuamComponent):
             raise AttributeError(
                 f"{cls_name}.parent or {cls_name}.id needed to define {cls_name}.name"
             )
-        return f"{self.parent.name}{str_ref.DELIMITER}{self._get_parent_attr_name()}"
+        return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
 
     @property
     def pulse_mapping(self):
