@@ -386,6 +386,36 @@ class QuamBase(ReferenceClass):
             warnings.warn(str(e))
             return reference
 
+    def print_summary(self, indent: int = 0):
+        """Print a summary of the QuamBase object.
+
+        Args:
+            indent: The number of spaces to indent the summary.
+        """
+        if self._root is self:
+            full_name = "QuAM:"
+        elif self.parent is None:
+            full_name = f"{self.__class__.__name__} (parent unknown):"
+        else:
+            try:
+                attr_name = self.parent.get_attr_name(self)
+                full_name = f"{attr_name}: {self.__class__.__name__}"
+            except AttributeError:
+                full_name = f"{self.__class__.__name__}:"
+
+        if not self.get_attrs():
+            print(" " * indent + f"{full_name} Empty")
+            return
+
+        print(" " * indent + f"{full_name}")
+        for attr, val in self.get_attrs().items():
+            if isinstance(val, str):
+                val = f'"{val}"'
+            if isinstance(val, QuamBase):
+                val.print_summary(indent=indent + 2)
+            else:
+                print(" " * (indent + 2) + f"{attr}: {val}")
+
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
 QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
@@ -872,3 +902,33 @@ class QuamList(UserList, QuamBase):
         self, follow_references: bool = False, include_defaults: bool = True
     ) -> Dict[str, Any]:
         raise NotImplementedError("QuamList does not have attributes")
+
+    def print_summary(self, indent: int = 0):
+        """Print a summary of the QuamBase object.
+
+        Args:
+            indent: The number of spaces to indent the summary.
+        """
+
+        if self.parent is None:
+            full_name = f"{self.__class__.__name__} (parent unknown):"
+        else:
+            try:
+                attr_name = self.parent.get_attr_name(self)
+                full_name = f"{attr_name}: {self.__class__.__name__}"
+            except AttributeError:
+                full_name = f"{self.__class__.__name__}:"
+
+        if not self.data:
+            print(" " * indent + f"{full_name} = []")
+            return
+
+        print(" " * indent + f"{full_name}:")
+        if len(str(self.data)) + 2 * indent < 80:
+            print(" " * (indent + 2) + f"{self.data}")
+        else:
+            for k, val in enumerate(self.data):
+                if isinstance(val, QuamBase):
+                    val.print_summary(indent=indent + 2)
+                else:
+                    print(" " * (indent + 2) + f"{k}: {val}")
