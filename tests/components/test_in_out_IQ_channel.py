@@ -1,11 +1,11 @@
 import pytest
 from quam.components import *
-from quam.components.channels import InOutIQChannel
+from quam.components.channels import InOutIQChannel, LocalOscillator, Mixer
 
 
 def test_empty_in_out_IQ_channel():
     readout_resonator = InOutIQChannel(
-        frequency_converter_up=FrequencyConverter(),
+        frequency_converter_up=FrequencyConverter(mixer=Mixer()),
         frequency_converter_down=FrequencyConverter(mixer=None),
         output_port_I=("con1", 1),
         output_port_Q=("con1", 2),
@@ -14,11 +14,27 @@ def test_empty_in_out_IQ_channel():
         intermediate_frequency=100e6,
     )
 
-    mixer = readout_resonator.frequency_converted_up.mixer
-    assert mixer.local_oscillator_frequency == 5e9
+    assert readout_resonator.frequency_converter_down.mixer is None
+    assert isinstance(readout_resonator.frequency_converter_up.mixer, Mixer)
+
+    assert isinstance(readout_resonator.local_oscillator, LocalOscillator)
+    assert (
+        readout_resonator.frequency_converter_up.local_oscillator
+        is readout_resonator.local_oscillator
+    )
+    assert (
+        readout_resonator.frequency_converter_down.local_oscillator
+        is readout_resonator.local_oscillator
+    )
+
+    mixer = readout_resonator.frequency_converter_up.mixer
     assert mixer.intermediate_frequency == 100e6
     assert mixer.offset_I == 0
     assert mixer.offset_Q == 0
+
+    assert mixer.local_oscillator_frequency is None
+    readout_resonator.local_oscillator.frequency = 5e9
+    assert mixer.local_oscillator_frequency == 5e9
 
     with pytest.raises(AttributeError):
         mixer.name
@@ -30,13 +46,17 @@ def test_empty_in_out_IQ_channel():
 
     d = readout_resonator.to_dict()
     assert d == {
-        "mixer": {},
+        "frequency_converter_up": {
+            "mixer": {},
+            "local_oscillator": "#../local_oscillator",
+        },
+        "local_oscillator": {"frequency": 5000000000.0},
+        "frequency_converter_down": {"local_oscillator": "#../local_oscillator"},
         "output_port_I": ("con1", 1),
         "output_port_Q": ("con1", 2),
         "input_port_I": ("con1", 3),
         "input_port_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
-        "local_oscillator": {"frequency": 5000000000.0},
         "id": 1,
     }
 
@@ -52,8 +72,8 @@ def test_empty_in_out_IQ_channel():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    1: {"offset": 0.0},
-                    2: {"offset": 0.0},
+                    3: {"offset": 0.0},
+                    4: {"offset": 0.0},
                 },
                 "analog_outputs": {
                     1: {"offset": 0.0},
@@ -100,12 +120,13 @@ def test_empty_in_out_IQ_channel():
 def test_readout_resonator_with_readout():
     readout_resonator = InOutIQChannel(
         id=1,
-        mixer=Mixer(),
         output_port_I=("con1", 1),
         output_port_Q=("con1", 2),
         input_port_I=("con1", 3),
         input_port_Q=("con1", 4),
         intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(mixer=Mixer()),
+        frequency_converter_down=FrequencyConverter(mixer=None),
         local_oscillator=LocalOscillator(frequency=5e9),
     )
     readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
@@ -114,7 +135,11 @@ def test_readout_resonator_with_readout():
 
     d = readout_resonator.to_dict()
     assert d == {
-        "mixer": {},
+        "frequency_converter_up": {
+            "mixer": {},
+            "local_oscillator": "#../local_oscillator",
+        },
+        "frequency_converter_down": {"local_oscillator": "#../local_oscillator"},
         "output_port_I": ("con1", 1),
         "output_port_Q": ("con1", 2),
         "input_port_I": ("con1", 3),
@@ -143,8 +168,8 @@ def test_readout_resonator_with_readout():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    1: {"offset": 0.0},
-                    2: {"offset": 0.0},
+                    3: {"offset": 0.0},
+                    4: {"offset": 0.0},
                 },
                 "analog_outputs": {
                     1: {"offset": 0.0},

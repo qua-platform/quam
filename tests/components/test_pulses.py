@@ -39,30 +39,31 @@ def test_channel():
 
 def test_IQ_channel():
     IQ_channel = IQChannel(
-        mixer=Mixer(),
-        local_oscillator=None,
         output_port_I=0,
         output_port_Q=1,
         intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
     )
     d = IQ_channel.to_dict()
     assert d == {
-        "mixer": {},
         "output_port_I": 0,
         "output_port_Q": 1,
         "intermediate_frequency": 100e6,
-        "local_oscillator": None,
+        "frequency_converter_up": {"mixer": {}, "local_oscillator": {}},
     }
 
 
 def test_single_pulse_IQ_channel():
     IQ_channel = IQChannel(
         id="IQ",
-        mixer=Mixer(),
-        local_oscillator=None,
         output_port_I=0,
         output_port_Q=1,
         intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
     )
     IQ_channel.operations["X180"] = pulses.GaussianPulse(
         length=16, amplitude=1, sigma=12

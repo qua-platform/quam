@@ -39,10 +39,12 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         transmon = Transmon(
             id=idx,
             xy=IQChannel(
-                mixer=Mixer(),
                 output_port_I=f"#/wiring/qubits/{idx}/port_I",
                 output_port_Q=f"#/wiring/qubits/{idx}/port_Q",
-                local_oscillator=LocalOscillator(power=10, frequency=6e9),
+                frequency_converter_up=FrequencyConverter(
+                    mixer=Mixer(),
+                    local_oscillator=LocalOscillator(power=10, frequency=6e9),
+                ),
                 intermediate_frequency=100e6,
             ),
             z=SingleChannel(output_port=f"#/wiring/qubits/{idx}/port_Z"),
@@ -57,7 +59,8 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             output_port_Q="#/wiring/resonator/output_port_Q",
             input_port_I="#/wiring/resonator/input_port_I",
             input_port_Q="#/wiring/resonator/input_port_Q",
-            mixer=Mixer(),
+            frequency_converter_up=FrequencyConverter(mixer=Mixer()),
+            frequency_converter_down=FrequencyConverter(),
             local_oscillator=LocalOscillator(power=10, frequency=6e9),
         )
         quam.resonators.append(readout_resonator)

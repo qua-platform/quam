@@ -272,7 +272,7 @@ class IQChannel(Channel):
     @property
     def rf_frequency(self):
         return self.local_oscillator.frequency + self.intermediate_frequency
-
+    
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
 
