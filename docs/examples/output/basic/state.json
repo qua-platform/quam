@@ -11,10 +11,12 @@
                     "con1",
                     4
                 ],
-                "mixer": {},
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {}
                 }
             },
             "z": {
@@ -35,10 +37,12 @@
                     "con1",
                     7
                 ],
-                "mixer": {},
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {}
                 }
             },
             "z": {
@@ -60,10 +64,16 @@
                 "con1",
                 2
             ],
-            "mixer": {},
+            "frequency_converter_up": {
+                "local_oscillator": "#../local_oscillator",
+                "mixer": {}
+            },
             "local_oscillator": {
                 "frequency": 6000000000.0,
                 "power": 10
+            },
+            "frequency_converter_down": {
+                "local_oscillator": "#../local_oscillator"
             },
             "input_port_I": [
                 "con1",
@@ -84,10 +94,16 @@
                 "con1",
                 2
             ],
-            "mixer": {},
+            "frequency_converter_up": {
+                "local_oscillator": "#../local_oscillator",
+                "mixer": {}
+            },
             "local_oscillator": {
                 "frequency": 6000000000.0,
                 "power": 10
+            },
+            "frequency_converter_down": {
+                "local_oscillator": "#../local_oscillator"
             },
             "input_port_I": [
                 "con1",

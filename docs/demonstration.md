@@ -35,8 +35,10 @@ for idx in range(num_qubits):
     transmon = Transmon(
         id=idx,
         xy=IQChannel(
-            local_oscillator=LocalOscillator(power=10, frequency=6e9),
-            mixer=Mixer(),
+            frequency_converter_up=FrequencyConverter(
+                local_oscillator=LocalOscillator(power=10, frequency=6e9),
+                mixer=Mixer(),
+            ),
             output_port_I=("con1", 3 * idx + 3),
             output_port_Q=("con1", 3 * idx + 4),
         ),
@@ -51,8 +53,9 @@ for idx in range(num_qubits):
         output_port_I=("con1", 1),
         output_port_Q=("con1", 2),
         id=idx, 
+        frequency_converter_up=FrequencyConverter(mixer=Mixer()),
+        frequency_converter_down=FrequencyConverter(),
         local_oscillator=LocalOscillator(power=10, frequency=6e9),
-        mixer=Mixer()
     )
     machine.resonators.append(resonator)
 ```
@@ -82,10 +85,12 @@ machine.save("state.json")
                     "con1",
                     4
                 ],
-                "mixer": {},
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {}
                 }
             },
             "z": {
@@ -106,10 +111,12 @@ machine.save("state.json")
                     "con1",
                     7
                 ],
-                "mixer": {},
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {}
                 }
             },
             "z": {
@@ -131,10 +138,16 @@ machine.save("state.json")
                 "con1",
                 2
             ],
-            "mixer": {},
+            "frequency_converter_up": {
+                "local_oscillator": "#../local_oscillator",
+                "mixer": {}
+            },
             "local_oscillator": {
                 "frequency": 6000000000.0,
                 "power": 10
+            },
+            "frequency_converter_down": {
+                "local_oscillator": "#../local_oscillator"
             },
             "input_port_I": [
                 "con1",
@@ -155,10 +168,16 @@ machine.save("state.json")
                 "con1",
                 2
             ],
-            "mixer": {},
+            "frequency_converter_up": {
+                "local_oscillator": "#../local_oscillator",
+                "mixer": {}
+            },
             "local_oscillator": {
                 "frequency": 6000000000.0,
                 "power": 10
+            },
+            "frequency_converter_down": {
+                "local_oscillator": "#../local_oscillator"
             },
             "input_port_I": [
                 "con1",

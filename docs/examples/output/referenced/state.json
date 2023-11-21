@@ -5,10 +5,12 @@
             "xy": {
                 "output_port_I": "#/wiring/qubits/0/output_port_I",
                 "output_port_Q": "#/wiring/qubits/0/output_port_Q",
-                "mixer": {},
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {}
                 }
             },
             "z": {
@@ -20,10 +22,12 @@
             "xy": {
                 "output_port_I": "#/wiring/qubits/1/output_port_I",
                 "output_port_Q": "#/wiring/qubits/1/output_port_Q",
-                "mixer": {},
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {}
                 }
             },
             "z": {
@@ -36,10 +40,16 @@
             "id": 0,
             "output_port_I": "#/wiring/resonator/output_port_I",
             "output_port_Q": "#/wiring/resonator/output_port_Q",
-            "mixer": {},
+            "frequency_converter_up": {
+                "local_oscillator": "#../local_oscillator",
+                "mixer": {}
+            },
             "local_oscillator": {
                 "frequency": 6000000000.0,
                 "power": 10
+            },
+            "frequency_converter_down": {
+                "local_oscillator": "#../local_oscillator"
             },
             "input_port_I": "#/wiring/resonator/input_port_I",
             "input_port_Q": "#/wiring/resonator/input_port_Q"
@@ -48,10 +58,16 @@
             "id": 1,
             "output_port_I": "#/wiring/resonator/output_port_I",
             "output_port_Q": "#/wiring/resonator/output_port_Q",
-            "mixer": {},
+            "frequency_converter_up": {
+                "local_oscillator": "#../local_oscillator",
+                "mixer": {}
+            },
             "local_oscillator": {
                 "frequency": 6000000000.0,
                 "power": 10
+            },
+            "frequency_converter_down": {
+                "local_oscillator": "#../local_oscillator"
             },
             "input_port_I": "#/wiring/resonator/input_port_I",
             "input_port_Q": "#/wiring/resonator/input_port_Q"

@@ -31,10 +31,10 @@
       "digital_outputs": {},
       "analog_inputs": {
         "1": {
-          "offset": 0
+          "offset": 0.0
         },
         "2": {
-          "offset": 0
+          "offset": 0.0
         }
       }
     }
