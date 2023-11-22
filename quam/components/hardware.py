@@ -65,10 +65,18 @@ class Mixer(QuamComponent):
 
     @property
     def name(self):
-        parent_id = self._get_referenced_value("#../../name")
-        if str_ref.is_reference(parent_id):
-            raise AttributeError(f"Mixer.parent must be defined for {self}")
-        return f"{parent_id}{str_ref.DELIMITER}mixer"
+        frequency_converter = getattr(self, "parent", None)
+        if frequency_converter is None:
+            raise AttributeError(
+                f"Mixer.parent must be a frequency converter for {self}"
+            )
+
+        channel = getattr(frequency_converter, "parent", None)
+        channel_name = getattr(channel, "name", None)
+        if channel is None or channel_name is None:
+            raise AttributeError(f"Mixer.parent.parent must be a channel for {self}")
+
+        return f"{channel_name}{str_ref.DELIMITER}mixer"
 
     def apply_to_config(self, config: dict):
         """Adds this mixer to the QUA configuration.
