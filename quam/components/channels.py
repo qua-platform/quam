@@ -358,13 +358,6 @@ class InOutIQChannel(IQChannel):
 
     _default_label: ClassVar[str] = "IQ"
 
-    def __post_init__(self):
-
-        if self.frequency_converter_up.local_oscillator is None:
-            self.frequency_converter_up.local_oscillator = "#../local_oscillator"
-        if self.frequency_converter_down.local_oscillator is None:
-            self.frequency_converter_down.local_oscillator = "#../local_oscillator"
-
     def apply_to_config(self, config: dict):
         """Adds this InOutIQChannel to the QUA configuration.
 
