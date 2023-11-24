@@ -257,8 +257,6 @@ class IQChannel(Channel):
             (controller_name, port).
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
-        mixer (Mixer): Mixer QuAM component.
-        local_oscillator (LocalOscillator): Local oscillator QuAM component.
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
@@ -269,12 +267,18 @@ class IQChannel(Channel):
     opx_output_offset_Q: float = 0.0
 
     frequency_converter_up: FrequencyConverter
-    mixer: Mixer = "#./frequency_converter_up/mixer"
-    local_oscillator: LocalOscillator = "#./frequency_converter_up/local_oscillator"
 
     intermediate_frequency: float = 0.0
 
     _default_label: ClassVar[str] = "IQ"
+
+    @property
+    def local_oscillator(self):
+        return self.frequency_converter_up.local_oscillator
+
+    @property
+    def mixer(self):
+        return self.frequency_converter_up.mixer
 
     @property
     def rf_frequency(self):
@@ -339,7 +343,6 @@ class InOutIQChannel(IQChannel):
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
-    local_oscillator: LocalOscillator = field(default_factory=LocalOscillator)
     frequency_converter_down: FrequencyConverter
 
     opx_input_I: Tuple[str, int]
@@ -356,6 +359,7 @@ class InOutIQChannel(IQChannel):
     _default_label: ClassVar[str] = "IQ"
 
     def __post_init__(self):
+
         if self.frequency_converter_up.local_oscillator is None:
             self.frequency_converter_up.local_oscillator = "#../local_oscillator"
         if self.frequency_converter_down.local_oscillator is None:

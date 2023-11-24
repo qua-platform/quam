@@ -59,9 +59,12 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             opx_output_Q="#/wiring/resonator/opx_output_Q",
             opx_input_I="#/wiring/resonator/opx_input_I",
             opx_input_Q="#/wiring/resonator/opx_input_Q",
-            frequency_converter_up=FrequencyConverter(mixer=Mixer()),
-            frequency_converter_down=FrequencyConverter(),
-            local_oscillator=LocalOscillator(power=10, frequency=6e9),
+            frequency_converter_up=FrequencyConverter(
+                mixer=Mixer(), local_oscillator=LocalOscillator(power=10, frequency=6e9)
+            ),
+            frequency_converter_down=FrequencyConverter(
+                local_oscillator="#../frequency_converter_up/local_oscillator"
+            ),
         )
         quam.resonators.append(readout_resonator)
         quam.local_oscillators.append(f"#/resonators/{idx}/xy/local_oscillator")

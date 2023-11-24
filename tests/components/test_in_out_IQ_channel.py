@@ -5,8 +5,12 @@ from quam.components.channels import InOutIQChannel, LocalOscillator, Mixer
 
 def test_empty_in_out_IQ_channel():
     readout_resonator = InOutIQChannel(
-        frequency_converter_up=FrequencyConverter(mixer=Mixer()),
-        frequency_converter_down=FrequencyConverter(mixer=None),
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
+        frequency_converter_down=FrequencyConverter(
+            mixer=None, local_oscillator="#../frequency_converter_up/local_oscillator"
+        ),
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
         opx_input_I=("con1", 3),
@@ -46,10 +50,11 @@ def test_empty_in_out_IQ_channel():
     assert d == {
         "frequency_converter_up": {
             "mixer": {},
-            "local_oscillator": "#../local_oscillator",
+            "local_oscillator": {"frequency": 5000000000.0},
         },
-        "local_oscillator": {"frequency": 5000000000.0},
-        "frequency_converter_down": {"local_oscillator": "#../local_oscillator"},
+        "frequency_converter_down": {
+            "local_oscillator": "#../frequency_converter_up/local_oscillator"
+        },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
         "opx_input_I": ("con1", 3),
@@ -123,9 +128,12 @@ def test_readout_resonator_with_readout():
         opx_input_I=("con1", 3),
         opx_input_Q=("con1", 4),
         intermediate_frequency=100e6,
-        frequency_converter_up=FrequencyConverter(mixer=Mixer()),
-        frequency_converter_down=FrequencyConverter(mixer=None),
-        local_oscillator=LocalOscillator(frequency=5e9),
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
+        ),
+        frequency_converter_down=FrequencyConverter(
+            mixer=None, local_oscillator="#../frequency_converter_up/local_oscillator"
+        ),
     )
     readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
         amplitude=0.1, length=1000
@@ -135,15 +143,16 @@ def test_readout_resonator_with_readout():
     assert d == {
         "frequency_converter_up": {
             "mixer": {},
-            "local_oscillator": "#../local_oscillator",
+            "local_oscillator": {"frequency": 5000000000.0},
         },
-        "frequency_converter_down": {"local_oscillator": "#../local_oscillator"},
+        "frequency_converter_down": {
+            "local_oscillator": "#../frequency_converter_up/local_oscillator"
+        },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
         "opx_input_I": ("con1", 3),
         "opx_input_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
-        "local_oscillator": {"frequency": 5000000000.0},
         "id": 1,
         "operations": {
             "readout": {

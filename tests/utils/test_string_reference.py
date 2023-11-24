@@ -135,8 +135,6 @@ def test_delimiter():
         xy=IQChannel(
             opx_output_I=None,
             opx_output_Q=None,
-            mixer=None,
-            local_oscillator=None,
             frequency_converter_up=None,
         ),
     )
