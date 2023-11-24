@@ -302,7 +302,7 @@ class IQChannel(Channel):
         if self.mixer is not None:
             mix_inputs["mixer"] = self.mixer.name
         if self.local_oscillator is not None:
-            mix_inputs["local_oscillator"] = self.local_oscillator.frequency
+            mix_inputs["lo_frequency"] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
