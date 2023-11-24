@@ -133,8 +133,8 @@ def test_delimiter():
     transmon = Transmon(
         id=1,
         xy=IQChannel(
-            output_port_I=None,
-            output_port_Q=None,
+            opx_output_I=None,
+            opx_output_Q=None,
             mixer=None,
             local_oscillator=None,
             frequency_converter_up=None,

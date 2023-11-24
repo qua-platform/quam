@@ -7,10 +7,10 @@ def test_empty_in_out_IQ_channel():
     readout_resonator = InOutIQChannel(
         frequency_converter_up=FrequencyConverter(mixer=Mixer()),
         frequency_converter_down=FrequencyConverter(mixer=None),
-        output_port_I=("con1", 1),
-        output_port_Q=("con1", 2),
-        input_port_I=("con1", 3),
-        input_port_Q=("con1", 4),
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        opx_input_I=("con1", 3),
+        opx_input_Q=("con1", 4),
         intermediate_frequency=100e6,
     )
 
@@ -29,8 +29,6 @@ def test_empty_in_out_IQ_channel():
 
     mixer = readout_resonator.frequency_converter_up.mixer
     assert mixer.intermediate_frequency == 100e6
-    assert mixer.offset_I == 0
-    assert mixer.offset_Q == 0
 
     assert mixer.local_oscillator_frequency is None
     readout_resonator.local_oscillator.frequency = 5e9
@@ -52,10 +50,10 @@ def test_empty_in_out_IQ_channel():
         },
         "local_oscillator": {"frequency": 5000000000.0},
         "frequency_converter_down": {"local_oscillator": "#../local_oscillator"},
-        "output_port_I": ("con1", 1),
-        "output_port_Q": ("con1", 2),
-        "input_port_I": ("con1", 3),
-        "input_port_Q": ("con1", 4),
+        "opx_output_I": ("con1", 1),
+        "opx_output_Q": ("con1", 2),
+        "opx_input_I": ("con1", 3),
+        "opx_input_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "id": 1,
     }
@@ -120,10 +118,10 @@ def test_empty_in_out_IQ_channel():
 def test_readout_resonator_with_readout():
     readout_resonator = InOutIQChannel(
         id=1,
-        output_port_I=("con1", 1),
-        output_port_Q=("con1", 2),
-        input_port_I=("con1", 3),
-        input_port_Q=("con1", 4),
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        opx_input_I=("con1", 3),
+        opx_input_Q=("con1", 4),
         intermediate_frequency=100e6,
         frequency_converter_up=FrequencyConverter(mixer=Mixer()),
         frequency_converter_down=FrequencyConverter(mixer=None),
@@ -140,10 +138,10 @@ def test_readout_resonator_with_readout():
             "local_oscillator": "#../local_oscillator",
         },
         "frequency_converter_down": {"local_oscillator": "#../local_oscillator"},
-        "output_port_I": ("con1", 1),
-        "output_port_Q": ("con1", 2),
-        "input_port_I": ("con1", 3),
-        "input_port_Q": ("con1", 4),
+        "opx_output_I": ("con1", 1),
+        "opx_output_Q": ("con1", 2),
+        "opx_input_I": ("con1", 3),
+        "opx_input_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "local_oscillator": {"frequency": 5000000000.0},
         "id": 1,

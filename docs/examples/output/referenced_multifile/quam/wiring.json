@@ -2,48 +2,48 @@
     "wiring": {
         "qubits": [
             {
-                "output_port_I": [
+                "opx_output_I": [
                     "con1",
                     3
                 ],
-                "output_port_Q": [
+                "opx_output_Q": [
                     "con1",
                     4
                 ],
-                "output_port_Z": [
+                "opx_output_Z": [
                     "con1",
                     5
                 ]
             },
             {
-                "output_port_I": [
+                "opx_output_I": [
                     "con1",
                     6
                 ],
-                "output_port_Q": [
+                "opx_output_Q": [
                     "con1",
                     7
                 ],
-                "output_port_Z": [
+                "opx_output_Z": [
                     "con1",
                     8
                 ]
             }
         ],
         "resonator": {
-            "output_port_I": [
+            "opx_output_I": [
                 "con1",
                 1
             ],
-            "output_port_Q": [
+            "opx_output_Q": [
                 "con1",
                 2
             ],
-            "input_port_I": [
+            "opx_input_I": [
                 "con1",
                 1
             ],
-            "input_port_Q": [
+            "opx_input_Q": [
                 "con1",
                 2
             ]

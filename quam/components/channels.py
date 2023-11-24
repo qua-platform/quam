@@ -195,18 +195,18 @@ class SingleChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        output_port (Tuple[str, int]): Channel output port, a tuple of
+        opx_output (Tuple[str, int]): Channel output port, a tuple of
             (controller_name, port).
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
-        offset (float): DC offset for the output port.
+        output_offset (float): DC offset for the output port.
     """
 
-    output_port: Tuple[str, int]
+    opx_output: Tuple[str, int]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
-    offset: float = 0
+    output_offset: float = 0
 
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
@@ -217,7 +217,7 @@ class SingleChannel(Channel):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
-        controller_name, port = self.output_port
+        controller_name, port = self.opx_output
 
         config["elements"][self.name] = {
             "singleInput": {"port": (controller_name, port)},
@@ -228,7 +228,9 @@ class SingleChannel(Channel):
             controller_name,
             {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
         )
-        analog_output = controller["analog_outputs"][port] = {"offset": self.offset}
+        analog_output = controller["analog_outputs"][port] = {
+            "offset": self.output_offset
+        }
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
@@ -249,9 +251,9 @@ class IQChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        output_port_I (Tuple[str, int]): Channel I output port, a tuple of
+        opx_output_I (Tuple[str, int]): Channel I output port, a tuple of
             (controller_name, port).
-        output_port_Q (Tuple[str, int]): Channel Q output port, a tuple of
+        opx_output_Q (Tuple[str, int]): Channel Q output port, a tuple of
             (controller_name, port).
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
@@ -260,8 +262,8 @@ class IQChannel(Channel):
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
-    output_port_I: Tuple[str, int]
-    output_port_Q: Tuple[str, int]
+    opx_output_I: Tuple[str, int]
+    opx_output_Q: Tuple[str, int]
 
     opx_output_offset_I: float = 0.0
     opx_output_offset_Q: float = 0.0
@@ -286,12 +288,12 @@ class IQChannel(Channel):
         """
         # Add pulses & waveforms
         super().apply_to_config(config)
-        output_ports = {"I": tuple(self.output_port_I), "Q": tuple(self.output_port_Q)}
+        opx_outputs = {"I": tuple(self.opx_output_I), "Q": tuple(self.opx_output_Q)}
         offsets = {"I": self.opx_output_offset_I, "Q": self.opx_output_offset_Q}
 
         config["elements"][self.name] = {
             "mixInputs": {
-                **output_ports,
+                **opx_outputs,
             },
             "intermediate_frequency": self.intermediate_frequency,
             "operations": self.pulse_mapping,
@@ -303,7 +305,7 @@ class IQChannel(Channel):
             mix_inputs["local_oscillator"] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
-            controller_name, port = output_ports[I_or_Q]
+            controller_name, port = opx_outputs[I_or_Q]
             controller = config["controllers"].setdefault(
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
@@ -324,13 +326,13 @@ class InOutIQChannel(IQChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        input_port_I (Tuple[str, int]): Channel I input port, a tuple of
+        opx_input_I (Tuple[str, int]): Channel I input port, a tuple of
             (controller_name, port). Port is usually 1 or 2.
-        input_port_Q (Tuple[str, int]): Channel Q input port, a tuple of
+        opx_input_Q (Tuple[str, int]): Channel Q input port, a tuple of
             (controller_name, port). Port is usually 1 or 2.
-        output_port_I (Tuple[str, int]): Channel I output port, a tuple of
+        opx_output_I (Tuple[str, int]): Channel I output port, a tuple of
             (controller_name, port).
-        output_port_Q (Tuple[str, int]): Channel Q output port, a tuple of
+        opx_output_Q (Tuple[str, int]): Channel Q output port, a tuple of
             (controller_name, port).
         mixer (Mixer): Mixer QuAM component for the IQ output.
         local_oscillator (LocalOscillator): Local oscillator QuAM component.
@@ -340,8 +342,8 @@ class InOutIQChannel(IQChannel):
     local_oscillator: LocalOscillator = field(default_factory=LocalOscillator)
     frequency_converter_down: FrequencyConverter
 
-    input_port_I: Tuple[str, int]
-    input_port_Q: Tuple[str, int]
+    opx_input_I: Tuple[str, int]
+    opx_input_Q: Tuple[str, int]
 
     time_of_flight: int = 24
     smearing: int = 0
@@ -367,19 +369,19 @@ class InOutIQChannel(IQChannel):
         """
         super().apply_to_config(config)
 
-        input_ports = {"I": tuple(self.input_port_I), "Q": tuple(self.input_port_Q)}
+        opx_inputs = {"I": tuple(self.opx_input_I), "Q": tuple(self.opx_input_Q)}
         offsets = {"I": self.input_offset_I, "Q": self.input_offset_Q}
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
         config["elements"][self.name]["outputs"] = {
-            "out1": tuple(self.input_port_I),
-            "out2": tuple(self.input_port_Q),
+            "out1": tuple(self.opx_input_I),
+            "out2": tuple(self.opx_input_Q),
         }
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
         for I_or_Q in ["I", "Q"]:
-            controller_name, port = input_ports[I_or_Q]
+            controller_name, port = opx_inputs[I_or_Q]
             controller = config["controllers"].setdefault(
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},

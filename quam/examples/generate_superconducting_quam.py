@@ -27,10 +27,10 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             for k in range(num_qubits)
         ],
         "resonator": {
-            "output_port_I": ("con1", 1),
-            "output_port_Q": ("con1", 2),
-            "input_port_I": ("con1", 1),
-            "input_port_Q": ("con1", 2),
+            "opx_output_I": ("con1", 1),
+            "opx_output_Q": ("con1", 2),
+            "opx_input_I": ("con1", 1),
+            "opx_input_Q": ("con1", 2),
         },
     }
 
@@ -39,15 +39,15 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         transmon = Transmon(
             id=idx,
             xy=IQChannel(
-                output_port_I=f"#/wiring/qubits/{idx}/port_I",
-                output_port_Q=f"#/wiring/qubits/{idx}/port_Q",
+                opx_output_I=f"#/wiring/qubits/{idx}/port_I",
+                opx_output_Q=f"#/wiring/qubits/{idx}/port_Q",
                 frequency_converter_up=FrequencyConverter(
                     mixer=Mixer(),
                     local_oscillator=LocalOscillator(power=10, frequency=6e9),
                 ),
                 intermediate_frequency=100e6,
             ),
-            z=SingleChannel(output_port=f"#/wiring/qubits/{idx}/port_Z"),
+            z=SingleChannel(opx_output=f"#/wiring/qubits/{idx}/port_Z"),
         )
         quam.qubits.append(transmon)
         quam.local_oscillators.append(f"#/qubits/{idx}/xy/local_oscillator")
@@ -55,10 +55,10 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
 
         readout_resonator = InOutIQChannel(
             id=idx,
-            output_port_I="#/wiring/resonator/output_port_I",
-            output_port_Q="#/wiring/resonator/output_port_Q",
-            input_port_I="#/wiring/resonator/input_port_I",
-            input_port_Q="#/wiring/resonator/input_port_Q",
+            opx_output_I="#/wiring/resonator/opx_output_I",
+            opx_output_Q="#/wiring/resonator/opx_output_Q",
+            opx_input_I="#/wiring/resonator/opx_input_I",
+            opx_input_Q="#/wiring/resonator/opx_input_Q",
             frequency_converter_up=FrequencyConverter(mixer=Mixer()),
             frequency_converter_down=FrequencyConverter(),
             local_oscillator=LocalOscillator(power=10, frequency=6e9),
