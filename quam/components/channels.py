@@ -253,6 +253,8 @@ class IQChannel(Channel):
             (controller_name, port).
         output_port_Q (Tuple[str, int]): Channel Q output port, a tuple of
             (controller_name, port).
+        opx_output_offset_I float: The offset of the I channel. Default is 0.
+        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
         mixer (Mixer): Mixer QuAM component.
         local_oscillator (LocalOscillator): Local oscillator QuAM component.
         intermediate_frequency (float): Intermediate frequency of the mixer.
@@ -260,6 +262,9 @@ class IQChannel(Channel):
 
     output_port_I: Tuple[str, int]
     output_port_Q: Tuple[str, int]
+
+    opx_output_offset_I: float = 0.0
+    opx_output_offset_Q: float = 0.0
 
     frequency_converter_up: FrequencyConverter
     mixer: Mixer = "#./frequency_converter_up/mixer"
@@ -272,7 +277,7 @@ class IQChannel(Channel):
     @property
     def rf_frequency(self):
         return self.local_oscillator.frequency + self.intermediate_frequency
-    
+
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
 
@@ -282,17 +287,20 @@ class IQChannel(Channel):
         # Add pulses & waveforms
         super().apply_to_config(config)
         output_ports = {"I": tuple(self.output_port_I), "Q": tuple(self.output_port_Q)}
-        offsets = {"I": self.mixer.offset_I, "Q": self.mixer.offset_Q}
+        offsets = {"I": self.opx_output_offset_I, "Q": self.opx_output_offset_Q}
 
         config["elements"][self.name] = {
             "mixInputs": {
                 **output_ports,
-                "lo_frequency": self.local_oscillator.frequency,
-                "mixer": self.mixer.name,
             },
             "intermediate_frequency": self.intermediate_frequency,
             "operations": self.pulse_mapping,
         }
+        mix_inputs = config["elements"][self.name]["mixInputs"]
+        if self.mixer is not None:
+            mix_inputs["mixer"] = self.mixer.name
+        if self.local_oscillator is not None:
+            mix_inputs["local_oscillator"] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = output_ports[I_or_Q]
