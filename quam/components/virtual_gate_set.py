@@ -1,3 +1,4 @@
+from copy import copy
 from dataclasses import dataclass, field
 import numpy as np
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
@@ -15,49 +16,50 @@ patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python <
 __all__ = ["VirtualGateSet"]
 
 
+class VirtualPulse(Pulse):
+    amplitudes: Dict[str, float]
+    # pulses: List[Pulse] = None  # Should be added later
+
+    @property
+    def virtual_gate_set(self):
+        virtual_gate_set = self.parent.parent
+        assert isinstance(virtual_gate_set, VirtualGateSet)
+        return virtual_gate_set
+
+    def apply_to_config(self, config: dict) -> None:
+        ...
+
+
 @dataclass(kw_only=True, eq=False)
 class VirtualGateSet(QuamComponent):
     gates: List[SingleChannel]
     virtual_gates: Dict[str, List[float]]
 
-    # Not sure if I should implement it this way
-    pulses: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    pulse_defaults: List[Pulse] = field(default_factory=list)
+    operations: Dict[str, VirtualPulse] = field(default_factory=dict)
 
     @property
     def apply_config_after(self):
         return self.gates
 
-    def add_pulse(self, pulse_name: str, pulse_type: type, **virtual_gate_voltages): ...
-
-    def convert_voltages(self, **virtual_gate_voltages):
-        gate_voltages = np.zeros(len(self.gates))
-        for virtual_gate_name, voltage in virtual_gate_voltages.items():
+    def convert_amplitudes(self, **virtual_gate_amplitudes):
+        gate_amplitudes = np.zeros(len(self.gates))
+        for virtual_gate_name, amplitude in virtual_gate_amplitudes.items():
             scales = self.virtual_gates[virtual_gate_name]
-            gate_voltages += voltage * np.array(scales)
+            gate_amplitudes += amplitude * np.array(scales)
 
-        return gate_voltages
+        return gate_amplitudes
 
     def play(self, pulse_name):
         for gate in self.gates:
             gate.play(pulse_name)
 
+    def apply_to_config(self, config: dict) -> None:
+        for operation in self.operations:
+            gate_pulses = [copy(pulse) for pulse in self.pulse_defaults]
+            gate_amplitudes = self.convert_amplitudes(**operation.amplitudes)
 
-gate1.play("pulse_0.1V")
-gate2.play("pulse_0.02V")
-
-virtual = VirtualGateSet(
-  gates=[gate1, gate2], 
-  virtual_gates={"eps": [0.2, 0.01], "U": [0.01, 0.5]}
-  pulse_defaults=[
-    SquarePulse(amplitude=0.1, length=16),  # This already includes scale
-    SquarePulse(amplitude=0.2, length=16),
-  ]
-)
-virtual.pulses["initialize"] = CombinedPulse(
-  amplitudes={"eps": 0.01, "U": 0.005},
-  pulses=None  # use pulse_defaults if not specified
-)
-
-
-# Playing pulses
-virtual.play("initialize")
+            for gate, pulse, amplitude in zip(self.gates, gate_pulses, gate_amplitudes):
+                pulse.amplitude = amplitude
+                pulse.parent = gate
+                pulse.apply_to_config(config, gate)
