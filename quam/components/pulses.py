@@ -19,6 +19,7 @@ __all__ = [
     "DragPulse",
     "SquarePulse",
     "GaussianPulse",
+    "FlatTopGaussianPulse",
 ]
 
 
@@ -441,3 +442,27 @@ class GaussianPulse(Pulse):
         if self.subtracted:
             gauss_wave = gauss_wave - gauss_wave[-1]
         return gauss_wave
+
+
+@dataclass(kw_only=True, eq=False)
+class FlatTopGaussianPulse(Pulse):
+    amplitude: float
+    rotation_axis: float = None
+    flat_length: float
+    rise_fall_length: float
+    return_part: str = "all"
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
+
+        waveform = flattop_gaussian_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=self.rise_fall_length,
+            return_part="all",
+        )
+        if self.rotation_axis is not None:
+            waveform = np.array(waveform)
+            waveform = waveform * np.exp(1j * np.pi * self.rotation_axis / 180)
+
+        return waveform

@@ -39,19 +39,19 @@ for idx in range(num_qubits):
                 local_oscillator=LocalOscillator(power=10, frequency=6e9),
                 mixer=Mixer(),
             ),
-            output_port_I=("con1", 3 * idx + 3),
-            output_port_Q=("con1", 3 * idx + 4),
+            opx_output_I=("con1", 3 * idx + 3),
+            opx_output_Q=("con1", 3 * idx + 4),
         ),
-        z=SingleChannel(output_port=("con1", 3 * idx + 5)),
+        z=SingleChannel(opx_output=("con1", 3 * idx + 5)),
     )
     machine.qubits.append(transmon)
 
     # Create resonator components
     resonator = InOutIQChannel(
-        input_port_I=("con1", 1),
-        input_port_Q=("con1", 2),
-        output_port_I=("con1", 1),
-        output_port_Q=("con1", 2),
+        opx_input_I=("con1", 1),
+        opx_input_Q=("con1", 2),
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
         id=idx, 
         frequency_converter_up=FrequencyConverter(mixer=Mixer()),
         frequency_converter_down=FrequencyConverter(),
@@ -77,11 +77,11 @@ machine.save("state.json")
         {
             "id": 0,
             "xy": {
-                "output_port_I": [
+                "opx_output_I": [
                     "con1",
                     3
                 ],
-                "output_port_Q": [
+                "opx_output_Q": [
                     "con1",
                     4
                 ],
@@ -94,7 +94,7 @@ machine.save("state.json")
                 }
             },
             "z": {
-                "output_port": [
+                "opx_output": [
                     "con1",
                     5
                 ]
@@ -103,11 +103,11 @@ machine.save("state.json")
         {
             "id": 1,
             "xy": {
-                "output_port_I": [
+                "opx_output_I": [
                     "con1",
                     6
                 ],
-                "output_port_Q": [
+                "opx_output_Q": [
                     "con1",
                     7
                 ],
@@ -120,7 +120,7 @@ machine.save("state.json")
                 }
             },
             "z": {
-                "output_port": [
+                "opx_output": [
                     "con1",
                     8
                 ]
@@ -130,11 +130,11 @@ machine.save("state.json")
     "resonators": [
         {
             "id": 0,
-            "output_port_I": [
+            "opx_output_I": [
                 "con1",
                 1
             ],
-            "output_port_Q": [
+            "opx_output_Q": [
                 "con1",
                 2
             ],
@@ -149,22 +149,22 @@ machine.save("state.json")
             "frequency_converter_down": {
                 "local_oscillator": "#../local_oscillator"
             },
-            "input_port_I": [
+            "opx_input_I": [
                 "con1",
                 1
             ],
-            "input_port_Q": [
+            "opx_input_Q": [
                 "con1",
                 2
             ]
         },
         {
             "id": 1,
-            "output_port_I": [
+            "opx_output_I": [
                 "con1",
                 1
             ],
-            "output_port_Q": [
+            "opx_output_Q": [
                 "con1",
                 2
             ],
@@ -179,11 +179,11 @@ machine.save("state.json")
             "frequency_converter_down": {
                 "local_oscillator": "#../local_oscillator"
             },
-            "input_port_I": [
+            "opx_input_I": [
                 "con1",
                 1
             ],
-            "input_port_Q": [
+            "opx_input_Q": [
                 "con1",
                 2
             ]
