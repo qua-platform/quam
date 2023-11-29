@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from quam.core import QuamComponent
 from quam.components.hardware import FrequencyConverter
-
+from quam.components.channels import InOutIQChannel
 
 from qm.QuantumMachinesManager import QuantumMachinesManager
 from qm.QuantumMachine import QuantumMachine
@@ -61,31 +61,34 @@ class OctaveOld(QuamComponent):
     def get_portmap(self):
         portmap = {}
 
-        for q in self._root.active_qubits:
-            if q.xy.local_oscillator.frequency_converter is self:
-                xy_LO_channel = q.xy.local_oscillator.channel
-                portmap[tuple(q.xy.opx_output_I)] = (self.name, f"I{xy_LO_channel}")
-                portmap[tuple(q.xy.opx_output_Q)] = (self.name, f"Q{xy_LO_channel}")
-                self._channel_to_qe[(self.name, xy_LO_channel)] = q.xy.name
+        for elem in self._root.iterate_components():
+            if not isinstance(elem, OctaveOldFrequencyConverter):
+                continue
 
-            if q.rr.local_oscillator.frequency_converter is self:
-                rr_LO_channel = q.rr.local_oscillator.channel
-                portmap[tuple(q.rr.opx_output_I)] = (self.name, f"I{rr_LO_channel}")
-                portmap[tuple(q.rr.opx_output_Q)] = (self.name, f"Q{rr_LO_channel}")
-                self._channel_to_qe[(self.name, rr_LO_channel)] = q.rr.name
+            if elem.octave is not self:
+                continue
 
+            channel = elem.parent
+            portmap[tuple(channel.opx_output_I)] = (self.name, f"I{elem.channel}")
+            portmap[tuple(channel.opx_output_Q)] = (self.name, f"Q{elem.channel}")
+            self._channel_to_qe[(self.name, elem.channel)] = channel.name
         return portmap
 
     def configure_octave_settings(self):
         self.octave.set_clock(self.name, ClockType.Internal)
         for qe in self._channel_to_qe.values():
             self.octave.set_rf_output_mode(qe, RFOutputMode.on)
-        for q in self._root.active_qubits:
-            if q.rr.local_oscillator.frequency_converter is self:
-                self.octave.set_qua_element_octave_rf_in_port(q.rr.name, self.name, 1)
-                self.octave.set_downconversion(
-                    q.rr.name, lo_source=RFInputLOSource.Internal
-                )
+
+        for elem in self._root.iterate_components():
+            if not isinstance(elem, InOutIQChannel):
+                continue
+            if getattr(elem.frequency_converter_down, "octave") is not self:
+                continue
+
+            self.octave.set_qua_element_octave_rf_in_port(elem.name, self.name, 1)
+            self.octave.set_downconversion(
+                elem.name, lo_source=RFInputLOSource.Internal
+            )
 
     def configure(self):
         if self.name not in self._qms:
