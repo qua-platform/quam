@@ -98,7 +98,7 @@ class OctaveOld(QuamComponent):
         else:
             self.qm = self._qms[self.name]
             self.octave = self.qm.octave
-            self.octave_config = self.qm._octave_config
+            self.octave_config = self.octave._octave_config
 
         self.configure_octave_settings()
 
