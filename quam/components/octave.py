@@ -110,9 +110,9 @@ class OctaveOld(QuamComponent):
         self.octave.set_clock(self.name, ClockType.Internal)
         self.octave.calibrate_element(channel_qe, [(lo_freq, if_freq)])
 
-    def set_frequency(self, channel: str, freq: float):
+    def set_frequency(self, channel: str, frequency: float):
         channel_qe = self._channel_to_qe[self.name, channel]
-        self.octave.set_lo_frequency(channel_qe, freq)
+        self.octave.set_lo_frequency(channel_qe, frequency)
 
     def set_gain(self, channel: str, gain: float):
         channel_qe = self._channel_to_qe[self.name, channel]
