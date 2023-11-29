@@ -64,10 +64,25 @@ class Pulse(QuamComponent, ABC):
     digital_marker: Union[str, List[Tuple[int, int]]] = None
 
     @property
+    def channel(self):
+        from quam.components.channels import Channel
+
+        if isinstance(self.parent, Channel):
+            return self.parent
+        elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, Channel):
+            return self.parent.parent
+        else:
+            return None
+
+    @property
     def full_name(self):
+        if self.channel is None:
+            raise ValueError(
+                f"Cannot get full name of pulse '{self}' because it is not"
+                " attached to a channel"
+            )
         name = self.parent.get_attr_name(self)
-        channel = self._get_referenced_value("#../../")
-        return f"{channel.name}{str_ref.DELIMITER}{name}"
+        return f"{self.channel.name}{str_ref.DELIMITER}{name}"
 
     @property
     def pulse_name(self):
@@ -187,21 +202,18 @@ class Pulse(QuamComponent, ABC):
             raise ValueError("unsupported return type")
 
         # Add check that waveform type (single or IQ) matches parent
-        parent_channel = getattr(getattr(self, "parent", None), "parent", None)
         from quam.components.channels import SingleChannel, IQChannel
 
-        parent_is_channel = isinstance(parent_channel, (IQChannel, SingleChannel))
-        if parent_channel is not None and parent_is_channel:
-            if "single" in waveforms and isinstance(parent_channel, IQChannel):
-                raise ValueError(
-                    "Waveform type 'single' not allowed for IQChannel"
-                    f" '{parent_channel.name}'"
-                )
-            elif "I" in waveforms and isinstance(parent_channel, SingleChannel):
-                raise ValueError(
-                    "Waveform type 'IQ' not allowed for SingleChannel"
-                    f" '{parent_channel.name}'"
-                )
+        if "single" in waveforms and not isinstance(self.channel, SingleChannel):
+            raise ValueError(
+                "Waveform type 'single' not allowed for IQChannel"
+                f" '{self.channel.name}'"
+            )
+        elif "I" in waveforms and not isinstance(self.channel, IQChannel):
+            raise ValueError(
+                "Waveform type 'IQ' not allowed for SingleChannel"
+                f" '{self.channel.name}'"
+            )
 
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
@@ -249,6 +261,9 @@ class Pulse(QuamComponent, ABC):
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
+        if self.channel is None:
+            return
+
         self._config_add_pulse(config)
         self._config_add_waveforms(config)
 

@@ -1,13 +1,11 @@
 from copy import copy
 from dataclasses import dataclass, field
 import numpy as np
-from typing import ClassVar, Dict, List, Optional, Tuple, Union
+from typing import Dict, List
 
-from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
 from quam.components.pulses import Pulse
 from quam.components.channels import SingleChannel
 from quam.core import QuamComponent
-from quam.utils import string_reference as str_ref
 
 from quam.utils import patch_dataclass
 
@@ -25,9 +23,6 @@ class VirtualPulse(Pulse):
         virtual_gate_set = self.parent.parent
         assert isinstance(virtual_gate_set, VirtualGateSet)
         return virtual_gate_set
-
-    def apply_to_config(self, config: dict) -> None:
-        ...
 
 
 @dataclass(kw_only=True, eq=False)
@@ -55,7 +50,7 @@ class VirtualGateSet(QuamComponent):
             gate.play(pulse_name)
 
     def apply_to_config(self, config: dict) -> None:
-        for operation in self.operations:
+        for operation_name, operation in self.operations.items():
             gate_pulses = [copy(pulse) for pulse in self.pulse_defaults]
             gate_amplitudes = self.convert_amplitudes(**operation.amplitudes)
 
@@ -63,3 +58,6 @@ class VirtualGateSet(QuamComponent):
                 pulse.amplitude = amplitude
                 pulse.parent = gate
                 pulse.apply_to_config(config, gate)
+
+                element_config = config["elements"][gate.name]
+                element_config["operations"][operation_name] = pulse.full_name
