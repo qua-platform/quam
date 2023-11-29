@@ -64,14 +64,14 @@ class OctaveOld(QuamComponent):
         for q in self._root.active_qubits:
             if q.xy.local_oscillator.frequency_converter is self:
                 xy_LO_channel = q.xy.local_oscillator.channel
-                portmap[tuple(q.xy.output_port_I)] = (self.name, f"I{xy_LO_channel}")
-                portmap[tuple(q.xy.output_port_Q)] = (self.name, f"Q{xy_LO_channel}")
+                portmap[tuple(q.xy.opx_output_I)] = (self.name, f"I{xy_LO_channel}")
+                portmap[tuple(q.xy.opx_output_Q)] = (self.name, f"Q{xy_LO_channel}")
                 self._channel_to_qe[(self.name, xy_LO_channel)] = q.xy.name
 
             if q.rr.local_oscillator.frequency_converter is self:
                 rr_LO_channel = q.rr.local_oscillator.channel
-                portmap[tuple(q.rr.output_port_I)] = (self.name, f"I{rr_LO_channel}")
-                portmap[tuple(q.rr.output_port_Q)] = (self.name, f"Q{rr_LO_channel}")
+                portmap[tuple(q.rr.opx_output_I)] = (self.name, f"I{rr_LO_channel}")
+                portmap[tuple(q.rr.opx_output_Q)] = (self.name, f"Q{rr_LO_channel}")
                 self._channel_to_qe[(self.name, rr_LO_channel)] = q.rr.name
 
         return portmap

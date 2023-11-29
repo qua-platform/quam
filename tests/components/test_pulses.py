@@ -39,8 +39,8 @@ def test_channel():
 
 def test_IQ_channel():
     IQ_channel = IQChannel(
-        output_port_I=0,
-        output_port_Q=1,
+        opx_output_I=0,
+        opx_output_Q=1,
         intermediate_frequency=100e6,
         frequency_converter_up=FrequencyConverter(
             mixer=Mixer(), local_oscillator=LocalOscillator()
@@ -48,8 +48,8 @@ def test_IQ_channel():
     )
     d = IQ_channel.to_dict()
     assert d == {
-        "output_port_I": 0,
-        "output_port_Q": 1,
+        "opx_output_I": 0,
+        "opx_output_Q": 1,
         "intermediate_frequency": 100e6,
         "frequency_converter_up": {"mixer": {}, "local_oscillator": {}},
     }
@@ -58,8 +58,8 @@ def test_IQ_channel():
 def test_single_pulse_IQ_channel():
     IQ_channel = IQChannel(
         id="IQ",
-        output_port_I=0,
-        output_port_Q=1,
+        opx_output_I=0,
+        opx_output_Q=1,
         intermediate_frequency=100e6,
         frequency_converter_up=FrequencyConverter(
             mixer=Mixer(), local_oscillator=LocalOscillator()
@@ -81,7 +81,7 @@ def test_single_pulse_IQ_channel():
 def test_IQ_pulse_single_channel():
     single_channel = SingleChannel(
         id="single",
-        output_port=0,
+        opx_output=0,
     )
     single_channel.operations["X180"] = pulses.DragPulse(
         length=16,

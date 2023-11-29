@@ -91,10 +91,10 @@ class AcDcGate(DcGate, SingleChannel):
 
 It can be instantiated using
 ```python
-ac_dc_gate = AcDcGate(id="plunger_gate", dc_voltage=0.43, output_port=("con1", 1))
+ac_dc_gate = AcDcGate(id="plunger_gate", dc_voltage=0.43, opx_output=("con1", 1))
 ```
 
-Notice that the keyword argument `output_port` now also needs to be passed. This is because it's a required argument for [quam.components.channels.SingleChannel][].
+Notice that the keyword argument `opx_output` now also needs to be passed. This is because it's a required argument for [quam.components.channels.SingleChannel][].
 
 ### Limitations when inheriting from a dataclass
 Inheriting from a dataclass is not directly possible when the parent class has keyword arguments and the child class does not.

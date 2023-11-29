@@ -47,8 +47,6 @@ class Mixer(QuamComponent):
         intermediate_frequency (float, optional): The intermediate frequency of the
             mixer. Default is `#../intermediate_frequency`, meaning that the frequency
             references the intermediate_frequency of the parent.
-        offset_I (float, optional): The offset of the I channel. Default is 0.
-        offset_Q (float, optional): The offset of the Q channel. Default is 0.
         correction_gain (float, optional): The gain imbalance of the mixer.
             Default is 0, see `Mixer.IQ_imbalance` for details.
         correction_phase (float, optional): The phase imbalance of the mixer in radians.
@@ -56,9 +54,6 @@ class Mixer(QuamComponent):
 
     local_oscillator_frequency: float = "#../local_oscillator/frequency"
     intermediate_frequency: float = "#../../intermediate_frequency"
-
-    offset_I: float = 0
-    offset_Q: float = 0
 
     correction_gain: float = 0
     correction_phase: float = 0

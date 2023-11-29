@@ -48,7 +48,7 @@ def test_quam_referenced_full(tmp_path):
     assert len(loaded_quam["local_oscillators"]) == 6
     assert loaded_quam["mixers"][0] == "#/qubits/0/xy/mixer"
     assert loaded_quam["local_oscillators"][0] == "#/qubits/0/xy/local_oscillator"
-    assert loaded_quam["qubits"][0]["xy"]["output_port_I"] == "#/wiring/qubits/0/port_I"
+    assert loaded_quam["qubits"][0]["xy"]["opx_output_I"] == "#/wiring/qubits/0/port_I"
     assert loaded_quam["qubits"][0]["xy"]["intermediate_frequency"] == 100e6
 
     loaded_quam = json.load((folder / "quam" / "wiring.json").open("r"))

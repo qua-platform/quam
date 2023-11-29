@@ -3,11 +3,11 @@
         {
             "id": 0,
             "xy": {
-                "output_port_I": [
+                "opx_output_I": [
                     "con1",
                     3
                 ],
-                "output_port_Q": [
+                "opx_output_Q": [
                     "con1",
                     4
                 ],
@@ -20,7 +20,7 @@
                 }
             },
             "z": {
-                "output_port": [
+                "opx_output": [
                     "con1",
                     5
                 ]
@@ -29,11 +29,11 @@
         {
             "id": 1,
             "xy": {
-                "output_port_I": [
+                "opx_output_I": [
                     "con1",
                     6
                 ],
-                "output_port_Q": [
+                "opx_output_Q": [
                     "con1",
                     7
                 ],
@@ -46,7 +46,7 @@
                 }
             },
             "z": {
-                "output_port": [
+                "opx_output": [
                     "con1",
                     8
                 ]
@@ -56,11 +56,11 @@
     "resonators": [
         {
             "id": 0,
-            "output_port_I": [
+            "opx_output_I": [
                 "con1",
                 1
             ],
-            "output_port_Q": [
+            "opx_output_Q": [
                 "con1",
                 2
             ],
@@ -75,22 +75,22 @@
             "frequency_converter_down": {
                 "local_oscillator": "#../local_oscillator"
             },
-            "input_port_I": [
+            "opx_input_I": [
                 "con1",
                 1
             ],
-            "input_port_Q": [
+            "opx_input_Q": [
                 "con1",
                 2
             ]
         },
         {
             "id": 1,
-            "output_port_I": [
+            "opx_output_I": [
                 "con1",
                 1
             ],
-            "output_port_Q": [
+            "opx_output_Q": [
                 "con1",
                 2
             ],
@@ -105,11 +105,11 @@
             "frequency_converter_down": {
                 "local_oscillator": "#../local_oscillator"
             },
-            "input_port_I": [
+            "opx_input_I": [
                 "con1",
                 1
             ],
-            "input_port_Q": [
+            "opx_input_Q": [
                 "con1",
                 2
             ]

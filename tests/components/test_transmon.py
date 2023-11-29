@@ -20,8 +20,8 @@ def test_transmon_xy():
     transmon = Transmon(
         id=1,
         xy=IQChannel(
-            output_port_I=("con1", 1),
-            output_port_Q=("con1", 2),
+            opx_output_I=("con1", 1),
+            opx_output_Q=("con1", 2),
             frequency_converter_up=FrequencyConverter(
                 mixer=Mixer(),
                 local_oscillator=LocalOscillator(frequency=5e9),
@@ -71,8 +71,8 @@ def test_transmon_add_pulse():
     transmon = Transmon(
         id=1,
         xy=IQChannel(
-            output_port_I=("con1", 1),
-            output_port_Q=("con1", 2),
+            opx_output_I=("con1", 1),
+            opx_output_Q=("con1", 2),
             frequency_converter_up=FrequencyConverter(
                 mixer=Mixer(),
                 local_oscillator=LocalOscillator(frequency=5e9),
@@ -89,8 +89,8 @@ def test_transmon_add_pulse():
         "id": 1,
         "xy": {
             "intermediate_frequency": 100000000.0,
-            "output_port_I": ("con1", 1),
-            "output_port_Q": ("con1", 2),
+            "opx_output_I": ("con1", 1),
+            "opx_output_Q": ("con1", 2),
             "frequency_converter_up": {
                 "mixer": {},
                 "local_oscillator": {"frequency": 5000000000.0},
@@ -175,8 +175,8 @@ quam_dict_single_nested = {
     "qubit": {
         "id": 0,
         "xy": {
-            "output_port_I": ("con1", 0),
-            "output_port_Q": ("con1", 1),
+            "opx_output_I": ("con1", 0),
+            "opx_output_Q": ("con1", 1),
             "intermediate_frequency": 100e6,
             "frequency_converter_up": {
                 "mixer": {},
