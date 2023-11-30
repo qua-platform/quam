@@ -34,8 +34,8 @@ class VirtualGateSet(QuamComponent):
     operations: Dict[str, VirtualPulse] = field(default_factory=dict)
 
     @property
-    def apply_config_after(self):
-        return self.gates
+    def config_settings(self):
+        return {"after": self.gates}
 
     def convert_amplitudes(self, **virtual_gate_amplitudes):
         gate_amplitudes = np.zeros(len(self.gates))
