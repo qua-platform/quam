@@ -122,7 +122,9 @@ class Channel(QuamComponent):
         from qm.qua._dsl import _PulseAmp
 
         if validate and pulse_name not in self.operations:
-            raise KeyError(f"Pulse {pulse_name} not found in {self.name}.")
+            raise KeyError(
+                f"Operation '{pulse_name}' not found in channel '{self.name}'"
+            )
 
         if amplitude_scale is not None:
             if not isinstance(amplitude_scale, _PulseAmp):
