@@ -58,6 +58,7 @@ class Pulse(QuamComponent, ABC):
 
     """
 
+    id: ClassVar[str] = None
     operation: ClassVar[str] = "control"
     length: int
 
@@ -75,26 +76,31 @@ class Pulse(QuamComponent, ABC):
             return None
 
     @property
-    def full_name(self):
+    def name(self):
         if self.channel is None:
             raise ValueError(
                 f"Cannot get full name of pulse '{self}' because it is not"
                 " attached to a channel"
             )
-        name = self.parent.get_attr_name(self)
+
+        if self.id is not None:
+            name = self.id
+        else:
+            name = self.parent.get_attr_name(self)
+
         return f"{self.channel.name}{str_ref.DELIMITER}{name}"
 
     @property
     def pulse_name(self):
-        return f"{self.full_name}{str_ref.DELIMITER}pulse"
+        return f"{self.name}{str_ref.DELIMITER}pulse"
 
     @property
     def waveform_name(self):
-        return f"{self.full_name}{str_ref.DELIMITER}wf"
+        return f"{self.name}{str_ref.DELIMITER}wf"
 
     @property
     def digital_marker_name(self):
-        return f"{self.full_name}{str_ref.DELIMITER}dm"
+        return f"{self.name}{str_ref.DELIMITER}dm"
 
     def calculate_waveform(self) -> Union[float, complex, List[float], List[complex]]:
         """Calculate the waveform of the pulse.
@@ -290,7 +296,7 @@ class ReadoutPulse(Pulse, ABC):
 
     @property
     def integration_weights_names(self):
-        return [f"{self.full_name}{str_ref.DELIMITER}iw{k}" for k in [1, 2, 3]]
+        return [f"{self.name}{str_ref.DELIMITER}iw{k}" for k in [1, 2, 3]]
 
     @property
     def integration_weights_mapping(self):
