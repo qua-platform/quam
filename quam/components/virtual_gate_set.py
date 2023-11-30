@@ -57,7 +57,8 @@ class VirtualGateSet(QuamComponent):
             for gate, pulse, amplitude in zip(self.gates, gate_pulses, gate_amplitudes):
                 pulse.amplitude = amplitude
                 pulse.parent = gate
+                pulse.id = operation_name
                 pulse.apply_to_config(config, gate)
 
                 element_config = config["elements"][gate.name]
-                element_config["operations"][operation_name] = pulse.full_name
+                element_config["operations"][operation_name] = pulse.name
