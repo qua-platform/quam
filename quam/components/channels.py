@@ -77,6 +77,7 @@ class Channel(QuamComponent):
         timestamp_stream: StreamType = None,
         continue_chirp: bool = False,
         target: str = "",
+        validate: bool = True,
     ):
         """Play a pulse on this channel.
 
@@ -110,6 +111,8 @@ class Channel(QuamComponent):
                 handle can be retrieved with
                 [`qm._results.JobResults.get`][qm.results.streaming_result_fetcher.StreamingResultFetcher] with the same
                 ``label``.
+            validate (bool): If True (default), validate that the pulse is registered
+                in Channel.operations
 
         Note:
             The `element` argument from `qm.qua.play()`is not needed, as it is
@@ -118,8 +121,10 @@ class Channel(QuamComponent):
         """
         from qm.qua._dsl import _PulseAmp
 
-        if pulse_name not in self.operations:
-            raise KeyError(f"Pulse {pulse_name} not found in {self.name}.")
+        if validate and pulse_name not in self.operations:
+            raise KeyError(
+                f"Operation '{pulse_name}' not found in channel '{self.name}'"
+            )
 
         if amplitude_scale is not None:
             if not isinstance(amplitude_scale, _PulseAmp):
