@@ -76,6 +76,66 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
         return value
 
 
+def sort_quam_components(
+    components: List["QuamComponent"], max_attempts=5
+) -> List["QuamComponent"]:
+    """Sort QuamComponent objects based on their config_settings.
+
+    Args:
+        components: A list of QuamComponent objects.
+        max_attempts: The maximum number of attempts to sort the components.
+            If the components aren't yet properly sorted after all these attempts,
+            a warning is raised and the components are returned in the final attempted
+            ordering.
+
+    Returns:
+        A sorted list of QuamComponent objects.
+
+    Note:
+        This function is used by
+        [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]
+        to determine the order in which to add the components to the QUA config.
+        This sorting isn't guaranteed to be successful.
+    """
+    sorted_components = components.copy()
+    for _ in range(max_attempts):
+        adjustments_made = False
+
+        for component in components:
+            if component.config_settings is None:
+                continue
+
+            component_idx = sorted_components.index(component)
+
+            if "after" in component.config_settings:
+                for after_component in component.config_settings["after"]:
+                    after_component_idx = sorted_components.index(after_component)
+                    if after_component_idx < component_idx:
+                        continue
+                    sorted_components.remove(after_component)
+                    sorted_components.insert(component_idx, after_component)
+                    adjustments_made = True
+
+            if "before" in component.config_settings:
+                for before_component in component.config_settings["before"]:
+                    before_component_idx = sorted_components.index(before_component)
+                    if before_component_idx > component_idx:
+                        continue
+                    sorted_components.remove(before_component)
+                    sorted_components.insert(component_idx+1, before_component)
+                    adjustments_made = True
+
+        if not adjustments_made:
+            break
+    else:
+        warnings.warn(
+            "Unable to sort QuamComponents based on config_settings. "
+            "This may cause issues when generating the QUA config."
+        )
+
+    return sorted_components
+
+
 class ParentDescriptor:
     """Descriptor for the parent attribute of QuamBase.
 
@@ -122,6 +182,10 @@ class QuamBase(ReferenceClass):
             this object to another QuamBase object.
         _root: The QuamRoot object. This is automatically set when instantiating
             a QuamRoot object.
+        config_settings: A dictionary of configuration settings for this object.
+            This is used by [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]
+            to determine the order in which to add the components to the QUA config.
+            Keys are "before" and "after", and the values are a list of QuamComponents
 
     Note:
         This class should not be used directly, but should generally be subclassed.
@@ -130,6 +194,8 @@ class QuamBase(ReferenceClass):
 
     parent: ClassVar["QuamBase"] = ParentDescriptor()
     _root: ClassVar["QuamRoot"] = None
+
+    config_settings: ClassVar[Dict[str, Any]] = None
 
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
@@ -545,7 +611,10 @@ class QuamRoot(QuamBase):
         """
         qua_config = deepcopy(qua_config_template)
 
-        for quam_component in self.iterate_components():
+        quam_components = list(self.iterate_components())
+        sorted_components = sort_quam_components(quam_components)
+
+        for quam_component in sorted_components:
             quam_component.apply_to_config(qua_config)
 
         return qua_config
@@ -625,7 +694,7 @@ class QuamDict(UserDict, QuamBase):
             raise AttributeError(key) from e
 
     def __setattr__(self, key, value):
-        if key in ["data", "parent"]:
+        if key in ["data", "parent", "config_settings"]:
             super().__setattr__(key, value)
         else:
             self[key] = value

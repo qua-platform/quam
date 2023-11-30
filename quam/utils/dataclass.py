@@ -38,6 +38,7 @@ def get_dataclass_attr_annotations(
     annotated_attrs.pop("_references", None)
     annotated_attrs.pop("_skip_attrs", None)
     annotated_attrs.pop("parent", None)
+    annotated_attrs.pop("config_settings", None)
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
@@ -135,7 +136,8 @@ def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
             for f in fields(self):
                 if getattr(self, f.name, None) is REQUIRED:
                     raise TypeError(
-                        f"Please provide {cls.__name__}.{f.name} as it is a required arg"
+                        f"Please provide {cls.__name__}.{f.name} as it is a"
+                        " required arg"
                     )
 
         if post_init_method is not None:

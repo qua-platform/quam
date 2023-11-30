@@ -33,7 +33,7 @@ def test_generate_after():
         second_component=Component(name="second"),
     )
 
-    root.first_component.config_settings = {"after": "#/second_component"}
+    root.first_component.config_settings = {"after": ["#/second_component"]}
 
     config = root.generate_config()
     assert config["list"] == ["second", "first"]
@@ -45,7 +45,7 @@ def test_generate_before():
         second_component=Component(name="second"),
     )
 
-    root.second_component.config_settings = {"after": "#/first_component"}
+    root.second_component.config_settings = {"before": ["#/first_component"]}
 
     config = root.generate_config()
     assert config["list"] == ["second", "first"]
@@ -62,7 +62,7 @@ def test_generate_after_property():
 
         @property
         def config_settings(self):
-            return {"after": self._root.second_component}
+            return {"after": [self._root.second_component]}
 
     root = Root(
         first_component=ComponentProperty(name="first"),
