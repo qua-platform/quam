@@ -47,7 +47,7 @@ class VirtualGateSet(QuamComponent):
 
     def play(self, pulse_name):
         for gate in self.gates:
-            gate.play(pulse_name)
+            gate.play(pulse_name, validate=False)
 
     def apply_to_config(self, config: dict) -> None:
         for operation_name, operation in self.operations.items():
