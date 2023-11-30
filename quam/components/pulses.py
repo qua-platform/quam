@@ -328,19 +328,19 @@ class ConstantReadoutPulse(ReadoutPulse):
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
         amplitude (float): The constant amplitude of the pulse.
-        rotation_axis (float, optional): IQ rotation axis of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel.
-        rotation_angle (float, optional): The rotation angle for the integration weights
-            in degrees.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+        weights_rotation_angle (float, optional): The rotation angle for the integration
+            weights in degrees.
     """
 
     amplitude: float
-    rotation_axis: float = None
-    rotation_angle: float = 0.0
+    axis_angle: float = None
+    weights_rotation_angle: float = 0.0
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        return [(np.exp(1j * self.rotation_angle), self.length)]
+        return [(np.exp(1j * self.weights_rotation_angle), self.length)]
 
     def waveform_function(self):
         # This should probably be complex because the pulse needs I and Q
@@ -359,7 +359,9 @@ class DragPulse(Pulse):
 
     Args:
         length (int): The pulse length in ns.
-        axis_angle (float): The axis rotation angle for the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+            If None (default), the pulse is meant for a single channel.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
         amplitude (float): The amplitude in volts.
         sigma (float): The gaussian standard deviation.
         alpha (float): The DRAG coefficient.
@@ -409,20 +411,19 @@ class SquarePulse(Pulse):
         length (int): The length of the pulse in samples.
         digital_marker (str, list, optional): The digital marker to use for the pulse.
         amplitude (float): The amplitude of the pulse in volts.
-            Either a float for a single channel, or a complex number for an IQ channel.
-        rotation_axis (float, optional): IQ rotation axis of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
     """
 
     amplitude: float
-    rotation_axis: float = None
+    axis_angle: float = None
 
     def waveform_function(self):
         waveform = self.amplitude
 
-        if self.rotation_axis is not None:
-            waveform = waveform * np.exp(1j * np.pi * self.rotation_axis / 180)
+        if self.axis_angle is not None:
+            waveform = waveform * np.exp(1j * np.pi * self.axis_angle / 180)
         return waveform
 
 
@@ -435,9 +436,9 @@ class GaussianPulse(Pulse):
         length (int): The length of the pulse in samples.
         sigma (float): The standard deviation of the gaussian pulse.
             Should generally be less than half the length of the pulse.
-        rotation_axis (float, optional): IQ rotation axis of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
         subtracted (bool): If true, returns a subtracted Gaussian, such that the first
             and last points will be at 0 volts. This reduces high-frequency components
             due to the initial and final points offset. Default is true.
@@ -446,7 +447,7 @@ class GaussianPulse(Pulse):
     amplitude: float
     length: int
     sigma: float
-    rotation_axis: float = None
+    axis_angle: float = None
     subtracted: bool = True
 
     def waveform_function(self):
@@ -457,8 +458,8 @@ class GaussianPulse(Pulse):
         if self.subtracted:
             waveform = waveform - waveform[-1]
 
-        if self.rotation_axis is not None:
-            waveform = waveform * np.exp(1j * np.pi * self.rotation_axis / 180)
+        if self.axis_angle is not None:
+            waveform = waveform * np.exp(1j * np.pi * self.axis_angle / 180)
 
         return waveform
 
@@ -470,16 +471,16 @@ class FlatTopGaussianPulse(Pulse):
     Args:
         length (int): The total length of the pulse in samples.
         amplitude (float): The amplitude of the pulse in volts.
-        rotation_axis (float, optional): IQ rotation axis of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
         flat_length (int): The length of the pulse's flat top in samples.
             The rise and fall lengths are calculated from the total length and the
             flat length.
     """
 
     amplitude: float
-    rotation_axis: float = None
+    axis_angle: float = None
     flat_length: int
 
     def waveform_function(self):
@@ -501,7 +502,7 @@ class FlatTopGaussianPulse(Pulse):
         )
         waveform = np.array(waveform)
 
-        if self.rotation_axis is not None:
-            waveform = waveform * np.exp(1j * np.pi * self.rotation_axis / 180)
+        if self.axis_angle is not None:
+            waveform = waveform * np.exp(1j * np.pi * self.axis_angle / 180)
 
         return waveform
