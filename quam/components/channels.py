@@ -343,8 +343,6 @@ class InOutIQChannel(IQChannel):
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
-    frequency_converter_down: FrequencyConverter
-
     opx_input_I: Tuple[str, int]
     opx_input_Q: Tuple[str, int]
 
