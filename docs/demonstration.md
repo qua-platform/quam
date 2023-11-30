@@ -53,9 +53,10 @@ for idx in range(num_qubits):
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
         id=idx, 
-        frequency_converter_up=FrequencyConverter(mixer=Mixer()),
-        frequency_converter_down=FrequencyConverter(),
-        local_oscillator=LocalOscillator(power=10, frequency=6e9),
+        frequency_converter_up=FrequencyConverter(
+            local_oscillator=LocalOscillator(power=10, frequency=6e9),
+            mixer=Mixer()
+        )
     )
     machine.resonators.append(resonator)
 ```
