@@ -282,28 +282,30 @@ class ReadoutPulse(Pulse, ABC):
         return dict(zip(["iw1", "iw2", "iw3"], self.integration_weights_names))
 
     @abstractmethod
-    def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        """Abstract method to calculate the integration weights."""
+    def integration_weights_function(self) -> Dict[str, List[Tuple[float, int]]]:
+        """Abstract method to calculate the integration weights.
+
+        Returns:
+            Dict containing keys "real", "imag", "minus_real", "minus_imag".
+            Values are lists of tuples of (weight, length) pairs.
+        """
         ...
 
     def _config_add_integration_weights(self, config: dict):
         """Add the integration weights to the config"""
-        iw = self.integration_weights_function()
-
-        if not isinstance(iw, (list, np.ndarray)):
-            raise ValueError("unsupported return type")
+        integration_weights = self.integration_weights_function()
 
         config["integration_weights"][self.integration_weights_names[0]] = {
-            "cosine": [(sample.real, length) for sample, length in iw],
-            "sine": [(-sample.imag, length) for sample, length in iw],
+            "cosine": integration_weights["real"],
+            "sine": integration_weights["minus_imag"],
         }
         config["integration_weights"][self.integration_weights_names[1]] = {
-            "cosine": [(sample.imag, length) for sample, length in iw],
-            "sine": [(sample.real, length) for sample, length in iw],
+            "cosine": integration_weights["imag"],
+            "sine": integration_weights["real"],
         }
         config["integration_weights"][self.integration_weights_names[2]] = {
-            "cosine": [(-sample.imag, length) for sample, length in iw],
-            "sine": [(-sample.real, length) for sample, length in iw],
+            "cosine": integration_weights["minus_imag"],
+            "sine": integration_weights["minus_real"],
         }
 
         pulse_config = config["pulses"][self.pulse_name]
@@ -328,23 +330,80 @@ class ConstantReadoutPulse(ReadoutPulse):
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
         amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the output pulse in degrees.
             If None (default), the pulse is meant for a single channel.
             If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
-        weights_rotation_angle (float, optional): The rotation angle for the integration
+        integration_weights_angle (float, optional): The rotation angle for the integration
             weights in degrees.
     """
 
     amplitude: float
-    axis_angle: float = None
-    weights_rotation_angle: float = 0.0
+    axis_angle: float = 0
+    integration_weights_angle: float = 0
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        return [(np.exp(1j * self.weights_rotation_angle), self.length)]
+        complex_weight = np.exp(1j * self.integration_weights_angle)
+        return {
+            "real": [(complex_weight.real, self.length)],
+            "imag": [(complex_weight.imag, self.length)],
+            "minus_real": [(-complex_weight.real, self.length)],
+            "minus_imag": [(-complex_weight.imag, self.length)],
+        }
 
     def waveform_function(self):
-        # This should probably be complex because the pulse needs I and Q
-        return complex(self.amplitude)
+        if self.axis_angle is None:
+            return self.amplitude
+        else:
+            return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
+
+
+class ArbitraryWeightsReadoutPulse(ReadoutPulse):
+    """QuAM component for readout pulse with arbitrary weights
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+        amplitude (float): The constant amplitude of the pulse.
+        axis_angle (float, optional): IQ axis angle of the output pulse in degrees.
+            If None (default), the pulse is meant for a single channel.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+        integration_weights_real (list): The real part of the integration weights.
+        integration_weights_imag (list): The imaginary part of the integration weights.
+        integration_weights_minus_real (list): The negative real part of the integration
+            weights.
+        integration_weights_minus_imag (list): The negative imaginary part of the
+            integration weights.
+    """
+
+    amplitude: float
+    axis_angle: float = 0
+    integration_weights_real: List[float]  # cos
+    integration_weights_imag: List[float]  # sin
+    integration_weights_minus_real: List[float]  # -cos
+    integration_weights_minus_imag: List[float]  # -sin
+
+    def integration_weights_function(self):
+        from qualang_tools.config import convert_integration_weights
+
+        # Convert integration weights to tuples [(sample, length), ...]
+        converted_integration_weights = {
+            "real": convert_integration_weights(self.integration_weights_real),
+            "imag": convert_integration_weights(self.integration_weights_imag),
+            "minus_real": convert_integration_weights(
+                self.integration_weights_minus_real
+            ),
+            "minus_imag": convert_integration_weights(
+                self.integration_weights_minus_imag
+            ),
+        }
+        return converted_integration_weights
+
+    def waveform_function(self):
+        if self.axis_angle is None:
+            return self.amplitude
+        else:
+            return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
 
 
 @dataclass(kw_only=True, eq=False)
