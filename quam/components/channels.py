@@ -392,7 +392,7 @@ class InOutIQChannel(IQChannel):
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain
 
     def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
-        """Perform a full dual demolition measurement on this channel.
+        """Perform a full dual demodulation measurement on this channel.
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
