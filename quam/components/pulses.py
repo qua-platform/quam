@@ -270,8 +270,8 @@ class ReadoutPulse(Pulse, ABC):
     digital_marker: str = "ON"
 
     # TODO Understand why the thresholds were added.
-    threshold: int = 0.0
-    rus_exit_threshold: int = 0.0
+    threshold: float = None
+    rus_exit_threshold: float = None
 
     @property
     def integration_weights_names(self):
