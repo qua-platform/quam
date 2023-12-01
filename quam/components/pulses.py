@@ -273,13 +273,17 @@ class ReadoutPulse(Pulse, ABC):
     threshold: float = None
     rus_exit_threshold: float = None
 
+    _weight_labels: ClassVar[List[str]] = ["iw1", "iw2", "iw3"]
+
     @property
     def integration_weights_names(self):
-        return [f"{self.full_name}{str_ref.DELIMITER}iw{k}" for k in [1, 2, 3]]
+        return [
+            f"{self.full_name}{str_ref.DELIMITER}{name}" for name in self._weight_labels
+        ]
 
     @property
     def integration_weights_mapping(self):
-        return dict(zip(["iw1", "iw2", "iw3"], self.integration_weights_names))
+        return dict(zip(self._weight_labels, self.integration_weights_names))
 
     @abstractmethod
     def integration_weights_function(self) -> Dict[str, List[Tuple[float, int]]]:
@@ -295,15 +299,15 @@ class ReadoutPulse(Pulse, ABC):
         """Add the integration weights to the config"""
         integration_weights = self.integration_weights_function()
 
-        config["integration_weights"][self.integration_weights_names[0]] = {
+        config["integration_weights"][self._weight_labels[0]] = {
             "cosine": integration_weights["real"],
             "sine": integration_weights["minus_imag"],
         }
-        config["integration_weights"][self.integration_weights_names[1]] = {
+        config["integration_weights"][self._weight_labels[1]] = {
             "cosine": integration_weights["imag"],
             "sine": integration_weights["real"],
         }
-        config["integration_weights"][self.integration_weights_names[2]] = {
+        config["integration_weights"][self._weight_labels[2]] = {
             "cosine": integration_weights["minus_imag"],
             "sine": integration_weights["minus_real"],
         }
