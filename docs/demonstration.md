@@ -140,15 +140,11 @@ machine.save("state.json")
                 2
             ],
             "frequency_converter_up": {
-                "local_oscillator": "#../local_oscillator",
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                },
                 "mixer": {}
-            },
-            "local_oscillator": {
-                "frequency": 6000000000.0,
-                "power": 10
-            },
-            "frequency_converter_down": {
-                "local_oscillator": "#../local_oscillator"
             },
             "opx_input_I": [
                 "con1",
@@ -170,15 +166,11 @@ machine.save("state.json")
                 2
             ],
             "frequency_converter_up": {
-                "local_oscillator": "#../local_oscillator",
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                },
                 "mixer": {}
-            },
-            "local_oscillator": {
-                "frequency": 6000000000.0,
-                "power": 10
-            },
-            "frequency_converter_down": {
-                "local_oscillator": "#../local_oscillator"
             },
             "opx_input_I": [
                 "con1",
