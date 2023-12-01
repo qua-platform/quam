@@ -2,14 +2,14 @@ from dataclasses import dataclass, field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
 from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
-from quam.components.pulses import Pulse
+from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent
 from quam.utils import patch_dataclass
 from quam.utils import string_reference as str_ref
 
 
 try:
-    from qm.qua import align, amp, play, wait
+    from qm.qua import align, amp, play, wait, measure, dual_demod, declare, fixed
     from qm.qua._type_hinting import *
 except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
@@ -390,3 +390,48 @@ class InOutIQChannel(IQChannel):
 
             if self.input_gain is not None:
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain
+
+    def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
+        """Perform a full dual demolition measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            I_var (QuaVariableType): QUA variable to store the I measurement result.
+                If not provided, a new variable  will be declared
+            Q_var (QuaVariableType): QUA variable to store the Q measurement result.
+                If not provided, a new variable  will be declared
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I_var, Q_var: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: ReadoutPulse = self.operations[pulse_name]
+
+        if I_var is None:
+            I_var = declare(fixed)
+        if Q_var is None:
+            Q_var = declare(fixed)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            dual_demod.full(
+                iw1=pulse.integration_weights_names[0],
+                element_output1="out1",
+                iw2=pulse.integration_weights_names[1],
+                element_output2="out2",
+                target=I_var,
+            ),
+            dual_demod.full(
+                iw1=pulse.integration_weights_names[2],
+                element_output1="out1",
+                iw2=pulse.integration_weights_names[0],
+                element_output2="out2",
+                target=Q_var,
+            ),
+        )
+        return I_var, Q_var
