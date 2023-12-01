@@ -392,6 +392,16 @@ class InOutIQChannel(IQChannel):
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain
 
     def measure(self, pulse_name: str, I_var, Q_var, stream=None):
+        """Perform a full dual demolition measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            I_var (QuaVariableType): QUA variable to store the I measurement result.
+            Q_var (QuaVariableType): QUA variable to store the Q measurement result.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+        """
         pulse: ReadoutPulse = self.operations[pulse_name]
         measure(
             pulse_name,
