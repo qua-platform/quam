@@ -962,12 +962,12 @@ def _quam_dataclass(cls=None, **kwargs):
     kwargs.setdefault("kw_only", True)
     kwargs.setdefault("eq", False)
 
-    if sys.version_info.minor > 3.9:
+    if sys.version_info.minor > 9:
         return dataclass(cls, **kwargs)
 
-    from quam.utils.dataclass import quam_patched_dataclass
+    from quam.utils.dataclass import _quam_patched_dataclass
 
-    return quam_patched_dataclass(cls, **kwargs)
+    return _quam_patched_dataclass(cls, **kwargs)
 
 
 # Exec statement is needed to trick type checkers into recognizing it as a dataclass
