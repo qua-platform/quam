@@ -31,6 +31,9 @@ class LocalOscillator(QuamComponent):
     frequency: float = None
     power: float = None
 
+    def configure(self): 
+        ...
+
 
 @dataclass(kw_only=True, eq=False)
 class Mixer(QuamComponent):
@@ -115,3 +118,7 @@ class FrequencyConverter(QuamComponent):
     local_oscillator: LocalOscillator = None
     mixer: Mixer = None
     gain: float = None
+
+    def configure(self):
+        if self.local_oscillator is not None:
+            self.local_oscillator.configure()
