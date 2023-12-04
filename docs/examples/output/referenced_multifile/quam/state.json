@@ -41,15 +41,11 @@
             "opx_output_I": "#/wiring/resonator/opx_output_I",
             "opx_output_Q": "#/wiring/resonator/opx_output_Q",
             "frequency_converter_up": {
-                "local_oscillator": "#../local_oscillator",
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                },
                 "mixer": {}
-            },
-            "local_oscillator": {
-                "frequency": 6000000000.0,
-                "power": 10
-            },
-            "frequency_converter_down": {
-                "local_oscillator": "#../local_oscillator"
             },
             "opx_input_I": "#/wiring/resonator/opx_input_I",
             "opx_input_Q": "#/wiring/resonator/opx_input_Q"
@@ -59,15 +55,11 @@
             "opx_output_I": "#/wiring/resonator/opx_output_I",
             "opx_output_Q": "#/wiring/resonator/opx_output_Q",
             "frequency_converter_up": {
-                "local_oscillator": "#../local_oscillator",
+                "local_oscillator": {
+                    "frequency": 6000000000.0,
+                    "power": 10
+                },
                 "mixer": {}
-            },
-            "local_oscillator": {
-                "frequency": 6000000000.0,
-                "power": 10
-            },
-            "frequency_converter_down": {
-                "local_oscillator": "#../local_oscillator"
             },
             "opx_input_I": "#/wiring/resonator/opx_input_I",
             "opx_input_Q": "#/wiring/resonator/opx_input_Q"
