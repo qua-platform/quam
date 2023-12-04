@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+import sys
 import warnings
 from pathlib import Path
 from copy import deepcopy
@@ -37,6 +38,7 @@ __all__ = [
     "QuamComponent",
     "QuamDict",
     "QuamList",
+    "quam_dataclass",
 ]
 
 
@@ -932,3 +934,43 @@ class QuamList(UserList, QuamBase):
                     val.print_summary(indent=indent + 2)
                 else:
                     print(" " * (indent + 2) + f"{k}: {val}")
+
+
+def _quam_dataclass(cls=None, **kwargs):
+    """Dataclass for QuAM classes.
+
+    This class is used as a patch to maintain compatibility with Python 3.8 and 3.9, as
+    these do not support the dataclass argument `kw_only`. This argument is needed to
+    ensure inheritance of parent dataclasses is allowed.
+
+    Args:
+    - cls: The QuAM class to decorate.
+    - kwargs: The arguments to pass to the dataclass decorator.
+      By default, kw_only=True and eq=False are passed, though they can be overwritten.
+    Notes:
+    - This custom dataclass is no longer necessary once Python 3.9 support is dropped
+    - The actual custom dataclass is `quam_dataclass` (without the underscore). This
+      function is only used to trick type checkers into recognizing it as a dataclass.
+    - From Python 3.10 onwards, this customized dataclass is no longer needed, as then
+      the following two decorators are equivalent:
+      - @quam_dataclass
+      - @dataclass(eq=False, kw_only=True)
+    """
+    if cls is None:
+        return dataclass(**kwargs)
+
+    kwargs.setdefault("kw_only", True)
+    kwargs.setdefault("eq", False)
+
+    if sys.version_info.minor > 3.9:
+        return dataclass(cls, **kwargs)
+
+    from quam.utils.dataclass import quam_patched_dataclass
+
+    return quam_patched_dataclass(cls, **kwargs)
+
+
+# Exec statement is needed to trick type checkers into recognizing it as a dataclass
+# This will no longer be necessary once we drop support for Python 3.9
+quam_dataclass = dataclass
+exec("quam_dataclass = _quam_dataclass")
