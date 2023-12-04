@@ -263,6 +263,8 @@ class IQChannel(Channel):
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+            for the IQ output.
     """
 
     opx_output_I: Tuple[str, int]
@@ -329,23 +331,29 @@ class InOutIQChannel(IQChannel):
     An example of such a channel is a readout resonator, where you may want to
     apply a readout tone and then measure the response.
 
-    Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
-            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+            channel. The key is the pulse label (e.g. "readout") and value is a
+            ReadoutPulse.
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_input_I (Tuple[str, int]): Channel I input port, a tuple of
-            (controller_name, port). Port is usually 1 or 2.
-        opx_input_Q (Tuple[str, int]): Channel Q input port, a tuple of
-            (controller_name, port). Port is usually 1 or 2.
         opx_output_I (Tuple[str, int]): Channel I output port, a tuple of
             (controller_name, port).
         opx_output_Q (Tuple[str, int]): Channel Q output port, a tuple of
             (controller_name, port).
-        mixer (Mixer): Mixer QuAM component for the IQ output.
-        local_oscillator (LocalOscillator): Local oscillator QuAM component.
+        opx_output_offset_I float: The offset of the I channel. Default is 0.
+        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
+        opx_input_I (Tuple[str, int]): Channel I input port, a tuple of
+            (controller_name, port).
+        opx_input_Q (Tuple[str, int]): Channel Q input port, a tuple of
+            (controller_name, port).
+        opx_input_offset_I float: The offset of the I channel. Default is 0.
+        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+            for the IQ output.
+        frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
+            QuAM component for the IQ input port. Only needed for the old Octave.
     """
 
     opx_input_I: Tuple[str, int]
@@ -358,6 +366,8 @@ class InOutIQChannel(IQChannel):
     input_offset_Q: float = 0.0
 
     input_gain: Optional[float] = None
+
+    frequency_converter_down: FrequencyConverter = None
 
     _default_label: ClassVar[str] = "IQ"
 
