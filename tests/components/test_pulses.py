@@ -77,6 +77,9 @@ def test_single_pulse_IQ_channel():
     error_message = "Waveform type 'single' not allowed for IQChannel 'IQ'"
     assert str(exc_info.value) == error_message
 
+    pulse.axis_angle = 90
+    pulse.apply_to_config(cfg)
+
 
 def test_IQ_pulse_single_channel():
     single_channel = SingleChannel(
@@ -99,3 +102,28 @@ def test_IQ_pulse_single_channel():
         pulse.apply_to_config(cfg)
     error_message = "Waveform type 'IQ' not allowed for SingleChannel 'single'"
     assert str(exc_info.value) == error_message
+
+
+def test_IQ_pulse_play_validate():
+    single_channel = SingleChannel(
+        id="single",
+        opx_output=0,
+    )
+
+    with pytest.raises(KeyError):
+        single_channel.play("X180")
+
+    with pytest.raises(IndexError):
+        single_channel.play("X180", validate=False)
+
+    single_channel.operations["X180"] = pulses.DragPulse(
+        length=16,
+        axis_angle=0,
+        amplitude=1,
+        sigma=12,
+        alpha=0.1,
+        anharmonicity=200e6,
+    )
+
+    with pytest.raises(IndexError):
+        single_channel.play("X180")

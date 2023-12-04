@@ -2,14 +2,14 @@ from dataclasses import dataclass, field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
 from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
-from quam.components.pulses import Pulse
+from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent
 from quam.utils import patch_dataclass
 from quam.utils import string_reference as str_ref
 
 
 try:
-    from qm.qua import align, amp, play, wait
+    from qm.qua import align, amp, play, wait, measure, dual_demod, declare, fixed
     from qm.qua._type_hinting import *
 except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
@@ -77,6 +77,7 @@ class Channel(QuamComponent):
         timestamp_stream: StreamType = None,
         continue_chirp: bool = False,
         target: str = "",
+        validate: bool = True,
     ):
         """Play a pulse on this channel.
 
@@ -110,6 +111,8 @@ class Channel(QuamComponent):
                 handle can be retrieved with
                 [`qm._results.JobResults.get`][qm.results.streaming_result_fetcher.StreamingResultFetcher] with the same
                 ``label``.
+            validate (bool): If True (default), validate that the pulse is registered
+                in Channel.operations
 
         Note:
             The `element` argument from `qm.qua.play()`is not needed, as it is
@@ -118,8 +121,10 @@ class Channel(QuamComponent):
         """
         from qm.qua._dsl import _PulseAmp
 
-        if pulse_name not in self.operations:
-            raise KeyError(f"Pulse {pulse_name} not found in {self.name}.")
+        if validate and pulse_name not in self.operations:
+            raise KeyError(
+                f"Operation '{pulse_name}' not found in channel '{self.name}'"
+            )
 
         if amplitude_scale is not None:
             if not isinstance(amplitude_scale, _PulseAmp):
@@ -343,8 +348,6 @@ class InOutIQChannel(IQChannel):
         intermediate_frequency (float): Intermediate frequency of the mixer.
     """
 
-    frequency_converter_down: FrequencyConverter
-
     opx_input_I: Tuple[str, int]
     opx_input_Q: Tuple[str, int]
 
@@ -387,3 +390,50 @@ class InOutIQChannel(IQChannel):
 
             if self.input_gain is not None:
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain
+
+    def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
+        """Perform a full dual demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            I_var (QuaVariableType): QUA variable to store the I measurement result.
+                If not provided, a new variable  will be declared
+            Q_var (QuaVariableType): QUA variable to store the Q measurement result.
+                If not provided, a new variable  will be declared
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I_var, Q_var: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: ReadoutPulse = self.operations[pulse_name]
+
+        if I_var is None:
+            I_var = declare(fixed)
+        if Q_var is None:
+            Q_var = declare(fixed)
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            dual_demod.full(
+                iw1=integration_weight_labels[0],
+                element_output1="out1",
+                iw2=integration_weight_labels[1],
+                element_output2="out2",
+                target=I_var,
+            ),
+            dual_demod.full(
+                iw1=integration_weight_labels[2],
+                element_output1="out1",
+                iw2=integration_weight_labels[0],
+                element_output2="out2",
+                target=Q_var,
+            ),
+        )
+        return I_var, Q_var

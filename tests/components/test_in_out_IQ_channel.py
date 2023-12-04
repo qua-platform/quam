@@ -8,9 +8,6 @@ def test_empty_in_out_IQ_channel():
         frequency_converter_up=FrequencyConverter(
             mixer=Mixer(), local_oscillator=LocalOscillator()
         ),
-        frequency_converter_down=FrequencyConverter(
-            mixer=None, local_oscillator="#../frequency_converter_up/local_oscillator"
-        ),
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
         opx_input_I=("con1", 3),
@@ -18,16 +15,11 @@ def test_empty_in_out_IQ_channel():
         intermediate_frequency=100e6,
     )
 
-    assert readout_resonator.frequency_converter_down.mixer is None
     assert isinstance(readout_resonator.frequency_converter_up.mixer, Mixer)
 
     assert isinstance(readout_resonator.local_oscillator, LocalOscillator)
     assert (
         readout_resonator.frequency_converter_up.local_oscillator
-        is readout_resonator.local_oscillator
-    )
-    assert (
-        readout_resonator.frequency_converter_down.local_oscillator
         is readout_resonator.local_oscillator
     )
 
@@ -51,9 +43,6 @@ def test_empty_in_out_IQ_channel():
         "frequency_converter_up": {
             "mixer": {},
             "local_oscillator": {"frequency": 5000000000.0},
-        },
-        "frequency_converter_down": {
-            "local_oscillator": "#../frequency_converter_up/local_oscillator"
         },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
@@ -131,9 +120,6 @@ def test_readout_resonator_with_readout():
         frequency_converter_up=FrequencyConverter(
             mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
         ),
-        frequency_converter_down=FrequencyConverter(
-            mixer=None, local_oscillator="#../frequency_converter_up/local_oscillator"
-        ),
     )
     readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
         amplitude=0.1, length=1000
@@ -144,9 +130,6 @@ def test_readout_resonator_with_readout():
         "frequency_converter_up": {
             "mixer": {},
             "local_oscillator": {"frequency": 5000000000.0},
-        },
-        "frequency_converter_down": {
-            "local_oscillator": "#../frequency_converter_up/local_oscillator"
         },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
@@ -250,3 +233,22 @@ def test_readout_resonator_with_readout():
         },
     }
     assert cfg == expected_cfg
+
+
+def test_channel_measure():
+    readout_resonator = InOutIQChannel(
+        id=1,
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        opx_input_I=("con1", 3),
+        opx_input_Q=("con1", 4),
+        intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
+        ),
+    )
+    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
+        amplitude=0.1, length=1000
+    )
+
+    readout_resonator.measure("readout")
