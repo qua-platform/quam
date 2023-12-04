@@ -299,15 +299,15 @@ class ReadoutPulse(Pulse, ABC):
         """Add the integration weights to the config"""
         integration_weights = self.integration_weights_function()
 
-        config["integration_weights"][self._weight_labels[0]] = {
+        config["integration_weights"][self.integration_weights_names[0]] = {
             "cosine": integration_weights["real"],
             "sine": integration_weights["minus_imag"],
         }
-        config["integration_weights"][self._weight_labels[1]] = {
+        config["integration_weights"][self.integration_weights_names[1]] = {
             "cosine": integration_weights["imag"],
             "sine": integration_weights["real"],
         }
-        config["integration_weights"][self._weight_labels[2]] = {
+        config["integration_weights"][self.integration_weights_names[2]] = {
             "cosine": integration_weights["minus_imag"],
             "sine": integration_weights["minus_real"],
         }

@@ -415,21 +415,23 @@ class InOutIQChannel(IQChannel):
             I_var = declare(fixed)
         if Q_var is None:
             Q_var = declare(fixed)
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
             pulse_name,
             self.name,
             stream,
             dual_demod.full(
-                iw1=pulse.integration_weights_names[0],
+                iw1=integration_weight_labels[0],
                 element_output1="out1",
-                iw2=pulse.integration_weights_names[1],
+                iw2=integration_weight_labels[1],
                 element_output2="out2",
                 target=I_var,
             ),
             dual_demod.full(
-                iw1=pulse.integration_weights_names[2],
+                iw1=integration_weight_labels[2],
                 element_output1="out1",
-                iw2=pulse.integration_weights_names[0],
+                iw2=integration_weight_labels[0],
                 element_output2="out2",
                 target=Q_var,
             ),

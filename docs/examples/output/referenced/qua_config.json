@@ -4,28 +4,28 @@
     "con1": {
       "analog_outputs": {
         "3": {
-          "offset": 0
+          "offset": 0.0
         },
         "4": {
-          "offset": 0
+          "offset": 0.0
         },
         "5": {
           "offset": 0
         },
         "6": {
-          "offset": 0
+          "offset": 0.0
         },
         "7": {
-          "offset": 0
+          "offset": 0.0
         },
         "8": {
           "offset": 0
         },
         "1": {
-          "offset": 0
+          "offset": 0.0
         },
         "2": {
-          "offset": 0
+          "offset": 0.0
         }
       },
       "digital_outputs": {},
@@ -50,8 +50,8 @@
           "con1",
           4
         ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "q0.xy.mixer"
+        "mixer": "q0.xy.mixer",
+        "lo_frequency": 6000000000.0
       },
       "intermediate_frequency": 0.0,
       "operations": {}
@@ -75,8 +75,8 @@
           "con1",
           7
         ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "q1.xy.mixer"
+        "mixer": "q1.xy.mixer",
+        "lo_frequency": 6000000000.0
       },
       "intermediate_frequency": 0.0,
       "operations": {}
@@ -100,8 +100,8 @@
           "con1",
           2
         ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "IQ0.mixer"
+        "mixer": "IQ0.mixer",
+        "lo_frequency": 6000000000.0
       },
       "intermediate_frequency": 0.0,
       "operations": {},
@@ -128,8 +128,8 @@
           "con1",
           2
         ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "IQ1.mixer"
+        "mixer": "IQ1.mixer",
+        "lo_frequency": 6000000000.0
       },
       "intermediate_frequency": 0.0,
       "operations": {},
