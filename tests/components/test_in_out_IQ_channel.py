@@ -235,7 +235,7 @@ def test_readout_resonator_with_readout():
     assert cfg == expected_cfg
 
 
-def test_channel_measure():
+def test_channel_measure(mocker):
     readout_resonator = InOutIQChannel(
         id=1,
         opx_output_I=("con1", 1),
@@ -251,4 +251,7 @@ def test_channel_measure():
         amplitude=0.1, length=1000
     )
 
-    readout_resonator.measure("readout")
+    mocker.patch("quam.components.channels.declare", return_value=1)
+    mocker.patch("quam.components.channels.measure", return_value=1)
+    result = readout_resonator.measure("readout")
+    assert result == (1, 1)
