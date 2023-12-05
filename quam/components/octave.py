@@ -99,7 +99,7 @@ class OctaveOld(QuamComponent):
             # self.configure_octave_settings()
             self.octave_config = self.octave._octave_manager._octave_config
 
-            self.configure_octave_settings()
+        self.configure_octave_settings()
 
     def calibrate(self, channel: str, lo_freq: int, if_freq: int, gain: float):
         channel_qe = self._channel_to_qe[self.name, channel]
