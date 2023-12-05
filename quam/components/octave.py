@@ -89,16 +89,17 @@ class OctaveOld(QuamComponent):
     def configure(self):
         self._channel_to_qe = {}
         if self.name not in self._qms:
+            self.octave_config = self._initialize_config()
             self.qm = self._qms[self.name] = self._initialize_qm()
             self.octave = self.qm.octave
 
-            self.configure_octave_settings()
         else:
             self.qm = self._qms[self.name]
             self.octave = self.qm.octave
-            # self.octave_config = self.octave._octave_manager._octave_config
+            # self.configure_octave_settings()
+            self.octave_config = self.octave._octave_manager._octave_config
 
-        self.octave_config = self._initialize_config()
+            self.configure_octave_settings()
 
     def calibrate(self, channel: str, lo_freq: int, if_freq: int, gain: float):
         channel_qe = self._channel_to_qe[self.name, channel]
