@@ -1,12 +1,8 @@
 from typing import List
-from dataclasses import dataclass
 
 import pytest
 
 from quam.core import *
-from quam.utils import patch_dataclass
-
-patch_dataclass(__name__)
 
 
 def test_root_reference(BareQuamRoot):
@@ -16,12 +12,12 @@ def test_root_reference(BareQuamRoot):
     assert root.get_reference() == "#"
 
 
-@dataclass
+@quam_dataclass
 class QuamComponentTest(QuamComponent):
     test_str: str
 
 
-@dataclass
+@quam_dataclass
 class QuamRootTest(QuamRoot):
     quam_elem: QuamComponentTest
     quam_elem_list: List[QuamComponentTest]

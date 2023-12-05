@@ -1,14 +1,12 @@
-from dataclasses import dataclass
-
-from quam.core import QuamRoot, QuamComponent, QuamDict
+from quam.core import QuamRoot, QuamComponent, quam_dataclass
 
 
-@dataclass
+@quam_dataclass
 class BareQuamRoot(QuamRoot):
     pass
 
 
-@dataclass
+@quam_dataclass
 class BareQuamComponent(QuamComponent):
     pass
 
@@ -23,7 +21,7 @@ def test_empty_quam_root_attrs():
 
 
 def test_basic_quam_root_attrs():
-    @dataclass
+    @quam_dataclass
     class QuamTest(QuamRoot):
         int_val: int
 
@@ -33,7 +31,7 @@ def test_basic_quam_root_attrs():
 
 
 def test_quam_root_component_attrs():
-    @dataclass
+    @quam_dataclass
     class QuamTest(QuamRoot):
         int_val: int
         quam_elem: QuamComponent
@@ -45,7 +43,7 @@ def test_quam_root_component_attrs():
 
 
 def test_quam_root_default_attr():
-    @dataclass
+    @quam_dataclass
     class QuamTest(QuamRoot):
         int_val: int = 42
         default_none: int = None

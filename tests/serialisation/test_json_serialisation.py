@@ -1,13 +1,11 @@
-from dataclasses import dataclass
 import json
-
 import pytest
 
 from quam.serialisation import JSONSerialiser
-from quam.core import QuamRoot, QuamComponent
+from quam.core import QuamRoot, QuamComponent, quam_dataclass
 
 
-@dataclass
+@quam_dataclass
 class QuAM(QuamRoot):
     a: int
     b: list
@@ -53,7 +51,7 @@ def test_serialise_ignore(tmp_path):
     }
 
 
-@dataclass
+@quam_dataclass
 class Component(QuamComponent):
     a: int
 

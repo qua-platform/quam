@@ -1,6 +1,5 @@
 import pytest
 from quam.components import *
-from quam.components.channels import InOutIQChannel, LocalOscillator, Mixer
 
 
 def test_empty_in_out_IQ_channel():
