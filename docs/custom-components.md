@@ -55,11 +55,10 @@ We will assume that the newly-created Python module `my_quam` is used.
 In this example, we will make a basic QuAM component representing a DC gate, with two properties: `name` and `dc_voltage`:
 
 ```python title="my_quam/components/gates.py"
-from dataclasses import dataclass
 from typing import Union
-from quam.core import QuamComponent
+from quam.core import QuamComponent, quam_dataclass
 
-@dataclass(kw_only=True, eq=True)
+@quam_dataclass
 class DcGate(QuamComponent):
     id: Union[int, str]
     dc_voltage: float
@@ -73,30 +72,9 @@ dc_gate = DcGate(id="plunger_gate", dc_voltage=0.43)
 A few notes about the above:
 
 - Each QuamComponent inherits from [quam.core.quam_classes.QuamComponent][].
-- A QuAM component should be a [Python dataclass](https://docs.python.org/3/library/dataclasses.html).
-- We add the keyword arguments `@dataclass(kw_only=True, eq=True)`. We recommend doing so for every QuAM component, the reason for this is described below.
+- QuAM components are decorated with `@quam_dataclass`, which is a variant of the Python [@dataclass](https://docs.python.org/3/library/dataclasses.html).
 
-## QuAM component subclassing
-QuAM components can also be subclassed to add functionalities to the parent class.
-For example, we now want to combine a DC and AC gate together, where the AC part corresponds to an OPX channel.
-To do this, we create a class called `AcDcGate` that inherits from both `DcGate` and [quam.components.channels.SingleChannel][]:
-
-```python
-from quam.components import SingleChannel
-
-
-@dataclass(kw_only=True, eq=True)
-class AcDcGate(DcGate, SingleChannel):
-```
-
-It can be instantiated using
-```python
-ac_dc_gate = AcDcGate(id="plunger_gate", dc_voltage=0.43, opx_output=("con1", 1))
-```
-
-Notice that the keyword argument `opx_output` now also needs to be passed. This is because it's a required argument for [quam.components.channels.SingleChannel][].
-
-### Limitations when inheriting from a dataclass
+/// details | Reason for `@quam_dataclass` instead of `@dataclass`
 Inheriting from a dataclass is not directly possible when the parent class has keyword arguments and the child class does not.
 To illustrate this, the following example will raise a `TypeError`:
 ```python
@@ -123,9 +101,34 @@ child = Child(required_attr=12)  # Note that we now need to explicitly pass keyw
 ```
 
 The keyword `kw_only` was only introduced in Python 3.10, and so the example above would raise an error in Python <3.10.
-To make the code compatible with Python 3.9 and lower, we introduced a patch that allows `kw_only` to be used in Python <3.10.
-To enable this patch, the following lines should be added to the top of each file that has QuAM components:
+However, to ensure QuAM is compatible with Python 3.8 and above, we introduced `@quam_dataclass` which fixes this problem:
+
 ```python
-from quam.utils import patch_dataclass
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
+@quam_dataclass
+class Child(Parent):
+    required_attr: int
 ```
+
+An additional benefit is that `kw_only=True` is automatically passed along.  
+From Python 3.10 onwards, `@quam_dataclass` is equivalent to `@dataclass(kw_only=True, eq=False)`
+///
+
+## QuAM component subclassing
+QuAM components can also be subclassed to add functionalities to the parent class.
+For example, we now want to combine a DC and AC gate together, where the AC part corresponds to an OPX channel.
+To do this, we create a class called `AcDcGate` that inherits from both `DcGate` and [quam.components.channels.SingleChannel][]:
+
+```python
+from quam.components import SingleChannel
+
+
+@dataclass(kw_only=True, eq=True)
+class AcDcGate(DcGate, SingleChannel):
+```
+
+It can be instantiated using
+```python
+ac_dc_gate = AcDcGate(id="plunger_gate", dc_voltage=0.43, opx_output=("con1", 1))
+```
+
+Notice that the keyword argument `opx_output` now also needs to be passed. This is because it's a required argument for [quam.components.channels.SingleChannel][].
