@@ -27,11 +27,11 @@ class OctaveOld(QuamComponent):
 
     calibration_db: str = None
 
-    octave_config: QmOctaveConfig = None
+    octave_config: ClassVar[QmOctaveConfig] = None
     _qms: ClassVar[Dict[str, QuantumMachinesManager]] = {}
-    _qm: QuantumMachine = None
-    octave: QmOctave = None
-    _channel_to_qe: dict = field(default_factory=dict)
+    _qm: ClassVar[QuantumMachine] = None
+    octave: ClassVar[QmOctave] = None
+    _channel_to_qe: ClassVar[dict] = None
 
     def _initialize_config(self):
         calibration_db = self.calibration_db
@@ -87,6 +87,7 @@ class OctaveOld(QuamComponent):
             )
 
     def configure(self):
+        self._channel_to_qe = {}
         if self.name not in self._qms:
             self.octave_config = self._initialize_config()
             self.qm = self._qms[self.name] = self._initialize_qm()
