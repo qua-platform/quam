@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 
 __all__ = ["ReferenceClass"]
@@ -6,6 +6,12 @@ __all__ = ["ReferenceClass"]
 
 class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
+
+    _initialized: ClassVar[bool] = False
+
+    def __post_init__(self) -> None:
+        """Post init function"""
+        self._initialized = True
 
     def _get_referenced_value(self, attr: str) -> Any:
         """Get the value of an attribute by reference
@@ -37,3 +43,25 @@ class ReferenceClass:
             return attr_val
         except Exception:
             return attr_val
+
+    def __setattr__(self, attr: str, value: Any) -> None:
+        if value is None:
+            return super().__setattr__(attr, value)
+
+        try:
+            original_value = super().__getattribute__(attr)
+        except AttributeError:
+            return super().__setattr__(attr, value)
+
+        if not self._initialized:
+            return super().__setattr__(attr, value)
+
+        if self._is_reference(original_value) and value is not None:
+            raise ValueError(
+                f"Cannot set attribute {attr} to {value} because it is a reference. "
+                "To overwrite the reference, set the attribute to None first.\n"
+                f"Object: {self}\n"
+                f"Original value: {original_value}"
+            )
+
+        super().__setattr__(attr, value)

@@ -39,6 +39,7 @@ def get_dataclass_attr_annotations(
     annotated_attrs.pop("_skip_attrs", None)
     annotated_attrs.pop("parent", None)
     annotated_attrs.pop("_value_annotation", None)
+    annotated_attrs.pop("_initialized", None)
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
