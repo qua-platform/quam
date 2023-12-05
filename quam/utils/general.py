@@ -83,7 +83,8 @@ def validate_obj_type(
                 "Wrong object type found during validation.\n"
                 f"Path: {str_repr}\n"
                 f"Required type: {required_type}\n"
-                f"Actual type: {type(elem)}, value: {elem}"
+                f"Actual type: {type(elem)}\n"
+                f"value of actual type: {elem}"
             ) from e
 
 
