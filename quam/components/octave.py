@@ -87,9 +87,9 @@ class OctaveOld(QuamComponent):
             )
 
     def configure(self):
-        self._channel_to_qe = {}
+        self.octave_config = self._initialize_config()
+
         if self.name not in self._qms:
-            self.octave_config = self._initialize_config()
             self.qm = self._qms[self.name] = self._initialize_qm()
             self.octave = self.qm.octave
 
@@ -97,7 +97,7 @@ class OctaveOld(QuamComponent):
             self.qm = self._qms[self.name]
             self.octave = self.qm.octave
             # self.configure_octave_settings()
-            self.octave_config = self.octave._octave_manager._octave_config
+            # self.octave_config = self.octave._octave_manager._octave_config
 
         self.configure_octave_settings()
 
