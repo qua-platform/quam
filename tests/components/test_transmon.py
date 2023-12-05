@@ -1,3 +1,5 @@
+import pytest
+
 from quam.components import *
 from quam.components.superconducting_qubits import *
 from quam.components.channels import IQChannel
@@ -37,6 +39,10 @@ def test_transmon_xy():
 
     cfg = {"controllers": {}, "elements": {}}
 
+    # References first have to be set to None
+    with pytest.raises(ValueError):
+        transmon.xy.mixer.local_oscillator_frequency = 5e9
+    transmon.xy.mixer.local_oscillator_frequency = None
     transmon.xy.mixer.local_oscillator_frequency = 5e9
 
     assert transmon.xy.rf_frequency == 5.1e9
