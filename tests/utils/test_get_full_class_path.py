@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from quam.core import *
 from quam.utils import get_full_class_path
 
@@ -10,7 +9,7 @@ def test_get_transmon_class_path():
     assert class_path == "quam.components.superconducting_qubits.Transmon"
 
 
-@dataclass
+@quam_dataclass
 class QuamComponentTest(QuamComponent):
     str_val: str
 

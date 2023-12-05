@@ -1,12 +1,11 @@
 import pytest
-from dataclasses import dataclass
 
 from quam.core import *
 
 
 @pytest.fixture
 def BareQuamRoot():
-    @dataclass
+    @quam_dataclass
     class BareQuamRoot(QuamRoot): ...
 
     return BareQuamRoot
@@ -14,7 +13,7 @@ def BareQuamRoot():
 
 @pytest.fixture
 def BareQuamComponent():
-    @dataclass
+    @quam_dataclass
     class BareQuamComponent(QuamComponent): ...
 
     return BareQuamComponent

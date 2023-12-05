@@ -1,5 +1,5 @@
 from typing import List
-from dataclasses import dataclass, is_dataclass, field
+from dataclasses import is_dataclass, field
 import pytest
 
 from quam.core import *
@@ -19,7 +19,7 @@ def test_error_create_base_classes_directly():
 def test_create_dataclass_subclass():
     for cls in [QuamBase, QuamRoot, QuamComponent]:
 
-        @dataclass
+        @quam_dataclass
         class TestClass(cls):
             pass
 
@@ -28,12 +28,12 @@ def test_create_dataclass_subclass():
         assert is_dataclass(test_class)
 
 
-@dataclass
+@quam_dataclass
 class BareQuamRoot(QuamRoot):
     pass
 
 
-@dataclass
+@quam_dataclass
 class BareQuamComponent(QuamComponent):
     pass
 
@@ -46,7 +46,7 @@ def test_update_quam_component_quam():
     assert quam_component._root is quam_root
 
 
-@dataclass(eq=False)
+@quam_dataclass(eq=False)
 class QuamTest(QuamRoot):
     int_val: int
     quam_elem: QuamComponent
@@ -90,7 +90,7 @@ def test_iterate_quam_component_nested():
 
 
 def test_iterate_quam_component_duplicate():
-    @dataclass
+    @quam_dataclass
     class QuamTest(QuamRoot):
         quam_elem1: QuamComponent
         quam_elem2: QuamComponent
@@ -107,7 +107,7 @@ def test_iterate_quam_component_duplicate():
 
 
 def test_iterate_quam_component_list_duplicate():
-    @dataclass
+    @quam_dataclass
     class QuamTest(QuamRoot):
         quam_list: List[QuamComponent]
 
@@ -134,14 +134,14 @@ def test_iterate_quam_with_elements():
     assert all(isinstance(elem, QuamComponent) for elem in elems)
 
 
-@dataclass
+@quam_dataclass
 class QuamComponentTest(QuamComponent):
     int_val: int
     quam_elem: QuamComponent
     quam_elem_list: List[QuamComponent]
 
 
-@dataclass
+@quam_dataclass
 class NestedQuamTest(QuamRoot):
     int_val: int
     quam_elem: QuamComponentTest
@@ -229,7 +229,7 @@ def test_nested_quam_dict():
 
 
 def test_quam_setattr_quam_dict_component():
-    @dataclass
+    @quam_dataclass
     class TestQuamRoot(QuamRoot):
         quam_dict: dict = field(default_factory=dict)
 
@@ -252,14 +252,17 @@ def test_parent_attr_name(BareQuamComponent):
     with pytest.raises(AttributeError):
         inner_quam_component.parent.get_attr_name(inner_quam_component)
 
-    @dataclass
+    @quam_dataclass
     class OuterQuamComponent(QuamComponent):
         quam_component: QuamComponent
 
     outer_quam_component = OuterQuamComponent(quam_component=inner_quam_component)
     assert outer_quam_component.quam_component is inner_quam_component
     assert inner_quam_component.parent is outer_quam_component
-    assert inner_quam_component.parent.get_attr_name(inner_quam_component) == "quam_component"
+    assert (
+        inner_quam_component.parent.get_attr_name(inner_quam_component)
+        == "quam_component"
+    )
 
     outer_quam_component.quam_component = None
     with pytest.raises(AttributeError):

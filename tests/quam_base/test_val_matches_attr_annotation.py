@@ -1,9 +1,8 @@
 from typing import Dict, List
-from dataclasses import dataclass
 from quam.core.quam_classes import *
 
 
-@dataclass
+@quam_dataclass
 class QuamTest(QuamComponent):
     int_val: int
     str_val: str
@@ -23,7 +22,7 @@ def test_attr_type_basic():
     assert not test_quam._val_matches_attr_annotation("str_val", 1)
 
 
-@dataclass
+@quam_dataclass
 class QuamTest2(QuamComponent):
     int_val: int
     str_val: str

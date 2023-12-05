@@ -1,8 +1,7 @@
-from dataclasses import dataclass
 from quam.components import *
 from quam.components.superconducting_qubits import *
 from quam.components.channels import IQChannel
-from quam.core import QuamRoot
+from quam.core import QuamRoot, quam_dataclass
 
 
 def test_basic_transmon():
@@ -163,7 +162,7 @@ def test_transmon_add_pulse():
     assert config == expected_cfg
 
 
-@dataclass
+@quam_dataclass
 class QuamTestSingle(QuamRoot):
     qubit: Transmon
 
