@@ -1,12 +1,11 @@
 from typing import Dict, List
 import pytest
-from dataclasses import dataclass
 from quam.core.quam_classes import *
 from quam.core.quam_classes import _get_value_annotation
 
 
 def test_value_annotation_nonexisting():
-    @dataclass
+    @quam_dataclass
     class TestQuam(QuamComponent):
         int_val: int
         str_val: str
@@ -18,7 +17,7 @@ def test_value_annotation_nonexisting():
 
 
 def test_value_annotation_dict():
-    @dataclass
+    @quam_dataclass
     class TestQuam(QuamComponent):
         int_val: int
         str_val: str
@@ -32,7 +31,7 @@ def test_value_annotation_dict():
 
 
 def test_value_annotation_list():
-    @dataclass
+    @quam_dataclass
     class TestQuam(QuamComponent):
         int_val: int
         str_val: str
@@ -46,9 +45,8 @@ def test_value_annotation_list():
 
 
 def test_value_annotation_bare_quam_component():
-    @dataclass
-    class TestQuam(QuamComponent):
-        ...
+    @quam_dataclass
+    class TestQuam(QuamComponent): ...
 
     test_quam = TestQuam()
 
@@ -59,9 +57,8 @@ def test_value_annotation_bare_quam_component():
 def test_value_annotation_bare_quam_root():
     from quam.core.quam_classes import _get_value_annotation
 
-    @dataclass
-    class TestQuam(QuamRoot):
-        ...
+    @quam_dataclass
+    class TestQuam(QuamRoot): ...
 
     assert _get_value_annotation(TestQuam, "attr") is None
 
@@ -69,9 +66,8 @@ def test_value_annotation_bare_quam_root():
 
 
 def test_type_hints_empty_dataclass():
-    @dataclass
-    class C:
-        ...
+    @quam_dataclass
+    class C: ...
 
     assert _get_value_annotation(C, "attr") is None
 

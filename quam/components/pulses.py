@@ -1,15 +1,10 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 import numbers
 from typing import Any, ClassVar, Dict, List, Union, Tuple
 import numpy as np
 
-from quam.core import QuamComponent
-from quam.utils import patch_dataclass
+from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
-
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = [
@@ -23,7 +18,7 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class Pulse(QuamComponent, ABC):
     """QuAM base component for a pulse.
 
@@ -256,7 +251,7 @@ class Pulse(QuamComponent, ABC):
             self._config_add_digital_markers(config)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class ReadoutPulse(Pulse, ABC):
     """QuAM abstract base component for a readout pulse.
 
@@ -325,7 +320,7 @@ class ReadoutPulse(Pulse, ABC):
         self._config_add_integration_weights(config)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class ConstantReadoutPulse(ReadoutPulse):
     """QuAM component for a constant readout pulse.
 
@@ -361,6 +356,7 @@ class ConstantReadoutPulse(ReadoutPulse):
             return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
 
 
+@quam_dataclass
 class ArbitraryWeightsReadoutPulse(ReadoutPulse):
     """QuAM component for readout pulse with arbitrary weights
 
@@ -410,7 +406,7 @@ class ArbitraryWeightsReadoutPulse(ReadoutPulse):
             return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class DragPulse(Pulse):
     """Gaussian-based DRAG pulse that compensate for the leakage and AC stark shift.
 
@@ -466,7 +462,7 @@ class DragPulse(Pulse):
         return I_rot + 1.0j * Q_rot
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class SquarePulse(Pulse):
     """Square pulse QuAM component.
 
@@ -490,7 +486,7 @@ class SquarePulse(Pulse):
         return waveform
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class GaussianPulse(Pulse):
     """Gaussian pulse QuAM component.
 
@@ -527,7 +523,7 @@ class GaussianPulse(Pulse):
         return waveform
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class FlatTopGaussianPulse(Pulse):
     """Gaussian pulse with flat top QuAM component.
 

@@ -4,7 +4,7 @@ from quam.core.quam_instantiation import *
 from quam.utils import get_full_class_path
 
 
-@dataclass
+@quam_dataclass
 class QuamComponentTest(QuamComponent):
     str_val: str
 

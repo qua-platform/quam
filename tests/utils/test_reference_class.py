@@ -1,8 +1,7 @@
-from dataclasses import dataclass
 from typing import Any
-
 import pytest
 
+from quam.core import quam_dataclass
 from quam.utils import ReferenceClass
 
 
@@ -49,7 +48,7 @@ def test_set_reference_attribute():
     assert reference_obj.a == 42
 
 
-@dataclass
+@quam_dataclass
 class SubReferenceDataClass(SubReferenceClass):
     a: float = 42
 

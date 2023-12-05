@@ -1,3 +1,7 @@
+## [0.2.0]
+### Changed
+- Quam components now user `@quam_dataclass` decorator instead of `@dataclass(kw_only=True)`
+
 ## [0.1.1]
 Only registering changes from November 29th
 

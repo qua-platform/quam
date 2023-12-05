@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import pytest
 
 from quam.core import *
@@ -71,9 +70,8 @@ def test_double_parent_descriptor():
 
 @pytest.mark.parametrize("cls", [QuamBase, QuamRoot, QuamComponent, QuamDict, QuamList])
 def test_parent_quam_class(cls):
-    @dataclass
-    class C(cls):
-        ...
+    @quam_dataclass
+    class C(cls): ...
 
     assert isinstance(C.parent, ParentDescriptor)
     c = C()
@@ -86,9 +84,8 @@ def test_parent_quam_class(cls):
 @pytest.mark.parametrize("child_cls", [QuamDict, QuamList])
 @pytest.mark.parametrize("parent_cls", [QuamRoot, QuamComponent])
 def test_quam_parent_child_dict(parent_cls, child_cls):
-    @dataclass
-    class C(parent_cls):
-        ...
+    @quam_dataclass
+    class C(parent_cls): ...
 
     d = child_cls()
     assert d.parent is None

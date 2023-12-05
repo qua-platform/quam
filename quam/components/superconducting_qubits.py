@@ -1,19 +1,15 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import List, Union
 
 from quam import QuamComponent
-from quam.components.channels import IQChannel, SingleChannel
-from quam.components.channels import InOutIQChannel
+from quam.components.channels import IQChannel, SingleChannel, InOutIQChannel
 from quam.components.hardware import LocalOscillator, Mixer
-from quam.core import QuamRoot
-from quam.utils import patch_dataclass
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
+from quam.core import QuamRoot, quam_dataclass
 
 __all__ = ["Transmon", "QuAM"]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class Transmon(QuamComponent):
     """Example QuAM component for a transmon qubit."""
 
@@ -29,7 +25,7 @@ class Transmon(QuamComponent):
         return self.id if isinstance(self.id, str) else f"q{self.id}"
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class QuAM(QuamRoot):
     """Example QuAM root component."""
 

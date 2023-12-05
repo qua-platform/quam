@@ -1,7 +1,8 @@
 from dataclasses import dataclass, is_dataclass, fields, field
 import pytest
 
-from quam.utils.dataclass import get_dataclass_attr_annotations, quam_dataclass
+from quam.utils.dataclass import get_dataclass_attr_annotations
+from quam.core import quam_dataclass
 
 
 def test_dataclass_inheritance_error():
@@ -146,46 +147,6 @@ def test_dataclass_inheritance_optional_base():
     assert d.int_val3 == 44
 
 
-@pytest.fixture
-def dataclass_patch(scope="function"):
-    import sys
-
-    existing_dataclass = getattr(sys.modules[__name__], "dataclass", None)
-    yield
-    if existing_dataclass is not None:
-        setattr(sys.modules[__name__], "dataclass", existing_dataclass)
-
-
-def test_patch_dataclass(dataclass_patch):
-    import sys
-
-    if sys.version_info.minor < 10:
-        with pytest.raises(TypeError):
-
-            @dataclass(kw_only=True)
-            class C:
-                ...
-
-        from quam.utils import patch_dataclass
-
-        patch_dataclass(__name__)
-
-        @dataclass(kw_only=True)
-        class C:
-            ...
-
-
-def test_dataclass_patch_teardown(dataclass_patch):
-    import sys
-
-    if sys.version_info.minor < 10:
-        with pytest.raises(TypeError):
-
-            @dataclass(kw_only=True)
-            class C:
-                ...
-
-
 def test_subsubclass_default_factory():
     """This bug was found quite late, and has been fixed.
     It only occurred with Python < 3.10.
@@ -215,3 +176,24 @@ def test_subsubclass_default_factory():
         "optional": {"attr": int, "attr2": int},
         "allowed": {"attr": int, "attr2": int},
     }
+
+
+def test_quam_dataclass_with_kw_only():
+    @quam_dataclass(kw_only=True)
+    class C:
+        int_val: int
+        int_val_optional: int = 42
+
+    assert is_dataclass(C)
+    with pytest.raises(TypeError):
+        c = C()
+
+    c = C(2)
+    assert is_dataclass(c)
+    assert c.int_val == 2
+    assert c.int_val_optional == 42
+
+    f = fields(c)
+    assert len(f) == 2
+    assert f[0].name == "int_val"
+    assert f[1].name == "int_val_optional"

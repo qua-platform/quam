@@ -1,10 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
-from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
+from quam.components.hardware import FrequencyConverter
 from quam.components.pulses import Pulse, ReadoutPulse
-from quam.core import QuamComponent
-from quam.utils import patch_dataclass
+from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
 
@@ -15,8 +14,6 @@ except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
 
 
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
-
 __all__ = [
     "Channel",
     "SingleChannel",
@@ -25,7 +22,7 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class Channel(QuamComponent):
     """Base QuAM component for a channel, can be output, input or both.
 
@@ -190,7 +187,7 @@ class Channel(QuamComponent):
             align(self.name, *other_elements_str)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class SingleChannel(Channel):
     """QuAM component for a single (not IQ) output channel.
 
@@ -246,7 +243,7 @@ class SingleChannel(Channel):
             output_filter["feedback"] = self.filter_iir_taps
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class IQChannel(Channel):
     """QuAM component for an IQ output channel.
 
@@ -324,7 +321,7 @@ class IQChannel(Channel):
             controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class InOutIQChannel(IQChannel):
     """QuAM component for an IQ channel with both input and output.
 
