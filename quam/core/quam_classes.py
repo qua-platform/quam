@@ -488,6 +488,7 @@ class QuamRoot(QuamBase):
 
     def __post_init__(self):
         QuamBase._root = self
+        super().__post_init__()
 
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
@@ -659,6 +660,7 @@ class QuamDict(UserDict, QuamBase):
     def __init__(self, dict=None, /, value_annotation: type = None, **kwargs):
         self.__dict__["data"] = {}
         self.__dict__["_value_annotation"] = value_annotation
+        self.__dict__["_initialized"] = True
         super().__init__(dict, **kwargs)
 
     def __getattr__(self, key):
@@ -668,7 +670,7 @@ class QuamDict(UserDict, QuamBase):
             raise AttributeError(key) from e
 
     def __setattr__(self, key, value):
-        if key in ["data", "parent"]:
+        if key in ["data", "parent", "_initialized"]:
             super().__setattr__(key, value)
         else:
             self[key] = value
@@ -685,6 +687,7 @@ class QuamDict(UserDict, QuamBase):
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
         value = convert_dict_and_list(value)
+        self._is_valid_setattr(key, value, error_on_False=True)
         super().__setitem__(key, value)
 
         if isinstance(value, QuamBase):
@@ -747,8 +750,13 @@ class QuamDict(UserDict, QuamBase):
             The value of the attribute. If the value is a reference, it returns the
             reference string instead of the value it is referencing.
         """
-
-        return self.__getattr__(attr)
+        try:
+            return self.__dict__["data"][attr]
+        except KeyError as e:
+            raise AttributeError(
+                "Cannot get unreferenced value from attribute {attr} that does not"
+                " exist in {self}"
+            ) from e
 
     def iterate_components(
         self, skip_elems: Sequence[QuamBase] = None

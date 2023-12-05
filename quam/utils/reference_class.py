@@ -44,24 +44,62 @@ class ReferenceClass:
         except Exception:
             return attr_val
 
-    def __setattr__(self, attr: str, value: Any) -> None:
+    def _is_valid_setattr(
+        self, attr: str, value: Any, error_on_False: bool = False
+    ) -> bool:
+        """Check if an attribute can be set to a value
+
+        This will be called by __setattr__ to check if the attribute can be set to the
+        given value.
+
+        Args:
+            attr: The attribute to set
+            value: The value to set the attribute to
+            error_on_False: If True, raise an error if the attribute cannot be set to
+                the value. If False, return False if the attribute cannot be set to the
+                value.
+
+        Returns:
+            True if
+            - The new value is None
+            - The attribute does not exist yet
+            - The attribute's previous value is not a reference
+            - The new value is a reference
+            False otherwise, in particular if the previous value is a reference and the
+            new value is not and is also not None.
+
+        Raises:
+            ValueError: If error_on_False is True and the attribute cannot be set to
+                the value.
+        """
         if value is None:
-            return super().__setattr__(attr, value)
+            return True
 
         try:
-            original_value = super().__getattribute__(attr)
+            original_value = self.get_unreferenced_value(attr)
         except AttributeError:
-            return super().__setattr__(attr, value)
+            return True
 
         if not self._initialized:
-            return super().__setattr__(attr, value)
+            return True
 
-        if self._is_reference(original_value) and value is not None:
+        if self._is_reference(original_value):
+            if self._is_reference(value):
+                return True
+
+            if not error_on_False:
+                return False
+
             raise ValueError(
                 f"Cannot set attribute {attr} to {value} because it is a reference. "
                 "To overwrite the reference, set the attribute to None first.\n"
                 f"Object: {self}\n"
                 f"Original value: {original_value}"
             )
+
+        return True
+
+    def __setattr__(self, attr: str, value: Any) -> None:
+        self._is_valid_setattr(attr, value, error_on_False=True)
 
         super().__setattr__(attr, value)
