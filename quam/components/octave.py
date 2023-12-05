@@ -1,8 +1,8 @@
 import os
 from typing import Union, ClassVar, Dict
-from dataclasses import dataclass, field
+from dataclasses import field
 
-from quam.core import QuamComponent
+from quam.core import QuamComponent, quam_dataclass
 from quam.components.hardware import FrequencyConverter
 
 
@@ -12,16 +12,12 @@ from qm.octave.qm_octave import QmOctave
 
 from octave_sdk import RFInputLOSource
 from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
-from quam.utils import patch_dataclass
-
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = ["OctaveOldFrequencyConverter", "OctaveOld"]
 
 
-@dataclass
+@quam_dataclass
 class OctaveOld(QuamComponent):
     name: str
     host: str
@@ -116,7 +112,7 @@ class OctaveOld(QuamComponent):
         self.octave.set_rf_output_gain(channel_qe, gain)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class OctaveOldFrequencyConverter(FrequencyConverter):
     channel: Union[str, int]
     octave: OctaveOld

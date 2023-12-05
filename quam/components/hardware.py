@@ -1,13 +1,8 @@
 import numpy as np
-from typing import List, Union
-from dataclasses import dataclass, field
+from typing import List
 
-from quam.core import QuamComponent
-from quam.utils import patch_dataclass
+from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
-
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = [
@@ -17,7 +12,7 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class LocalOscillator(QuamComponent):
     """QuAM component for a local oscillator.
 
@@ -32,7 +27,7 @@ class LocalOscillator(QuamComponent):
     power: float = None
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class Mixer(QuamComponent):
     """QuAM component for a mixer.
 
@@ -110,7 +105,7 @@ class Mixer(QuamComponent):
         ]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class FrequencyConverter(QuamComponent):
     local_oscillator: LocalOscillator = None
     mixer: Mixer = None
