@@ -57,6 +57,9 @@ class OctaveOld(QuamComponent):
     def get_portmap(self):
         portmap = {}
 
+        if self._channel_to_qe is None:
+            self._channel_to_qe = {}
+
         for elem in self._root.iterate_components():
             if not isinstance(elem, OctaveOldFrequencyConverter):
                 continue
