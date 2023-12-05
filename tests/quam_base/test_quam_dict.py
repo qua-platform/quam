@@ -194,3 +194,10 @@ def test_dict_nested():
 def test_quam_dict_repr():
     quam_dict = QuamDict(val1=42, val2=43)
     assert repr(quam_dict) == "{'val1': 42, 'val2': 43}"
+
+
+def test_dict_unreferenced_value():
+    d = QuamDict(val1="#./val2", val2=42)
+    assert d.val1 == 42
+    assert d.val2 == 42
+    assert d.get_unreferenced_value("val1") == "#./val2"
