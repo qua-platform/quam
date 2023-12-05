@@ -1,6 +1,5 @@
 import pytest
 from quam.components import *
-from quam.components.channels import InOutIQChannel, LocalOscillator, Mixer
 
 
 def test_empty_in_out_IQ_channel():
@@ -233,3 +232,25 @@ def test_readout_resonator_with_readout():
         },
     }
     assert cfg == expected_cfg
+
+
+def test_channel_measure(mocker):
+    readout_resonator = InOutIQChannel(
+        id=1,
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        opx_input_I=("con1", 3),
+        opx_input_Q=("con1", 4),
+        intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
+        ),
+    )
+    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
+        amplitude=0.1, length=1000
+    )
+
+    mocker.patch("quam.components.channels.declare", return_value=1)
+    mocker.patch("quam.components.channels.measure", return_value=1)
+    result = readout_resonator.measure("readout")
+    assert result == (1, 1)

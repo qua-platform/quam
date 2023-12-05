@@ -39,6 +39,8 @@ def get_dataclass_attr_annotations(
     annotated_attrs.pop("_skip_attrs", None)
     annotated_attrs.pop("parent", None)
     annotated_attrs.pop("config_settings", None)
+    annotated_attrs.pop("_value_annotation", None)
+    annotated_attrs.pop("_initialized", None)
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
@@ -104,7 +106,7 @@ def handle_inherited_required_fields(cls):
         setattr(cls, attr, REQUIRED)
 
 
-def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
+def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
     """Patch around Python dataclass to ensure that dataclass subclassing works
 
     Prior to Python 3.10, it was not possible for a dataclass to be a subclass of
@@ -124,7 +126,7 @@ def quam_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
     The python dataclass can be overridden by calling patch_dataclass.
     """
     if cls is None:
-        return functools.partial(quam_dataclass, kw_only=kw_only, eq=eq)
+        return functools.partial(_quam_patched_dataclass, kw_only=kw_only, eq=eq)
 
     handle_inherited_required_fields(cls)
 
@@ -182,5 +184,10 @@ def patch_dataclass(module_name):
         static analysis tools, such as mypy. This is necessary as mypy otherwise will
         no longer recognize the dataclass as a dataclass.
     """
+    DeprecationWarning(
+        "patch_dataclass is deprecated and will be removed in QuAM v1.0. "
+        "Please use 'from quam.core import quam_dataclass' as a decorator instead of "
+        "the regular Python dataclass."
+    )
     if sys.version_info.minor < 10:
-        setattr(sys.modules[module_name], "dataclass", quam_dataclass)
+        setattr(sys.modules[module_name], "dataclass", _quam_patched_dataclass)

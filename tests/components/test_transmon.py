@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+import pytest
+
 from quam.components import *
 from quam.components.superconducting_qubits import *
 from quam.components.channels import IQChannel
-from quam.core import QuamRoot
+from quam.core import QuamRoot, quam_dataclass
 
 
 def test_basic_transmon():
@@ -38,6 +39,10 @@ def test_transmon_xy():
 
     cfg = {"controllers": {}, "elements": {}}
 
+    # References first have to be set to None
+    with pytest.raises(ValueError):
+        transmon.xy.mixer.local_oscillator_frequency = 5e9
+    transmon.xy.mixer.local_oscillator_frequency = None
     transmon.xy.mixer.local_oscillator_frequency = 5e9
 
     assert transmon.xy.rf_frequency == 5.1e9
@@ -163,7 +168,7 @@ def test_transmon_add_pulse():
     assert config == expected_cfg
 
 
-@dataclass
+@quam_dataclass
 class QuamTestSingle(QuamRoot):
     qubit: Transmon
 

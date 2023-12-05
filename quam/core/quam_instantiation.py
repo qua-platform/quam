@@ -264,9 +264,14 @@ def instantiate_attrs(
                 f"Attribute {attr_name} is not a valid attr of {str_repr}"
             )
 
+        if isinstance(attr_val, dict) and "__class__" in attr_val:
+            expected_type = get_class_from_path(attr_val["__class__"])
+        else:
+            expected_type = attr_annotations["allowed"][attr_name]
+
         instantiated_attr = instantiate_attr(
             attr_val=attr_val,
-            expected_type=attr_annotations["allowed"][attr_name],
+            expected_type=expected_type,
             allow_none=attr_name not in attr_annotations["required"],
             fix_attrs=fix_attrs,
             validate_type=validate_type,

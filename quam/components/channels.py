@@ -1,21 +1,18 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
-from quam.components.hardware import LocalOscillator, Mixer, FrequencyConverter
-from quam.components.pulses import Pulse
-from quam.core import QuamComponent
-from quam.utils import patch_dataclass
+from quam.components.hardware import FrequencyConverter
+from quam.components.pulses import Pulse, ReadoutPulse
+from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
 
 try:
-    from qm.qua import align, amp, play, wait
+    from qm.qua import align, amp, play, wait, measure, dual_demod, declare, fixed
     from qm.qua._type_hinting import *
 except ImportError:
     print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
 
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 __all__ = [
     "Channel",
@@ -25,7 +22,7 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class Channel(QuamComponent):
     """Base QuAM component for a channel, can be output, input or both.
 
@@ -190,7 +187,7 @@ class Channel(QuamComponent):
             align(self.name, *other_elements_str)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class SingleChannel(Channel):
     """QuAM component for a single (not IQ) output channel.
 
@@ -246,7 +243,7 @@ class SingleChannel(Channel):
             output_filter["feedback"] = self.filter_iir_taps
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class IQChannel(Channel):
     """QuAM component for an IQ output channel.
 
@@ -263,6 +260,8 @@ class IQChannel(Channel):
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+            for the IQ output.
     """
 
     opx_output_I: Tuple[str, int]
@@ -322,30 +321,36 @@ class IQChannel(Channel):
             controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class InOutIQChannel(IQChannel):
     """QuAM component for an IQ channel with both input and output.
 
     An example of such a channel is a readout resonator, where you may want to
     apply a readout tone and then measure the response.
 
-    Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
-            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+            channel. The key is the pulse label (e.g. "readout") and value is a
+            ReadoutPulse.
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_input_I (Tuple[str, int]): Channel I input port, a tuple of
-            (controller_name, port). Port is usually 1 or 2.
-        opx_input_Q (Tuple[str, int]): Channel Q input port, a tuple of
-            (controller_name, port). Port is usually 1 or 2.
         opx_output_I (Tuple[str, int]): Channel I output port, a tuple of
             (controller_name, port).
         opx_output_Q (Tuple[str, int]): Channel Q output port, a tuple of
             (controller_name, port).
-        mixer (Mixer): Mixer QuAM component for the IQ output.
-        local_oscillator (LocalOscillator): Local oscillator QuAM component.
+        opx_output_offset_I float: The offset of the I channel. Default is 0.
+        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
+        opx_input_I (Tuple[str, int]): Channel I input port, a tuple of
+            (controller_name, port).
+        opx_input_Q (Tuple[str, int]): Channel Q input port, a tuple of
+            (controller_name, port).
+        opx_input_offset_I float: The offset of the I channel. Default is 0.
+        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+            for the IQ output.
+        frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
+            QuAM component for the IQ input port. Only needed for the old Octave.
     """
 
     opx_input_I: Tuple[str, int]
@@ -358,6 +363,8 @@ class InOutIQChannel(IQChannel):
     input_offset_Q: float = 0.0
 
     input_gain: Optional[float] = None
+
+    frequency_converter_down: FrequencyConverter = None
 
     _default_label: ClassVar[str] = "IQ"
 
@@ -390,3 +397,50 @@ class InOutIQChannel(IQChannel):
 
             if self.input_gain is not None:
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain
+
+    def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
+        """Perform a full dual demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            I_var (QuaVariableType): QUA variable to store the I measurement result.
+                If not provided, a new variable  will be declared
+            Q_var (QuaVariableType): QUA variable to store the Q measurement result.
+                If not provided, a new variable  will be declared
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I_var, Q_var: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: ReadoutPulse = self.operations[pulse_name]
+
+        if I_var is None:
+            I_var = declare(fixed)
+        if Q_var is None:
+            Q_var = declare(fixed)
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            dual_demod.full(
+                iw1=integration_weight_labels[0],
+                element_output1="out1",
+                iw2=integration_weight_labels[1],
+                element_output2="out2",
+                target=I_var,
+            ),
+            dual_demod.full(
+                iw1=integration_weight_labels[2],
+                element_output1="out1",
+                iw2=integration_weight_labels[0],
+                element_output2="out2",
+                target=Q_var,
+            ),
+        )
+        return I_var, Q_var

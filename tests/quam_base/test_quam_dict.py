@@ -1,11 +1,11 @@
 import pytest
 from typing import Dict
-from dataclasses import dataclass, field
+from dataclasses import field
 from quam.core.quam_classes import *
 from collections import UserDict
 
 
-@dataclass
+@quam_dataclass
 class BareQuamComponent(QuamComponent):
     pass
 
@@ -110,7 +110,7 @@ def test_inner_quam_dict():
 
 
 def test_dict_from_quam_root():
-    @dataclass
+    @quam_dataclass
     class TestDictQuamRoot(QuamRoot):
         test_dict: dict = field(default_factory=dict)
 
@@ -119,7 +119,7 @@ def test_dict_from_quam_root():
 
 
 def test_dict_from_quam_component():
-    @dataclass
+    @quam_dataclass
     class TestDictQuamComponent(QuamComponent):
         test_dict: dict = field(default_factory=dict)
 
@@ -144,7 +144,7 @@ def test_quam_dict_get_attr_names():
 
 
 def test_val_matches_annotation():
-    @dataclass
+    @quam_dataclass
     class TestQuamComponent(QuamComponent):
         val_dict: dict
         val_float: float
@@ -194,3 +194,10 @@ def test_dict_nested():
 def test_quam_dict_repr():
     quam_dict = QuamDict(val1=42, val2=43)
     assert repr(quam_dict) == "{'val1': 42, 'val2': 43}"
+
+
+def test_dict_unreferenced_value():
+    d = QuamDict(val1="#./val2", val2=42)
+    assert d.val1 == 42
+    assert d.val2 == 42
+    assert d.get_unreferenced_value("val1") == "#./val2"

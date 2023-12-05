@@ -1,21 +1,17 @@
 import pytest
 from typing import List
-from dataclasses import dataclass
 
-from quam.core import QuamRoot, QuamComponent
+from quam.core import QuamRoot, QuamComponent, quam_dataclass
 from quam.components.superconducting_qubits import Transmon
 from quam.core.quam_instantiation import *
 from quam.utils import (
     get_dataclass_attr_annotations,
-    patch_dataclass,
     validate_obj_type,
 )
 
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
-
 
 def test_get_dataclass_attributes():
-    @dataclass
+    @quam_dataclass
     class TestClass(QuamComponent):
         a: int
         b: List[int]
@@ -38,7 +34,7 @@ def test_get_dataclass_attributes_subclass():
     class AbstractClass(QuamComponent):
         elem: float = 42
 
-    @dataclass
+    @quam_dataclass
     class TestClass(AbstractClass):
         a: int
         b: List[int]
@@ -57,11 +53,11 @@ def test_get_dataclass_attributes_subclass():
 
 
 def test_get_dataclass_attributes_subdataclass():
-    @dataclass(kw_only=True)
+    @quam_dataclass
     class AbstractClass(QuamComponent):
         elem: float = 42
 
-    @dataclass
+    @quam_dataclass
     class TestClass(AbstractClass):
         a: int
         b: List[int]
@@ -131,7 +127,7 @@ def test_validate_typing_dict():
     validate_obj_type("#../reference", Dict[str, int])
 
 
-@dataclass
+@quam_dataclass
 class QuamComponentTest(QuamComponent):
     test_str: str
 
@@ -294,7 +290,7 @@ def test_instantiate_wrong_type():
 
 
 def test_instantiate_component_wrong_type():
-    @dataclass
+    @quam_dataclass
     class QuamTestComponent(QuamComponent):
         test_str: str
 
@@ -307,7 +303,7 @@ def test_instantiate_component_wrong_type():
 
 
 def test_instantiation_fixed_attrs():
-    @dataclass
+    @quam_dataclass
     class TestComponent(QuamComponent):
         int_val: int
 
@@ -325,7 +321,7 @@ def test_instantiation_fixed_attrs():
 
 
 def test_instantiate_required_cannot_be_None():
-    @dataclass
+    @quam_dataclass
     class TestComponent(QuamComponent):
         int_val: int
 

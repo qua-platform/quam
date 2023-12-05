@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+import sys
 import warnings
 from pathlib import Path
 from copy import deepcopy
@@ -17,6 +18,7 @@ from typing import (
     get_args,
     Optional,
 )
+from functools import partial
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
@@ -37,6 +39,7 @@ __all__ = [
     "QuamComponent",
     "QuamDict",
     "QuamList",
+    "quam_dataclass",
 ]
 
 
@@ -122,7 +125,7 @@ def sort_quam_components(
                     if before_component_idx > component_idx:
                         continue
                     sorted_components.remove(before_component)
-                    sorted_components.insert(component_idx+1, before_component)
+                    sorted_components.insert(component_idx + 1, before_component)
                     adjustments_made = True
 
         if not adjustments_made:
@@ -134,6 +137,46 @@ def sort_quam_components(
         )
 
     return sorted_components
+
+
+def _quam_dataclass(cls=None, **kwargs):
+    """Dataclass for QuAM classes.
+
+    This class is used as a patch to maintain compatibility with Python 3.8 and 3.9, as
+    these do not support the dataclass argument `kw_only`. This argument is needed to
+    ensure inheritance of parent dataclasses is allowed.
+
+    Args:
+    - cls: The QuAM class to decorate.
+    - kwargs: The arguments to pass to the dataclass decorator.
+      By default, kw_only=True and eq=False are passed, though they can be overwritten.
+    Notes:
+    - This custom dataclass is no longer necessary once Python 3.9 support is dropped
+    - The actual custom dataclass is `quam_dataclass` (without the underscore). This
+      function is only used to trick type checkers into recognizing it as a dataclass.
+    - From Python 3.10 onwards, this customized dataclass is no longer needed, as then
+      the following two decorators are equivalent:
+      - @quam_dataclass
+      - @dataclass(eq=False, kw_only=True)
+    """
+    if cls is None:
+        return partial(_quam_dataclass, **kwargs)
+
+    kwargs.setdefault("kw_only", True)
+    kwargs.setdefault("eq", False)
+
+    if sys.version_info.minor > 9:
+        return dataclass(cls, **kwargs)
+
+    from quam.utils.dataclass import _quam_patched_dataclass
+
+    return _quam_patched_dataclass(cls, **kwargs)
+
+
+# Exec statement is needed to trick type checkers into recognizing it as a dataclass
+# This will no longer be necessary once we drop support for Python 3.9
+quam_dataclass = dataclass
+exec("quam_dataclass = _quam_dataclass")
 
 
 class ParentDescriptor:
@@ -511,6 +554,7 @@ class QuamRoot(QuamBase):
 
     def __post_init__(self):
         QuamBase._root = self
+        super().__post_init__()
 
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
@@ -658,7 +702,7 @@ class QuamComponent(QuamBase):
         ...
 
 
-@dataclass
+@quam_dataclass
 class QuamDict(UserDict, QuamBase):
     """A QuAM dictionary class.
 
@@ -685,6 +729,7 @@ class QuamDict(UserDict, QuamBase):
     def __init__(self, dict=None, /, value_annotation: type = None, **kwargs):
         self.__dict__["data"] = {}
         self.__dict__["_value_annotation"] = value_annotation
+        self.__dict__["_initialized"] = True
         super().__init__(dict, **kwargs)
 
     def __getattr__(self, key):
@@ -694,7 +739,7 @@ class QuamDict(UserDict, QuamBase):
             raise AttributeError(key) from e
 
     def __setattr__(self, key, value):
-        if key in ["data", "parent", "config_settings"]:
+        if key in ["data", "parent", "config_settings", "_initialized"]:
             super().__setattr__(key, value)
         else:
             self[key] = value
@@ -711,6 +756,7 @@ class QuamDict(UserDict, QuamBase):
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
         value = convert_dict_and_list(value)
+        self._is_valid_setattr(key, value, error_on_False=True)
         super().__setitem__(key, value)
 
         if isinstance(value, QuamBase):
@@ -773,8 +819,13 @@ class QuamDict(UserDict, QuamBase):
             The value of the attribute. If the value is a reference, it returns the
             reference string instead of the value it is referencing.
         """
-
-        return self.__getattr__(attr)
+        try:
+            return self.__dict__["data"][attr]
+        except KeyError as e:
+            raise AttributeError(
+                "Cannot get unreferenced value from attribute {attr} that does not"
+                " exist in {self}"
+            ) from e
 
     def iterate_components(
         self, skip_elems: Sequence[QuamBase] = None
@@ -800,7 +851,7 @@ class QuamDict(UserDict, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
 
-@dataclass
+@quam_dataclass
 class QuamList(UserList, QuamBase):
     """A QuAM list class.
 

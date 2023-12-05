@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import List
 from quam.core.quam_classes import *
 
@@ -8,7 +8,7 @@ def test_basic_list_to_dict():
     assert l.to_dict() == [1, 2, 3]
 
 
-@dataclass
+@quam_dataclass
 class QuamTest(QuamComponent):
     int_val: int
 
@@ -44,7 +44,7 @@ def test_dict_with_component_to_dict():
     }
 
 
-@dataclass
+@quam_dataclass
 class QuamBasicComponent(QuamComponent):
     a: int
     b: str
@@ -57,7 +57,7 @@ def test_quam_component_to_dict_basic():
 
 
 def test_quam_component_to_dict_nested():
-    @dataclass
+    @quam_dataclass
     class QuamNestedComponent(QuamComponent):
         a: int
         b: str
@@ -74,7 +74,7 @@ def test_quam_component_to_dict_nested():
 
 
 def test_to_dict_nondefault():
-    @dataclass
+    @quam_dataclass
     class QuamBasicComponent(QuamComponent):
         required_val: int
         optional_val: int = 42
@@ -115,7 +115,7 @@ def test_to_dict_nondefault():
 
 
 def test_omit_default_dict_field():
-    @dataclass
+    @quam_dataclass
     class QuamBasicComponent(QuamComponent):
         d: dict = field(default_factory=dict)
 
@@ -124,7 +124,7 @@ def test_omit_default_dict_field():
 
 
 def test_omit_default_list_field():
-    @dataclass
+    @quam_dataclass
     class QuamBasicComponent(QuamComponent):
         l: list = field(default_factory=list)
 

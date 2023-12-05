@@ -1,15 +1,10 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 import numbers
 from typing import Any, ClassVar, Dict, List, Union, Tuple
 import numpy as np
 
-from quam.core import QuamComponent
-from quam.utils import patch_dataclass
+from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
-
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
 
 
 __all__ = [
@@ -23,7 +18,7 @@ __all__ = [
 ]
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class Pulse(QuamComponent, ABC):
     """QuAM base component for a pulse.
 
@@ -277,7 +272,7 @@ class Pulse(QuamComponent, ABC):
             self._config_add_digital_markers(config)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class ReadoutPulse(Pulse, ABC):
     """QuAM abstract base component for a readout pulse.
 
@@ -291,40 +286,44 @@ class ReadoutPulse(Pulse, ABC):
     digital_marker: str = "ON"
 
     # TODO Understand why the thresholds were added.
-    threshold: int = 0.0
-    rus_exit_threshold: int = 0.0
+    threshold: float = None
+    rus_exit_threshold: float = None
+
+    _weight_labels: ClassVar[List[str]] = ["iw1", "iw2", "iw3"]
 
     @property
     def integration_weights_names(self):
-        return [f"{self.name}{str_ref.DELIMITER}iw{k}" for k in [1, 2, 3]]
+        return [f"{self.name}{str_ref.DELIMITER}{name}" for name in self._weight_labels]
 
     @property
     def integration_weights_mapping(self):
-        return dict(zip(["iw1", "iw2", "iw3"], self.integration_weights_names))
+        return dict(zip(self._weight_labels, self.integration_weights_names))
 
     @abstractmethod
-    def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        """Abstract method to calculate the integration weights."""
+    def integration_weights_function(self) -> Dict[str, List[Tuple[float, int]]]:
+        """Abstract method to calculate the integration weights.
+
+        Returns:
+            Dict containing keys "real", "imag", "minus_real", "minus_imag".
+            Values are lists of tuples of (weight, length) pairs.
+        """
         ...
 
     def _config_add_integration_weights(self, config: dict):
         """Add the integration weights to the config"""
-        iw = self.integration_weights_function()
-
-        if not isinstance(iw, (list, np.ndarray)):
-            raise ValueError("unsupported return type")
+        integration_weights = self.integration_weights_function()
 
         config["integration_weights"][self.integration_weights_names[0]] = {
-            "cosine": [(sample.real, length) for sample, length in iw],
-            "sine": [(-sample.imag, length) for sample, length in iw],
+            "cosine": integration_weights["real"],
+            "sine": integration_weights["minus_imag"],
         }
         config["integration_weights"][self.integration_weights_names[1]] = {
-            "cosine": [(sample.imag, length) for sample, length in iw],
-            "sine": [(sample.real, length) for sample, length in iw],
+            "cosine": integration_weights["imag"],
+            "sine": integration_weights["real"],
         }
         config["integration_weights"][self.integration_weights_names[2]] = {
-            "cosine": [(-sample.imag, length) for sample, length in iw],
-            "sine": [(-sample.real, length) for sample, length in iw],
+            "cosine": integration_weights["minus_imag"],
+            "sine": integration_weights["minus_real"],
         }
 
         pulse_config = config["pulses"][self.pulse_name]
@@ -340,7 +339,7 @@ class ReadoutPulse(Pulse, ABC):
         self._config_add_integration_weights(config)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class ConstantReadoutPulse(ReadoutPulse):
     """QuAM component for a constant readout pulse.
 
@@ -349,26 +348,84 @@ class ConstantReadoutPulse(ReadoutPulse):
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
         amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the output pulse in degrees.
             If None (default), the pulse is meant for a single channel.
             If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
-        weights_rotation_angle (float, optional): The rotation angle for the integration
+        integration_weights_angle (float, optional): The rotation angle for the integration
             weights in degrees.
     """
 
     amplitude: float
-    axis_angle: float = None
-    weights_rotation_angle: float = 0.0
+    axis_angle: float = 0
+    integration_weights_angle: float = 0
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        return [(np.exp(1j * self.weights_rotation_angle), self.length)]
+        complex_weight = np.exp(1j * self.integration_weights_angle)
+        return {
+            "real": [(complex_weight.real, self.length)],
+            "imag": [(complex_weight.imag, self.length)],
+            "minus_real": [(-complex_weight.real, self.length)],
+            "minus_imag": [(-complex_weight.imag, self.length)],
+        }
 
     def waveform_function(self):
-        # This should probably be complex because the pulse needs I and Q
-        return complex(self.amplitude)
+        if self.axis_angle is None:
+            return self.amplitude
+        else:
+            return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
+class ArbitraryWeightsReadoutPulse(ReadoutPulse):
+    """QuAM component for readout pulse with arbitrary weights
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+        amplitude (float): The constant amplitude of the pulse.
+        axis_angle (float, optional): IQ axis angle of the output pulse in degrees.
+            If None (default), the pulse is meant for a single channel.
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+        integration_weights_real (list): The real part of the integration weights.
+        integration_weights_imag (list): The imaginary part of the integration weights.
+        integration_weights_minus_real (list): The negative real part of the integration
+            weights.
+        integration_weights_minus_imag (list): The negative imaginary part of the
+            integration weights.
+    """
+
+    amplitude: float
+    axis_angle: float = 0
+    integration_weights_real: List[float]  # cos
+    integration_weights_imag: List[float]  # sin
+    integration_weights_minus_real: List[float]  # -cos
+    integration_weights_minus_imag: List[float]  # -sin
+
+    def integration_weights_function(self):
+        from qualang_tools.config import convert_integration_weights
+
+        # Convert integration weights to tuples [(sample, length), ...]
+        converted_integration_weights = {
+            "real": convert_integration_weights(self.integration_weights_real),
+            "imag": convert_integration_weights(self.integration_weights_imag),
+            "minus_real": convert_integration_weights(
+                self.integration_weights_minus_real
+            ),
+            "minus_imag": convert_integration_weights(
+                self.integration_weights_minus_imag
+            ),
+        }
+        return converted_integration_weights
+
+    def waveform_function(self):
+        if self.axis_angle is None:
+            return self.amplitude
+        else:
+            return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
+
+
+@quam_dataclass
 class DragPulse(Pulse):
     """Gaussian-based DRAG pulse that compensate for the leakage and AC stark shift.
 
@@ -424,7 +481,7 @@ class DragPulse(Pulse):
         return I_rot + 1.0j * Q_rot
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class SquarePulse(Pulse):
     """Square pulse QuAM component.
 
@@ -448,7 +505,7 @@ class SquarePulse(Pulse):
         return waveform
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class GaussianPulse(Pulse):
     """Gaussian pulse QuAM component.
 
@@ -485,7 +542,7 @@ class GaussianPulse(Pulse):
         return waveform
 
 
-@dataclass(kw_only=True, eq=False)
+@quam_dataclass
 class FlatTopGaussianPulse(Pulse):
     """Gaussian pulse with flat top QuAM component.
 

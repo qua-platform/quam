@@ -1,10 +1,8 @@
 from quam.core import *
 from quam.utils.string_reference import *
 
-from dataclasses import dataclass
 
-
-@dataclass
+@quam_dataclass
 class BareQuamRoot(QuamRoot):
     a: int = 4
 
