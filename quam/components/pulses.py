@@ -64,18 +64,12 @@ class Pulse(QuamComponent, ABC):
     def channel(self):
         from quam.components.channels import Channel
 
-        if self._channel is not None:
-            return self._channel
         if isinstance(self.parent, Channel):
             return self.parent
         elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, Channel):
             return self.parent.parent
         else:
             return None
-
-    @channel.setter
-    def channel(self, channel):
-        self._channel = channel
 
     @property
     def name(self):

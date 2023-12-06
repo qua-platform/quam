@@ -147,11 +147,3 @@ def test_pulse_parent_parent_channel():
     channel.operations["pulse"] = pulse
     assert pulse.parent is channel.operations
     assert pulse.channel is channel
-
-
-def test_pulse_explicit_channel():
-    pulse = pulses.SquarePulse(length=60, amplitude=0)
-    channel = QuamDict()
-    pulse.channel = channel
-    assert pulse.parent is None
-    assert pulse.channel is channel
