@@ -23,6 +23,17 @@ __all__ = [
 
 
 @quam_dataclass
+class Sticky(QuamComponent):
+    enabled: bool = True
+    analog: bool = True
+    digital: bool = True
+    duration: int
+
+    def apply_to_config(self, config: dict) -> None:
+        if self.enabled:
+            
+
+@quam_dataclass
 class Channel(QuamComponent):
     """Base QuAM component for a channel, can be output, input or both.
 
