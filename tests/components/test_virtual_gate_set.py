@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import List
+from typing import Any, List
 import pytest
 
 from quam.core import *
@@ -30,8 +30,8 @@ def machine_virtual():
         gates=["#/gates/0", "#/gates/1"],
         virtual_gates={"eps": [1, 0.1], "U": [0.1, 0.8]},
         pulse_defaults=[
-            pulses.SquarePulse(amplitude=0.01, length=60),
-            pulses.SquarePulse(amplitude=0.01, length=60),
+            pulses.SquarePulse(amplitude=None, length=None),
+            pulses.SquarePulse(amplitude=None, length=None),
         ],
     )
 
@@ -42,7 +42,7 @@ def test_instantiate_virtual_gate_set(machine_virtual): ...
 
 
 def test_virtual_gate_set_generate_empty_config(machine_virtual):
-    config = machine_virtual.generate_config()
+    machine_virtual.generate_config()
 
 
 def test_generate_config_virtual_pulse(machine_virtual):
@@ -80,12 +80,12 @@ def test_generate_config_virtual_pulse(machine_virtual):
                 "waveforms": {"I": "const_wf", "Q": "zero_wf"},
             },
             "gate1.readout.pulse": {
-                "length": 60,
+                "length": 40,
                 "operation": "control",
                 "waveforms": {"single": "gate1.readout.wf"},
             },
             "gate2.readout.pulse": {
-                "length": 60,
+                "length": 40,
                 "operation": "control",
                 "waveforms": {"single": "gate2.readout.wf"},
             },
@@ -100,3 +100,30 @@ def test_generate_config_virtual_pulse(machine_virtual):
     }
 
     assert config == expected_config
+
+
+class MockPlay:
+    calls = []
+
+    def __init__(self) -> None:
+        MockPlay.calls.clear()
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        MockPlay.calls.append({"args": args, "kwargs": kwargs})
+
+
+def test_play_virtual_gate_set(machine_virtual, mocker):
+    machine_virtual.virtual_gate_set.operations["readout"] = VirtualPulse(
+        length=40, amplitudes={"eps": 1, "U": 0.5}
+    )
+
+    mocker.patch("quam.components.channels.play", MockPlay())
+    machine_virtual.virtual_gate_set.play("readout")
+
+    assert len(MockPlay.calls) == 2
+    assert not MockPlay.calls[0]["args"]
+    assert MockPlay.calls[0]["kwargs"]["pulse"] == "readout"
+    assert MockPlay.calls[0]["kwargs"]["element"] == "gate1"
+    assert MockPlay.calls[1]["kwargs"]["pulse"] == "readout"
+    assert MockPlay.calls[1]["kwargs"]["element"] == "gate2"
+    MockPlay.calls

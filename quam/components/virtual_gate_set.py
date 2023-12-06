@@ -55,8 +55,9 @@ class VirtualGateSet(QuamComponent):
             gate_amplitudes = self.convert_amplitudes(**operation.amplitudes)
 
             for gate, pulse, amplitude in zip(self.gates, gate_pulses, gate_amplitudes):
-                pulse.amplitude = amplitude
                 pulse.id = operation_name
+                pulse.amplitude = amplitude
+                pulse.length = operation.length
                 pulse.parent = None  # Reset parent so it can be attached to new parent
                 pulse.parent = gate
                 pulse.apply_to_config(config)
