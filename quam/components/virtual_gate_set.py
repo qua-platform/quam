@@ -1,11 +1,16 @@
 from copy import copy
-from dataclasses import dataclass, field
+from dataclasses import field
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from quam.components.pulses import Pulse
 from quam.components.channels import SingleChannel
 from quam.core import QuamComponent, quam_dataclass
+
+try:
+    from qm.qua._type_hinting import *
+except ImportError:
+    print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
 
 
 __all__ = ["VirtualPulse", "VirtualGateSet"]
@@ -45,9 +50,29 @@ class VirtualGateSet(QuamComponent):
 
         return gate_amplitudes
 
-    def play(self, pulse_name):
+    def play(
+        self,
+        pulse_name,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        duration: QuaNumberType = None,
+        **kwargs,
+    ):
+        """Play a pulse on all gates in the virtual gate set
+
+        Args:
+            pulse_name: The name of the pulse to play
+            amplitude_scale: The amplitude scale to apply to the pulse
+            duration: The duration of the pulse
+            **kwargs: Additional kwargs to pass to the play function
+        """
         for gate in self.gates:
-            gate.play(pulse_name, validate=False)
+            gate.play(
+                pulse_name,
+                validate=False,
+                amplitude_scale=amplitude_scale,
+                duration=duration,
+                **kwargs,
+            )
 
     def apply_to_config(self, config: dict) -> None:
         for operation_name, operation in self.operations.items():
