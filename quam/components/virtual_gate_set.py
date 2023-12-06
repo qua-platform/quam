@@ -5,15 +5,13 @@ from typing import Dict, List
 
 from quam.components.pulses import Pulse
 from quam.components.channels import SingleChannel
-from quam.core import QuamComponent
-
-from quam.utils import patch_dataclass
-
-patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
-
-__all__ = ["VirtualGateSet"]
+from quam.core import QuamComponent, quam_dataclass
 
 
+__all__ = ["VirtualPulse", "VirtualGateSet"]
+
+
+@quam_dataclass
 class VirtualPulse(Pulse):
     amplitudes: Dict[str, float]
     # pulses: List[Pulse] = None  # Should be added later
@@ -24,8 +22,10 @@ class VirtualPulse(Pulse):
         assert isinstance(virtual_gate_set, VirtualGateSet)
         return virtual_gate_set
 
+    def waveform_function(self): ...
 
-@dataclass(kw_only=True, eq=False)
+
+@quam_dataclass
 class VirtualGateSet(QuamComponent):
     gates: List[SingleChannel]
     virtual_gates: Dict[str, List[float]]
@@ -56,9 +56,10 @@ class VirtualGateSet(QuamComponent):
 
             for gate, pulse, amplitude in zip(self.gates, gate_pulses, gate_amplitudes):
                 pulse.amplitude = amplitude
-                pulse.parent = gate
                 pulse.id = operation_name
-                pulse.apply_to_config(config, gate)
+                pulse.parent = None  # Reset parent so it can be attached to new parent
+                pulse.parent = gate
+                pulse.apply_to_config(config)
 
                 element_config = config["elements"][gate.name]
                 element_config["operations"][operation_name] = pulse.name
