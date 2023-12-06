@@ -1,3 +1,7 @@
+## [Unreleased]
+### Changed
+- Changed `InOutIQChannel.input_offset_I/Q` to `InOutIQChannel.opx_input_offset_I/Q`
+
 ## [0.2.2] -
 ### Added
 - Overwriting a reference now raises an error. A referencing attribute must first be set to None

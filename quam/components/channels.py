@@ -359,8 +359,8 @@ class InOutIQChannel(IQChannel):
     time_of_flight: int = 24
     smearing: int = 0
 
-    input_offset_I: float = 0.0
-    input_offset_Q: float = 0.0
+    opx_input_offset_I: float = 0.0
+    opx_input_offset_Q: float = 0.0
 
     input_gain: Optional[float] = None
 
@@ -377,7 +377,7 @@ class InOutIQChannel(IQChannel):
         super().apply_to_config(config)
 
         opx_inputs = {"I": tuple(self.opx_input_I), "Q": tuple(self.opx_input_Q)}
-        offsets = {"I": self.input_offset_I, "Q": self.input_offset_Q}
+        offsets = {"I": self.opx_input_offset_I, "Q": self.opx_input_offset_Q}
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
         config["elements"][self.name]["outputs"] = {
