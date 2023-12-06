@@ -15,7 +15,7 @@ except ImportError:
 
 
 __all__ = [
-    "Channel",
+    "StickyChannelAddon",
     "SingleChannel",
     "IQChannel",
     "InOutIQChannel",
@@ -23,7 +23,7 @@ __all__ = [
 
 
 @quam_dataclass
-class Sticky(QuamComponent):
+class StickyChannelAddon(QuamComponent):
     enabled: bool = True
     analog: bool = True
     digital: bool = True
@@ -75,7 +75,7 @@ class Channel(QuamComponent):
 
     id: Union[str, int] = None
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
-    sticky: Sticky = None
+    sticky: StickyChannelAddon = None
 
     @property
     def name(self) -> str:
