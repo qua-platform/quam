@@ -62,11 +62,11 @@ def test_generate_config_virtual_pulse(machine_virtual):
         "digital_waveforms": {"ON": {"samples": [[1, 0]]}},
         "elements": {
             "gate1": {
-                "operations": {"readout": "gate1.readout"},
+                "operations": {"readout": "gate1.readout.pulse"},
                 "singleInput": {"port": ("con1", 1)},
             },
             "gate2": {
-                "operations": {"readout": "gate2.readout"},
+                "operations": {"readout": "gate2.readout.pulse"},
                 "singleInput": {"port": ("con1", 2)},
             },
         },

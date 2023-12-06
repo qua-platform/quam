@@ -63,4 +63,4 @@ class VirtualGateSet(QuamComponent):
                 pulse.apply_to_config(config)
 
                 element_config = config["elements"][gate.name]
-                element_config["operations"][operation_name] = pulse.name
+                element_config["operations"][operation_name] = pulse.pulse_name
