@@ -29,9 +29,27 @@ class Sticky(QuamComponent):
     digital: bool = True
     duration: int
 
+    @property
+    def channel(self) -> Optional["Channel"]:
+        """If the parent is a channel, returns the parent, otherwise returns None."""
+        if isinstance(self.parent, Channel):
+            return self.parent
+        else:
+            return
+
     def apply_to_config(self, config: dict) -> None:
-        if self.enabled:
-            
+        if self.channel is None:
+            return
+
+        if not self.enabled:
+            return
+
+        config["elements"][self.channel.name]["sticky"] = {
+            "analog": self.analog,
+            "digital": self.digital,
+            "duration": self.duration,
+        }
+
 
 @quam_dataclass
 class Channel(QuamComponent):
@@ -43,12 +61,16 @@ class Channel(QuamComponent):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
+        sticky (Sticky): Optional sticky parameters for the channel, i.e. defining
+            whether successive pulses are applied w.r.t the previous pulse or w.r.t 0 V.
+            If not specified, this channel is not sticky.
     """
 
     operations: Dict[str, Pulse] = field(default_factory=dict)
 
     id: Union[str, int] = None
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
+    sticky: Sticky = None
 
     @property
     def name(self) -> str:
