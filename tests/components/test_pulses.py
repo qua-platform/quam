@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from quam.core import *
 from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
 
@@ -127,3 +128,30 @@ def test_IQ_pulse_play_validate():
 
     with pytest.raises(IndexError):
         single_channel.play("X180")
+
+
+def test_pulse_parent_channel():
+    pulse = pulses.SquarePulse(length=60, amplitude=0)
+    assert pulse.parent is None
+    assert pulse.channel is None
+
+    channel = SingleChannel(id="single", opx_output=0)
+    pulse.parent = channel
+    assert pulse.parent is channel
+    assert pulse.channel is channel
+
+
+def test_pulse_parent_parent_channel():
+    pulse = pulses.SquarePulse(length=60, amplitude=0)
+    channel = SingleChannel(id="single", opx_output=0)
+    channel.operations["pulse"] = pulse
+    assert pulse.parent is channel.operations
+    assert pulse.channel is channel
+
+
+def test_pulse_explicit_channel():
+    pulse = pulses.SquarePulse(length=60, amplitude=0)
+    channel = QuamDict()
+    pulse.channel = channel
+    assert pulse.parent is None
+    assert pulse.channel is channel

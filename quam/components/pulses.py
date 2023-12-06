@@ -58,17 +58,24 @@ class Pulse(QuamComponent, ABC):
     length: int
 
     digital_marker: Union[str, List[Tuple[int, int]]] = None
+    _channel: ClassVar[QuamComponent] = None
 
     @property
     def channel(self):
         from quam.components.channels import Channel
 
+        if self._channel is not None:
+            return self._channel
         if isinstance(self.parent, Channel):
             return self.parent
         elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, Channel):
             return self.parent.parent
         else:
             return None
+
+    @channel.setter
+    def channel(self, channel):
+        self._channel = channel
 
     @property
     def name(self):
