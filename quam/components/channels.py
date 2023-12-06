@@ -37,6 +37,11 @@ class Sticky(QuamComponent):
         else:
             return
 
+    @property
+    def config_settings(self):
+        if self.channel is not None:
+            return {"after": [self.channel]}
+
     def apply_to_config(self, config: dict) -> None:
         if self.channel is None:
             return
