@@ -241,6 +241,8 @@ class SingleChannel(Channel):
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
         opx_output_offset (float): DC offset for the output port.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
     """
 
     opx_output: Tuple[str, int]
@@ -248,6 +250,7 @@ class SingleChannel(Channel):
     filter_iir_taps: List[float] = None
 
     opx_output_offset: float = 0
+    intermediate_frequency: float = None
 
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
@@ -260,10 +263,12 @@ class SingleChannel(Channel):
 
         controller_name, port = self.opx_output
 
-        config["elements"][self.name] = {
+        element_config = config["elements"][self.name] = {
             "singleInput": {"port": (controller_name, port)},
             "operations": self.pulse_mapping,
         }
+        if self.intermediate_frequency is not None:
+            element_config["intermediate_frequency"] = self.intermediate_frequency
 
         controller = config["controllers"].setdefault(
             controller_name,
@@ -300,6 +305,8 @@ class InOutSingleChannel(SingleChannel):
         filter_iir_taps (List[float]): IIR filter taps for the output port.
         opx_output_offset (float): DC offset for the output port.
         opx_input_offset (float): DC offset for the input port.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
     """
 
     opx_input: Tuple[str, int]
