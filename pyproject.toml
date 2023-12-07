@@ -34,7 +34,7 @@ keywords = [
 dependencies = [
     "numpy >= 1.21.2",
     "qualang-tools >= 0.15.0",
-    "typeguard >= 4.0.0",
+    "typeguard >= 4.1.0",
 ]
 
 [project.urls]
