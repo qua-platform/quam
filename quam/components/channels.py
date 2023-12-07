@@ -17,6 +17,7 @@ except ImportError:
 __all__ = [
     "Channel",
     "SingleChannel",
+    "InOutSingleChannel",
     "IQChannel",
     "InOutIQChannel",
 ]
@@ -197,18 +198,18 @@ class SingleChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port, a tuple of
-            (controller_name, port).
+        opx_output (Tuple[str, int]): Channel output port from the OPX perspective, 
+            a tuple of (controller_name, port).
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
-        output_offset (float): DC offset for the output port.
+        opx_output_offset (float): DC offset for the output port.
     """
 
     opx_output: Tuple[str, int]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
-    output_offset: float = 0
+    opx_output_offset: float = 0
 
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
@@ -244,6 +245,56 @@ class SingleChannel(Channel):
 
 
 @quam_dataclass
+class InOutSingleChannel(SingleChannel):
+    """QuAM component for a single (not IQ) input & output channel.
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output (Tuple[str, int]): Channel output port from OPX perspective, 
+            a tuple of (controller_name, port).
+        opx_input (Tuple[str, int]): Channel input port from OPX perspective, 
+            a tuple of (controller_name, port).
+        filter_fir_taps (List[float]): FIR filter taps for the output port.
+        filter_iir_taps (List[float]): IIR filter taps for the output port.
+        opx_output_offset (float): DC offset for the output port.
+        opx_input_offset (float): DC offset for the input port.
+    """
+
+    opx_input: Tuple[str, int]
+    opx_input_offset: float = 0.0
+
+    time_of_flight: int = 24
+    smearing: int = 0
+
+    def apply_to_config(self, config: dict):
+        """Adds this SingleChannel to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
+        # Add output to config
+        super().apply_to_config(config)
+
+        # Note outputs instead of inputs because it's w.r.t. the QPU
+        config["elements"][self.name]["outputs"] = {
+            "out1": tuple(self.opx_input),
+        }
+        config["elements"][self.name]["smearing"] = self.smearing
+        config["elements"][self.name]["time_of_flight"] = self.time_of_flight
+
+        controller_name, port = self.opx_input
+        controller = config["controllers"].setdefault(
+            controller_name,
+            {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
+        )
+        controller["analog_inputs"][port] = {"offset": self.opx_input_offset}
+
+
+@quam_dataclass
 class IQChannel(Channel):
     """QuAM component for an IQ output channel.
 
@@ -253,10 +304,10 @@ class IQChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port, a tuple of
-            (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port, a tuple of
-            (controller_name, port).
+        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective, 
+            a tuple of (controller_name, port).
+        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective, 
+            a tuple of (controller_name, port).
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
@@ -318,8 +369,7 @@ class IQChannel(Channel):
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
             )
-            controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
-
+            controller["analog_ou   
 
 @quam_dataclass
 class InOutIQChannel(IQChannel):
@@ -334,16 +384,16 @@ class InOutIQChannel(IQChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port, a tuple of
-            (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port, a tuple of
-            (controller_name, port).
+        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective, 
+            a tuple of (controller_name, port).
+        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective, 
+            a tuple of (controller_name, port).
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
-        opx_input_I (Tuple[str, int]): Channel I input port, a tuple of
-            (controller_name, port).
-        opx_input_Q (Tuple[str, int]): Channel Q input port, a tuple of
-            (controller_name, port).
+        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective, 
+            a tuple of (controller_name, port).
+        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective, 
+            a tuple of (controller_name, port).
         opx_input_offset_I float: The offset of the I channel. Default is 0.
         opx_input_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.

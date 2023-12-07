@@ -1,6 +1,10 @@
 ## [Unreleased]
+### Added
+- Added InOutSingleChannel
+
 ### Changed
 - Changed `InOutIQChannel.input_offset_I/Q` to `InOutIQChannel.opx_input_offset_I/Q`
+- Renamed `SingleChannel.output_offset` -> `SingleChannel.opx_output_offset`
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class
