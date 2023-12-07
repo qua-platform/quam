@@ -52,8 +52,7 @@ def instantiate_attrs_from_dict(
         if not required_subtype:
             instantiated_attr_dict[attr_name] = attr_val
             continue
-
-        if issubclass(required_subtype, QuamComponent):
+        if isclass(required_subtype) and issubclass(required_subtype, QuamComponent):
             instantiated_attr = instantiate_quam_class(
                 required_subtype,
                 attr_val,
