@@ -24,10 +24,10 @@ __all__ = [
 
 @quam_dataclass
 class StickyChannelAddon(QuamComponent):
+    duration: int
     enabled: bool = True
     analog: bool = True
     digital: bool = True
-    duration: int
 
     @property
     def channel(self) -> Optional["Channel"]:
