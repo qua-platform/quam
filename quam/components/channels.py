@@ -198,7 +198,7 @@ class SingleChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port from the OPX perspective, 
+        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
             a tuple of (controller_name, port).
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
@@ -254,9 +254,9 @@ class InOutSingleChannel(SingleChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port from OPX perspective, 
+        opx_output (Tuple[str, int]): Channel output port from OPX perspective,
             a tuple of (controller_name, port).
-        opx_input (Tuple[str, int]): Channel input port from OPX perspective, 
+        opx_input (Tuple[str, int]): Channel input port from OPX perspective,
             a tuple of (controller_name, port).
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
@@ -304,9 +304,9 @@ class IQChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective, 
+        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
             a tuple of (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective, 
+        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
             a tuple of (controller_name, port).
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
@@ -369,7 +369,8 @@ class IQChannel(Channel):
                 controller_name,
                 {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
             )
-            controller["analog_ou   
+            controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
+
 
 @quam_dataclass
 class InOutIQChannel(IQChannel):
@@ -384,15 +385,15 @@ class InOutIQChannel(IQChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective, 
+        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
             a tuple of (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective, 
+        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
             a tuple of (controller_name, port).
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
-        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective, 
+        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
             a tuple of (controller_name, port).
-        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective, 
+        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
             a tuple of (controller_name, port).
         opx_input_offset_I float: The offset of the I channel. Default is 0.
         opx_input_offset_Q float: The offset of the Q channel. Default is 0.
