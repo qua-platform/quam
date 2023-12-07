@@ -232,7 +232,7 @@ class SingleChannel(Channel):
             {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
         )
         analog_output = controller["analog_outputs"][port] = {
-            "offset": self.output_offset
+            "offset": self.opx_output_offset
         }
 
         if self.filter_fir_taps is not None:
