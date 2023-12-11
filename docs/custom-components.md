@@ -122,7 +122,7 @@ To do this, we create a class called `AcDcGate` that inherits from both `DcGate`
 from quam.components import SingleChannel
 
 
-@dataclass(kw_only=True, eq=True)
+@quam_dataclass
 class AcDcGate(DcGate, SingleChannel):
 ```
 
