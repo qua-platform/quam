@@ -150,7 +150,7 @@ def instantiate_attr(
     Note that references and None are not instantiated, nor validated.
 
     Args:
-        attr_val: The attribute to instantiate.
+        attr_val: The value of the to instantiate.
         required_type: The required type of the attribute.
         allow_none: Whether None is allowed as a value even if it's the wrong type.
         fix_attrs: Whether to only allow attributes that have been defined in the class
@@ -163,6 +163,13 @@ def instantiate_attr(
         The instantiated attribute.
     """
     from quam.core import QuamComponent  # noqa: F811
+
+    # Convert Optional[T] to T with allow_none=True
+    if typing.get_origin(expected_type) == typing.Union:
+        expected_types = typing.get_args(expected_type)
+        if type(None) in expected_types and len(expected_types) == 2:
+            expected_type = next(t for t in expected_types if t is not type(None))
+            allow_none = True
 
     if string_reference.is_reference(attr_val):
         # Value is a reference, add without instantiating
@@ -198,10 +205,14 @@ def instantiate_attr(
         if typing.get_origin(expected_type) == list:
             expected_type = list
     elif typing.get_origin(expected_type) == typing.Union:
-        assert all(
+        if not all(
             t in [str, int, float, bool, type(None)]
             for t in typing.get_args(expected_type)
-        ), "Currently only Union[str, int, float, bool] is supported"
+        ):
+            raise TypeError(
+                "Currently only Union[str, int, float, bool] is supported, whereas "
+                f"{expected_type} was found in {str_repr}"
+            )
         instantiated_attr = attr_val
 
     elif typing.get_origin(expected_type) == tuple:
