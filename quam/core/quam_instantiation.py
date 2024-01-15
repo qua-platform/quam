@@ -8,6 +8,7 @@ from quam.utils import (
     get_dataclass_attr_annotations,
     get_class_from_path,
     validate_obj_type,
+    type_is_optional,
 )
 
 if TYPE_CHECKING:
@@ -165,11 +166,9 @@ def instantiate_attr(
     from quam.core import QuamComponent  # noqa: F811
 
     # Convert Optional[T] to T with allow_none=True
-    if typing.get_origin(expected_type) == typing.Union:
-        expected_types = typing.get_args(expected_type)
-        if type(None) in expected_types and len(expected_types) == 2:
-            expected_type = next(t for t in expected_types if t is not type(None))
-            allow_none = True
+    if type_is_optional(expected_type):
+        expected_type = typing.get_args(expected_type)[0]
+        allow_none = True
 
     if string_reference.is_reference(attr_val):
         # Value is a reference, add without instantiating

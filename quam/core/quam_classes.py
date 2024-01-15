@@ -28,6 +28,7 @@ from quam.utils import (
     ReferenceClass,
     string_reference,
     get_full_class_path,
+    type_is_optional,
 )
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
@@ -265,6 +266,9 @@ class QuamBase(ReferenceClass):
             return False
 
         required_type = annotated_attrs["allowed"][attr]
+        if type_is_optional(required_type):
+            required_type = get_args(required_type)[0]
+
         if required_type == dict or get_origin(required_type) == dict:
             return isinstance(val, (dict, QuamDict))
         elif required_type == list or get_origin(required_type) == list:

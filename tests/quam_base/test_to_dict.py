@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import List
+from typing import List, Optional
 from quam.core.quam_classes import *
 
 
@@ -130,3 +130,15 @@ def test_omit_default_list_field():
 
     quam_component = QuamBasicComponent()
     assert quam_component.to_dict() == {}
+
+
+def test_optional_list_to_dict():
+    @quam_dataclass
+    class QuamBasicComponent(QuamComponent):
+        l: Optional[List[int]] = None
+
+    quam_component = QuamBasicComponent()
+    assert quam_component.to_dict() == {}
+
+    quam_component = QuamBasicComponent(l=[1, 2, 3])
+    assert quam_component.to_dict() == {"l": [1, 2, 3]}
