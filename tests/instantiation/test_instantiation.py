@@ -1,5 +1,5 @@
 import pytest
-from typing import List
+from typing import List, Optional
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
 from quam.components.superconducting_qubits import Transmon
@@ -328,3 +328,15 @@ def test_instantiate_required_cannot_be_None():
     instantiate_quam_class(TestComponent, {"int_val": 42})
     with pytest.raises(TypeError):
         instantiate_quam_class(TestComponent, {"int_val": None})
+
+
+def test_instantiate_optional():
+    @quam_dataclass
+    class TestComponent(QuamComponent):
+        int_vals: Optional[List[int]]
+
+    instantiate_quam_class(TestComponent, {"int_vals": [42]})
+    instantiate_quam_class(TestComponent, {"int_vals": None})
+
+    with pytest.raises(TypeError):
+        instantiate_quam_class(TestComponent, {"int_vals": 42})
