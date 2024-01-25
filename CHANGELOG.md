@@ -1,3 +1,4 @@
+
 ## [Unreleased]
 ### Added
 - Added InOutSingleChannel
@@ -6,6 +7,12 @@
 ### Changed
 - Changed `InOutIQChannel.input_offset_I/Q` to `InOutIQChannel.opx_input_offset_I/Q`
 - Renamed `SingleChannel.output_offset` -> `SingleChannel.opx_output_offset`
+- Pulse behaviour modifications to allow pulses to be attached to objects other than channels. Changes conist of following components
+  - Added `pulse.channel`, which returns None if both its parent & grandparent is not a `Channel`
+  - Rename `Pulse.full_name` -> `Pulse.name`.
+    Raises error if `Pulse.channel` is None
+    TODO Check if this causes issues
+  - `Pulse.apply_to_config` does nothing if pulse has no channel
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class
