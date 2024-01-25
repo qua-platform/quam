@@ -62,6 +62,7 @@ class Pulse(QuamComponent, ABC):
 
     @property
     def channel(self):
+        """The channel to which the pulse is attached, None if no channel is attached"""
         from quam.components.channels import Channel
 
         if isinstance(self.parent, Channel):
@@ -74,7 +75,7 @@ class Pulse(QuamComponent, ABC):
     @property
     def name(self):
         if self.channel is None:
-            raise ValueError(
+            raise AttributeError(
                 f"Cannot get full name of pulse '{self}' because it is not"
                 " attached to a channel"
             )
