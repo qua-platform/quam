@@ -53,28 +53,51 @@ class Pulse(QuamComponent, ABC):
 
     """
 
+    id: ClassVar[str] = None
     operation: ClassVar[str] = "control"
     length: int
 
     digital_marker: Union[str, List[Tuple[int, int]]] = None
+    _channel: ClassVar[QuamComponent] = None
 
     @property
-    def full_name(self):
-        name = self.parent.get_attr_name(self)
-        channel = self._get_referenced_value("#../../")
-        return f"{channel.name}{str_ref.DELIMITER}{name}"
+    def channel(self):
+        """The channel to which the pulse is attached, None if no channel is attached"""
+        from quam.components.channels import Channel
+
+        if isinstance(self.parent, Channel):
+            return self.parent
+        elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, Channel):
+            return self.parent.parent
+        else:
+            return None
+
+    @property
+    def name(self):
+        if self.channel is None:
+            raise AttributeError(
+                f"Cannot get full name of pulse '{self}' because it is not"
+                " attached to a channel"
+            )
+
+        if self.id is not None:
+            name = self.id
+        else:
+            name = self.parent.get_attr_name(self)
+
+        return f"{self.channel.name}{str_ref.DELIMITER}{name}"
 
     @property
     def pulse_name(self):
-        return f"{self.full_name}{str_ref.DELIMITER}pulse"
+        return f"{self.name}{str_ref.DELIMITER}pulse"
 
     @property
     def waveform_name(self):
-        return f"{self.full_name}{str_ref.DELIMITER}wf"
+        return f"{self.name}{str_ref.DELIMITER}wf"
 
     @property
     def digital_marker_name(self):
-        return f"{self.full_name}{str_ref.DELIMITER}dm"
+        return f"{self.name}{str_ref.DELIMITER}dm"
 
     def calculate_waveform(self) -> Union[float, complex, List[float], List[complex]]:
         """Calculate the waveform of the pulse.
@@ -182,21 +205,18 @@ class Pulse(QuamComponent, ABC):
             raise ValueError("unsupported return type")
 
         # Add check that waveform type (single or IQ) matches parent
-        parent_channel = getattr(getattr(self, "parent", None), "parent", None)
         from quam.components.channels import SingleChannel, IQChannel
 
-        parent_is_channel = isinstance(parent_channel, (IQChannel, SingleChannel))
-        if parent_channel is not None and parent_is_channel:
-            if "single" in waveforms and isinstance(parent_channel, IQChannel):
-                raise ValueError(
-                    "Waveform type 'single' not allowed for IQChannel"
-                    f" '{parent_channel.name}'"
-                )
-            elif "I" in waveforms and isinstance(parent_channel, SingleChannel):
-                raise ValueError(
-                    "Waveform type 'IQ' not allowed for SingleChannel"
-                    f" '{parent_channel.name}'"
-                )
+        if "single" in waveforms and not isinstance(self.channel, SingleChannel):
+            raise ValueError(
+                "Waveform type 'single' not allowed for IQChannel"
+                f" '{self.channel.name}'"
+            )
+        elif "I" in waveforms and not isinstance(self.channel, IQChannel):
+            raise ValueError(
+                "Waveform type 'IQ' not allowed for SingleChannel"
+                f" '{self.channel.name}'"
+            )
 
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
@@ -244,6 +264,9 @@ class Pulse(QuamComponent, ABC):
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
+        if self.channel is None:
+            return
+
         self._config_add_pulse(config)
         self._config_add_waveforms(config)
 
@@ -272,9 +295,7 @@ class ReadoutPulse(Pulse, ABC):
 
     @property
     def integration_weights_names(self):
-        return [
-            f"{self.full_name}{str_ref.DELIMITER}{name}" for name in self._weight_labels
-        ]
+        return [f"{self.name}{str_ref.DELIMITER}{name}" for name in self._weight_labels]
 
     @property
     def integration_weights_mapping(self):
