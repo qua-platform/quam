@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 
-from quam.core import QuamComponent, QuamRoot
+from quam.core import QuamComponent, QuamRoot, quam_dataclass
 
 
-@dataclass
+@quam_dataclass
 class Component(QuamComponent):
     name: str
 
@@ -12,7 +11,7 @@ class Component(QuamComponent):
         config["list"].append(self.name)
 
 
-@dataclass
+@quam_dataclass
 class Root(QuamRoot):
     first_component: Component
     second_component: Component
@@ -52,7 +51,7 @@ def test_generate_before():
 
 
 def test_generate_after_property():
-    @dataclass
+    @quam_dataclass
     class ComponentProperty(QuamComponent):
         name: str
 
