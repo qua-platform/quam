@@ -47,8 +47,9 @@ class Channel(QuamComponent):
         if self.id is not None:
             if str_ref.is_reference(self.id):
                 raise AttributeError(
-                    f"{cls_name}.parent or {cls_name}.id needed to define"
-                    f" {cls_name}.name"
+                    f"{cls_name}.name cannot be determined. "
+                    f"Please either set {cls_name}.id to a string or integer, "
+                    f"or {cls_name} should be an attribute of another QuAM component."
                 )
             if isinstance(self.id, str):
                 return self.id
@@ -56,7 +57,9 @@ class Channel(QuamComponent):
                 return f"{self._default_label}{self.id}"
         if self.parent is None:
             raise AttributeError(
-                f"{cls_name}.parent or {cls_name}.id needed to define {cls_name}.name"
+                f"{cls_name}.name cannot be determined. "
+                f"Please either set {cls_name}.id to a string or integer, "
+                f"or {cls_name} should be an attribute of another QuAM component."
             )
         return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
 
@@ -211,7 +214,7 @@ class SingleChannel(Channel):
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
-    opx_output_offset: float = 0
+    opx_output_offset: float = 0.0
     intermediate_frequency: float = None
 
     def apply_to_config(self, config: dict):
