@@ -228,6 +228,14 @@ class SingleChannel(Channel):
 
         controller_name, port = self.opx_output
 
+        if str_ref.is_reference(self.name):
+            raise AttributeError(
+                f"Channel {self.get_reference()} cannot be added to the config because"
+                " it doesn't have a name. Either set channel.id to a string or"
+                " integer, or channel should be an attribute of another QuAM component"
+                " with a name."
+            )
+
         element_config = config["elements"][self.name] = {
             "singleInput": {"port": (controller_name, port)},
             "operations": self.pulse_mapping,
@@ -359,6 +367,14 @@ class IQChannel(Channel):
         super().apply_to_config(config)
         opx_outputs = {"I": tuple(self.opx_output_I), "Q": tuple(self.opx_output_Q)}
         offsets = {"I": self.opx_output_offset_I, "Q": self.opx_output_offset_Q}
+
+        if str_ref.is_reference(self.name):
+            raise AttributeError(
+                f"Channel {self.get_reference()} cannot be added to the config because"
+                " it doesn't have a name. Either set channel.id to a string or"
+                " integer, or channel should be an attribute of another QuAM component"
+                " with a name."
+            )
 
         config["elements"][self.name] = {
             "mixInputs": {
