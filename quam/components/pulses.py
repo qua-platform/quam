@@ -58,7 +58,6 @@ class Pulse(QuamComponent, ABC):
     length: int
 
     digital_marker: Union[str, List[Tuple[int, int]]] = None
-    _channel: ClassVar[QuamComponent] = None
 
     @property
     def channel(self):
