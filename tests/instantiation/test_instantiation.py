@@ -340,3 +340,13 @@ def test_instantiate_optional():
 
     with pytest.raises(TypeError):
         instantiate_quam_class(TestComponent, {"int_vals": 42})
+
+
+def test_instantiate_sublist():
+    @quam_dataclass
+    class TestQuamSubList(QuamComponent):
+        sublist: List[List[float]]
+
+    obj = instantiate_quam_class(TestQuamSubList, {"sublist": [[1,2,3], [4,5,6]]})
+
+    assert obj.sublist == [[1,2,3], [4,5,6]]

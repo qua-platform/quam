@@ -109,8 +109,19 @@ def instantiate_attrs_from_list(
         if not required_subtype:
             instantiated_attr_list.append(attr_val)
             continue
+        elif typing.get_origin(required_subtype) == list:
+            assert typing.get_origin(required_subtype) == list
 
-        if issubclass(required_subtype, QuamComponent):
+            instantiated_attr = instantiate_attrs_from_list(
+                attr_list=attr_val,
+                required_type=required_subtype,
+                fix_attrs=fix_attrs,
+                validate_type=validate_type,
+                str_repr=f"{str_repr}[{k}]",
+            )
+        elif not isclass(required_subtype):
+            instantiated_attr = attr_val
+        elif issubclass(required_subtype, QuamComponent):
             if string_reference.is_reference(attr_val):
                 instantiated_attr = attr_val
             else:
