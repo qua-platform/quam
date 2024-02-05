@@ -18,6 +18,7 @@
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class
+- Add support for QuAM component sublist type: List[List[...]]
 
 ## [0.2.2] -
 ### Added
