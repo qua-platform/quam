@@ -15,6 +15,7 @@
   - `Pulse.apply_to_config` does nothing if pulse has no channel
 - Raise AttributeError if channel doesn't have a well-defined name.
   This happens if channel.id is not set, and channel.parent does not have a name either
+- `Pulse.axis_angle` is now in radians instead of degrees.
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class

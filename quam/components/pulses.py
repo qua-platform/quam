@@ -349,11 +349,11 @@ class ConstantReadoutPulse(ReadoutPulse):
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
         amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
         integration_weights_angle (float, optional): The rotation angle for the integration
-            weights in degrees.
+            weights in radians.
     """
 
     amplitude: float
@@ -373,7 +373,7 @@ class ConstantReadoutPulse(ReadoutPulse):
         if self.axis_angle is None:
             return self.amplitude
         else:
-            return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
+            return self.amplitude * np.exp(-1.0j * self.axis_angle)
 
 
 @quam_dataclass
@@ -385,9 +385,9 @@ class ArbitraryWeightsReadoutPulse(ReadoutPulse):
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
         amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
         integration_weights_real (list): The real part of the integration weights.
         integration_weights_imag (list): The imaginary part of the integration weights.
         integration_weights_minus_real (list): The negative real part of the integration
@@ -423,7 +423,7 @@ class ArbitraryWeightsReadoutPulse(ReadoutPulse):
         if self.axis_angle is None:
             return self.amplitude
         else:
-            return self.amplitude * np.exp(-1.0j * self.axis_angle * np.pi / 180)
+            return self.amplitude * np.exp(-1.0j * self.axis_angle)
 
 
 @quam_dataclass
@@ -438,9 +438,9 @@ class DragPulse(Pulse):
 
     Args:
         length (int): The pulse length in ns.
-        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in radians.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
         amplitude (float): The amplitude in volts.
         sigma (float): The gaussian standard deviation.
         alpha (float): The DRAG coefficient.
@@ -475,9 +475,8 @@ class DragPulse(Pulse):
         )
         I, Q = np.array(I), np.array(Q)
 
-        axis_angle_rad = np.pi * self.axis_angle / 180
-        I_rot = I * np.cos(axis_angle_rad) - Q * np.sin(axis_angle_rad)
-        Q_rot = I * np.sin(axis_angle_rad) + Q * np.cos(axis_angle_rad)
+        I_rot = I * np.cos(self.axis_angle) - Q * np.sin(self.axis_angle)
+        Q_rot = I * np.sin(self.axis_angle) + Q * np.cos(self.axis_angle)
 
         return I_rot + 1.0j * Q_rot
 
@@ -490,9 +489,9 @@ class SquarePulse(Pulse):
         length (int): The length of the pulse in samples.
         digital_marker (str, list, optional): The digital marker to use for the pulse.
         amplitude (float): The amplitude of the pulse in volts.
-        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in radians.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
     """
 
     amplitude: float
@@ -502,7 +501,7 @@ class SquarePulse(Pulse):
         waveform = self.amplitude
 
         if self.axis_angle is not None:
-            waveform = waveform * np.exp(1j * np.pi * self.axis_angle / 180)
+            waveform = waveform * np.exp(1j * self.axis_angle)
         return waveform
 
 
@@ -515,9 +514,9 @@ class GaussianPulse(Pulse):
         length (int): The length of the pulse in samples.
         sigma (float): The standard deviation of the gaussian pulse.
             Should generally be less than half the length of the pulse.
-        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in radians.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
         subtracted (bool): If true, returns a subtracted Gaussian, such that the first
             and last points will be at 0 volts. This reduces high-frequency components
             due to the initial and final points offset. Default is true.
@@ -538,7 +537,7 @@ class GaussianPulse(Pulse):
             waveform = waveform - waveform[-1]
 
         if self.axis_angle is not None:
-            waveform = waveform * np.exp(1j * np.pi * self.axis_angle / 180)
+            waveform = waveform * np.exp(1j * self.axis_angle)
 
         return waveform
 
@@ -550,9 +549,9 @@ class FlatTopGaussianPulse(Pulse):
     Args:
         length (int): The total length of the pulse in samples.
         amplitude (float): The amplitude of the pulse in volts.
-        axis_angle (float, optional): IQ axis angle of the pulse in degrees.
+        axis_angle (float, optional): IQ axis angle of the pulse in radians.
             If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, 90 is Y).
+            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
         flat_length (int): The length of the pulse's flat top in samples.
             The rise and fall lengths are calculated from the total length and the
             flat length.
@@ -582,6 +581,6 @@ class FlatTopGaussianPulse(Pulse):
         waveform = np.array(waveform)
 
         if self.axis_angle is not None:
-            waveform = waveform * np.exp(1j * np.pi * self.axis_angle / 180)
+            waveform = waveform * np.exp(1j * self.axis_angle)
 
         return waveform
