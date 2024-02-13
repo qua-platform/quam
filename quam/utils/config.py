@@ -1,0 +1,18 @@
+__all__ = ["generate_config_final_actions"]
+
+
+def generate_config_final_actions(qua_config):
+    """Performs final actions on the generated qua config.
+
+    This is called at the end of `QuamRoot.generate_config()`.
+    In this case it ensures that all analog outputs and inputs have a defined offset
+
+    Args:
+        qua_config (dict): The generated qua config.
+    """
+
+    for controller_cfg in qua_config["controllers"].values():
+        for analog_output in controller_cfg["analog_outputs"].values():
+            analog_output.setdefault("offset", 0.0)
+        for analog_input in controller_cfg["analog_inputs"].values():
+            analog_input.setdefault("offset", 0.0)
