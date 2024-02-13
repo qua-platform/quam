@@ -352,72 +352,38 @@ class ConstantReadoutPulse(ReadoutPulse):
         axis_angle (float, optional): IQ axis angle of the output pulse in radians.
             If None (default), the pulse is meant for a single channel.
             If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
-        integration_weights_angle (float, optional): The rotation angle for the integration
-            weights in radians.
+        integration_weights (list[float], list[tuple[float, int]], optional): The
+            integration weights, can be either
+            - a list of floats (one per sample), the length must match the pulse length
+            - a list of tuples of (weight, length) pairs, the sum of the lengths must
+              match the pulse length
+        integration_weights_angle (float, optional): The rotation angle for the
+            integration weights in radians.
     """
 
     amplitude: float
     axis_angle: float = 0
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = None
     integration_weights_angle: float = 0
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        complex_weight = np.exp(1j * self.integration_weights_angle)
-        return {
-            "real": [(complex_weight.real, self.length)],
-            "imag": [(complex_weight.imag, self.length)],
-            "minus_real": [(-complex_weight.real, self.length)],
-            "minus_imag": [(-complex_weight.imag, self.length)],
-        }
-
-    def waveform_function(self):
-        if self.axis_angle is None:
-            return self.amplitude
-        else:
-            return self.amplitude * np.exp(-1.0j * self.axis_angle)
-
-
-@quam_dataclass
-class ArbitraryWeightsReadoutPulse(ReadoutPulse):
-    """QuAM component for readout pulse with arbitrary weights
-
-    Args:
-        length (int): The length of the pulse in samples.
-        digital_marker (str, list, optional): The digital marker to use for the pulse.
-            Default is "ON".
-        amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
-        integration_weights_real (list): The real part of the integration weights.
-        integration_weights_imag (list): The imaginary part of the integration weights.
-        integration_weights_minus_real (list): The negative real part of the integration
-            weights.
-        integration_weights_minus_imag (list): The negative imaginary part of the
-            integration weights.
-    """
-
-    amplitude: float
-    axis_angle: float = 0
-    integration_weights_real: List[float]  # cos
-    integration_weights_imag: List[float]  # sin
-    integration_weights_minus_real: List[float]  # -cos
-    integration_weights_minus_imag: List[float]  # -sin
-
-    def integration_weights_function(self):
         from qualang_tools.config import convert_integration_weights
 
-        # Convert integration weights to tuples [(sample, length), ...]
-        converted_integration_weights = {
-            "real": convert_integration_weights(self.integration_weights_real),
-            "imag": convert_integration_weights(self.integration_weights_imag),
-            "minus_real": convert_integration_weights(
-                self.integration_weights_minus_real
-            ),
-            "minus_imag": convert_integration_weights(
-                self.integration_weights_minus_imag
-            ),
+        phase = np.exp(1j * self.integration_weights_angle)
+
+        if self.integration_weights is None or not self.integration_weights:
+            integration_weights = [(1, self.length)]
+        elif isinstance(self.integration_weights[0], float):
+            integration_weights = convert_integration_weights(self.integration_weights)
+        else:
+            integration_weights = self.integration_weights
+
+        return {
+            "real": [(phase.real * w, l) for w, l in integration_weights],
+            "imag": [(phase.imag * w, l) for w, l in integration_weights],
+            "minus_real": [(-phase.real * w, l) for w, l in integration_weights],
+            "minus_imag": [(-phase.imag * w, l) for w, l in integration_weights],
         }
-        return converted_integration_weights
 
     def waveform_function(self):
         if self.axis_angle is None:
