@@ -24,6 +24,20 @@ __all__ = [
 
 
 @quam_dataclass
+class DigitalOutputChannel(QuamComponent):
+    opx_output: Tuple[str, int]
+    delay: int = None
+    buffer: int = None
+
+    def apply_to_config(self, config: dict):
+        controller_name, port = self.opx_output
+        controller_cfg = config["controllers"].setdefault(controller_name, {})
+        controller_cfg.setdefault("digital_outputs", {})
+        if port not in controller_cfg["digital_outputs"]:
+            controller_cfg["digital_outputs"][port] = {}
+
+
+@quam_dataclass
 class Channel(QuamComponent):
     """Base QuAM component for a channel, can be output, input or both.
 
@@ -39,6 +53,8 @@ class Channel(QuamComponent):
 
     id: Union[str, int] = None
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
+
+    digital_channels: Dict[str, DigitalChannel] = field(default_factory=dict)
 
     @property
     def name(self) -> str:
@@ -66,6 +82,14 @@ class Channel(QuamComponent):
     @property
     def pulse_mapping(self):
         return {label: pulse.pulse_name for label, pulse in self.operations.items()}
+
+    def _config_add_controller(self, config, controller_name):
+        config["controllers"].setdefault(controller_name, {})
+        controller_cfg = config["controllers"][controller_name]
+        for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
+            controller_cfg.setdefault(key, {})
+
+        return controller_cfg
 
     def play(
         self,
@@ -226,8 +250,6 @@ class SingleChannel(Channel):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
-        controller_name, port = self.opx_output
-
         if str_ref.is_reference(self.name):
             raise AttributeError(
                 f"Channel {self.get_reference()} cannot be added to the config because"
@@ -237,17 +259,16 @@ class SingleChannel(Channel):
             )
 
         element_config = config["elements"][self.name] = {
-            "singleInput": {"port": (controller_name, port)},
+            "singleInput": {"port": self.opx_output},
             "operations": self.pulse_mapping,
         }
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
-        controller = config["controllers"].setdefault(
-            controller_name,
-            {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-        )
-        analog_output = controller["analog_outputs"][port] = {
+        controller_name, port = self.opx_output
+        controller_cfg = self._config_add_controller(config, controller_name)
+
+        analog_output = controller_cfg["analog_outputs"][port] = {
             "offset": self.opx_output_offset
         }
 
@@ -298,18 +319,13 @@ class InOutSingleChannel(SingleChannel):
         super().apply_to_config(config)
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        config["elements"][self.name]["outputs"] = {
-            "out1": tuple(self.opx_input),
-        }
+        config["elements"][self.name]["outputs"] = {"out1": tuple(self.opx_input)}
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
         controller_name, port = self.opx_input
-        controller = config["controllers"].setdefault(
-            controller_name,
-            {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-        )
-        controller["analog_inputs"][port] = {"offset": self.opx_input_offset}
+        controller_cfg = self._config_add_controller(config, controller_name)
+        controller_cfg["analog_inputs"][port] = {"offset": self.opx_input_offset}
 
 
 @quam_dataclass
@@ -391,11 +407,8 @@ class IQChannel(Channel):
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
-            controller = config["controllers"].setdefault(
-                controller_name,
-                {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-            )
-            controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
+            controller_cfg = self._config_add_controller(config, controller_name)
+            controller_cfg["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
 
 
 @quam_dataclass
@@ -466,14 +479,11 @@ class InOutIQChannel(IQChannel):
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_inputs[I_or_Q]
-            controller = config["controllers"].setdefault(
-                controller_name,
-                {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-            )
-            controller["analog_inputs"][port] = {"offset": offsets[I_or_Q]}
+            controller_cfg = self._config_add_controller(config, controller_name)
+            controller_cfg["analog_inputs"][port] = {"offset": offsets[I_or_Q]}
 
             if self.input_gain is not None:
-                controller["analog_inputs"][port]["gain_db"] = self.input_gain
+                controller_cfg["analog_inputs"][port]["gain_db"] = self.input_gain
 
     def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
         """Perform a full dual demodulation measurement on this channel.
