@@ -238,7 +238,7 @@ class SingleChannel(Channel):
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
-    opx_output_offset: float = 0.0
+    opx_output_offset: float = None
     intermediate_frequency: float = None
 
     def apply_to_config(self, config: dict):
@@ -267,10 +267,16 @@ class SingleChannel(Channel):
 
         controller_name, port = self.opx_output
         controller_cfg = self._config_add_controller(config, controller_name)
-
-        analog_output = controller_cfg["analog_outputs"][port] = {
-            "offset": self.opx_output_offset
-        }
+        analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
+        # If no offset specified, it will be added at the end of the config generation
+        offset = self.opx_output_offset
+        if offset is not None:
+            if analog_output.get("offset", offset) != offset:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting output offsets: "
+                    f"{analog_output['offset']} and {offset}"
+                )
+            analog_output["offset"] = offset
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
@@ -304,7 +310,7 @@ class InOutSingleChannel(SingleChannel):
     """
 
     opx_input: Tuple[str, int]
-    opx_input_offset: float = 0.0
+    opx_input_offset: float = None
 
     time_of_flight: int = 24
     smearing: int = 0
@@ -325,7 +331,16 @@ class InOutSingleChannel(SingleChannel):
 
         controller_name, port = self.opx_input
         controller_cfg = self._config_add_controller(config, controller_name)
-        controller_cfg["analog_inputs"][port] = {"offset": self.opx_input_offset}
+        analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
+        offset = self.opx_input_offset
+        # If no offset specified, it will be added at the end of the config generation
+        if offset is not None:
+            if analog_input.get("offset", offset) != offset:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting input offsets: "
+                    f"{analog_input['offset']} and {offset}"
+                )
+            analog_input["offset"] = offset
 
 
 @quam_dataclass
@@ -352,8 +367,8 @@ class IQChannel(Channel):
     opx_output_I: Tuple[str, int]
     opx_output_Q: Tuple[str, int]
 
-    opx_output_offset_I: float = 0.0
-    opx_output_offset_Q: float = 0.0
+    opx_output_offset_I: float = None
+    opx_output_offset_Q: float = None
 
     frequency_converter_up: FrequencyConverter
 
@@ -408,7 +423,15 @@ class IQChannel(Channel):
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
             controller_cfg = self._config_add_controller(config, controller_name)
-            controller_cfg["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
+            analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
+            # If no offset specified, it will be added at the end of config generation
+            if offsets[I_or_Q] is not None:
+                if analog_output.get("offset", offsets[I_or_Q]) != offsets[I_or_Q]:
+                    raise ValueError(
+                        f"Channel {self.name} has conflicting output offsets: "
+                        f"{analog_output['offset']} and {offsets[I_or_Q]}"
+                    )
+                analog_output["offset"] = offsets[I_or_Q]
 
 
 @quam_dataclass
@@ -449,8 +472,8 @@ class InOutIQChannel(IQChannel):
     time_of_flight: int = 24
     smearing: int = 0
 
-    opx_input_offset_I: float = 0.0
-    opx_input_offset_Q: float = 0.0
+    opx_input_offset_I: float = None
+    opx_input_offset_Q: float = None
 
     input_gain: Optional[float] = None
 
@@ -480,7 +503,15 @@ class InOutIQChannel(IQChannel):
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_inputs[I_or_Q]
             controller_cfg = self._config_add_controller(config, controller_name)
-            controller_cfg["analog_inputs"][port] = {"offset": offsets[I_or_Q]}
+            analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
+            # If no offset specified, it will be added at the end of config generation
+            if offsets[I_or_Q] is not None:
+                if analog_input.get("offset", offsets[I_or_Q]) != offsets[I_or_Q]:
+                    raise ValueError(
+                        f"Channel {self.name} has conflicting input offsets: "
+                        f"{analog_input['offset']} and {offsets[I_or_Q]}"
+                    )
+                analog_input["offset"] = offsets[I_or_Q]
 
             if self.input_gain is not None:
                 controller_cfg["analog_inputs"][port]["gain_db"] = self.input_gain

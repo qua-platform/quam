@@ -30,8 +30,8 @@ def test_in_out_single_channel():
     assert cfg == {
         "controllers": {
             "con1": {
-                "analog_inputs": {2: {"offset": 0.0}},
-                "analog_outputs": {1: {"offset": 0.0}},
+                "analog_inputs": {2: {}},
+                "analog_outputs": {1: {}},
                 "digital_outputs": {},
             }
         },
