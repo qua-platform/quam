@@ -251,10 +251,11 @@ class SingleChannel(Channel):
         # If no offset specified, it will be added at the end of the config generation
         offset = self.opx_output_offset
         if offset is not None:
-            if analog_output.get("offset", offset) != offset:
+            if abs(analog_output.get("offset", offset) - offset) > 1e-4:
                 raise ValueError(
                     f"Channel {self.name} has conflicting output offsets: "
-                    f"{analog_output['offset']} and {offset}"
+                    f"{analog_output['offset']} and {offset}. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}"
                 )
             analog_output["offset"] = offset
 
@@ -321,10 +322,11 @@ class InOutSingleChannel(SingleChannel):
         offset = self.opx_input_offset
         # If no offset specified, it will be added at the end of the config generation
         if offset is not None:
-            if analog_input.get("offset", offset) != offset:
+            if abs(analog_input.get("offset", offset) - offset) > 1e-4:
                 raise ValueError(
                     f"Channel {self.name} has conflicting input offsets: "
-                    f"{analog_input['offset']} and {offset}"
+                    f"{analog_input['offset']} and {offset}. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}"
                 )
             analog_input["offset"] = offset
 
@@ -415,13 +417,15 @@ class IQChannel(Channel):
 
             analog_output = controller["analog_outputs"].setdefault(port, {})
             # If no offset specified, it will be added at the end of config generation
-            if offsets[I_or_Q] is not None:
-                if analog_output.get("offset", offsets[I_or_Q]) != offsets[I_or_Q]:
+            offset = offsets[I_or_Q]
+            if offset is not None:
+                if abs(analog_output.get("offset", offset) - offset) > 1e-4:
                     raise ValueError(
                         f"Channel {self.name} has conflicting output offsets: "
-                        f"{analog_output['offset']} and {offsets[I_or_Q]}"
+                        f"{analog_output['offset']} and {offset}. Multiple channel "
+                        f"elements are trying to set different offsets to port {port}"
                     )
-                analog_output["offset"] = offsets[I_or_Q]
+                analog_output["offset"] = offset
 
 
 @quam_dataclass
@@ -498,14 +502,16 @@ class InOutIQChannel(IQChannel):
             )
 
             analog_input = controller["analog_inputs"].setdefault(port, {})
+            offset = offsets[I_or_Q]
             # If no offset specified, it will be added at the end of config generation
-            if offsets[I_or_Q] is not None:
-                if analog_input.get("offset", offsets[I_or_Q]) != offsets[I_or_Q]:
+            if offset is not None:
+                if abs(analog_input.get("offset", offset) - offset) > 1e-4:
                     raise ValueError(
                         f"Channel {self.name} has conflicting input offsets: "
-                        f"{analog_input['offset']} and {offsets[I_or_Q]}"
+                        f"{analog_input['offset']} and {offset}. Multiple channel "
+                        f"elements are trying to set different offsets to port {port}"
                     )
-                analog_input["offset"] = offsets[I_or_Q]
+                analog_input["offset"] = offset
 
             if self.input_gain is not None:
                 controller["analog_inputs"][port]["gain_db"] = self.input_gain

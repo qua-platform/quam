@@ -27,8 +27,8 @@ def test_single_channel_no_name(bare_cfg):
 def test_single_channel_offset(bare_cfg):
     channel = SingleChannel(id="channel", opx_output=("con1", 1))
 
-    channel.apply_to_config(bare_cfg)
     cfg = deepcopy(bare_cfg)
+    channel.apply_to_config(cfg)
 
     expected_cfg = {
         "controllers": {
@@ -52,6 +52,40 @@ def test_single_channel_offset(bare_cfg):
     expected_cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.1
     channel.apply_to_config(cfg)
     assert cfg == expected_cfg
+
+
+def test_single_channel_differing_offsets(bare_cfg):
+    channel1 = SingleChannel(id="channel", opx_output=("con1", 1))
+    channel2 = SingleChannel(id="channel", opx_output=("con1", 1))
+
+    cfg = deepcopy(bare_cfg)
+    channel1.apply_to_config(cfg)
+    channel2.apply_to_config(cfg)
+    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {}
+
+    channel1.opx_output_offset = 0.1
+
+    cfg = deepcopy(bare_cfg)
+    channel1.apply_to_config(cfg)
+    channel2.apply_to_config(cfg)
+    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1}
+
+    channel2.opx_output_offset = 0.1
+
+    cfg = deepcopy(bare_cfg)
+    channel1.apply_to_config(cfg)
+    channel2.apply_to_config(cfg)
+    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1}
+
+    channel2.opx_output_offset = 0.2
+
+    cfg = deepcopy(bare_cfg)
+    channel1.apply_to_config(cfg)
+    with pytest.raises(ValueError):
+        channel2.apply_to_config(cfg)
+    channel2.opx_output_offset = 0.1 + 0.5e-4
+    channel2.apply_to_config(cfg)
+    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1 + 0.5e-4}
 
 
 def test_single_channel_offset_quam(bare_cfg):
