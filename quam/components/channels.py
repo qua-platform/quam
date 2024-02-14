@@ -25,16 +25,76 @@ __all__ = [
 
 @quam_dataclass
 class DigitalOutputChannel(QuamComponent):
+    """QuAM component for a digital output channel (signal going out of the OPX)
+
+    Should be added to `Channel.digital_outputs` so that it's also added to the
+    respective element in the QUA config.
+
+    Args:
+        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
+            E.g. ("con1", 1)
+        delay (int, optional): Delay in nanoseconds. An intrinsic negative delay of
+            136 ns exists by default.
+        buffer (int, optional): Digital pulses played to this element will be convolved
+            with a digital pulse of value 1 with this length [ns].
+        shareable (bool, optional): If True, the digital output can be shared with other
+            QM instances. Default is False
+        inverted (bool, optional): If True, the digital output is inverted.
+            Default is False.
+    ."""
+
     opx_output: Tuple[str, int]
     delay: int = None
     buffer: int = None
 
-    def apply_to_config(self, config: dict):
+    shareable: bool = None
+    inverted: bool = None
+
+    def generate_element_config(self) -> Dict[str, int]:
+        """Generates the config entry for a digital channel in the QUA config.
+
+        This config entry goes into:
+        config.elements.<element_name>.digitalInputs.<opx_output[1]>
+
+        Returns:
+            Dict[str, int]: The digital channel config entry.
+                Contains "port", and optionally "delay", "buffer" if specified
+        """
+        digital_cfg = {"port": self.opx_output}
+        if self.delay is not None:
+            digital_cfg["delay"] = self.delay
+        if self.buffer is not None:
+            digital_cfg["buffer"] = self.buffer
+        return digital_cfg
+
+    def apply_to_config(self, config: dict) -> None:
+        """Adds this DigitalOutputChannel to the QUA configuration.
+
+        config.controllers.<controller_name>.digital_outputs.<port> will be updated
+        with the shareable and inverted settings of this channel if specified.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
         controller_name, port = self.opx_output
         controller_cfg = config["controllers"].setdefault(controller_name, {})
         controller_cfg.setdefault("digital_outputs", {})
-        if port not in controller_cfg["digital_outputs"]:
-            controller_cfg["digital_outputs"][port] = {}
+        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+
+        if self.shareable is not None:
+            if port_cfg.get("shareable", self.shareable) != self.shareable:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting shareable settings: "
+                    f"{port_cfg['shareable']} and {self.shareable}"
+                )
+            port_cfg["shareable"] = self.shareable
+        if self.inverted is not None:
+            if port_cfg.get("inverted", self.inverted) != self.inverted:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting inverted settings: "
+                    f"{port_cfg['inverted']} and {self.inverted}"
+                )
+            port_cfg["inverted"] = self.inverted
 
 
 @quam_dataclass
@@ -54,7 +114,7 @@ class Channel(QuamComponent):
     id: Union[str, int] = None
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
 
-    digital_channels: Dict[str, DigitalChannel] = field(default_factory=dict)
+    digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
 
     @property
     def name(self) -> str:
@@ -82,14 +142,6 @@ class Channel(QuamComponent):
     @property
     def pulse_mapping(self):
         return {label: pulse.pulse_name for label, pulse in self.operations.items()}
-
-    def _config_add_controller(self, config, controller_name):
-        config["controllers"].setdefault(controller_name, {})
-        controller_cfg = config["controllers"][controller_name]
-        for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
-            controller_cfg.setdefault(key, {})
-
-        return controller_cfg
 
     def play(
         self,
@@ -214,6 +266,70 @@ class Channel(QuamComponent):
             ]
             align(self.name, *other_elements_str)
 
+    def _config_add_controller(
+        self, config: Dict[str, dict], controller_name: str
+    ) -> Dict[str, dict]:
+        """Adds a controller to the config if it doesn't exist, and returns its config.
+
+        config.controllers.<controller_name> will be created if it doesn't exist.
+        It will also add the analog_outputs, digital_outputs, and analog_inputs keys
+
+        Args:
+            config (dict): The QUA config that's in the process of being generated.
+            controller_name (str): The name of the controller.
+
+        Returns:
+            Dict[str, dict]: The config entry for the controller.
+        """
+        config["controllers"].setdefault(controller_name, {})
+        controller_cfg = config["controllers"][controller_name]
+        for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
+            controller_cfg.setdefault(key, {})
+
+        return controller_cfg
+
+    def _config_add_digital_outputs(self, config: Dict[str, dict]) -> None:
+        """Adds the digital outputs to the QUA config.
+
+        config.elements.<element_name>.digitalInputs will be updated with the digital
+        outputs of this channel.
+
+        Note that the digital outputs are added separately to the controller config in
+        `DigitalOutputChannel.apply_to_config`.
+
+        Args:
+            config (dict): The QUA config that's in the process of being generated.
+        """
+        if not self.digital_outputs:
+            return
+
+        element_cfg = config["elements"][self.name]
+        element_cfg.setdefault("digitalInputs", {})
+
+        for name, digital_output in self.digital_outputs.items():
+            digital_cfg = digital_output.generate_element_config()
+            element_cfg["digitalInputs"][name] = digital_cfg
+
+    def apply_to_config(self, config: Dict[str, dict]) -> None:
+        """Adds this Channel to the QUA configuration.
+
+        config.elements.<element_name> will be created, and the operations are added.
+
+        Args:
+            config (dict): The QUA config that's in the process of being generated.
+
+        Raises:
+            ValueError: If the channel already exists in the config.
+        """
+        if self.name in config["elements"]:
+            raise ValueError(
+                f"Cannot add channel {self.name} to the config because it already "
+                f"exists. Existing entry: {config['elements'][self.name]}"
+            )
+        config["elements"][self.name] = {"operations": self.pulse_mapping}
+
+        self._config_add_digital_outputs(config)
+
 
 @quam_dataclass
 class SingleChannel(Channel):
@@ -258,10 +374,9 @@ class SingleChannel(Channel):
                 " with a name."
             )
 
-        element_config = config["elements"][self.name] = {
-            "singleInput": {"port": self.opx_output},
-            "operations": self.pulse_mapping,
-        }
+        element_config = config["elements"][self.name]
+        element_config["singleInput"] = ({"port": self.opx_output},)
+
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
@@ -407,18 +522,13 @@ class IQChannel(Channel):
                 " with a name."
             )
 
-        config["elements"][self.name] = {
-            "mixInputs": {
-                **opx_outputs,
-            },
-            "intermediate_frequency": self.intermediate_frequency,
-            "operations": self.pulse_mapping,
-        }
-        mix_inputs = config["elements"][self.name]["mixInputs"]
+        element_cfg = config["elements"][self.name]
+        element_cfg["mixInputs"] = {**opx_outputs}
+        element_cfg["intermediate_frequency"] = self.intermediate_frequency
         if self.mixer is not None:
-            mix_inputs["mixer"] = self.mixer.name
+            element_cfg["mixInputs"]["mixer"] = self.mixer.name
         if self.local_oscillator is not None:
-            mix_inputs["lo_frequency"] = self.local_oscillator.frequency
+            element_cfg["mixInputs"]["lo_frequency"] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
@@ -493,12 +603,13 @@ class InOutIQChannel(IQChannel):
         offsets = {"I": self.opx_input_offset_I, "Q": self.opx_input_offset_Q}
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        config["elements"][self.name]["outputs"] = {
+        element_cfg = config["elements"][self.name]
+        element_cfg["outputs"] = {
             "out1": tuple(self.opx_input_I),
             "out2": tuple(self.opx_input_Q),
         }
-        config["elements"][self.name]["smearing"] = self.smearing
-        config["elements"][self.name]["time_of_flight"] = self.time_of_flight
+        element_cfg["smearing"] = self.smearing
+        element_cfg["time_of_flight"] = self.time_of_flight
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_inputs[I_or_Q]
