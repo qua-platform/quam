@@ -27,8 +27,8 @@ def test_single_channel_no_name(bare_cfg):
 def test_single_channel_offset(bare_cfg):
     channel = SingleChannel(id="channel", opx_output=("con1", 1))
 
-    channel.apply_to_config(bare_cfg)
     cfg = deepcopy(bare_cfg)
+    channel.apply_to_config(cfg)
 
     expected_cfg = {
         "controllers": {

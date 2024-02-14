@@ -375,7 +375,7 @@ class SingleChannel(Channel):
             )
 
         element_config = config["elements"][self.name]
-        element_config["singleInput"] = ({"port": self.opx_output},)
+        element_config["singleInput"] = {"port": tuple(self.opx_output)}
 
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
