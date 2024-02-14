@@ -25,6 +25,8 @@
   - Previously the offset could be overwritten when two channels share the same port
   - Default values are None, and they're only added if nonzero
   - If the offset is not specified in config at the end, it's manually added to be 0.0
+- JSON serializer doesn't break if an item is added to ignore that isn't part of QuAM
+
 ## [0.2.2] -
 ### Added
 - Overwriting a reference now raises an error. A referencing attribute must first be set to None

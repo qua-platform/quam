@@ -107,7 +107,7 @@ class JSONSerialiser(AbstractSerialiser):
 
         # TODO This should ideally go to the QuamRoot.to_dict method
         for key in ignore or []:
-            contents.pop(key)
+            contents.pop(key, None)
 
         folder, default_filename = self._parse_path(path, content_mapping)
 
