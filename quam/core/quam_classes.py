@@ -29,6 +29,7 @@ from quam.utils import (
     string_reference,
     get_full_class_path,
     type_is_optional,
+    generate_config_final_actions,
 )
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
@@ -664,6 +665,8 @@ class QuamRoot(QuamBase):
 
         for quam_component in sorted_components:
             quam_component.apply_to_config(qua_config)
+
+        generate_config_final_actions(qua_config)
 
         return qua_config
 

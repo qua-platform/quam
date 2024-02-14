@@ -1,7 +1,7 @@
 import pytest
 
 from quam.components import *
-from quam.components.superconducting_qubits import *
+from quam.examples.superconducting_qubits.components import *
 from quam.components.channels import IQChannel
 from quam.core import QuamRoot, quam_dataclass
 
@@ -63,7 +63,7 @@ def test_transmon_xy():
         },
         "controllers": {
             "con1": {
-                "analog_outputs": {1: {"offset": 0.0}, 2: {"offset": 0.0}},
+                "analog_outputs": {1: {}, 2: {}},
                 "digital_outputs": {},
                 "analog_inputs": {},
             }
@@ -121,7 +121,7 @@ def test_transmon_add_pulse():
     assert config == {
         "controllers": {
             "con1": {
-                "analog_outputs": {1: {"offset": 0.0}, 2: {"offset": 0.0}},
+                "analog_outputs": {1: {}, 2: {}},
                 "digital_outputs": {},
                 "analog_inputs": {},
             }

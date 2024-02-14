@@ -3,10 +3,10 @@ from quam.utils import get_full_class_path
 
 
 def test_get_transmon_class_path():
-    from quam.components.superconducting_qubits import Transmon
+    from quam.examples.superconducting_qubits.components import Transmon
 
     class_path = get_full_class_path(Transmon)
-    assert class_path == "quam.components.superconducting_qubits.Transmon"
+    assert class_path == "quam.examples.superconducting_qubits.components.Transmon"
 
 
 @quam_dataclass

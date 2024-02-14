@@ -16,10 +16,16 @@
 - Raise AttributeError if channel doesn't have a well-defined name.
   This happens if channel.id is not set, and channel.parent does not have a name either
 - `Pulse.axis_angle` is now in radians instead of degrees.
+- Channel offsets (e.g. `SingleChannel.opx_output_offset`) is None by default (see note in Fixed)
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class
 - Add support for QuAM component sublist type: List[List[...]]
+- Channel offsets (e.g. `SingleChannel.opx_output_offset`) are ensured to be unique
+  - Previously the offset could be overwritten when two channels share the same port
+  - Default values are None, and they're only added if nonzero
+  - If the offset is not specified in config at the end, it's manually added to be 0.0
+- JSON serializer doesn't break if an item is added to ignore that isn't part of QuAM
 
 ## [0.2.2] -
 ### Added
