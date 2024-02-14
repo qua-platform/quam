@@ -18,6 +18,7 @@
   This happens if channel.id is not set, and channel.parent does not have a name either
 - `Pulse.axis_angle` is now in radians instead of degrees.
 - Channel offsets (e.g. `SingleChannel.opx_output_offset`) is None by default (see note in Fixed)
+- Move `quam.components.superconducting_qubits` to `quam.examples.superconducting_qubits`
 - Replaced `InOutIQChannel.measure` kwargs `I_var` and `Q_var` by `qua_vars` tuple
 
 ### Fixed
