@@ -1,7 +1,7 @@
 import pytest
 
 from quam.components import *
-from quam.components.superconducting_qubits import *
+from quam.examples.superconducting_qubits.components import *
 from quam.components.channels import IQChannel
 from quam.core import QuamRoot, quam_dataclass
 
