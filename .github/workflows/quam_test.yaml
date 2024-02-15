@@ -1,4 +1,4 @@
-name: Python package
+name: QUAM pytest
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .
+        pip install .[dev]
     - name: Test with pytest
       run: |
         pip install pytest
