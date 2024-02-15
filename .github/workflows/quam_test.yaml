@@ -18,37 +18,23 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install .[dev]
+        
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest
 
-    -  uses: dariocurr/pytest-summary@main
-       with:
-        output: test-summary-${{ matrix.python-version }}.md
-
-    - name: Upload test summary
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-summary-${{ matrix.python-version }}
-        path: test-summary-${{ matrix.python-version }}.md
-      
-
-
-
-    # - name: Test with pytest
-    #   run: |
-    #     pip install pytest
-    #     pytest
-
-    #     - name: Run pytest and generate a report
-    #     run: pytest --junitxml=pytest-report.xml
+        - name: Run pytest and generate a report
+        run: pytest --junitxml=pytest-report.xml
   
-    # - name: Upload pytest report as an artifact
-    #   if: success() || failure()
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: pytest-report-${{ matrix.python-version }}
-    #     path: pytest-report.xml
+    - name: Upload pytest report as an artifact
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-report-${{ matrix.python-version }}
+        path: pytest-report.xml
