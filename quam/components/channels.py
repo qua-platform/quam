@@ -15,6 +15,7 @@ except ImportError:
 
 
 __all__ = [
+    "DigitalOutputChannel",
     "Channel",
     "SingleChannel",
     "InOutSingleChannel",
