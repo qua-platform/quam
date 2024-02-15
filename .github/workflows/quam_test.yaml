@@ -18,42 +18,37 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install .[dev]
-    - name: Test with pytest
-      run: |
-        pip install pytest
-        pytest
 
-        - name: Run pytest and generate a report
-        run: pytest --junitxml=pytest-report.xml
+    -  uses: dariocurr/pytest-summary@main
+       with:
+        output: test-summary-${{ matrix.python-version }}.md
+
+    - name: Upload test summary
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-summary-${{ matrix.python-version }}
+        path: test-summary-${{ matrix.python-version }}.md
+      
+
+
+
+    # - name: Test with pytest
+    #   run: |
+    #     pip install pytest
+    #     pytest
+
+    #     - name: Run pytest and generate a report
+    #     run: pytest --junitxml=pytest-report.xml
   
-    - name: Upload pytest report as an artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: pytest-report-${{ matrix.python-version }}
-        path: pytest-report.xml
-
-    - name: Add test report summary to run summary
-      if: success() || failure() # This makes it run regardless of the job outcome
-      uses: actions/github-script@v5
-      with:
-        script: |
-            const reportPath = '${{ github.workspace }}/pytest-report.xml';
-            const report = require('fs').readFileSync(reportPath, 'utf-8');
-            // Parse the XML report or extract relevant information here
-            // This example assumes you have a way to extract a summary from your report
-            // For simplicity, we're just adding a placeholder message
-            const summary = `### Test Report Summary\n\n- Total Tests: X\n- Passed: Y\n- Failed: Z\n\nSee [pytest-report-${{ matrix.python-version }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts) for more details.`;
-            console.log(summary);
-            github.rest.actions.createWorkflowRunSummary({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: context.runId,
-                text: summary,
-                headers: {
-                'Content-Type': 'text/markdown',
-                },
-            });
+    # - name: Upload pytest report as an artifact
+    #   if: success() || failure()
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: pytest-report-${{ matrix.python-version }}
+    #     path: pytest-report.xml
