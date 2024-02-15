@@ -19,7 +19,7 @@ __all__ = [
 
 
 @quam_dataclass
-class Pulse(QuamComponent, ABC):
+class Pulse(QuamComponent):
     """QuAM base component for a pulse.
 
     Pulses are added to a channel using
@@ -125,7 +125,6 @@ class Pulse(QuamComponent, ABC):
 
         return waveform
 
-    @abstractmethod
     def waveform_function(
         self,
     ) -> Union[
@@ -164,7 +163,6 @@ class Pulse(QuamComponent, ABC):
         pulse_config = config["pulses"][self.pulse_name] = {
             "operation": self.operation,
             "length": self.length,
-            "waveforms": {},
         }
         if self.digital_marker is not None:
             pulse_config["digital_marker"] = self.digital_marker
@@ -186,6 +184,8 @@ class Pulse(QuamComponent, ABC):
         waveform = self.calculate_waveform()
         if waveform is None:
             return
+
+        pulse_config["waveforms"] = {}
 
         if isinstance(waveform, numbers.Number):
             wf_type = "constant"
