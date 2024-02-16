@@ -10,7 +10,7 @@ class QuamComponentTest(QuamComponent):
 
 
 def test_instantiate_from_class():
-    quam_component = QuamComponentTest("hi")
+    quam_component = QuamComponentTest(str_val="hi")
     loaded_component = instantiate_quam_class(
         QuamComponentTest, quam_component.to_dict()
     )
