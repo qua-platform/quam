@@ -6,8 +6,8 @@ from quam.core import QuamComponent, quam_dataclass
 from quam.components.hardware import FrequencyConverter
 from quam.components.channels import InOutIQChannel
 
-from qm.QuantumMachinesManager import QuantumMachinesManager
-from qm.QuantumMachine import QuantumMachine
+from qm import QuantumMachinesManager
+from qm import QuantumMachine
 from qm.octave.qm_octave import QmOctave
 
 from octave_sdk import RFInputLOSource
