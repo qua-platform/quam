@@ -7,21 +7,19 @@ from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
 
-try:
-    from qm.qua import (
-        align,
-        amp,
-        play,
-        wait,
-        measure,
-        dual_demod,
-        declare,
-        fixed,
-        demod,
-    )
-    from qm.qua._type_hinting import *
-except ImportError:
-    print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
+from qm.qua import (
+    align,
+    amp,
+    play,
+    wait,
+    measure,
+    declare,
+    fixed,
+    demod,
+    dual_demod,
+)
+from qm.qua._type_hinting import *
+from qm.qua._dsl import _PulseAmp
 
 
 __all__ = [
@@ -207,8 +205,6 @@ class Channel(QuamComponent):
             automatically set to `self.name`.
 
         """
-        from qm.qua._dsl import _PulseAmp
-
         if validate and pulse_name not in self.operations:
             raise KeyError(
                 f"Operation '{pulse_name}' not found in channel '{self.name}'"
