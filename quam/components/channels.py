@@ -334,7 +334,7 @@ class Channel(QuamComponent):
         """
         if self.name in config["elements"]:
             raise ValueError(
-                f"Cannot add channel {self.name} to the config because it already "
+                f"Cannot add channel '{self.name}' to the config because it already "
                 f"exists. Existing entry: {config['elements'][self.name]}"
             )
         config["elements"][self.name] = {"operations": self.pulse_mapping}
