@@ -2,7 +2,7 @@ import pytest
 from typing import List, Optional
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
-from quam.components.superconducting_qubits import Transmon
+from quam.examples.superconducting_qubits.components import Transmon
 from quam.core.quam_instantiation import *
 from quam.utils import (
     get_dataclass_attr_annotations,
