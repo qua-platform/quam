@@ -33,6 +33,7 @@ keywords = [
 
 dependencies = [
     "numpy >= 1.21.2",
+    "qm-qua >=1.1.0",
     "qualang-tools >= 0.15.0",
     "typeguard >= 4.1.0",
 ]
