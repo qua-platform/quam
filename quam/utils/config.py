@@ -10,9 +10,10 @@ def generate_config_final_actions(qua_config):
     Args:
         qua_config (dict): The generated qua config.
     """
-
     for controller_cfg in qua_config["controllers"].values():
-        for analog_output in controller_cfg["analog_outputs"].values():
-            analog_output.setdefault("offset", 0.0)
-        for analog_input in controller_cfg["analog_inputs"].values():
-            analog_input.setdefault("offset", 0.0)
+        if "analog_outputs" in controller_cfg:
+            for analog_output in controller_cfg["analog_outputs"].values():
+                analog_output.setdefault("offset", 0.0)
+        if "analog_inputs" in controller_cfg:
+            for analog_input in controller_cfg["analog_inputs"].values():
+                analog_input.setdefault("offset", 0.0)
