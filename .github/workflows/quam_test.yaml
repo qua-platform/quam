@@ -29,8 +29,8 @@ jobs:
         pip install pytest
         pytest
 
-        - name: Run pytest and generate a report
-        run: pytest --junitxml=pytest-report.xml
+    - name: Run pytest and generate a report
+    run: pytest --junitxml=pytest-report.xml
   
     - name: Upload pytest report as an artifact
       if: success() || failure()
