@@ -389,7 +389,7 @@ class ConstantReadoutPulse(ReadoutPulse):
         if self.axis_angle is None:
             return self.amplitude
         else:
-            return self.amplitude * np.exp(-1.0j * self.axis_angle)
+            return self.amplitude * np.exp(1.0j * self.axis_angle)
 
 
 @quam_dataclass
