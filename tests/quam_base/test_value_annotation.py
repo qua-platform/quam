@@ -10,7 +10,7 @@ def test_value_annotation_nonexisting():
         int_val: int
         str_val: str
 
-    test_quam = TestQuam(1, "test")
+    test_quam = TestQuam(int_val=1, str_val="test")
     assert _get_value_annotation(test_quam, "nonexisting") is None
     assert _get_value_annotation(test_quam, "int_val") is None
     assert _get_value_annotation(test_quam, "str_val") is None
@@ -24,7 +24,7 @@ def test_value_annotation_dict():
         d1: dict
         d2: Dict[str, int]
 
-    test_quam = TestQuam(1, "test", {"a": 1}, {"a": 1})
+    test_quam = TestQuam(int_val=1, str_val="test", d1={"a": 1}, d2={"a": 1})
     assert _get_value_annotation(test_quam, "d1") is None
     assert _get_value_annotation(test_quam, "str_val") is None
     assert _get_value_annotation(test_quam, "d2") == int
@@ -38,7 +38,7 @@ def test_value_annotation_list():
         l1: list
         l2: List[int]
 
-    test_quam = TestQuam(1, "test", [1, 2, 3], [1, 2, 3])
+    test_quam = TestQuam(int_val=1, str_val="test", l1=[1, 2, 3], l2=[1, 2, 3])
     assert _get_value_annotation(test_quam, "l1") is None
     assert _get_value_annotation(test_quam, "str_val") is None
     assert _get_value_annotation(test_quam, "l2") == int
