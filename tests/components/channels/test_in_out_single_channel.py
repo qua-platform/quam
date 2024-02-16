@@ -27,7 +27,7 @@ def test_in_out_single_channel():
 
     channel.apply_to_config(cfg)
 
-    assert cfg == {
+    expected_cfg = {
         "controllers": {
             "con1": {
                 "analog_inputs": {2: {}},
@@ -45,3 +45,5 @@ def test_in_out_single_channel():
             }
         },
     }
+
+    assert cfg == expected_cfg
