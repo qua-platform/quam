@@ -8,8 +8,14 @@ from quam.utils import string_reference as str_ref
 
 
 from qm.qua import align, amp, play, wait, measure, dual_demod, declare, fixed
-from qm.qua._type_hinting import *
-from qm.qua._dsl import _PulseAmp
+from qm.qua._dsl import (
+    _PulseAmp,
+    AmpValuesType,
+    QuaNumberType,
+    QuaExpressionType,
+    ChirpType,
+    StreamType,
+)
 
 
 __all__ = [
