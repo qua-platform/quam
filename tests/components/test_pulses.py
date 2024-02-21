@@ -14,6 +14,7 @@ def test_drag_pulse():
     assert drag_pulse.operation == "control"
     assert drag_pulse.length == 20
     assert drag_pulse.get_attrs() == {
+        "id": None,
         "length": 20,
         "axis_angle": 0.0,
         "digital_marker": None,
