@@ -7,7 +7,17 @@ from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
 
-from qm.qua import align, amp, play, wait, measure, dual_demod, declare, fixed
+from qm.qua import (
+    align,
+    amp,
+    play,
+    wait,
+    measure,
+    dual_demod,
+    declare,
+    fixed,
+    frame_rotation,
+)
 from qm.qua._dsl import (
     _PulseAmp,
     AmpValuesType,
@@ -268,6 +278,33 @@ class Channel(QuamComponent):
                 for element in other_elements
             ]
             align(self.name, *other_elements_str)
+
+    def frame_rotation(self, angle: QuaNumberType):
+        r"""Shift the phase of the channel element's oscillator by the given angle.
+
+        This is typically used for virtual z-rotations.
+
+        Note:
+            The fixed point format of QUA variables of type fixed is 4.28, meaning the
+            phase must be between $-8$ and $8-2^{28}$. Otherwise the phase value will be
+            invalid. It is therefore better to use `frame_rotation_2pi()` which avoids
+            this issue.
+
+        Note:
+            The phase is accumulated with a resolution of 16 bit.
+            Therefore, *N* changes to the phase can result in a phase (and amplitude)
+            inaccuracy of about :math:`N \cdot 2^{-16}`. To null out this accumulated
+            error, it is recommended to use `reset_frame(el)` from time to time.
+
+        Args:
+            angle (Union[float, QUA variable of type fixed]): The angle to
+                add to the current phase (in radians)
+            *elements (str): a single element whose oscillator's phase will
+                be shifted. multiple elements can be given, in which case
+                all of their oscillators' phases will be shifted
+
+        """
+        frame_rotation(angle, self.name)
 
     def _config_add_controller(
         self, config: Dict[str, dict], controller_name: str
