@@ -20,6 +20,7 @@
 - Channel offsets (e.g. `SingleChannel.opx_output_offset`) is None by default (see note in Fixed)
 - Move `quam.components.superconducting_qubits` to `quam.examples.superconducting_qubits`
 - Replaced `InOutIQChannel.measure` kwargs `I_var` and `Q_var` by `qua_vars` tuple
+- `Pulse.id` is now an instance variable instead of a class variable
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class

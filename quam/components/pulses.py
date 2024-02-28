@@ -52,10 +52,9 @@ class Pulse(QuamComponent):
         The digital marker label is defined as `"{channel_name}.{pulse_name}.dm"`.
 
     """
-
-    id: ClassVar[str] = None
     operation: ClassVar[str] = "control"
     length: int
+    id: str = None
 
     digital_marker: Union[str, List[Tuple[int, int]]] = None
 
