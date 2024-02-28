@@ -23,6 +23,7 @@ from qm.qua._dsl import (
     _PulseAmp,
     AmpValuesType,
     QuaNumberType,
+    QuaVariableType,
     QuaExpressionType,
     ChirpType,
     StreamType,
