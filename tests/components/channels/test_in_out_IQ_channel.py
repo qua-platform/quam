@@ -120,7 +120,7 @@ def test_readout_resonator_with_readout():
             mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
         ),
     )
-    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
+    readout_resonator.operations["readout"] = pulses.SquareReadoutPulse(
         amplitude=0.1, length=1000
     )
 
@@ -138,7 +138,7 @@ def test_readout_resonator_with_readout():
         "id": 1,
         "operations": {
             "readout": {
-                "__class__": "quam.components.pulses.ConstantReadoutPulse",
+                "__class__": "quam.components.pulses.SquareReadoutPulse",
                 "amplitude": 0.1,
                 "length": 1000,
             }
@@ -246,7 +246,7 @@ def test_channel_measure(mocker):
             mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
         ),
     )
-    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
+    readout_resonator.operations["readout"] = pulses.SquareReadoutPulse(
         amplitude=0.1, length=1000
     )
 

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numbers
+import warnings
 from typing import Any, ClassVar, Dict, List, Union, Tuple
 import numpy as np
 
@@ -10,11 +11,13 @@ from quam.utils import string_reference as str_ref
 __all__ = [
     "Pulse",
     "ReadoutPulse",
-    "ConstantReadoutPulse",
+    "StandardReadoutPulse",
     "DragPulse",
     "SquarePulse",
+    "SquareReadoutPulse",
     "GaussianPulse",
     "FlatTopGaussianPulse",
+    "ConstantReadoutPulse",
 ]
 
 
@@ -52,6 +55,7 @@ class Pulse(QuamComponent):
         The digital marker label is defined as `"{channel_name}.{pulse_name}.dm"`.
 
     """
+
     operation: ClassVar[str] = "control"
     length: int
     id: str = None
@@ -340,28 +344,7 @@ class ReadoutPulse(Pulse, ABC):
 
 
 @quam_dataclass
-class ConstantReadoutPulse(ReadoutPulse):
-    """QuAM component for a constant readout pulse.
-
-    Args:
-        length (int): The length of the pulse in samples.
-        digital_marker (str, list, optional): The digital marker to use for the pulse.
-            Default is "ON".
-        amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
-        integration_weights (list[float], list[tuple[float, int]], optional): The
-            integration weights, can be either
-            - a list of floats (one per sample), the length must match the pulse length
-            - a list of tuples of (weight, length) pairs, the sum of the lengths must
-              match the pulse length
-        integration_weights_angle (float, optional): The rotation angle for the
-            integration weights in radians.
-    """
-
-    amplitude: float
-    axis_angle: float = 0
+class StandardReadoutPulse(ReadoutPulse, ABC):
     integration_weights: Union[List[float], List[Tuple[float, int]]] = None
     integration_weights_angle: float = 0
 
@@ -383,12 +366,6 @@ class ConstantReadoutPulse(ReadoutPulse):
             "minus_real": [(-phase.real * w, l) for w, l in integration_weights],
             "minus_imag": [(-phase.imag * w, l) for w, l in integration_weights],
         }
-
-    def waveform_function(self):
-        if self.axis_angle is None:
-            return self.amplitude
-        else:
-            return self.amplitude * np.exp(1.0j * self.axis_angle)
 
 
 @quam_dataclass
@@ -468,6 +445,46 @@ class SquarePulse(Pulse):
         if self.axis_angle is not None:
             waveform = waveform * np.exp(1j * self.axis_angle)
         return waveform
+
+
+@quam_dataclass
+class SquareReadoutPulse(StandardReadoutPulse, SquarePulse):
+    """QuAM component for a constant readout pulse.
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+        amplitude (float): The constant amplitude of the pulse.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel.
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        integration_weights (list[float], list[tuple[float, int]], optional): The
+            integration weights, can be either
+            - a list of floats (one per sample), the length must match the pulse length
+            - a list of tuples of (weight, length) pairs, the sum of the lengths must
+              match the pulse length
+        integration_weights_angle (float, optional): The rotation angle for the
+            integration weights in radians.
+    """
+
+    amplitude: float
+    axis_angle: float = 0
+
+    def waveform_function(self):
+        if self.axis_angle is None:
+            return self.amplitude
+        else:
+            return self.amplitude * np.exp(1.0j * self.axis_angle)
+
+
+class ConstantReadoutPulse(SquareReadoutPulse):
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "ConstantReadoutPulse is deprecated. Use SquareReadoutPulse instead.",
+            DeprecationWarning,
+        )
+        return super().__post_init__()
 
 
 @quam_dataclass

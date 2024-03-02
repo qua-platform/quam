@@ -4,6 +4,7 @@
 - Added InOutSingleChannel
 - Add optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
 - Added `InOutIQChannel.measure_accumulated/sliced`
+- Added `StandardReadoutPulse`. All readout pulses can now be created simply by inheriting from the `StandardReadoutPulse` and the non-readout variant.
 
 ### Changed
 - Changed `InOutIQChannel.input_offset_I/Q` to `InOutIQChannel.opx_input_offset_I/Q`
