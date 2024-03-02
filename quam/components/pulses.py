@@ -278,7 +278,10 @@ class Pulse(QuamComponent):
 
 @quam_dataclass
 class ReadoutPulse(Pulse, ABC):
-    """QuAM abstract base component for a readout pulse.
+    """QuAM abstract base component for a general  readout pulse.
+
+    Readout pulse classes should usually inherit from `StandardReadoutPulse`, the
+    exception being when a custom integration weights function is required.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -345,6 +348,29 @@ class ReadoutPulse(Pulse, ABC):
 
 @quam_dataclass
 class StandardReadoutPulse(ReadoutPulse, ABC):
+    """QuAM abstract base component for most readout pulses.
+
+    This class is a subclass of `ReadoutPulse` and should be used for most readout
+    pulses. It provides a default implementation of the `integration_weights_function`
+    method, which is suitable for most cases.
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+        amplitude (float): The constant amplitude of the pulse.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel.
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        integration_weights (list[float], list[tuple[float, int]], optional): The
+            integration weights, can be either
+            - a list of floats (one per sample), the length must match the pulse length
+            - a list of tuples of (weight, length) pairs, the sum of the lengths must
+              match the pulse length
+        integration_weights_angle (float, optional): The rotation angle for the
+            integration weights in radians.
+    """
+
     integration_weights: Union[List[float], List[Tuple[float, int]]] = None
     integration_weights_angle: float = 0
 
@@ -449,7 +475,7 @@ class SquarePulse(Pulse):
 
 @quam_dataclass
 class SquareReadoutPulse(StandardReadoutPulse, SquarePulse):
-    """QuAM component for a constant readout pulse.
+    """QuAM component for a square readout pulse.
 
     Args:
         length (int): The length of the pulse in samples.
