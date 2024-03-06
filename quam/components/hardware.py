@@ -26,8 +26,7 @@ class LocalOscillator(QuamComponent):
     frequency: float = None
     power: float = None
 
-    def configure(self): 
-        ...
+    def configure(self): ...
 
 
 @quam_dataclass

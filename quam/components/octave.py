@@ -44,8 +44,18 @@ class Octave(QuamComponent):
             )
 
         for i in range(1, 6):
-            self.RF_outputs[i] = OctaveUpConverter(octave=self)
-            self.IF_outputs[i] = OctaveDownConverter(octave=self, id=i)
+            self.RF_outputs[i] = OctaveUpConverter(
+                octave=self,
+                port_I=("con1", 2 * i - 1),
+                port_Q=("con1", 2 * i),
+                LO_frequency=None,  # TODO What should default be?
+            )
+
+        for i in range(1, 3):
+            self.IF_outputs[i] = OctaveDownConverter(
+                octave=self,
+                
+            )
 
     def apply_to_config(self, config: Dict) -> None:
         if "octaves" not in config:
@@ -59,15 +69,16 @@ class Octave(QuamComponent):
         config["octaves"][self.name] = {
             "RF_outputs": {},
             "IF_outputs": {},
+            "RF_inputs": {},
             "loopbacks": self.loopbacks,
         }
 
 
 @quam_dataclass
 class OctaveConverter(FrequencyConverter, ABC):
-    channel: Channel
     port_I: Tuple[str, int]
     port_Q: Tuple[str, int]
+    channel: Channel = None
     id: Union[int, str] = None
 
     @property
@@ -159,16 +170,12 @@ class OctaveDownConverter(FrequencyConverter):
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        config["octaves"][self.octave.name]["IF_outputs"][self.name] = {
+        config["octaves"][self.octave.name]["RF_outputs"][self.name] = {
             "RF_source": self.RF_source,
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
             "IF_mode_I": self.IF_mode_I,
             "IF_mode_Q": self.IF_mode_Q,
-            "IF_outputs": {
-                "IF_out1": {"port": self.port_I, "name": "out1"},  #
-                "IF_out2": {"port": self.port_Q, "name": "out2"},
-            },
         }
 
 
