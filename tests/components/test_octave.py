@@ -101,7 +101,7 @@ def test_frequency_up_converter_apply_to_config(octave):
                         "LO_frequency": 2e9,
                         "LO_source": "internal",
                         "gain": 0,
-                        "output_mode": "always_on",
+                        "output_mode": "always_off",
                         "input_attenuators": "off",
                     }
                 },
