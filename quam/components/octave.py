@@ -5,7 +5,13 @@ from dataclasses import field
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.components.hardware import FrequencyConverter
-from quam.components.channels import Channel, InOutIQChannel
+from quam.components.channels import (
+    Channel,
+    IQChannel,
+    InOutIQChannel,
+    InOutSingleChannel,
+    SingleChannel,
+)
 
 from qm import QuantumMachinesManager
 from qm import QuantumMachine
@@ -85,10 +91,8 @@ class Octave(QuamComponent):
 
 @quam_dataclass
 class OctaveConverter(FrequencyConverter, ABC):
-    port_I: Tuple[str, int]
-    port_Q: Tuple[str, int]
     channel: Channel = None
-    id: Union[int, str] = None
+    id: int = None
 
     @property
     def octave(self) -> Optional[Octave]:
@@ -147,24 +151,30 @@ class OctaveUpConverter(OctaveConverter):
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        config["octaves"][self.octave.name]["RF_outputs"][self.name] = {
-            "I_connection": self.port_I,
-            "Q_connection": self.port_Q,
+        output_config = config["octaves"][self.octave.name]["RF_outputs"][self.name] = {
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
             "gain": self.gain,
             "output_mode": self.output_mode,
             "input_attenuators": self.input_attenuators,
         }
+        if isinstance(self.channel, SingleChannel):
+            output_config["I_connection"] = self.channel.opx_output
+        elif isinstance(self.channel, IQChannel):
+            output_config["I_connection"] = self.channel.opx_output_I
+            output_config["Q_connection"] = self.channel.opx_output_Q
 
 
 @quam_dataclass
 class OctaveDownConverter(FrequencyConverter):
-    RF_source: str = "RF_in"
     LO_frequency: float  # Between 2 and 18 GHz
-    LO_source: str = "internal"  # default is internal for LO 1, external for LO 2
-    IF_mode_I: str = "direct"  # direct / envelope / mixer / off
-    IF_mode_Q: str = "direct"  # direct / envelope / mixer / off
+    LO_source: Literal["internal", "external"] = (
+        "internal"  # default is internal for LO 1, external for LO 2
+    )
+    IF_mode_I: Literal["direct", "envelope", "mixer", "off"] = "direct"
+    IF_mode_Q: Literal["direct", "envelope", "mixer", "off"] = "direct"
+    IF_output_I: Literal[1, 2] = 1
+    IF_output_Q: Literal[1, 2] = 2
 
     @property
     def config_settings(self):
@@ -174,12 +184,30 @@ class OctaveDownConverter(FrequencyConverter):
         super().apply_to_config(config)
 
         config["octaves"][self.octave.name]["RF_inputs"][self.name] = {
-            "RF_source": self.RF_source,
+            "RF_source": "RF_in",
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
             "IF_mode_I": self.IF_mode_I,
             "IF_mode_Q": self.IF_mode_Q,
         }
+
+        if isinstance(self.channel, InOutIQChannel):
+            IF_channels = [self.IF_output_I, self.IF_output_Q]
+            opx_channels = [self.channel.opx_output_I, self.channel.opx_output_Q]
+        elif isinstance(self.channel, InOutSingleChannel):
+            IF_channels = [self.IF_output_I]
+            opx_channels = [self.channel.opx_output]
+
+        IF_config = config["octaves"][self.octave.name]["IF_outputs"]
+        for k, (IF_ch, opx_ch) in enumerate(zip(IF_channels, opx_channels)):
+            label = f"IF_out{IF_ch}"
+            IF_config.setdefault(label, {"port": tuple(opx_ch), "name": f"out{k}"})
+            if IF_config[label]["port"] != tuple(opx_ch):
+                raise ValueError(
+                    f"Error generating config for Octave downconverter {self.name}: "
+                    f"Unable to assign {label} to  port {opx_ch} because it is already "
+                    f"assigned to port {IF_config[label]['port']} "
+                )
 
 
 @quam_dataclass
