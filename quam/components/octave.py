@@ -15,11 +15,8 @@ from quam.components.channels import (
 
 from qm import QuantumMachinesManager
 from qm import QuantumMachine
-from qm.octave import QmOctaveConfig
-from qm.octave.qm_octave import QmOctave
-
-from octave_sdk import RFInputLOSource
 from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
+from qm.octave.qm_octave import QmOctave
 
 
 __all__ = [
@@ -267,6 +264,8 @@ class OctaveOld(QuamComponent):
         return portmap
 
     def configure_octave_settings(self):
+        from octave_sdk import RFInputLOSource
+
         self.octave.set_clock(self.name, ClockType.Internal)
         for qe in self._channel_to_qe.values():
             self.octave.set_rf_output_mode(qe, RFOutputMode.on)
