@@ -85,7 +85,7 @@ class OctaveOld(QuamComponent):
         for elem in self._root.iterate_components():
             if not isinstance(elem, InOutIQChannel):
                 continue
-            if getattr(elem.frequency_converter_down, "octave") is not self:
+            if getattr(elem.frequency_converter_down, "octave", None) is not self:
                 continue
 
             self.octave.set_qua_element_octave_rf_in_port(elem.name, self.name, 1)
