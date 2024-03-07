@@ -13,8 +13,7 @@ from quam.components.channels import (
     SingleChannel,
 )
 
-from qm import QuantumMachinesManager
-from qm import QuantumMachine
+from qm import QuantumMachinesManager, QuantumMachine
 from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
 from qm.octave.qm_octave import QmOctave
 
@@ -50,18 +49,14 @@ class Octave(QuamComponent):
                 "octave.IF_outputs is not empty"
             )
 
-        for i in range(1, 6):
-            self.RF_outputs[i] = OctaveUpConverter(
-                octave=self,
-                port_I=("con1", 2 * i - 1),
-                port_Q=("con1", 2 * i),
+        for idx in range(1, 6):
+            self.RF_outputs[idx] = OctaveUpConverter(
+                id=idx,
                 LO_frequency=None,  # TODO What should default be?
             )
 
-        for i in range(1, 3):
-            self.RF_inputs[i] = OctaveDownConverter(
-                octave=self,
-            )
+        for idx in range(1, 3):
+            self.RF_inputs[idx] = OctaveDownConverter(id=idx, LO_frequency=None)
 
     def get_octave_config(self) -> QmOctaveConfig:
         """Return a QmOctaveConfig object with the current Octave configuration."""
@@ -87,9 +82,9 @@ class Octave(QuamComponent):
 
 
 @quam_dataclass
-class OctaveConverter(FrequencyConverter, ABC):
+class OctaveFrequencyConverter(FrequencyConverter, ABC):
+    id: int
     channel: Channel = None
-    id: int = None
 
     @property
     def octave(self) -> Optional[Octave]:
@@ -98,19 +93,7 @@ class OctaveConverter(FrequencyConverter, ABC):
         parent_parent = getattr(self.parent, "parent")
         if not isinstance(parent_parent, Octave):
             return None
-        return self.parent
-
-    @property
-    def name(self) -> Union[str, int]:
-        if self.id is not None:
-            return self.id
-
-        if self.octave is None:
-            raise ValueError(
-                "Could not determine name for OctaveDownConverter. "
-                "Either specify id or add to an Octave."
-            )
-        return self.octave.get_attr_name(self)
+        return parent_parent
 
     @property
     def config_settings(self) -> Dict[str, Any]:
@@ -122,21 +105,21 @@ class OctaveConverter(FrequencyConverter, ABC):
         if "octaves" not in config:
             raise KeyError('Error generating config: "octaves" entry not found')
 
+        if self.octave is None:
+            raise KeyError(
+                f"Error generating config: OctaveConverter with id {self.id} does not "
+                "have an Octave parent"
+            )
+
         if self.octave.name not in config["octaves"]:
             raise KeyError(
                 'Error generating config: config["octaves"] does not have Octave'
                 f' entry config["octaves"]["{self.octave.name}"]'
             )
 
-        if self.name in config["octaves"][self.octave.name]:
-            raise KeyError(
-                f'Error generating config: config["octaves"]["{self.octave.name}"] '
-                f'already has an entry for OctaveUpConverter "{self.name}"'
-            )
-
 
 @quam_dataclass
-class OctaveUpConverter(OctaveConverter):
+class OctaveUpConverter(OctaveFrequencyConverter):
     gain: float = 0  # range [-20:0.5:20]
     LO_source: Literal["internal", "external"] = "internal"
     LO_frequency: float  # Between 2 and 18 GHz
@@ -148,7 +131,14 @@ class OctaveUpConverter(OctaveConverter):
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        output_config = config["octaves"][self.octave.name]["RF_outputs"][self.name] = {
+        if self.id in config["octaves"][self.octave.name]["RF_outputs"]:
+            raise KeyError(
+                f"Error generating config: "
+                f'config["octaves"]["{self.octave.name}"]["RF_inputs"] '
+                f'already has an entry for OctaveDownConverter with id "{self.id}"'
+            )
+
+        output_config = config["octaves"][self.octave.name]["RF_outputs"][self.id] = {
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
             "gain": self.gain,
@@ -163,7 +153,7 @@ class OctaveUpConverter(OctaveConverter):
 
 
 @quam_dataclass
-class OctaveDownConverter(FrequencyConverter):
+class OctaveDownConverter(OctaveFrequencyConverter):
     LO_frequency: float  # Between 2 and 18 GHz
     LO_source: Literal["internal", "external"] = (
         "internal"  # default is internal for LO 1, external for LO 2
@@ -180,7 +170,14 @@ class OctaveDownConverter(FrequencyConverter):
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        config["octaves"][self.octave.name]["RF_inputs"][self.name] = {
+        if self.id in config["octaves"][self.octave.name]["RF_inputs"]:
+            raise KeyError(
+                f"Error generating config: "
+                f'config["octaves"]["{self.octave.name}"]["RF_inputs"] '
+                f'already has an entry for OctaveDownConverter with id "{self.id}"'
+            )
+
+        config["octaves"][self.octave.name]["RF_inputs"][self.id] = {
             "RF_source": "RF_in",
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
@@ -190,18 +187,21 @@ class OctaveDownConverter(FrequencyConverter):
 
         if isinstance(self.channel, InOutIQChannel):
             IF_channels = [self.IF_output_I, self.IF_output_Q]
-            opx_channels = [self.channel.opx_output_I, self.channel.opx_output_Q]
+            opx_channels = [self.channel.opx_input_I, self.channel.opx_input_Q]
         elif isinstance(self.channel, InOutSingleChannel):
             IF_channels = [self.IF_output_I]
-            opx_channels = [self.channel.opx_output]
+            opx_channels = [self.channel.opx_input]
+        else:
+            IF_channels = []
+            opx_channels = []
 
         IF_config = config["octaves"][self.octave.name]["IF_outputs"]
-        for k, (IF_ch, opx_ch) in enumerate(zip(IF_channels, opx_channels)):
+        for k, (IF_ch, opx_ch) in enumerate(zip(IF_channels, opx_channels), start=1):
             label = f"IF_out{IF_ch}"
             IF_config.setdefault(label, {"port": tuple(opx_ch), "name": f"out{k}"})
             if IF_config[label]["port"] != tuple(opx_ch):
                 raise ValueError(
-                    f"Error generating config for Octave downconverter {self.name}: "
+                    f"Error generating config for Octave downconverter id={self.id}: "
                     f"Unable to assign {label} to  port {opx_ch} because it is already "
                     f"assigned to port {IF_config[label]['port']} "
                 )

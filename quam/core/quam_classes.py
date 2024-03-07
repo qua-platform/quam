@@ -497,7 +497,11 @@ class QuamBase(ReferenceClass):
                 self, reference, root=self._root
             )
         except ValueError as e:
-            warnings.warn(str(e))
+            try:
+                ref = f"{self.__class__.__name__}: {self.get_reference()}"
+            except Exception:
+                ref = self.__class__.__name__
+            warnings.warn(f"Could not get reference {reference} from {ref}.\n{str(e)}")
             return reference
 
     def print_summary(self, indent: int = 0):
@@ -743,7 +747,11 @@ class QuamDict(UserDict, QuamBase):
         try:
             return self[key]
         except KeyError as e:
-            raise AttributeError(key) from e
+            try:
+                repr = f"{self.__class__.__name__}: {self.get_reference()}"
+            except Exception:
+                repr = self.__class__.__name__
+            raise AttributeError(f'{repr} has no attribute "{key}"') from e
 
     def __setattr__(self, key, value):
         if key in ["data", "parent", "config_settings", "_initialized"]:
@@ -757,7 +765,13 @@ class QuamDict(UserDict, QuamBase):
             try:
                 elem = self._get_referenced_value(elem)
             except ValueError as e:
-                raise KeyError(str(e)) from e
+                try:
+                    repr = f"{self.__class__.__name__}: {self.get_reference()}"
+                except Exception:
+                    repr = self.__class__.__name__
+                raise KeyError(
+                    f"Could not get referenced value {elem} from {repr}"
+                ) from e
         return elem
 
     # Overriding methods from UserDict
