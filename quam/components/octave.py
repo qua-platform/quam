@@ -9,6 +9,7 @@ from quam.components.channels import Channel, InOutIQChannel
 
 from qm import QuantumMachinesManager
 from qm import QuantumMachine
+from qm.octave import QmOctaveConfig
 from qm.octave.qm_octave import QmOctave
 
 from octave_sdk import RFInputLOSource
@@ -27,8 +28,11 @@ __all__ = [
 @quam_dataclass
 class Octave(QuamComponent):
     name: str
+    ip: str
+    port: int
+
     RF_outputs: Dict[int, "OctaveUpConverter"] = field(default_factory=dict)
-    IF_outputs: Dict[int, "OctaveDownConverter"] = field(default_factory=dict)
+    RF_inputs: Dict[int, "OctaveDownConverter"] = field(default_factory=dict)
     loopbacks: List[Tuple[Tuple[str, str], str]] = field(default_factory=list)
 
     def initialize_default_connectivity(self):
@@ -37,7 +41,7 @@ class Octave(QuamComponent):
                 "Error initializing Octave with default connectivity. "
                 "octave.RF_outputs is not empty"
             )
-        if self.IF_outputs:
+        if self.RF_inputs:
             raise ValueError(
                 "Error initializing Octave with default connectivity. "
                 "octave.IF_outputs is not empty"
@@ -52,10 +56,15 @@ class Octave(QuamComponent):
             )
 
         for i in range(1, 3):
-            self.IF_outputs[i] = OctaveDownConverter(
+            self.RF_inputs[i] = OctaveDownConverter(
                 octave=self,
-                
             )
+
+    def get_octave_config(self) -> QmOctaveConfig:
+        """Return a QmOctaveConfig object with the current Octave configuration."""
+        octave_config = QmOctaveConfig()
+        octave_config.add_device_info(self.name, self.ip, self.port)
+        return octave_config
 
     def apply_to_config(self, config: Dict) -> None:
         if "octaves" not in config:
@@ -117,18 +126,12 @@ class OctaveConverter(FrequencyConverter, ABC):
                 'Error generating config: config["octaves"] does not have Octave'
                 f' entry config["octaves"]["{self.octave.name}"]'
             )
-        octave_config = config["octaves"][self.octave.name]
 
-        if self.name in octave_config:
+        if self.name in config["octaves"][self.octave.name]:
             raise KeyError(
                 f'Error generating config: config["octaves"]["{self.octave.name}"] '
                 f'already has an entry for OctaveUpConverter "{self.name}"'
             )
-
-        octave_config[self.name] = {
-            "I_connection": self.port_I,
-            "Q_connection": self.port_Q,
-        }
 
 
 @quam_dataclass
@@ -170,7 +173,7 @@ class OctaveDownConverter(FrequencyConverter):
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        config["octaves"][self.octave.name]["RF_outputs"][self.name] = {
+        config["octaves"][self.octave.name]["RF_inputs"][self.name] = {
             "RF_source": self.RF_source,
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
