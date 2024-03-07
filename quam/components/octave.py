@@ -24,6 +24,7 @@ class OctaveOld(QuamComponent):
     port: int
     qmm_host: str
     qmm_port: int
+    connection_headers: Dict[str, str] = None
 
     calibration_db: str = None
 
@@ -49,7 +50,10 @@ class OctaveOld(QuamComponent):
 
     def _initialize_qm(self) -> QuantumMachine:
         qmm = QuantumMachinesManager(
-            host=self.qmm_host, port=self.qmm_port, octave=self.octave_config
+            host=self.qmm_host,
+            port=self.qmm_port,
+            octave=self.octave_config,
+            connection_headers=self.connection_headers
         )
         qm = qmm.open_qm(self._root.generate_config())
         return qm
