@@ -436,11 +436,11 @@ class SingleChannel(Channel):
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedforward"] = self.filter_fir_taps
+            output_filter["feedforward"] = list(self.filter_fir_taps)
 
         if self.filter_iir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedback"] = self.filter_iir_taps
+            output_filter["feedback"] = list(self.filter_iir_taps)
 
 
 @quam_dataclass
