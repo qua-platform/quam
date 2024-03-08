@@ -4,7 +4,7 @@ from typing import Any, Optional, Union, ClassVar, Dict, List, Tuple, Literal
 from dataclasses import field
 
 from quam.core import QuamComponent, quam_dataclass
-from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter
+from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter,
 from quam.components.channels import (
     Channel,
     IQChannel,
@@ -45,6 +45,8 @@ class Octave(QuamComponent):
         name: The name of the Octave. Must be unique
         ip: The IP address of the Octave. Used in `Octave.get_octave_config()`
         port: The port number of the Octave. Used in `Octave.get_octave_config()`
+        calibration_db_path: The path to the calibration database. If not specified, the
+            current working directory is used.
         RF_outputs: A dictionary of `OctaveUpConverter` objects. The keys are the
             output numbers (1-5).
         RF_inputs: A dictionary of `OctaveDownConverter` objects. The keys are the
@@ -56,6 +58,7 @@ class Octave(QuamComponent):
     name: str
     ip: str
     port: int
+    calibration_db_path: str = None
 
     RF_outputs: Dict[int, "OctaveUpConverter"] = field(default_factory=dict)
     RF_inputs: Dict[int, "OctaveDownConverter"] = field(default_factory=dict)
@@ -97,6 +100,12 @@ class Octave(QuamComponent):
     def get_octave_config(self) -> QmOctaveConfig:
         """Return a QmOctaveConfig object with the current Octave configuration."""
         octave_config = QmOctaveConfig()
+
+        if self.calibration_db_path is not None:
+            octave_config.set_calibration_db(self.calibration_db_path)
+        else:
+            octave_config.set_calibration_db(os.getcwd())
+
         octave_config.add_device_info(self.name, self.ip, self.port)
         return octave_config
 
