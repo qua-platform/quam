@@ -322,3 +322,32 @@ def test_channel_add_RF_inputs(octave):
     }
 
     assert cfg["elements"] == expected_cfg_elements
+
+
+def test_load_octave(octave):
+    machine = OctaveQuAM(octave=octave)
+    octave.initialize_default_connectivity()
+
+    d = machine.to_dict()
+
+    d_expected = {
+        "__class__": "test_octave.OctaveQuAM",
+        "octave": {
+            "RF_inputs": {1: {"id": 1}, 2: {"id": 2}},
+            "RF_outputs": {
+                1: {"id": 1},
+                2: {"id": 2},
+                3: {"id": 3},
+                4: {"id": 4},
+                5: {"id": 5},
+            },
+            "ip": "127.0.0.1",
+            "name": "octave1",
+            "port": 80,
+        },
+    }
+    assert d == d_expected
+
+    machine2 = OctaveQuAM.load(d)
+
+    assert d == machine2.to_dict()

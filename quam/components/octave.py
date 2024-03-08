@@ -214,7 +214,7 @@ class OctaveUpConverter(OctaveFrequencyConverter):
             entering the mixer. Off by default.
     """
 
-    LO_frequency: float
+    LO_frequency: float = None
     LO_source: Literal["internal", "external"] = "internal"
     gain: float = 0
     output_mode: Literal[
@@ -290,10 +290,8 @@ class OctaveDownConverter(OctaveFrequencyConverter):
             are connected to the opposite OPX inputs.
     """
 
-    LO_frequency: float  # Between 2 and 18 GHz
-    LO_source: Literal["internal", "external"] = (
-        "internal"  # default is internal for LO 1, external for LO 2
-    )
+    LO_frequency: float = None
+    LO_source: Literal["internal", "external"] = "internal"
     IF_mode_I: Literal["direct", "envelope", "mixer", "off"] = "direct"
     IF_mode_Q: Literal["direct", "envelope", "mixer", "off"] = "direct"
     IF_output_I: Literal[1, 2] = 1
