@@ -201,3 +201,13 @@ def test_dict_unreferenced_value():
     assert d.val1 == 42
     assert d.val2 == 42
     assert d.get_unreferenced_value("val1") == "#./val2"
+
+
+def test_quam_dict_int_keys():
+    quam_dict = QuamDict({1: 2})
+    assert quam_dict.data == {1: 2}
+    assert quam_dict[1] == 2
+    quam_dict.pop(1)
+    assert quam_dict.data == {}
+    with pytest.raises(KeyError):
+        quam_dict[1]
