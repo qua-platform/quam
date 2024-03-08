@@ -211,3 +211,21 @@ def test_quam_dict_int_keys():
     assert quam_dict.data == {}
     with pytest.raises(KeyError):
         quam_dict[1]
+
+
+def test_quam_dict_get_attr_int():
+    quam_dict = QuamDict({1: 2})
+    assert quam_dict.get_attr_name(2) == 1
+
+
+def test_quam_dict_print_summary():
+    quam_dict = QuamDict({"a": "b", 1: 2})
+
+    from contextlib import redirect_stdout
+    import io
+
+    f = io.StringIO()
+    with redirect_stdout(f):
+        quam_dict.print_summary()
+    s = f.getvalue()
+    assert s == 'QuamDict (parent unknown):\n  a: "b"\n  1: 2\n'
