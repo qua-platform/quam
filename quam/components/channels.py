@@ -1,7 +1,7 @@
 from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
-from quam.components.hardware import FrequencyConverter, Mixer, LocalOscillator
+from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
@@ -527,7 +527,7 @@ class IQChannel(Channel):
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
 
-    frequency_converter_up: FrequencyConverter
+    frequency_converter_up: BaseFrequencyConverter
 
     intermediate_frequency: float = 0.0
 
@@ -654,7 +654,7 @@ class InOutIQChannel(IQChannel):
 
     input_gain: Optional[float] = None
 
-    frequency_converter_down: FrequencyConverter = None
+    frequency_converter_down: BaseFrequencyConverter = None
 
     _default_label: ClassVar[str] = "IQ"
 

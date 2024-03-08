@@ -4,7 +4,7 @@ from typing import Any, Optional, Union, ClassVar, Dict, List, Tuple, Literal
 from dataclasses import field
 
 from quam.core import QuamComponent, quam_dataclass
-from quam.components.hardware import FrequencyConverter
+from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter
 from quam.components.channels import (
     Channel,
     IQChannel,
@@ -128,7 +128,7 @@ class Octave(QuamComponent):
 
 
 @quam_dataclass
-class OctaveFrequencyConverter(FrequencyConverter, ABC):
+class OctaveFrequencyConverter(BaseFrequencyConverter, ABC):
     """Base class for OctaveUpConverter and OctaveDownConverter.
 
     Args:
@@ -394,7 +394,7 @@ class OctaveOld(QuamComponent):
             host=self.qmm_host,
             port=self.qmm_port,
             octave=self.octave_config,
-            connection_headers=self.connection_headers
+            connection_headers=self.connection_headers,
         )
         qm = qmm.open_qm(self._root.generate_config())
         return qm
