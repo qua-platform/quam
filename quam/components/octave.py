@@ -248,13 +248,14 @@ class OctaveUpConverter(OctaveFrequencyConverter):
                 not exist.
             KeyError: If the Octave already has an entry for the OctaveUpConverter.
         """
-        if self.channel is None:
-            return
         if not isinstance(self.LO_frequency, (int, float)):
-            raise ValueError(
-                f"Error generating config for Octave upconverter id={self.id}: "
-                "LO_frequency must be specified."
-            )
+            if self.channel is None:
+                return
+            else:
+                raise ValueError(
+                    f"Error generating config for Octave upconverter id={self.id}: "
+                    "LO_frequency must be specified."
+                )
 
         super().apply_to_config(config)
 
@@ -342,13 +343,14 @@ class OctaveDownConverter(OctaveFrequencyConverter):
             ValueError: If the IF_output_I and IF_output_Q are already assigned to
                 other ports.
         """
-        if self.channel is None:
-            return
         if not isinstance(self.LO_frequency, (int, float)):
-            raise ValueError(
-                f"Error generating config for Octave upconverter id={self.id}: "
-                "LO_frequency must be specified."
-            )
+            if self.channel is None:
+                return
+            else:
+                raise ValueError(
+                    f"Error generating config for Octave upconverter id={self.id}: "
+                    "LO_frequency must be specified."
+                )
 
         super().apply_to_config(config)
 
