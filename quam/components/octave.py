@@ -4,7 +4,7 @@ from typing import Any, Optional, Union, ClassVar, Dict, List, Tuple, Literal
 from dataclasses import field
 
 from quam.core import QuamComponent, quam_dataclass
-from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter,
+from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter
 from quam.components.channels import (
     Channel,
     IQChannel,
@@ -64,8 +64,8 @@ class Octave(QuamComponent):
     RF_inputs: Dict[int, "OctaveDownConverter"] = field(default_factory=dict)
     loopbacks: List[Tuple[Tuple[str, str], str]] = field(default_factory=list)
 
-    def initialize_default_connectivity(self):
-        """Initialize the Octave with default connectivity.
+    def initialize_frequency_converters(self):
+        """Initialize the Octave frequency converterswith default connectivity.
 
         This method initializes the Octave with default connectivity, i.e. it connects
         the Octave to a single OPX. It creates an `OctaveUpConverter` for each RF output
@@ -132,7 +132,7 @@ class Octave(QuamComponent):
             "RF_outputs": {},
             "IF_outputs": {},
             "RF_inputs": {},
-            "loopbacks": self.loopbacks,
+            "loopbacks": list(self.loopbacks),
         }
 
 
@@ -236,14 +236,26 @@ class OctaveUpConverter(OctaveFrequencyConverter):
 
         This method is called by the `QuamComponent.generate_config` method.
 
+        Nothing is added to the config if the `OctaveUpConverter.channel` is not
+        specified or if the `OctaveUpConverter.LO_frequency` is not specified.
+
         Args:
             config: A dictionary representing a QUA config file.
 
         Raises:
+            ValueError: If the LO_frequency is not specified.
             KeyError: If the Octave is not in the config, or if config["octaves"] does
                 not exist.
             KeyError: If the Octave already has an entry for the OctaveUpConverter.
         """
+        if self.channel is None:
+            return
+        if not isinstance(self.LO_frequency, (int, float)):
+            raise ValueError(
+                f"Error generating config for Octave upconverter id={self.id}: "
+                "LO_frequency must be specified."
+            )
+
         super().apply_to_config(config)
 
         if self.id in config["octaves"][self.octave.name]["RF_outputs"]:
@@ -309,23 +321,35 @@ class OctaveDownConverter(OctaveFrequencyConverter):
     @property
     def config_settings(self):
         """Specifies that the converter will be added to the config after the Octave."""
-        return {"after": self.octave}
+        return {"after": [self.octave]}
 
     def apply_to_config(self, config: Dict) -> None:
         """Add information about the frequency down-converter to the QUA config
 
         This method is called by the `QuamComponent.generate_config` method.
 
+        Nothing is added to the config if the `OctaveDownConverter.channel` is not
+        specified or if the `OctaveDownConverter.LO_frequency` is not specified.
+
         Args:
             config: A dictionary representing a QUA config file.
 
         Raises:
+            ValueError: If the LO_frequency is not specified.
             KeyError: If the Octave is not in the config, or if config["octaves"] does
                 not exist.
             KeyError: If the Octave already has an entry for the OctaveDownConverter.
             ValueError: If the IF_output_I and IF_output_Q are already assigned to
                 other ports.
         """
+        if self.channel is None:
+            return
+        if not isinstance(self.LO_frequency, (int, float)):
+            raise ValueError(
+                f"Error generating config for Octave upconverter id={self.id}: "
+                "LO_frequency must be specified."
+            )
+
         super().apply_to_config(config)
 
         if self.id in config["octaves"][self.octave.name]["RF_inputs"]:

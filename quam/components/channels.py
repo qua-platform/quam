@@ -4,6 +4,7 @@ from typing import ClassVar, Dict, List, Optional, Tuple, Union
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
+from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
 
 
@@ -150,7 +151,17 @@ class Channel(QuamComponent):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
                 f"Please either set {cls_name}.id to a string or integer, "
-                f"or {cls_name} should be an attribute of another QuAM component."
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
+            )
+        if isinstance(self.parent, QuamDict):
+            return self.parent.get_attr_name(self)
+        if not hasattr(self.parent, "name"):
+            raise AttributeError(
+                f"{cls_name}.name cannot be determined. "
+                f"Please either set {cls_name}.id to a string or integer, "
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
             )
         return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
 
