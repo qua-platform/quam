@@ -73,7 +73,7 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     """Convert a dict or list to a QuamDict or QuamList if possible."""
     if isinstance(value, dict):
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
-        return QuamDict(**value, value_annotation=value_annotation)
+        return QuamDict(value, value_annotation=value_annotation)
     elif type(value) == list:
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamList(value, value_annotation=value_annotation)

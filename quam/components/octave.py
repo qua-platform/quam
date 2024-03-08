@@ -365,6 +365,7 @@ class OctaveOld(QuamComponent):
     port: int
     qmm_host: str
     qmm_port: int
+    connection_headers: Dict[str, str] = None
 
     calibration_db: str = None
 
@@ -390,7 +391,10 @@ class OctaveOld(QuamComponent):
 
     def _initialize_qm(self) -> QuantumMachine:
         qmm = QuantumMachinesManager(
-            host=self.qmm_host, port=self.qmm_port, octave=self.octave_config
+            host=self.qmm_host,
+            port=self.qmm_port,
+            octave=self.octave_config,
+            connection_headers=self.connection_headers
         )
         qm = qmm.open_qm(self._root.generate_config())
         return qm
@@ -424,7 +428,7 @@ class OctaveOld(QuamComponent):
         for elem in self._root.iterate_components():
             if not isinstance(elem, InOutIQChannel):
                 continue
-            if getattr(elem.frequency_converter_down, "octave") is not self:
+            if getattr(elem.frequency_converter_down, "octave", None) is not self:
                 continue
 
             self.octave.set_qua_element_octave_rf_in_port(elem.name, self.name, 1)
