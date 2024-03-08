@@ -10,6 +10,7 @@ from quam.utils import (
     validate_obj_type,
     type_is_optional,
 )
+from .deprecations import instantiation_deprecations
 
 if TYPE_CHECKING:
     from quam.core import QuamBase
@@ -336,6 +337,13 @@ def instantiate_quam_class(
     Returns:
         QuamBase instance
     """
+    # Add depcrecation checks
+    for deprecation_rule in instantiation_deprecations:
+        if deprecation_rule.match(quam_class=quam_class, contents=contents):
+            quam_class, contents = deprecation_rule.apply(
+                quam_class=quam_class, contents=contents
+            )
+
     if not str_repr:
         str_repr = quam_class.__name__
     # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
@@ -348,6 +356,7 @@ def instantiate_quam_class(
             f"contents must be a dict, not {type(contents)}, could not instantiate"
             f" {str_repr}. Contents: {contents}"
         )
+
     attr_annotations = get_dataclass_attr_annotations(quam_class)
 
     instantiated_attrs = instantiate_attrs(
