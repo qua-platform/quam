@@ -46,3 +46,17 @@ def test_referencing_to_dict():
     assert quam_root._get_referenced_value("#/quam_dict/a") == 44
     assert quam_root.quam_dict._get_referenced_value("#/quam_dict/a") == 44
     assert quam_root.quam_dict._get_referenced_value("#./a") == 44
+
+
+def test_referencing_dict_int_keys():
+    quam_root = BareQuamRoot()
+    quam_root.quam_dict = {"1": 1, 2: 2}
+
+    assert list(quam_root.quam_dict.keys()) == list(quam_root.quam_dict)
+    assert list(quam_root.quam_dict) == ["1", 2]
+
+    assert quam_root._get_referenced_value("#/quam_dict/1") == 1
+    assert quam_root.quam_dict._get_referenced_value("#/quam_dict/1") == 1
+
+    assert quam_root._get_referenced_value("#/quam_dict/2") == 2
+    assert quam_root.quam_dict._get_referenced_value("#/quam_dict/2") == 2
