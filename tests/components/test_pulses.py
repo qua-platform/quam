@@ -53,7 +53,11 @@ def test_IQ_channel():
         "opx_output_I": 0,
         "opx_output_Q": 1,
         "intermediate_frequency": 100e6,
-        "frequency_converter_up": {"mixer": {}, "local_oscillator": {}},
+        "frequency_converter_up": {
+            "__class__": "quam.components.hardware.FrequencyConverter",
+            "mixer": {},
+            "local_oscillator": {},
+        },
     }
 
 
