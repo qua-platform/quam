@@ -21,6 +21,7 @@ nav:
     - quam-references.md
   - "QuAM components":
     - "components/channels.md"
+    - "components/octave.md"
     - custom-components.md
 
 plugins:
