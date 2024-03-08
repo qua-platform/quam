@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 import pytest
-from quam.components.channels import InOutIQChannel, InOutSingleChannel
+from quam.components.channels import IQChannel, InOutIQChannel, InOutSingleChannel
 
 from quam.components.octave import Octave, OctaveUpConverter, OctaveDownConverter
 from quam.core.qua_config_template import qua_config_template
@@ -265,3 +265,60 @@ def test_instantiate_octave_default_connectivity(octave):
     for idx, RF_input in octave.RF_inputs.items():
         assert RF_input.octave == octave
         assert RF_input.id == idx
+
+
+def test_channel_add_RF_outputs(octave):
+    OctaveQuAM(octave=octave)
+    octave.RF_outputs[2] = OctaveUpConverter(id=2, LO_frequency=2e9)
+
+    channel = IQChannel(
+        id="ch",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up="#/octave/RF_outputs/2",
+    )
+
+    cfg = deepcopy(qua_config_template)
+    channel.apply_to_config(cfg)
+
+    expected_cfg_elements = {
+        "ch": {
+            "intermediate_frequency": 0.0,
+            "RF_outputs": {"port": ("octave1", 2)},
+            "operations": {},
+        }
+    }
+
+    assert cfg["elements"] == expected_cfg_elements
+
+
+def test_channel_add_RF_inputs(octave):
+    OctaveQuAM(octave=octave)
+    octave.RF_outputs[3] = OctaveUpConverter(id=3, LO_frequency=2e9)
+    octave.RF_inputs[4] = OctaveDownConverter(id=4, LO_frequency=2e9)
+
+    channel = InOutIQChannel(
+        id="ch",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        opx_input_I=("con1", 1),
+        opx_input_Q=("con1", 2),
+        frequency_converter_up="#/octave/RF_outputs/3",
+        frequency_converter_down="#/octave/RF_inputs/4",
+    )
+
+    cfg = deepcopy(qua_config_template)
+    channel.apply_to_config(cfg)
+
+    expected_cfg_elements = {
+        "ch": {
+            "intermediate_frequency": 0.0,
+            "RF_outputs": {"port": ("octave1", 3)},
+            "RF_inputs": {"port": ("octave1", 4)},
+            "operations": {},
+            "smearing": 0,
+            "time_of_flight": 24,
+        }
+    }
+
+    assert cfg["elements"] == expected_cfg_elements
