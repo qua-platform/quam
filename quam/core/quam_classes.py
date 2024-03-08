@@ -801,6 +801,28 @@ class QuamDict(UserDict, QuamBase):
         # TODO implement reference kwargs
         return self.data
 
+    def get_attr_name(self, attr_val: Any) -> Union[str, int]:
+        """Get the name of an attribute that matches the value.
+
+        Args:
+            attr_val: The value of the attribute.
+
+        Returns:
+            The name of the attribute. This can also be an int depending on the dict key
+
+        Raises:
+            AttributeError if not found.
+        """
+        for attr_name in self._get_attr_names():
+            if attr_name in self and self[attr_name] is attr_val:
+                return attr_name
+        else:
+            raise AttributeError(
+                "Could not find name corresponding to attribute.\n"
+                f"attribute: {attr_val}\n"
+                f"obj: {self}"
+            )
+
     def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
