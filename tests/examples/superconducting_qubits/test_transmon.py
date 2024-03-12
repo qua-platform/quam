@@ -97,6 +97,7 @@ def test_transmon_add_pulse():
             "opx_output_I": ("con1", 1),
             "opx_output_Q": ("con1", 2),
             "frequency_converter_up": {
+                "__class__": "quam.components.hardware.FrequencyConverter",
                 "mixer": {},
                 "local_oscillator": {"frequency": 5000000000.0},
             },

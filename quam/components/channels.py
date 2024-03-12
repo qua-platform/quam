@@ -1,7 +1,7 @@
 from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
 
-from quam.components.hardware import FrequencyConverter
+from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
@@ -527,19 +527,19 @@ class IQChannel(Channel):
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
 
-    frequency_converter_up: FrequencyConverter
+    frequency_converter_up: BaseFrequencyConverter
 
     intermediate_frequency: float = 0.0
 
     _default_label: ClassVar[str] = "IQ"
 
     @property
-    def local_oscillator(self):
-        return self.frequency_converter_up.local_oscillator
+    def local_oscillator(self) -> Optional[LocalOscillator]:
+        return getattr(self.frequency_converter_up, "local_oscillator", None)
 
     @property
-    def mixer(self):
-        return self.frequency_converter_up.mixer
+    def mixer(self) -> Optional[Mixer]:
+        return getattr(self.frequency_converter_up, "mixer", None)
 
     @property
     def rf_frequency(self):
@@ -565,12 +565,35 @@ class IQChannel(Channel):
             )
 
         element_cfg = config["elements"][self.name]
-        element_cfg["mixInputs"] = {**opx_outputs}
         element_cfg["intermediate_frequency"] = self.intermediate_frequency
-        if self.mixer is not None:
-            element_cfg["mixInputs"]["mixer"] = self.mixer.name
-        if self.local_oscillator is not None:
-            element_cfg["mixInputs"]["lo_frequency"] = self.local_oscillator.frequency
+
+        from quam.components.octave import OctaveUpConverter
+
+        if isinstance(self.frequency_converter_up, OctaveUpConverter):
+            octave = self.frequency_converter_up.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveUpConverter (id={self.frequency_converter_up.id}) without "
+                    "an attached Octave"
+                )
+            element_cfg["RF_outputs"] = {
+                "port": (octave.name, self.frequency_converter_up.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_up):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_up", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_up}"
+            )
+        else:
+            element_cfg["mixInputs"] = {**opx_outputs}
+            if self.mixer is not None:
+                element_cfg["mixInputs"]["mixer"] = self.mixer.name
+            if self.local_oscillator is not None:
+                element_cfg["mixInputs"][
+                    "lo_frequency"
+                ] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
@@ -631,7 +654,7 @@ class InOutIQChannel(IQChannel):
 
     input_gain: Optional[float] = None
 
-    frequency_converter_down: FrequencyConverter = None
+    frequency_converter_down: BaseFrequencyConverter = None
 
     _default_label: ClassVar[str] = "IQ"
 
@@ -648,12 +671,33 @@ class InOutIQChannel(IQChannel):
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
         element_cfg = config["elements"][self.name]
-        element_cfg["outputs"] = {
-            "out1": tuple(self.opx_input_I),
-            "out2": tuple(self.opx_input_Q),
-        }
         element_cfg["smearing"] = self.smearing
         element_cfg["time_of_flight"] = self.time_of_flight
+
+        from quam.components.octave import OctaveDownConverter
+
+        if isinstance(self.frequency_converter_down, OctaveDownConverter):
+            octave = self.frequency_converter_down.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
+                    "without an attached Octave"
+                )
+            element_cfg["RF_inputs"] = {
+                "port": (octave.name, self.frequency_converter_down.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_down):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_down", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_down}"
+            )
+        else:
+            element_cfg["outputs"] = {
+                "out1": tuple(self.opx_input_I),
+                "out2": tuple(self.opx_input_Q),
+            }
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_inputs[I_or_Q]

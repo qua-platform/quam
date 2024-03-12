@@ -26,8 +26,7 @@ class LocalOscillator(QuamComponent):
     frequency: float = None
     power: float = None
 
-    def configure(self): 
-        ...
+    def configure(self): ...
 
 
 @quam_dataclass
@@ -109,7 +108,13 @@ class Mixer(QuamComponent):
 
 
 @quam_dataclass
-class FrequencyConverter(QuamComponent):
+class BaseFrequencyConverter(QuamComponent):
+    """Base class for frequency converters."""
+    pass
+
+
+@quam_dataclass
+class FrequencyConverter(BaseFrequencyConverter):
     local_oscillator: LocalOscillator = None
     mixer: Mixer = None
     gain: float = None
