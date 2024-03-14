@@ -1,8 +1,10 @@
 
-## [Unreleased]
+## [0.2.3]
 ### Added
 - Added InOutSingleChannel
-- Add optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
+- Added optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
+- Added support for the new Octave API.
+- Added support for `Literal` types in QuAM
 
 ### Changed
 - Changed `InOutIQChannel.input_offset_I/Q` to `InOutIQChannel.opx_input_offset_I/Q`
@@ -18,15 +20,17 @@
 - `Pulse.axis_angle` is now in radians instead of degrees.
 - Channel offsets (e.g. `SingleChannel.opx_output_offset`) is None by default (see note in Fixed)
 - `Pulse.id` is now an instance variable instead of a class variable
+- Channel frequency converter default types are now `BaseFrequencyConverter` which has fewer attributes than `FrequencyConverter`. This is to make it compatible with the new Octave API.
 
 ### Fixed
 - Don't raise instantiation error when required_type is not a class
 - Add support for QuAM component sublist type: List[List[...]]
-- Channel offsets (e.g. `SingleChannel.opx_output_offset`) are ensured to be unique
+- Channel offsets (e.g. `SingleChannel.opx_output_offset`) are ensured to be unique, otherwise a warning is raised
   - Previously the offset could be overwritten when two channels share the same port
   - Default values are None, and they're only added if nonzero
   - If the offset is not specified in config at the end, it's manually added to be 0.0
 - JSON serializer doesn't break if an item is added to ignore that isn't part of QuAM
+- Allow `QuamDict` keys to be integers
 
 ## [0.2.2] -
 ### Added
