@@ -1,5 +1,5 @@
 
-## [0.2.3]
+## [0.3.0]
 ### Added
 - Added InOutSingleChannel
 - Added optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
