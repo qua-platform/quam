@@ -1,5 +1,6 @@
 from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Tuple, Union
+import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, ReadoutPulse
@@ -427,10 +428,11 @@ class SingleChannel(Channel):
         offset = self.opx_output_offset
         if offset is not None:
             if abs(analog_output.get("offset", offset) - offset) > 1e-4:
-                raise ValueError(
+                warnings.warn(
                     f"Channel {self.name} has conflicting output offsets: "
-                    f"{analog_output['offset']} and {offset}. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}"
+                    f"{analog_output['offset']} V and {offset} V. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}. "
+                    f"Using the last offset {offset} V"
                 )
             analog_output["offset"] = offset
 
@@ -707,10 +709,11 @@ class InOutIQChannel(IQChannel):
             # If no offset specified, it will be added at the end of config generation
             if offset is not None:
                 if abs(analog_input.get("offset", offset) - offset) > 1e-4:
-                    raise ValueError(
+                    warnings.warn(
                         f"Channel {self.name} has conflicting input offsets: "
-                        f"{analog_input['offset']} and {offset}. Multiple channel "
-                        f"elements are trying to set different offsets to port {port}"
+                        f"{analog_input['offset']} V and {offset} V. Multiple channel "
+                        f"elements are trying to set different offsets to port {port}. "
+                        f"Using the last offset {offset} V"
                     )
                 analog_input["offset"] = offset
 
