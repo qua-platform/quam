@@ -81,7 +81,7 @@ def test_single_channel_differing_offsets(bare_cfg):
 
     cfg = deepcopy(bare_cfg)
     channel1.apply_to_config(cfg)
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         channel2.apply_to_config(cfg)
 
     cfg = deepcopy(bare_cfg)
