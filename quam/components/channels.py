@@ -5,6 +5,7 @@ import warnings
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
+from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
 
 
@@ -151,7 +152,17 @@ class Channel(QuamComponent):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
                 f"Please either set {cls_name}.id to a string or integer, "
-                f"or {cls_name} should be an attribute of another QuAM component."
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
+            )
+        if isinstance(self.parent, QuamDict):
+            return self.parent.get_attr_name(self)
+        if not hasattr(self.parent, "name"):
+            raise AttributeError(
+                f"{cls_name}.name cannot be determined. "
+                f"Please either set {cls_name}.id to a string or integer, "
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
             )
         return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
 
@@ -545,7 +556,7 @@ class IQChannel(Channel):
 
     @property
     def rf_frequency(self):
-        return self.local_oscillator.frequency + self.intermediate_frequency
+        return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.

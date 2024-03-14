@@ -254,7 +254,7 @@ def test_frequency_down_converter_with_single_channel_apply_to_config(octave):
 
 
 def test_instantiate_octave_default_connectivity(octave):
-    octave.initialize_default_connectivity()
+    octave.initialize_frequency_converters()
 
     assert list(octave.RF_outputs) == [1, 2, 3, 4, 5]
     for idx, RF_output in octave.RF_outputs.items():
@@ -326,7 +326,7 @@ def test_channel_add_RF_inputs(octave):
 
 def test_load_octave(octave):
     machine = OctaveQuAM(octave=octave)
-    octave.initialize_default_connectivity()
+    octave.initialize_frequency_converters()
 
     d = machine.to_dict()
 
@@ -351,3 +351,53 @@ def test_load_octave(octave):
     machine2 = OctaveQuAM.load(d)
 
     assert d == machine2.to_dict()
+
+
+def test_frequency_converter_config_no_LO_frequency(octave):
+    cfg = {}
+    converter = octave.RF_outputs[1] = OctaveUpConverter(id=1)
+    octave.apply_to_config(config=cfg)
+
+    converter.apply_to_config(cfg)
+
+    expected_cfg = {
+        "octaves": {
+            "octave1": {
+                "RF_outputs": {},
+                "RF_inputs": {},
+                "IF_outputs": {},
+                "loopbacks": [],
+            }
+        }
+    }
+    assert cfg == expected_cfg
+
+    converter.channel = "something"
+
+    with pytest.raises(ValueError):
+        converter.apply_to_config(cfg)
+
+    converter.channel = None
+    converter.LO_frequency = 2e9
+
+    converter.apply_to_config(cfg)
+
+    expected_cfg = {
+        "octaves": {
+            "octave1": {
+                "IF_outputs": {},
+                "RF_inputs": {},
+                "RF_outputs": {
+                    1: {
+                        "LO_frequency": 2000000000.0,
+                        "LO_source": "internal",
+                        "gain": 0,
+                        "input_attenuators": "off",
+                        "output_mode": "always_off",
+                    }
+                },
+                "loopbacks": [],
+            }
+        }
+    }
+    assert cfg == expected_cfg
