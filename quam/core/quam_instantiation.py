@@ -205,7 +205,11 @@ def instantiate_attr(
         )
         if typing.get_origin(expected_type) == dict:
             expected_type = dict
-    elif isinstance(expected_type, list) or typing.get_origin(expected_type) == list:
+    elif (
+        isinstance(expected_type, list)
+        or typing.get_origin(expected_type) == list
+        or isinstance(attr_val, list)
+    ):
         instantiated_attr = instantiate_attrs_from_list(
             attr_list=attr_val,
             required_type=expected_type,

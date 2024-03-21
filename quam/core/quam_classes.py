@@ -417,7 +417,8 @@ class QuamBase(ReferenceClass):
                     follow_references=follow_references,
                     include_defaults=include_defaults,
                 )
-                if not self._val_matches_attr_annotation(attr, val):
+                val_is_list = isinstance(val, (list, UserList))
+                if not self._val_matches_attr_annotation(attr, val) and not val_is_list:
                     quam_dict[attr]["__class__"] = get_full_class_path(val)
             else:
                 quam_dict[attr] = val
