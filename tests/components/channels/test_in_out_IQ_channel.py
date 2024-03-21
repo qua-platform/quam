@@ -40,6 +40,7 @@ def test_empty_in_out_IQ_channel():
     d = readout_resonator.to_dict()
     assert d == {
         "frequency_converter_up": {
+            "__class__": "quam.components.hardware.FrequencyConverter",
             "mixer": {},
             "local_oscillator": {"frequency": 5000000000.0},
         },
@@ -127,6 +128,7 @@ def test_readout_resonator_with_readout():
     d = readout_resonator.to_dict()
     assert d == {
         "frequency_converter_up": {
+            "__class__": "quam.components.hardware.FrequencyConverter",
             "mixer": {},
             "local_oscillator": {"frequency": 5000000000.0},
         },

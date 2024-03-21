@@ -1,9 +1,11 @@
 from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Sequence, Tuple, Union
+import warnings
 
-from quam.components.hardware import FrequencyConverter
+from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, ReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
+from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
 
 
@@ -152,7 +154,17 @@ class Channel(QuamComponent):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
                 f"Please either set {cls_name}.id to a string or integer, "
-                f"or {cls_name} should be an attribute of another QuAM component."
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
+            )
+        if isinstance(self.parent, QuamDict):
+            return self.parent.get_attr_name(self)
+        if not hasattr(self.parent, "name"):
+            raise AttributeError(
+                f"{cls_name}.name cannot be determined. "
+                f"Please either set {cls_name}.id to a string or integer, "
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
             )
         return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
 
@@ -429,20 +441,21 @@ class SingleChannel(Channel):
         offset = self.opx_output_offset
         if offset is not None:
             if abs(analog_output.get("offset", offset) - offset) > 1e-4:
-                raise ValueError(
+                warnings.warn(
                     f"Channel {self.name} has conflicting output offsets: "
-                    f"{analog_output['offset']} and {offset}. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}"
+                    f"{analog_output['offset']} V and {offset} V. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}. "
+                    f"Using the last offset {offset} V"
                 )
             analog_output["offset"] = offset
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedforward"] = self.filter_fir_taps
+            output_filter["feedforward"] = list(self.filter_fir_taps)
 
         if self.filter_iir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedback"] = self.filter_iir_taps
+            output_filter["feedback"] = list(self.filter_iir_taps)
 
 
 @quam_dataclass
@@ -749,27 +762,23 @@ class IQChannel(Channel):
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
 
-    frequency_converter_up: FrequencyConverter
+    frequency_converter_up: BaseFrequencyConverter
 
     intermediate_frequency: float = 0.0
 
     _default_label: ClassVar[str] = "IQ"
 
     @property
-    def local_oscillator(self):
-        if self.frequency_converter_up is None:
-            return None
-        return self.frequency_converter_up.local_oscillator
+    def local_oscillator(self) -> Optional[LocalOscillator]:
+        return getattr(self.frequency_converter_up, "local_oscillator", None)
 
     @property
-    def mixer(self):
-        if self.frequency_converter_up is None:
-            return None
-        return self.frequency_converter_up.mixer
+    def mixer(self) -> Optional[Mixer]:
+        return getattr(self.frequency_converter_up, "mixer", None)
 
     @property
     def rf_frequency(self):
-        return self.local_oscillator.frequency + self.intermediate_frequency
+        return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
@@ -791,12 +800,35 @@ class IQChannel(Channel):
             )
 
         element_cfg = config["elements"][self.name]
-        element_cfg["mixInputs"] = {**opx_outputs}
         element_cfg["intermediate_frequency"] = self.intermediate_frequency
-        if self.mixer is not None:
-            element_cfg["mixInputs"]["mixer"] = self.mixer.name
-        if self.local_oscillator is not None:
-            element_cfg["mixInputs"]["lo_frequency"] = self.local_oscillator.frequency
+
+        from quam.components.octave import OctaveUpConverter
+
+        if isinstance(self.frequency_converter_up, OctaveUpConverter):
+            octave = self.frequency_converter_up.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveUpConverter (id={self.frequency_converter_up.id}) without "
+                    "an attached Octave"
+                )
+            element_cfg["RF_outputs"] = {
+                "port": (octave.name, self.frequency_converter_up.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_up):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_up", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_up}"
+            )
+        else:
+            element_cfg["mixInputs"] = {**opx_outputs}
+            if self.mixer is not None:
+                element_cfg["mixInputs"]["mixer"] = self.mixer.name
+            if self.local_oscillator is not None:
+                element_cfg["mixInputs"][
+                    "lo_frequency"
+                ] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
@@ -857,7 +889,7 @@ class InOutIQChannel(IQChannel):
 
     input_gain: Optional[float] = None
 
-    frequency_converter_down: FrequencyConverter = None
+    frequency_converter_down: BaseFrequencyConverter = None
 
     _default_label: ClassVar[str] = "IQ"
 
@@ -874,12 +906,33 @@ class InOutIQChannel(IQChannel):
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
         element_cfg = config["elements"][self.name]
-        element_cfg["outputs"] = {
-            "out1": tuple(self.opx_input_I),
-            "out2": tuple(self.opx_input_Q),
-        }
         element_cfg["smearing"] = self.smearing
         element_cfg["time_of_flight"] = self.time_of_flight
+
+        from quam.components.octave import OctaveDownConverter
+
+        if isinstance(self.frequency_converter_down, OctaveDownConverter):
+            octave = self.frequency_converter_down.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
+                    "without an attached Octave"
+                )
+            element_cfg["RF_inputs"] = {
+                "port": (octave.name, self.frequency_converter_down.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_down):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_down", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_down}"
+            )
+        else:
+            element_cfg["outputs"] = {
+                "out1": tuple(self.opx_input_I),
+                "out2": tuple(self.opx_input_Q),
+            }
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_inputs[I_or_Q]
@@ -889,10 +942,11 @@ class InOutIQChannel(IQChannel):
             # If no offset specified, it will be added at the end of config generation
             if offset is not None:
                 if abs(analog_input.get("offset", offset) - offset) > 1e-4:
-                    raise ValueError(
+                    warnings.warn(
                         f"Channel {self.name} has conflicting input offsets: "
-                        f"{analog_input['offset']} and {offset}. Multiple channel "
-                        f"elements are trying to set different offsets to port {port}"
+                        f"{analog_input['offset']} V and {offset} V. Multiple channel "
+                        f"elements are trying to set different offsets to port {port}. "
+                        f"Using the last offset {offset} V"
                     )
                 analog_input["offset"] = offset
 
