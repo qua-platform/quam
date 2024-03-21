@@ -262,7 +262,7 @@ class OctaveUpConverter(OctaveFrequencyConverter):
         if self.id in config["octaves"][self.octave.name]["RF_outputs"]:
             raise KeyError(
                 f"Error generating config: "
-                f'config["octaves"]["{self.octave.name}"]["RF_inputs"] '
+                f'config["octaves"]["{self.octave.name}"]["RF_outputs"] '
                 f'already has an entry for OctaveDownConverter with id "{self.id}"'
             )
 

@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- Switched channel `RF_inputs` and `RF_outputs` for Octave
+
 
 ## [0.3.0]
 ### Added
