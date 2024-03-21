@@ -7,13 +7,15 @@
 ### Changed
 - Pulses with `pulse.axis_angle = None` are now compatible with an `IQChannel` as all signal on the I port.
 
+### Fixed
+- Switched channel `RF_inputs` and `RF_outputs` for Octave
+
 ## [0.3.0]
 ### Added
 - Added InOutSingleChannel
 - Added optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
 - Added support for the new Octave API.
 - Added support for `Literal` types in QuAM
-
 
 ### Changed
 - Changed `InOutIQChannel.input_offset_I/Q` to `InOutIQChannel.opx_input_offset_I/Q`

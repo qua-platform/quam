@@ -812,7 +812,7 @@ class IQChannel(Channel):
                     f"OctaveUpConverter (id={self.frequency_converter_up.id}) without "
                     "an attached Octave"
                 )
-            element_cfg["RF_outputs"] = {
+            element_cfg["RF_inputs"] = {
                 "port": (octave.name, self.frequency_converter_up.id)
             }
         elif str_ref.is_reference(self.frequency_converter_up):
@@ -919,7 +919,7 @@ class InOutIQChannel(IQChannel):
                     f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
                     "without an attached Octave"
                 )
-            element_cfg["RF_inputs"] = {
+            element_cfg["RF_outputs"] = {
                 "port": (octave.name, self.frequency_converter_down.id)
             }
         elif str_ref.is_reference(self.frequency_converter_down):
