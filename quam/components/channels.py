@@ -3,7 +3,7 @@ from typing import ClassVar, Dict, List, Optional, Sequence, Tuple, Union
 import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
-from quam.components.pulses import Pulse, ReadoutPulse
+from quam.components.pulses import Pulse, BaseReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
@@ -544,7 +544,7 @@ class InOutSingleChannel(SingleChannel):
                 variables.
         """
 
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -607,7 +607,7 @@ class InOutSingleChannel(SingleChannel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -689,7 +689,7 @@ class InOutSingleChannel(SingleChannel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -978,7 +978,7 @@ class InOutIQChannel(IQChannel):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1051,7 +1051,7 @@ class InOutIQChannel(IQChannel):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1137,7 +1137,7 @@ class InOutIQChannel(IQChannel):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
         if num_segments is None and segment_length is None:
             raise ValueError(

@@ -2,8 +2,10 @@
 ### Added
 - Add optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
 - Added `InOutIQChannel.measure_accumulated/sliced`
-- Added `StandardReadoutPulse`. All readout pulses can now be created simply by inheriting from the `StandardReadoutPulse` and the non-readout variant.
+- Added `ReadoutPulse`. All readout pulses can now be created simply by inheriting from the `ReadoutPulse` and the non-readout variant.
 
+### Changed
+- Pulses with `pulse.axis_angle = None` are now compatible with an `IQChannel` as all signal on the I port.
 
 ## [0.3.0]
 ### Added
