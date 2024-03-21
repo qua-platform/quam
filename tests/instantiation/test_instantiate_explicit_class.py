@@ -37,3 +37,26 @@ def test_instantiate_nondefault_list_from_dict():
 
     d = quam_component.to_dict()
     instantiate_quam_class(QuamBasicComponent, d)
+
+
+@quam_dataclass
+class QuamBasicComponent(QuamComponent):
+    int_val: int = 42
+
+
+@quam_dataclass
+class QuamOuterComponent(QuamComponent):
+    list_basic_components: Union[int, List[QuamBasicComponent]]
+
+
+def test_instantiate_explicit_class_with_union_type():
+    quam_component = QuamOuterComponent(
+        list_basic_components=[QuamBasicComponent(int_val=42)]
+    )
+
+    d = quam_component.to_dict()
+    component = instantiate_quam_class(QuamOuterComponent, d)
+
+    assert isinstance(component, QuamOuterComponent)
+    assert isinstance(component.list_basic_components[0], QuamBasicComponent)
+    assert component.to_dict() == quam_component.to_dict()

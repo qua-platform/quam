@@ -107,7 +107,15 @@ def instantiate_attrs_from_list(
 
     instantiated_attr_list = []
     for k, attr_val in enumerate(attr_list):
-        if not required_subtype:
+        if isinstance(attr_val, dict) and "__class__" in attr_val:
+            instantiated_attr = instantiate_quam_class(
+                get_class_from_path(attr_val["__class__"]),
+                attr_val,
+                fix_attrs=fix_attrs,
+                validate_type=validate_type,
+                str_repr=f"{str_repr}[{k}]",
+            )
+        elif not required_subtype:
             instantiated_attr_list.append(attr_val)
             continue
         elif typing.get_origin(required_subtype) == list:
@@ -136,8 +144,8 @@ def instantiate_attrs_from_list(
         else:
             instantiated_attr = attr_val
         # Add custom __class__ QuamComponent logic here
-
-        validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
+        if required_subtype:
+            validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
 
         instantiated_attr_list.append(instantiated_attr)
 
@@ -195,6 +203,14 @@ def instantiate_attr(
             validate_type=validate_type,
             str_repr=str_repr,
         )
+    elif isinstance(attr_val, dict) and "__class__" in attr_val:
+        instantiated_attr = instantiate_quam_class(
+            quam_class=expected_type,
+            contents=attr_val,
+            fix_attrs=fix_attrs,
+            validate_type=validate_type,
+            str_repr=str_repr,
+        )
     elif isinstance(expected_type, dict) or typing.get_origin(expected_type) == dict:
         instantiated_attr = instantiate_attrs_from_dict(
             attr_dict=attr_val,
@@ -220,16 +236,7 @@ def instantiate_attr(
         if typing.get_origin(expected_type) == list:
             expected_type = list
     elif typing.get_origin(expected_type) == typing.Union:
-        if not all(
-            t in [str, int, float, bool, type(None)]
-            for t in typing.get_args(expected_type)
-        ):
-            raise TypeError(
-                "Currently only Union[str, int, float, bool] is supported, whereas "
-                f"{expected_type} was found in {str_repr}"
-            )
         instantiated_attr = attr_val
-
     elif typing.get_origin(expected_type) == tuple:
         if isinstance(attr_val, list):
             attr_val = tuple(attr_val)
