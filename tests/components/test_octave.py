@@ -284,7 +284,7 @@ def test_channel_add_RF_outputs(octave):
     expected_cfg_elements = {
         "ch": {
             "intermediate_frequency": 0.0,
-            "RF_outputs": {"port": ("octave1", 2)},
+            "RF_inputs": {"port": ("octave1", 2)},
             "operations": {},
         }
     }
@@ -313,8 +313,8 @@ def test_channel_add_RF_inputs(octave):
     expected_cfg_elements = {
         "ch": {
             "intermediate_frequency": 0.0,
-            "RF_outputs": {"port": ("octave1", 3)},
-            "RF_inputs": {"port": ("octave1", 4)},
+            "RF_inputs": {"port": ("octave1", 3)},
+            "RF_outputs": {"port": ("octave1", 4)},
             "operations": {},
             "smearing": 0,
             "time_of_flight": 24,
