@@ -74,3 +74,8 @@ def test_list_get_attrs_error():
     quam_list = QuamList()
     with pytest.raises(NotImplementedError):
         quam_list.get_attrs()
+
+
+def test_list_to_dict():
+    quam_list = QuamList([1, 2, 3])
+    assert quam_list.to_dict() == [1, 2, 3]

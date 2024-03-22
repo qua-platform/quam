@@ -142,3 +142,12 @@ def test_optional_list_to_dict():
 
     quam_component = QuamBasicComponent(l=[1, 2, 3])
     assert quam_component.to_dict() == {"l": [1, 2, 3]}
+
+
+def test_list_to_dict_nondefault():
+    @quam_dataclass
+    class QuamBasicComponent(QuamComponent):
+        l: int = 42
+
+    quam_component = QuamBasicComponent(l=[1, 2, 3])
+    assert quam_component.to_dict() == {"l": [1, 2, 3]}
