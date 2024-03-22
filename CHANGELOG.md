@@ -1,6 +1,8 @@
 ## [Unreleased]
 ### Fixed
 - Switched channel `RF_inputs` and `RF_outputs` for Octave
+- Loading QuAM components when the expected type is a union or the actual type is a list
+  no longer raises an error
 
 
 ## [0.3.0]
