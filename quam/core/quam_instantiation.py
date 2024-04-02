@@ -235,6 +235,8 @@ def instantiate_attr(
         )
         if typing.get_origin(expected_type) == list:
             expected_type = list
+        elif typing.get_origin(expected_type) == tuple:
+            instantiated_attr = tuple(instantiated_attr)
     elif typing.get_origin(expected_type) == typing.Union:
         instantiated_attr = attr_val
     elif typing.get_origin(expected_type) == tuple:
