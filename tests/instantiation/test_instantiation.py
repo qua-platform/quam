@@ -1,5 +1,5 @@
 import pytest
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Tuple
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
 from quam.examples.superconducting_qubits.components import Transmon
@@ -317,3 +317,12 @@ def test_instance_attr_literal_fail():
             attr_val=1,
             expected_type=Literal["a", "b", "c"],
         )
+
+
+def test_isntantiate_tuple():
+    @quam_dataclass
+    class TestQuamTuple(QuamComponent):
+        tuple_val: Tuple[int, str]
+
+    obj = instantiate_quam_class(TestQuamTuple, {"tuple_val": [42, "hello"]})
+    assert obj.tuple_val == (42, "hello")
