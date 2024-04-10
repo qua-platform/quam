@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import ClassVar, Dict, List, Optional, Tuple, Union
+from typing import ClassVar, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
@@ -17,6 +17,7 @@ from qm.qua import (
     measure,
     dual_demod,
     declare,
+    set_dc_offset,
     fixed,
     frame_rotation,
 )
@@ -409,6 +410,18 @@ class SingleChannel(Channel):
     opx_output_offset: float = None
     intermediate_frequency: float = None
 
+    def set_dc_offset(self, voltage: QuaNumberType):
+        """Set the DC offset of an element's input to the given value.
+        This value will remain the DC offset until changed or until the Quantum Machine
+        is closed.
+
+        Args:
+            voltage (QuaNumberType): The DC offset to set the input to.
+                This is limited by the OPX output voltage range.
+                The number can be a QUA variable
+        """
+        set_dc_offset(element=self.name, element_input="single", offset=voltage)
+
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
 
@@ -557,6 +570,19 @@ class IQChannel(Channel):
     @property
     def rf_frequency(self):
         return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
+
+    def set_dc_offset(self, voltage: QuaNumberType, element_input: Literal["I", "Q"]):
+        """Set the DC offset of an element's input to the given value.
+        This value will remain the DC offset until changed or until the Quantum Machine
+        is closed.
+
+        Args:
+            voltage (QuaNumberType): The DC offset to set the input to.
+                This is limited by the OPX output voltage range.
+                The number can be a QUA variable
+            element_input (Literal["I", "Q"]): The element input to set the offset for.
+        """
+        set_dc_offset(element=self.name, element_input=element_input, offset=voltage)
 
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
