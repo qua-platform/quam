@@ -410,17 +410,17 @@ class SingleChannel(Channel):
     opx_output_offset: float = None
     intermediate_frequency: float = None
 
-    def set_dc_offset(self, voltage: QuaNumberType):
+    def set_dc_offset(self, offset: QuaNumberType):
         """Set the DC offset of an element's input to the given value.
         This value will remain the DC offset until changed or until the Quantum Machine
         is closed.
 
         Args:
-            voltage (QuaNumberType): The DC offset to set the input to.
+            offset (QuaNumberType): The DC offset to set the input to.
                 This is limited by the OPX output voltage range.
                 The number can be a QUA variable
         """
-        set_dc_offset(element=self.name, element_input="single", offset=voltage)
+        set_dc_offset(element=self.name, element_input="single", offset=offset)
 
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
@@ -571,18 +571,25 @@ class IQChannel(Channel):
     def rf_frequency(self):
         return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
-    def set_dc_offset(self, voltage: QuaNumberType, element_input: Literal["I", "Q"]):
+    def set_dc_offset(self, offset: QuaNumberType, element_input: Literal["I", "Q"]):
         """Set the DC offset of an element's input to the given value.
         This value will remain the DC offset until changed or until the Quantum Machine
         is closed.
 
         Args:
-            voltage (QuaNumberType): The DC offset to set the input to.
+            offset (QuaNumberType): The DC offset to set the input to.
                 This is limited by the OPX output voltage range.
                 The number can be a QUA variable
             element_input (Literal["I", "Q"]): The element input to set the offset for.
+
+        Raises:
+            ValueError: If element_input is not "I" or "Q"
         """
-        set_dc_offset(element=self.name, element_input=element_input, offset=voltage)
+        if element_input not in ["I", "Q"]:
+            raise ValueError(
+                f"element_input should be either 'I' or 'Q', got {element_input}"
+            )
+        set_dc_offset(element=self.name, element_input=element_input, offset=offset)
 
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
