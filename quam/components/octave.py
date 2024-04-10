@@ -276,8 +276,8 @@ class OctaveUpConverter(OctaveFrequencyConverter):
         if isinstance(self.channel, SingleChannel):
             output_config["I_connection"] = self.channel.opx_output
         elif isinstance(self.channel, IQChannel):
-            output_config["I_connection"] = self.channel.opx_output_I
-            output_config["Q_connection"] = self.channel.opx_output_Q
+            output_config["I_connection"] = tuple(self.channel.opx_output_I)
+            output_config["Q_connection"] = tuple(self.channel.opx_output_Q)
 
 
 @quam_dataclass
