@@ -5,6 +5,8 @@
 - Switched channel `RF_inputs` and `RF_outputs` for Octave
 - Loading QuAM components when the expected type is a union or the actual type is a list
   no longer raises an error
+- The qua config entries from OctaveUpConverter entries I/Q_connection were of type 
+  QuamList, resulting in errors during deepcopy. Converted to tuple
 
 
 ## [0.3.0]
