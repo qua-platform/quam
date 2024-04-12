@@ -3,12 +3,17 @@
 - Add optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
 - Added `InOutIQChannel.measure_accumulated/sliced`
 - Added `ReadoutPulse`. All readout pulses can now be created simply by inheriting from the `ReadoutPulse` and the non-readout variant.
+- Added `Channel.set_dc_offset`
 
 ### Changed
 - Pulses with `pulse.axis_angle = None` are now compatible with an `IQChannel` as all signal on the I port.
 
 ### Fixed
 - Switched channel `RF_inputs` and `RF_outputs` for Octave
+- Loading QuAM components when the expected type is a union or the actual type is a list
+  no longer raises an error
+- The qua config entries from OctaveUpConverter entries I/Q_connection were of type 
+  QuamList, resulting in errors during deepcopy. Converted to tuple
 
 ## [0.3.0]
 ### Added

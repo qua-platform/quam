@@ -123,3 +123,16 @@ def test_single_channel_offset_quam(bare_cfg):
     cfg = machine.generate_config()
     expected_cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.1
     assert cfg == expected_cfg
+
+
+def test_single_channel_set_dc_offset(mocker):
+    mocker.patch("quam.components.channels.set_dc_offset")
+
+    channel = SingleChannel(id="channel", opx_output=("con1", 1))
+    channel.set_dc_offset(0.5)
+
+    from quam.components.channels import set_dc_offset
+
+    set_dc_offset.assert_called_once_with(
+        element="channel", element_input="single", offset=0.5
+    )
