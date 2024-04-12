@@ -1,4 +1,5 @@
 import pytest
+import json
 from copy import deepcopy
 
 from quam.components import *
@@ -136,3 +137,16 @@ def test_single_channel_set_dc_offset(mocker):
     set_dc_offset.assert_called_once_with(
         element="channel", element_input="single", offset=0.5
     )
+
+
+def test_instantiate_single_channel():
+    from quam.core.quam_instantiation import instantiate_quam_class
+
+    channel = SingleChannel(opx_output=("con1", 1))
+    d = channel.to_dict()
+
+    d_json = json.dumps(d)
+
+    d_loaded = json.loads(d_json)
+
+    instantiate_quam_class(SingleChannel, d_loaded)
