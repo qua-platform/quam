@@ -778,8 +778,52 @@ class IQChannel(Channel):
     frequency_converter_up: BaseFrequencyConverter
 
     intermediate_frequency: float = 0.0
+    LO_frequency: float = "#./frequency_converter_up/LO_frequency"
+    RF_frequency: float = "#./inferred_RF_frequency"
 
     _default_label: ClassVar[str] = "IQ"
+
+    @property
+    def inferred_RF_frequency(self) -> float:
+        if not isinstance(self.LO_frequency, (float, int)):
+            raise ValueError(
+                f"Error inferring RF frequency for channel {self.name}: "
+                f"LO_frequency is not a number: {self.LO_frequency}"
+            )
+        if not isinstance(self.intermediate_frequency, (float, int)):
+            raise ValueError(
+                f"Error inferring RF frequency for channel {self.name}: "
+                f"intermediate_frequency is not a number: {self.intermediate_frequency}"
+            )
+        return self.LO_frequency + self.intermediate_frequency
+
+    @property
+    def inferred_intermediate_frequency(self) -> float:
+        if not isinstance(self.LO_frequency, (float, int)):
+            raise ValueError(
+                f"Error inferring intermediate frequency for channel {self.name}: "
+                f"LO_frequency is not a number: {self.LO_frequency}"
+            )
+        if not isinstance(self.RF_frequency, (float, int)):
+            raise ValueError(
+                f"Error inferring intermediate frequency for channel {self.name}: "
+                f"RF_frequency is not a number: {self.RF_frequency}"
+            )
+        return self.RF_frequency - self.LO_frequency
+
+    @property
+    def inferred_LO_frequency(self) -> float:
+        if not isinstance(self.RF_frequency, (float, int)):
+            raise ValueError(
+                f"Error inferring LO frequency for channel {self.name}: "
+                f"RF_frequency is not a number: {self.RF_frequency}"
+            )
+        if not isinstance(self.intermediate_frequency, (float, int)):
+            raise ValueError(
+                f"Error inferring LO frequency for channel {self.name}: "
+                f"intermediate_frequency is not a number: {self.intermediate_frequency}"
+            )
+        return self.RF_frequency - self.intermediate_frequency
 
     @property
     def local_oscillator(self) -> Optional[LocalOscillator]:
@@ -791,6 +835,9 @@ class IQChannel(Channel):
 
     @property
     def rf_frequency(self):
+        warnings.warn(
+            "rf_frequency is deprecated, use RF_frequency instead", DeprecationWarning
+        )
         return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
     def set_dc_offset(self, offset: QuaNumberType, element_input: Literal["I", "Q"]):
