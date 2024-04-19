@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numbers
+import warnings
 from typing import Any, ClassVar, Dict, List, Union, Tuple
 import numpy as np
 
@@ -9,12 +10,14 @@ from quam.utils import string_reference as str_ref
 
 __all__ = [
     "Pulse",
+    "BaseReadoutPulse",
     "ReadoutPulse",
-    "ConstantReadoutPulse",
     "DragPulse",
     "SquarePulse",
+    "SquareReadoutPulse",
     "GaussianPulse",
     "FlatTopGaussianPulse",
+    "ConstantReadoutPulse",
 ]
 
 
@@ -52,6 +55,7 @@ class Pulse(QuamComponent):
         The digital marker label is defined as `"{channel_name}.{pulse_name}.dm"`.
 
     """
+
     operation: ClassVar[str] = "control"
     length: int
     id: str = None
@@ -178,6 +182,9 @@ class Pulse(QuamComponent):
             ValueError: If the waveform type (single or IQ) does not match the parent
                 channel type (SingleChannel, IQChannel, InOutIQChannel).
         """
+
+        from quam.components.channels import SingleChannel, IQChannel
+
         pulse_config = config["pulses"][self.pulse_name]
 
         waveform = self.calculate_waveform()
@@ -190,6 +197,8 @@ class Pulse(QuamComponent):
             wf_type = "constant"
             if isinstance(waveform, complex):
                 waveforms = {"I": waveform.real, "Q": waveform.imag}
+            elif isinstance(self.channel, IQChannel):
+                waveforms = {"I": waveform, "Q": 0.0}
             else:
                 waveforms = {"single": waveform}
 
@@ -197,14 +206,14 @@ class Pulse(QuamComponent):
             wf_type = "arbitrary"
             if np.iscomplexobj(waveform):
                 waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
+            elif isinstance(self.channel, IQChannel):
+                waveforms = {"I": waveform, "Q": np.zeros_like(waveform)}
             else:
                 waveforms = {"single": list(waveform)}
         else:
             raise ValueError("unsupported return type")
 
         # Add check that waveform type (single or IQ) matches parent
-        from quam.components.channels import SingleChannel, IQChannel
-
         if "single" in waveforms and not isinstance(self.channel, SingleChannel):
             raise ValueError(
                 "Waveform type 'single' not allowed for IQChannel"
@@ -273,8 +282,11 @@ class Pulse(QuamComponent):
 
 
 @quam_dataclass
-class ReadoutPulse(Pulse, ABC):
-    """QuAM abstract base component for a readout pulse.
+class BaseReadoutPulse(Pulse, ABC):
+    """QuAM abstract base component for a general  readout pulse.
+
+    Readout pulse classes should usually inherit from `ReadoutPulse`, the
+    exception being when a custom integration weights function is required.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -340,8 +352,12 @@ class ReadoutPulse(Pulse, ABC):
 
 
 @quam_dataclass
-class ConstantReadoutPulse(ReadoutPulse):
-    """QuAM component for a constant readout pulse.
+class ReadoutPulse(BaseReadoutPulse, ABC):
+    """QuAM abstract base component for most readout pulses.
+
+    This class is a subclass of `ReadoutPulse` and should be used for most readout
+    pulses. It provides a default implementation of the `integration_weights_function`
+    method, which is suitable for most cases.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -349,80 +365,39 @@ class ConstantReadoutPulse(ReadoutPulse):
             Default is "ON".
         amplitude (float): The constant amplitude of the pulse.
         axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
             If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
-        integration_weights_angle (float, optional): The rotation angle for the integration
-            weights in radians.
+        integration_weights (list[float], list[tuple[float, int]], optional): The
+            integration weights, can be either
+            - a list of floats (one per sample), the length must match the pulse length
+            - a list of tuples of (weight, length) pairs, the sum of the lengths must
+              match the pulse length
+        integration_weights_angle (float, optional): The rotation angle for the
+            integration weights in radians.
     """
 
-    amplitude: float
-    axis_angle: float = 0
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = None
     integration_weights_angle: float = 0
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        complex_weight = np.exp(1j * self.integration_weights_angle)
-        return {
-            "real": [(complex_weight.real, self.length)],
-            "imag": [(complex_weight.imag, self.length)],
-            "minus_real": [(-complex_weight.real, self.length)],
-            "minus_imag": [(-complex_weight.imag, self.length)],
-        }
-
-    def waveform_function(self):
-        if self.axis_angle is None:
-            return self.amplitude
-        else:
-            return self.amplitude * np.exp(-1.0j * self.axis_angle)
-
-
-@quam_dataclass
-class ArbitraryWeightsReadoutPulse(ReadoutPulse):
-    """QuAM component for readout pulse with arbitrary weights
-
-    Args:
-        length (int): The length of the pulse in samples.
-        digital_marker (str, list, optional): The digital marker to use for the pulse.
-            Default is "ON".
-        amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
-        integration_weights_real (list): The real part of the integration weights.
-        integration_weights_imag (list): The imaginary part of the integration weights.
-        integration_weights_minus_real (list): The negative real part of the integration
-            weights.
-        integration_weights_minus_imag (list): The negative imaginary part of the
-            integration weights.
-    """
-
-    amplitude: float
-    axis_angle: float = 0
-    integration_weights_real: List[float]  # cos
-    integration_weights_imag: List[float]  # sin
-    integration_weights_minus_real: List[float]  # -cos
-    integration_weights_minus_imag: List[float]  # -sin
-
-    def integration_weights_function(self):
         from qualang_tools.config import convert_integration_weights
 
-        # Convert integration weights to tuples [(sample, length), ...]
-        converted_integration_weights = {
-            "real": convert_integration_weights(self.integration_weights_real),
-            "imag": convert_integration_weights(self.integration_weights_imag),
-            "minus_real": convert_integration_weights(
-                self.integration_weights_minus_real
-            ),
-            "minus_imag": convert_integration_weights(
-                self.integration_weights_minus_imag
-            ),
-        }
-        return converted_integration_weights
+        phase = np.exp(1j * self.integration_weights_angle)
 
-    def waveform_function(self):
-        if self.axis_angle is None:
-            return self.amplitude
+        if self.integration_weights is None or not self.integration_weights:
+            integration_weights = [(1, self.length)]
+        elif isinstance(self.integration_weights[0], float):
+            integration_weights = convert_integration_weights(self.integration_weights)
         else:
-            return self.amplitude * np.exp(-1.0j * self.axis_angle)
+            integration_weights = self.integration_weights
+
+        return {
+            "real": [(phase.real * w, l) for w, l in integration_weights],
+            "imag": [(phase.imag * w, l) for w, l in integration_weights],
+            "minus_real": [(-phase.real * w, l) for w, l in integration_weights],
+            "minus_imag": [(-phase.imag * w, l) for w, l in integration_weights],
+        }
 
 
 @quam_dataclass
@@ -437,9 +412,10 @@ class DragPulse(Pulse):
 
     Args:
         length (int): The pulse length in ns.
-        axis_angle (float, optional): IQ axis angle of the pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
         amplitude (float): The amplitude in volts.
         sigma (float): The gaussian standard deviation.
         alpha (float): The DRAG coefficient.
@@ -488,9 +464,10 @@ class SquarePulse(Pulse):
         length (int): The length of the pulse in samples.
         digital_marker (str, list, optional): The digital marker to use for the pulse.
         amplitude (float): The amplitude of the pulse in volts.
-        axis_angle (float, optional): IQ axis angle of the pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
     """
 
     amplitude: float
@@ -505,6 +482,40 @@ class SquarePulse(Pulse):
 
 
 @quam_dataclass
+class SquareReadoutPulse(ReadoutPulse, SquarePulse):
+    """QuAM component for a square readout pulse.
+
+    Args:
+        length (int): The length of the pulse in samples.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+            Default is "ON".
+        amplitude (float): The constant amplitude of the pulse.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        integration_weights (list[float], list[tuple[float, int]], optional): The
+            integration weights, can be either
+            - a list of floats (one per sample), the length must match the pulse length
+            - a list of tuples of (weight, length) pairs, the sum of the lengths must
+              match the pulse length
+        integration_weights_angle (float, optional): The rotation angle for the
+            integration weights in radians.
+    """
+
+    ...
+
+
+class ConstantReadoutPulse(SquareReadoutPulse):
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "ConstantReadoutPulse is deprecated. Use SquareReadoutPulse instead.",
+            DeprecationWarning,
+        )
+        return super().__post_init__()
+
+
+@quam_dataclass
 class GaussianPulse(Pulse):
     """Gaussian pulse QuAM component.
 
@@ -513,9 +524,10 @@ class GaussianPulse(Pulse):
         length (int): The length of the pulse in samples.
         sigma (float): The standard deviation of the gaussian pulse.
             Should generally be less than half the length of the pulse.
-        axis_angle (float, optional): IQ axis angle of the pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
         subtracted (bool): If true, returns a subtracted Gaussian, such that the first
             and last points will be at 0 volts. This reduces high-frequency components
             due to the initial and final points offset. Default is true.
@@ -548,9 +560,10 @@ class FlatTopGaussianPulse(Pulse):
     Args:
         length (int): The total length of the pulse in samples.
         amplitude (float): The amplitude of the pulse in volts.
-        axis_angle (float, optional): IQ axis angle of the pulse in radians.
-            If None (default), the pulse is meant for a single channel.
-            If not None, the pulse is meant for an IQ channel (0 degrees is X, pi/2 is Y).
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
         flat_length (int): The length of the pulse's flat top in samples.
             The rise and fall lengths are calculated from the total length and the
             flat length.

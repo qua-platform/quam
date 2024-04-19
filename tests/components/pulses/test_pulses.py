@@ -78,10 +78,8 @@ def test_single_pulse_IQ_channel():
     cfg = {"pulses": {}, "waveforms": {}}
     pulse = IQ_channel.operations["X180"]
 
-    with pytest.raises(ValueError) as exc_info:
-        pulse.apply_to_config(cfg)
-    error_message = "Waveform type 'single' not allowed for IQChannel 'IQ'"
-    assert str(exc_info.value) == error_message
+    # axis_angle = None translates to all signal on I
+    pulse.apply_to_config(cfg)
 
     pulse.axis_angle = 90
     pulse.apply_to_config(cfg)
