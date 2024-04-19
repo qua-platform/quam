@@ -17,7 +17,7 @@ nav:
   - index.md
   - getting-started.md
   - demonstration.md
-  - "Features":
+  - "QuAM features":
     - quam-references.md
   - "QuAM components":
     - "components/channels.md"

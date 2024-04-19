@@ -1,6 +1,6 @@
-# Component referencing
+# Referencing between components
 
-## QuAM tree-structure
+## QuAM tree structure
 QuAM follows a tree structure, meaning that each QuAM component can have a parent component and it can have children.
 
 The top-level object is always an instance of QuAMRoot, e.g.
