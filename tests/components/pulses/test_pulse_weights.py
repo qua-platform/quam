@@ -24,6 +24,22 @@ def test_constant_readout_pulse_integration_weights_default():
     compare_integration_weights(expected_weights, weights)
 
 
+def test_empty_integration_weights():
+    for weights in ([], np.array([]), None):
+        pulse = pulses.SquareReadoutPulse(
+            length=100, amplitude=1, integration_weights=weights
+        )
+
+        weights = pulse.integration_weights_function()
+        expected_weights = {
+            "real": [(1, 100)],
+            "imag": [(0, 100)],
+            "minus_real": [(-1, 100)],
+            "minus_imag": [(0, 100)],
+        }
+        compare_integration_weights(expected_weights, weights)
+
+
 def test_constant_readout_pulse_integration_weights_phase_shift():
     pulse = pulses.SquareReadoutPulse(
         length=100, amplitude=1, integration_weights_angle=np.pi / 2
@@ -44,6 +60,23 @@ def test_constant_readout_pulse_integration_weights_custom_uncompressed():
         length=100,
         amplitude=1,
         integration_weights=[0.4] * 10 + [0.6] * 15,  # units of clock cycle
+    )
+
+    weights = pulse.integration_weights_function()
+    expected_weights = {
+        "real": [(0.4, 40), (0.6, 60)],
+        "imag": [(0.0, 40), (0.0, 60)],
+        "minus_real": [(-0.4, 40), (-0.6, 60)],
+        "minus_imag": [(0.0, 40), (0.0, 60)],
+    }
+    compare_integration_weights(expected_weights, weights)
+
+
+def test_constant_readout_pulse_integration_weights_custom_uncompressed_array():
+    pulse = pulses.SquareReadoutPulse(
+        length=100,
+        amplitude=1,
+        integration_weights=np.array([0.4] * 10 + [0.6] * 15),  # units of clock cycle
     )
 
     weights = pulse.integration_weights_function()
