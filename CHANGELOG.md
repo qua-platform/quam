@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- Fix error where a numpy array of integration weights raises an error
+
 ## [0.3.1]
 ### Added
 - Add optional `config_settings` property to quam components indicating that they should be called before/after other components when generating QUA configuration
