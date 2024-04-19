@@ -1,9 +1,9 @@
 from dataclasses import field
-from typing import ClassVar, Dict, List, Literal, Optional, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union
 import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
-from quam.components.pulses import Pulse, ReadoutPulse
+from quam.components.pulses import Pulse, BaseReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
@@ -15,16 +15,18 @@ from qm.qua import (
     play,
     wait,
     measure,
-    dual_demod,
     declare,
     set_dc_offset,
     fixed,
+    demod,
+    dual_demod,
     frame_rotation,
 )
 from qm.qua._dsl import (
     _PulseAmp,
     AmpValuesType,
     QuaNumberType,
+    QuaVariableType,
     QuaExpressionType,
     ChirpType,
     StreamType,
@@ -376,7 +378,7 @@ class Channel(QuamComponent):
         """
         if self.name in config["elements"]:
             raise ValueError(
-                f"Cannot add channel {self.name} to the config because it already "
+                f"Cannot add channel '{self.name}' to the config because it already "
                 f"exists. Existing entry: {config['elements'][self.name]}"
             )
         config["elements"][self.name] = {"operations": self.pulse_mapping}
@@ -524,6 +526,226 @@ class InOutSingleChannel(SingleChannel):
                     f"elements are trying to set different offsets to port {port}"
                 )
             analog_input["offset"] = offset
+
+    def measure(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
+        """Perform a full demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+                variables to store the I, Q measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I, Q: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+
+        Raises:
+            ValueError: If `qua_vars` is provided and is not a tuple of two QUA
+                variables.
+        """
+
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutSingleChannel.measure received kwarg 'qua_vars' "
+                    f"which is not a tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.full(integration_weight_labels[0], qua_vars[0], "out1"),
+            demod.full(integration_weight_labels[1], qua_vars[1], "out1"),
+        )
+        return tuple(qua_vars)
+
+    def measure_accumulated(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
+        """Perform an accumulated demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+                variables to store the I, Q measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I, Q: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+
+        Raises:
+            ValueError: If both `num_segments` and `segment_length` are provided, or if
+                neither are provided.
+            ValueError: If `qua_vars` is provided and is not a tuple of two QUA
+                variables.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_accumulated received kwarg 'qua_vars' "
+                    f"which is not a tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.accumulated(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.accumulated(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"
+            ),
+        )
+        return tuple(qua_vars)
+
+    def measure_sliced(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
+        """Perform an accumulated demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+                variables to store the I, Q measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I, Q: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+
+        Raises:
+            ValueError: If both `num_segments` and `segment_length` are provided, or if
+                neither are provided.
+            ValueError: If `qua_vars` is provided and is not a tuple of two QUA
+                variables.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_sliced received kwarg 'qua_vars' "
+                    f"which is not a tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.sliced(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.sliced(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"
+            ),
+        )
+        return tuple(qua_vars)
 
 
 @quam_dataclass
@@ -764,30 +986,46 @@ class InOutIQChannel(IQChannel):
             if self.input_gain is not None:
                 controller_cfg["analog_inputs"][port]["gain_db"] = self.input_gain
 
-    def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
+    def measure(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        qua_vars: Tuple[QuaVariableType, QuaVariableType] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
         """Perform a full dual demodulation measurement on this channel.
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            I_var (QuaVariableType): QUA variable to store the I measurement result.
-                If not provided, a new variable  will be declared
-            Q_var (QuaVariableType): QUA variable to store the Q measurement result.
-                If not provided, a new variable  will be declared
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            qua_vars (Tuple[QuaVariableType, QuaVariableType], optional): Two QUA
+                variables to store the I and Q measurement results. If not provided,
+                new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
                 If not provided, the raw ADC signal will not be streamed.
 
         Returns:
-            I_var, Q_var: The QUA variables used to store the measurement results.
+            I, Q: The QUA variables used to store the measurement results.
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
-        if I_var is None:
-            I_var = declare(fixed)
-        if Q_var is None:
-            Q_var = declare(fixed)
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutIQChannel.measure received kwarg 'qua_vars' which is not a "
+                    f"tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -799,14 +1037,186 @@ class InOutIQChannel(IQChannel):
                 element_output1="out1",
                 iw2=integration_weight_labels[1],
                 element_output2="out2",
-                target=I_var,
+                target=qua_vars[0],
             ),
             dual_demod.full(
                 iw1=integration_weight_labels[2],
                 element_output1="out1",
                 iw2=integration_weight_labels[0],
                 element_output2="out2",
-                target=Q_var,
+                target=qua_vars[1],
             ),
         )
-        return I_var, Q_var
+        return tuple(qua_vars)
+
+    def measure_accumulated(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
+        """Perform an accumulated dual demodulation measurement on this channel.
+
+        Instead of two QUA variables (I and Q), this method returns four variables
+        (II, IQ, QI, QQ)
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate the
+                measurement.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Four QUA
+                variables to store the II, IQ, QI, QQ measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            II, IQ, QI, QQ: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 4:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_accumulated received kwarg 'qua_vars' "
+                    f"which is not a tuple of four QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.accumulated(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.accumulated(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out2"
+            ),
+            demod.accumulated(
+                integration_weight_labels[2], qua_vars[2], segment_length, "out1"
+            ),
+            demod.accumulated(
+                integration_weight_labels[0], qua_vars[3], segment_length, "out2"
+            ),
+        )
+        return tuple(qua_vars)
+
+    def measure_sliced(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
+        """Perform a sliced dual demodulation measurement on this channel.
+
+        Instead of two QUA variables (I and Q), this method returns four variables
+        (II, IQ, QI, QQ)
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate the
+                measurement.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Four QUA
+                variables to store the II, IQ, QI, QQ measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            II, IQ, QI, QQ: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 4:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_sliced received kwarg 'qua_vars' "
+                    f"which is not a tuple of four QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.sliced(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.sliced(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out2"
+            ),
+            demod.sliced(
+                integration_weight_labels[2], qua_vars[2], segment_length, "out1"
+            ),
+            demod.sliced(
+                integration_weight_labels[0], qua_vars[3], segment_length, "out2"
+            ),
+        )
+        return tuple(qua_vars)
