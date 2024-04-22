@@ -1,17 +1,45 @@
-site_name: QuAM (Quantum Abstract Machine) Documentation
+site_name: The Quantum Abstract Machine - QuAM Documentation
+# site_url: 
+site_author: QM. Technologies Ltd.
+# site_description:
+
+copyright: Copyright &copy; 2024 Q.M Technologies Ltd.
 
 theme:
   name: material
+  logo: assets/qm_logo_white.svg
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/qm_logo_white.svg
+  palette:
+    - scheme: entropy-bright
+      toggle:
+        icon: material/brightness-7
+        name: Switch to high contrast mode
+    - scheme: entropy-high-contrast
+      toggle:
+        icon: material/brightness-6
+        name: Switch to dark mode
+    - scheme: entropy-dark 
+      toggle:
+        icon: material/brightness-5
+        name: Switch to light mode
+
   features:
-  - navigation.tabs
-  - navigation.sections
-  - toc.integrate
+  # - navigation.tabs  # Add tabs to the top of the page
+  # - navigation.sections  # Expand sections in the navigation
+  - navigation.top # Add "back to top" button when scrolling back up
+  - toc.integrate  # Invlude TOC in left sidebar instead of separate right
   - search.suggest
   - search.highlight
   - content.tabs.link
   - content.code.annotations
   - content.code.copy
   language: en
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - index.md
