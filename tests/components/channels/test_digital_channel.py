@@ -2,6 +2,7 @@ from copy import deepcopy
 from quam.components import Channel, DigitalOutputChannel, pulses
 from quam.core import QuamRoot, quam_dataclass
 from quam.core.qua_config_template import qua_config_template
+from quam.core.quam_instantiation import instantiate_quam_class
 
 
 @quam_dataclass
@@ -54,3 +55,11 @@ def test_digital_only_pulse():
     }
 
     assert cfg == expected_cfg
+
+
+def test_instantiate_digital_channel():
+    channel = instantiate_quam_class(
+        quam_class=DigitalOutputChannel, contents={"opx_output": ["con1", 1]}
+    )
+
+    assert channel.opx_output == ("con1", 1)
