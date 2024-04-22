@@ -1,4 +1,30 @@
 # Channels
+In the QuAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the `quam.components.channels` module.
+
+There are two types of channels: Analog and Digital.
+
+## Analog channels
+Analog channels are the primary means of communication with the quantum hardware. They can be used to send various types of signals, such as microwave or RF signals, to control the quantum system. Each [Channel][quam.components.channels.Channel] corresponds to an element in QUA.
+
+We distinguish between the following output channels:
+
+- [SingleChannel][quam.components.channels.SingleChannel] - A single OPX output channel
+- [IQChannel][quam.components.IQChannel] - An OPX IQ output channel
+- [InOutSingleChannel][quam.components.channels.InOutSingleChannel] - An OPX output channel + OPX input channel
+- [InOutIQChannel][quam.components.channels.InOutIQChannel] - 
+
+
+Digital channels, on the other hand, are used for sending digital signals to the hardware. These signals are typically used for synchronization and triggering purposes. Digital channels can be attached to any analog channel through the Channel.digital_outputs attribute.
+
+In addition to these, QuAM also supports digital-only channels. These are channels that use digital ports without any analog ports. This can be useful in scenarios where only digital signals are needed.
+
+Once a DigitalOutputChannel is added to a Channel, digital waveforms can be played on it. This is done by attaching a digital waveform to a Pulse through the Pulse.digital_marker attribute.
+
+In summary, channels in QuAM provide a flexible and powerful way to control and interact with quantum hardware.
+
+## Analog channels
+
+
 
 ## Digital channels
 QuAM supports digital output channels (output from the OPX perspective) through the component [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel].
