@@ -80,7 +80,7 @@ class DigitalOutputChannel(QuamComponent):
             Dict[str, int]: The digital channel config entry.
                 Contains "port", and optionally "delay", "buffer" if specified
         """
-        digital_cfg = {"port": self.opx_output}
+        digital_cfg = {"port": tuple(self.opx_output)}
         if self.delay is not None:
             digital_cfg["delay"] = self.delay
         if self.buffer is not None:
