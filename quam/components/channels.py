@@ -99,7 +99,7 @@ class DigitalOutputChannel(QuamComponent):
         controller_name, port = self.opx_output
         controller_cfg = config["controllers"].setdefault(controller_name, {})
         controller_cfg.setdefault("digital_outputs", {})
-        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+        port_cfg = controller_cfg["digital_outputs"].setdefault(tuple(port), {})
 
         if self.shareable is not None:
             if port_cfg.get("shareable", self.shareable) != self.shareable:
