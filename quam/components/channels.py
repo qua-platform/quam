@@ -80,7 +80,7 @@ class DigitalOutputChannel(QuamComponent):
             Dict[str, int]: The digital channel config entry.
                 Contains "port", and optionally "delay", "buffer" if specified
         """
-        digital_cfg = {"port": self.opx_output}
+        digital_cfg = {"port": tuple(self.opx_output)}
         if self.delay is not None:
             digital_cfg["delay"] = self.delay
         if self.buffer is not None:
@@ -99,7 +99,7 @@ class DigitalOutputChannel(QuamComponent):
         controller_name, port = self.opx_output
         controller_cfg = config["controllers"].setdefault(controller_name, {})
         controller_cfg.setdefault("digital_outputs", {})
-        port_cfg = controller_cfg["digital_outputs"].setdefault(tuple(port), {})
+        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
 
         if self.shareable is not None:
             if port_cfg.get("shareable", self.shareable) != self.shareable:
