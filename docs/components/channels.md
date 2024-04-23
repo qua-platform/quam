@@ -6,24 +6,42 @@ There are two types of channels: Analog and Digital.
 ## Analog channels
 Analog channels are the primary means of communication with the quantum hardware. They can be used to send various types of signals, such as microwave or RF signals, to control the quantum system. Each [Channel][quam.components.channels.Channel] corresponds to an element in QUA.
 
-We distinguish between the following output channels:
+### Analog channel types
+We distinguish between the following analog channel types
 
 - [SingleChannel][quam.components.channels.SingleChannel] - A single OPX output channel
-- [IQChannel][quam.components.IQChannel] - An OPX IQ output channel
-- [InOutSingleChannel][quam.components.channels.InOutSingleChannel] - An OPX output channel + OPX input channel
-- [InOutIQChannel][quam.components.channels.InOutIQChannel] - 
+- [IQChannel][quam.components.IQChannel] - An IQ OPX output channel
+- [InOutSingleChannel][quam.components.channels.InOutSingleChannel] - A single OPX output + input channel
+- [InOutIQChannel][quam.components.channels.InOutIQChannel] - An IQ OPX output + input channel
+
+Note in QuAM,the terms output / input are in all cases from the OPX hardware's perspective.
+
+These channel combinations covermost use cases, though there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QuAM release.
+
+### Analog channel ports
+A [SingleChannel][quam.components.channels.SingleChannel] is always attached to a single OPX output port, and similarly an [IQChannel][quam.components.channels.IQChannel] has an associated pair of IQ ports:
+
+```python
+from quam.components import SingleChannel, IQChannel
+
+single_channel = SingleChannel(
+    opx_output=("con1", 1),
+    ...
+)
+IQ_channel = IQChannel(
+    opx_output_I=("con1", 2),
+    opx_output_Q=("con1", 3),
+    ...
+)
+```
+
+Although each channel is always attached to a single or pair of OPX ports, the converse is not necessarily true: multiple channels can be attached to the same output port(s).
+
+### DC offset
 
 
-Digital channels, on the other hand, are used for sending digital signals to the hardware. These signals are typically used for synchronization and triggering purposes. Digital channels can be attached to any analog channel through the Channel.digital_outputs attribute.
 
-In addition to these, QuAM also supports digital-only channels. These are channels that use digital ports without any analog ports. This can be useful in scenarios where only digital signals are needed.
-
-Once a DigitalOutputChannel is added to a Channel, digital waveforms can be played on it. This is done by attaching a digital waveform to a Pulse through the Pulse.digital_marker attribute.
-
-In summary, channels in QuAM provide a flexible and powerful way to control and interact with quantum hardware.
-
-## Analog channels
-
+### Frequency converters
 
 
 ## Digital channels
