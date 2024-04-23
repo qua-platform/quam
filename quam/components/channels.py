@@ -78,6 +78,7 @@ class StickyChannelAddon(QuamComponent):
         }
 
 
+@quam_dataclass
 class DigitalOutputChannel(QuamComponent):
     """QuAM component for a digital output channel (signal going out of the OPX)
 
