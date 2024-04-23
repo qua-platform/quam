@@ -7,10 +7,10 @@ from quam.components.pulses import Pulse
 from quam.components.channels import SingleChannel
 from quam.core import QuamComponent, quam_dataclass
 
-try:
-    from qm.qua._type_hinting import *
-except ImportError:
-    print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
+from qm.qua._dsl import (
+    AmpValuesType,
+    QuaNumberType,
+)
 
 
 __all__ = ["VirtualPulse", "VirtualGateSet"]
