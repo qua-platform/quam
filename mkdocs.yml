@@ -17,8 +17,12 @@ nav:
   - index.md
   - getting-started.md
   - demonstration.md
-  - custom-components.md
-  - quam-references.md
+  - "Features":
+    - quam-references.md
+  - "QuAM components":
+    - "components/channels.md"
+    - "components/octave.md"
+    - custom-components.md
 
 plugins:
 # - mkdocs-jupyter:

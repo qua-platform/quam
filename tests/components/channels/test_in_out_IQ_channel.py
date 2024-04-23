@@ -40,6 +40,7 @@ def test_empty_in_out_IQ_channel():
     d = readout_resonator.to_dict()
     assert d == {
         "frequency_converter_up": {
+            "__class__": "quam.components.hardware.FrequencyConverter",
             "mixer": {},
             "local_oscillator": {"frequency": 5000000000.0},
         },
@@ -63,12 +64,12 @@ def test_empty_in_out_IQ_channel():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    3: {"offset": 0.0},
-                    4: {"offset": 0.0},
+                    3: {},
+                    4: {},
                 },
                 "analog_outputs": {
-                    1: {"offset": 0.0},
-                    2: {"offset": 0.0},
+                    1: {},
+                    2: {},
                 },
                 "digital_outputs": {},
             }
@@ -120,13 +121,14 @@ def test_readout_resonator_with_readout():
             mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
         ),
     )
-    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
+    readout_resonator.operations["readout"] = pulses.SquareReadoutPulse(
         amplitude=0.1, length=1000
     )
 
     d = readout_resonator.to_dict()
     assert d == {
         "frequency_converter_up": {
+            "__class__": "quam.components.hardware.FrequencyConverter",
             "mixer": {},
             "local_oscillator": {"frequency": 5000000000.0},
         },
@@ -138,7 +140,7 @@ def test_readout_resonator_with_readout():
         "id": 1,
         "operations": {
             "readout": {
-                "__class__": "quam.components.pulses.ConstantReadoutPulse",
+                "__class__": "quam.components.pulses.SquareReadoutPulse",
                 "amplitude": 0.1,
                 "length": 1000,
             }
@@ -157,12 +159,12 @@ def test_readout_resonator_with_readout():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    3: {"offset": 0.0},
-                    4: {"offset": 0.0},
+                    3: {},
+                    4: {},
                 },
                 "analog_outputs": {
-                    1: {"offset": 0.0},
-                    2: {"offset": 0.0},
+                    1: {},
+                    2: {},
                 },
                 "digital_outputs": {},
             }
@@ -246,7 +248,7 @@ def test_channel_measure(mocker):
             mixer=Mixer(), local_oscillator=LocalOscillator(frequency=5e9)
         ),
     )
-    readout_resonator.operations["readout"] = pulses.ConstantReadoutPulse(
+    readout_resonator.operations["readout"] = pulses.SquareReadoutPulse(
         amplitude=0.1, length=1000
     )
 

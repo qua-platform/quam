@@ -29,6 +29,7 @@ from quam.utils import (
     string_reference,
     get_full_class_path,
     type_is_optional,
+    generate_config_final_actions,
 )
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
@@ -72,7 +73,7 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     """Convert a dict or list to a QuamDict or QuamList if possible."""
     if isinstance(value, dict):
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
-        return QuamDict(**value, value_annotation=value_annotation)
+        return QuamDict(value, value_annotation=value_annotation)
     elif type(value) == list:
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamList(value, value_annotation=value_annotation)
@@ -416,7 +417,8 @@ class QuamBase(ReferenceClass):
                     follow_references=follow_references,
                     include_defaults=include_defaults,
                 )
-                if not self._val_matches_attr_annotation(attr, val):
+                val_is_list = isinstance(val, (list, UserList))
+                if not self._val_matches_attr_annotation(attr, val) and not val_is_list:
                     quam_dict[attr]["__class__"] = get_full_class_path(val)
             else:
                 quam_dict[attr] = val
@@ -496,7 +498,11 @@ class QuamBase(ReferenceClass):
                 self, reference, root=self._root
             )
         except ValueError as e:
-            warnings.warn(str(e))
+            try:
+                ref = f"{self.__class__.__name__}: {self.get_reference()}"
+            except Exception:
+                ref = self.__class__.__name__
+            warnings.warn(f"Could not get reference {reference} from {ref}.\n{str(e)}")
             return reference
 
     def print_summary(self, indent: int = 0):
@@ -665,6 +671,8 @@ class QuamRoot(QuamBase):
         for quam_component in sorted_components:
             quam_component.apply_to_config(qua_config)
 
+        generate_config_final_actions(qua_config)
+
         return qua_config
 
     def get_unreferenced_value(self, attr: str):
@@ -740,7 +748,11 @@ class QuamDict(UserDict, QuamBase):
         try:
             return self[key]
         except KeyError as e:
-            raise AttributeError(key) from e
+            try:
+                repr = f"{self.__class__.__name__}: {self.get_reference()}"
+            except Exception:
+                repr = self.__class__.__name__
+            raise AttributeError(f'{repr} has no attribute "{key}"') from e
 
     def __setattr__(self, key, value):
         if key in ["data", "parent", "config_settings", "_initialized"]:
@@ -754,7 +766,13 @@ class QuamDict(UserDict, QuamBase):
             try:
                 elem = self._get_referenced_value(elem)
             except ValueError as e:
-                raise KeyError(str(e)) from e
+                try:
+                    repr = f"{self.__class__.__name__}: {self.get_reference()}"
+                except Exception:
+                    repr = self.__class__.__name__
+                raise KeyError(
+                    f"Could not get referenced value {elem} from {repr}"
+                ) from e
         return elem
 
     # Overriding methods from UserDict
@@ -783,6 +801,28 @@ class QuamDict(UserDict, QuamBase):
     ) -> Dict[str, Any]:
         # TODO implement reference kwargs
         return self.data
+
+    def get_attr_name(self, attr_val: Any) -> Union[str, int]:
+        """Get the name of an attribute that matches the value.
+
+        Args:
+            attr_val: The value of the attribute.
+
+        Returns:
+            The name of the attribute. This can also be an int depending on the dict key
+
+        Raises:
+            AttributeError if not found.
+        """
+        for attr_name in self._get_attr_names():
+            if attr_name in self and self[attr_name] is attr_val:
+                return attr_name
+        else:
+            raise AttributeError(
+                "Could not find name corresponding to attribute.\n"
+                f"attribute: {attr_val}\n"
+                f"obj: {self}"
+            )
 
     def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
         """Check whether the type of an attribute matches the annotation.

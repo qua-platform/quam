@@ -103,7 +103,14 @@ def get_class_from_path(class_str) -> type:
     Returns:
         Class object corresponding to the class path.
     """
-    module_path, class_name = class_str.rsplit(".", 1)
+    try:
+        module_path, class_name = class_str.rsplit(".", 1)
+    except ValueError as e:
+        raise ValueError(
+            "Could not extract module and class name from class path, be sure that the "
+            "class path is of the form '{module_name}.{class_name}'. "
+            f"class_str: '{class_str}'"
+        ) from e
     module = importlib.import_module(module_path)
     quam_class = getattr(module, class_name)
     return quam_class

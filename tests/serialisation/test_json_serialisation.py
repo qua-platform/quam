@@ -27,8 +27,7 @@ def test_serialise_random_object(tmp_path):
         "__class__": "test_json_serialisation.QuAM",
     }
 
-    class RandomObject:
-        ...
+    class RandomObject: ...
 
     quam_root.b = RandomObject()
 
@@ -47,6 +46,22 @@ def test_serialise_ignore(tmp_path):
 
     assert d == {
         "a": 1,
+        "__class__": "test_json_serialisation.QuAM",
+    }
+
+
+def test_serialise_ignore_nonexisting(tmp_path):
+    quam_root = QuAM(a=1, b=[1, 2, 3])
+
+    serialiser = JSONSerialiser()
+    path = tmp_path / "quam_root.json"
+    serialiser.save(quam_root, path, ignore=["c"])
+
+    d = json.loads(path.read_text())
+
+    assert d == {
+        "a": 1,
+        "b": [1, 2, 3],
         "__class__": "test_json_serialisation.QuAM",
     }
 

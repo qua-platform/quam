@@ -7,7 +7,7 @@ The standard QuAM components can be imported using
 
 ```python
 from quam.components import *
-from quam.components.superconducting_qubits import Transmon, QuAM
+from quam.examples.superconducting_qubits import Transmon, QuAM
 ```
 
 Since we're starting from scratch, we will have to instantiate all QuAM components. This has to be done once, after which we will generally save and load QuAM from a file.
@@ -61,6 +61,138 @@ for idx in range(num_qubits):
     machine.resonators.append(resonator)
 ```
 This example demonstrates that QuAM follows a tree structure: each component can have a parent and it can have children as attributes.
+
+We can print a summary of QuAM using
+```python
+machine.print_summary()
+```
+
+/// details | `machine.print_summary()` output
+```json
+QuAM:
+  mixers: QuamList = []
+  qubits: QuamList:
+    0: Transmon
+      id: 0
+      xy: IQChannel
+        operations: QuamDict Empty
+        id: None
+        digital_outputs: QuamDict Empty
+        opx_output_I: ('con1', 3)
+        opx_output_Q: ('con1', 4)
+        opx_output_offset_I: None
+        opx_output_offset_Q: None
+        frequency_converter_up: FrequencyConverter
+          local_oscillator: LocalOscillator
+            frequency: 6000000000.0
+            power: 10
+          mixer: Mixer
+            local_oscillator_frequency: "#../local_oscillator/frequency"
+            intermediate_frequency: "#../../intermediate_frequency"
+            correction_gain: 0
+            correction_phase: 0
+          gain: None
+        intermediate_frequency: 0.0
+      z: SingleChannel
+        operations: QuamDict Empty
+        id: None
+        digital_outputs: QuamDict Empty
+        opx_output: ('con1', 5)
+        filter_fir_taps: None
+        filter_iir_taps: None
+        opx_output_offset: None
+        intermediate_frequency: None
+      resonator: None
+    1: Transmon
+      id: 1
+      xy: IQChannel
+        operations: QuamDict Empty
+        id: None
+        digital_outputs: QuamDict Empty
+        opx_output_I: ('con1', 6)
+        opx_output_Q: ('con1', 7)
+        opx_output_offset_I: None
+        opx_output_offset_Q: None
+        frequency_converter_up: FrequencyConverter
+          local_oscillator: LocalOscillator
+            frequency: 6000000000.0
+            power: 10
+          mixer: Mixer
+            local_oscillator_frequency: "#../local_oscillator/frequency"
+            intermediate_frequency: "#../../intermediate_frequency"
+            correction_gain: 0
+            correction_phase: 0
+          gain: None
+        intermediate_frequency: 0.0
+      z: SingleChannel
+        operations: QuamDict Empty
+        id: None
+        digital_outputs: QuamDict Empty
+        opx_output: ('con1', 8)
+        filter_fir_taps: None
+        filter_iir_taps: None
+        opx_output_offset: None
+        intermediate_frequency: None
+      resonator: None
+  resonators: QuamList:
+    0: InOutIQChannel
+      operations: QuamDict Empty
+      id: 0
+      digital_outputs: QuamDict Empty
+      opx_output_I: ('con1', 1)
+      opx_output_Q: ('con1', 2)
+      opx_output_offset_I: None
+      opx_output_offset_Q: None
+      frequency_converter_up: FrequencyConverter
+        local_oscillator: LocalOscillator
+          frequency: 6000000000.0
+          power: 10
+        mixer: Mixer
+          local_oscillator_frequency: "#../local_oscillator/frequency"
+          intermediate_frequency: "#../../intermediate_frequency"
+          correction_gain: 0
+          correction_phase: 0
+        gain: None
+      intermediate_frequency: 0.0
+      opx_input_I: ('con1', 1)
+      opx_input_Q: ('con1', 2)
+      time_of_flight: 24
+      smearing: 0
+      opx_input_offset_I: None
+      opx_input_offset_Q: None
+      input_gain: None
+      frequency_converter_down: None
+    1: InOutIQChannel
+      operations: QuamDict Empty
+      id: 1
+      digital_outputs: QuamDict Empty
+      opx_output_I: ('con1', 1)
+      opx_output_Q: ('con1', 2)
+      opx_output_offset_I: None
+      opx_output_offset_Q: None
+      frequency_converter_up: FrequencyConverter
+        local_oscillator: LocalOscillator
+          frequency: 6000000000.0
+          power: 10
+        mixer: Mixer
+          local_oscillator_frequency: "#../local_oscillator/frequency"
+          intermediate_frequency: "#../../intermediate_frequency"
+          correction_gain: 0
+          correction_phase: 0
+        gain: None
+      intermediate_frequency: 0.0
+      opx_input_I: ('con1', 1)
+      opx_input_Q: ('con1', 2)
+      time_of_flight: 24
+      smearing: 0
+      opx_input_offset_I: None
+      opx_input_offset_Q: None
+      input_gain: None
+      frequency_converter_down: None
+  local_oscillators: QuamList = []
+  wiring: QuamDict Empty
+```
+///
 
 
 ## Saving and loading QuAM

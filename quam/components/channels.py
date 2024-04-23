@@ -1,21 +1,42 @@
 from dataclasses import field
-from typing import ClassVar, Dict, List, Optional, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union
+import warnings
 
-from quam.components.hardware import FrequencyConverter
-from quam.components.pulses import Pulse, ReadoutPulse
+from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
+from quam.components.pulses import Pulse, BaseReadoutPulse
 from quam.core import QuamComponent, quam_dataclass
+from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
 
 
-try:
-    from qm.qua import align, amp, play, wait, measure, dual_demod, declare, fixed
-    from qm.qua._type_hinting import *
-except ImportError:
-    print("Warning: qm.qua package not found, pulses cannot be played from QuAM.")
+from qm.qua import (
+    align,
+    amp,
+    play,
+    wait,
+    measure,
+    declare,
+    set_dc_offset,
+    fixed,
+    demod,
+    dual_demod,
+    frame_rotation,
+)
+from qm.qua._dsl import (
+    _PulseAmp,
+    AmpValuesType,
+    QuaNumberType,
+    QuaVariableType,
+    QuaExpressionType,
+    ChirpType,
+    StreamType,
+)
 
 
 __all__ = [
     "StickyChannelAddon",
+    "DigitalOutputChannel",
+    "Channel",
     "SingleChannel",
     "InOutSingleChannel",
     "IQChannel",
@@ -57,6 +78,79 @@ class StickyChannelAddon(QuamComponent):
         }
 
 
+class DigitalOutputChannel(QuamComponent):
+    """QuAM component for a digital output channel (signal going out of the OPX)
+
+    Should be added to `Channel.digital_outputs` so that it's also added to the
+    respective element in the QUA config.
+
+    Args:
+        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
+            E.g. ("con1", 1)
+        delay (int, optional): Delay in nanoseconds. An intrinsic negative delay of
+            136 ns exists by default.
+        buffer (int, optional): Digital pulses played to this element will be convolved
+            with a digital pulse of value 1 with this length [ns].
+        shareable (bool, optional): If True, the digital output can be shared with other
+            QM instances. Default is False
+        inverted (bool, optional): If True, the digital output is inverted.
+            Default is False.
+    ."""
+
+    opx_output: Tuple[str, int]
+    delay: int = None
+    buffer: int = None
+
+    shareable: bool = None
+    inverted: bool = None
+
+    def generate_element_config(self) -> Dict[str, int]:
+        """Generates the config entry for a digital channel in the QUA config.
+
+        This config entry goes into:
+        config.elements.<element_name>.digitalInputs.<opx_output[1]>
+
+        Returns:
+            Dict[str, int]: The digital channel config entry.
+                Contains "port", and optionally "delay", "buffer" if specified
+        """
+        digital_cfg = {"port": tuple(self.opx_output)}
+        if self.delay is not None:
+            digital_cfg["delay"] = self.delay
+        if self.buffer is not None:
+            digital_cfg["buffer"] = self.buffer
+        return digital_cfg
+
+    def apply_to_config(self, config: dict) -> None:
+        """Adds this DigitalOutputChannel to the QUA configuration.
+
+        config.controllers.<controller_name>.digital_outputs.<port> will be updated
+        with the shareable and inverted settings of this channel if specified.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
+        controller_name, port = self.opx_output
+        controller_cfg = config["controllers"].setdefault(controller_name, {})
+        controller_cfg.setdefault("digital_outputs", {})
+        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+
+        if self.shareable is not None:
+            if port_cfg.get("shareable", self.shareable) != self.shareable:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting shareable settings: "
+                    f"{port_cfg['shareable']} and {self.shareable}"
+                )
+            port_cfg["shareable"] = self.shareable
+        if self.inverted is not None:
+            if port_cfg.get("inverted", self.inverted) != self.inverted:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting inverted settings: "
+                    f"{port_cfg['inverted']} and {self.inverted}"
+                )
+            port_cfg["inverted"] = self.inverted
+
+
 @quam_dataclass
 class Channel(QuamComponent):
     """Base QuAM component for a channel, can be output, input or both.
@@ -78,6 +172,8 @@ class Channel(QuamComponent):
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
     sticky: StickyChannelAddon = None
 
+    digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
+
     @property
     def name(self) -> str:
         cls_name = self.__class__.__name__
@@ -97,7 +193,17 @@ class Channel(QuamComponent):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
                 f"Please either set {cls_name}.id to a string or integer, "
-                f"or {cls_name} should be an attribute of another QuAM component."
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
+            )
+        if isinstance(self.parent, QuamDict):
+            return self.parent.get_attr_name(self)
+        if not hasattr(self.parent, "name"):
+            raise AttributeError(
+                f"{cls_name}.name cannot be determined. "
+                f"Please either set {cls_name}.id to a string or integer, "
+                f"or {cls_name} should be an attribute of another QuAM component with "
+                "a name."
             )
         return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
 
@@ -158,8 +264,6 @@ class Channel(QuamComponent):
             automatically set to `self.name`.
 
         """
-        from qm.qua._dsl import _PulseAmp
-
         if validate and pulse_name not in self.operations:
             raise KeyError(
                 f"Operation '{pulse_name}' not found in channel '{self.name}'"
@@ -228,6 +332,97 @@ class Channel(QuamComponent):
             ]
             align(self.name, *other_elements_str)
 
+    def frame_rotation(self, angle: QuaNumberType):
+        r"""Shift the phase of the channel element's oscillator by the given angle.
+
+        This is typically used for virtual z-rotations.
+
+        Note:
+            The fixed point format of QUA variables of type fixed is 4.28, meaning the
+            phase must be between $-8$ and $8-2^{28}$. Otherwise the phase value will be
+            invalid. It is therefore better to use `frame_rotation_2pi()` which avoids
+            this issue.
+
+        Note:
+            The phase is accumulated with a resolution of 16 bit.
+            Therefore, *N* changes to the phase can result in a phase (and amplitude)
+            inaccuracy of about :math:`N \cdot 2^{-16}`. To null out this accumulated
+            error, it is recommended to use `reset_frame(el)` from time to time.
+
+        Args:
+            angle (Union[float, QUA variable of type fixed]): The angle to
+                add to the current phase (in radians)
+            *elements (str): a single element whose oscillator's phase will
+                be shifted. multiple elements can be given, in which case
+                all of their oscillators' phases will be shifted
+
+        """
+        frame_rotation(angle, self.name)
+
+    def _config_add_controller(
+        self, config: Dict[str, dict], controller_name: str
+    ) -> Dict[str, dict]:
+        """Adds a controller to the config if it doesn't exist, and returns its config.
+
+        config.controllers.<controller_name> will be created if it doesn't exist.
+        It will also add the analog_outputs, digital_outputs, and analog_inputs keys
+
+        Args:
+            config (dict): The QUA config that's in the process of being generated.
+            controller_name (str): The name of the controller.
+
+        Returns:
+            Dict[str, dict]: The config entry for the controller.
+        """
+        config["controllers"].setdefault(controller_name, {})
+        controller_cfg = config["controllers"][controller_name]
+        for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
+            controller_cfg.setdefault(key, {})
+
+        return controller_cfg
+
+    def _config_add_digital_outputs(self, config: Dict[str, dict]) -> None:
+        """Adds the digital outputs to the QUA config.
+
+        config.elements.<element_name>.digitalInputs will be updated with the digital
+        outputs of this channel.
+
+        Note that the digital outputs are added separately to the controller config in
+        `DigitalOutputChannel.apply_to_config`.
+
+        Args:
+            config (dict): The QUA config that's in the process of being generated.
+        """
+        if not self.digital_outputs:
+            return
+
+        element_cfg = config["elements"][self.name]
+        element_cfg.setdefault("digitalInputs", {})
+
+        for name, digital_output in self.digital_outputs.items():
+            digital_cfg = digital_output.generate_element_config()
+            element_cfg["digitalInputs"][name] = digital_cfg
+
+    def apply_to_config(self, config: Dict[str, dict]) -> None:
+        """Adds this Channel to the QUA configuration.
+
+        config.elements.<element_name> will be created, and the operations are added.
+
+        Args:
+            config (dict): The QUA config that's in the process of being generated.
+
+        Raises:
+            ValueError: If the channel already exists in the config.
+        """
+        if self.name in config["elements"]:
+            raise ValueError(
+                f"Cannot add channel '{self.name}' to the config because it already "
+                f"exists. Existing entry: {config['elements'][self.name]}"
+            )
+        config["elements"][self.name] = {"operations": self.pulse_mapping}
+
+        self._config_add_digital_outputs(config)
+
 
 @quam_dataclass
 class SingleChannel(Channel):
@@ -252,8 +447,20 @@ class SingleChannel(Channel):
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
-    opx_output_offset: float = 0.0
+    opx_output_offset: float = None
     intermediate_frequency: float = None
+
+    def set_dc_offset(self, offset: QuaNumberType):
+        """Set the DC offset of an element's input to the given value.
+        This value will remain the DC offset until changed or until the Quantum Machine
+        is closed.
+
+        Args:
+            offset (QuaNumberType): The DC offset to set the input to.
+                This is limited by the OPX output voltage range.
+                The number can be a QUA variable
+        """
+        set_dc_offset(element=self.name, element_input="single", offset=offset)
 
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
@@ -264,30 +471,42 @@ class SingleChannel(Channel):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
-        controller_name, port = self.opx_output
+        if str_ref.is_reference(self.name):
+            raise AttributeError(
+                f"Channel {self.get_reference()} cannot be added to the config because"
+                " it doesn't have a name. Either set channel.id to a string or"
+                " integer, or channel should be an attribute of another QuAM component"
+                " with a name."
+            )
 
-        element_config = config["elements"][self.name] = {
-            "singleInput": {"port": (controller_name, port)},
-            "operations": self.pulse_mapping,
-        }
+        element_config = config["elements"][self.name]
+        element_config["singleInput"] = {"port": tuple(self.opx_output)}
+
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
-        controller = config["controllers"].setdefault(
-            controller_name,
-            {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-        )
-        analog_output = controller["analog_outputs"][port] = {
-            "offset": self.opx_output_offset
-        }
+        controller_name, port = self.opx_output
+        controller_cfg = self._config_add_controller(config, controller_name)
+        analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
+        # If no offset specified, it will be added at the end of the config generation
+        offset = self.opx_output_offset
+        if offset is not None:
+            if abs(analog_output.get("offset", offset) - offset) > 1e-4:
+                warnings.warn(
+                    f"Channel {self.name} has conflicting output offsets: "
+                    f"{analog_output['offset']} V and {offset} V. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}. "
+                    f"Using the last offset {offset} V"
+                )
+            analog_output["offset"] = offset
 
         if self.filter_fir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedforward"] = self.filter_fir_taps
+            output_filter["feedforward"] = list(self.filter_fir_taps)
 
         if self.filter_iir_taps is not None:
             output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedback"] = self.filter_iir_taps
+            output_filter["feedback"] = list(self.filter_iir_taps)
 
 
 @quam_dataclass
@@ -313,7 +532,7 @@ class InOutSingleChannel(SingleChannel):
     """
 
     opx_input: Tuple[str, int]
-    opx_input_offset: float = 0.0
+    opx_input_offset: float = None
 
     time_of_flight: int = 24
     smearing: int = 0
@@ -328,18 +547,243 @@ class InOutSingleChannel(SingleChannel):
         super().apply_to_config(config)
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        config["elements"][self.name]["outputs"] = {
-            "out1": tuple(self.opx_input),
-        }
+        config["elements"][self.name]["outputs"] = {"out1": tuple(self.opx_input)}
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
         controller_name, port = self.opx_input
-        controller = config["controllers"].setdefault(
-            controller_name,
-            {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
+        controller_cfg = self._config_add_controller(config, controller_name)
+        analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
+        offset = self.opx_input_offset
+        # If no offset specified, it will be added at the end of the config generation
+        if offset is not None:
+            if abs(analog_input.get("offset", offset) - offset) > 1e-4:
+                raise ValueError(
+                    f"Channel {self.name} has conflicting input offsets: "
+                    f"{analog_input['offset']} and {offset}. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}"
+                )
+            analog_input["offset"] = offset
+
+    def measure(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
+        """Perform a full demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+                variables to store the I, Q measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I, Q: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+
+        Raises:
+            ValueError: If `qua_vars` is provided and is not a tuple of two QUA
+                variables.
+        """
+
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutSingleChannel.measure received kwarg 'qua_vars' "
+                    f"which is not a tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.full(integration_weight_labels[0], qua_vars[0], "out1"),
+            demod.full(integration_weight_labels[1], qua_vars[1], "out1"),
         )
-        controller["analog_inputs"][port] = {"offset": self.opx_input_offset}
+        return tuple(qua_vars)
+
+    def measure_accumulated(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
+        """Perform an accumulated demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+                variables to store the I, Q measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I, Q: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+
+        Raises:
+            ValueError: If both `num_segments` and `segment_length` are provided, or if
+                neither are provided.
+            ValueError: If `qua_vars` is provided and is not a tuple of two QUA
+                variables.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_accumulated received kwarg 'qua_vars' "
+                    f"which is not a tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.accumulated(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.accumulated(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"
+            ),
+        )
+        return tuple(qua_vars)
+
+    def measure_sliced(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
+        """Perform an accumulated demodulation measurement on this channel.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+                variables to store the I, Q measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            I, Q: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+
+        Raises:
+            ValueError: If both `num_segments` and `segment_length` are provided, or if
+                neither are provided.
+            ValueError: If `qua_vars` is provided and is not a tuple of two QUA
+                variables.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_sliced received kwarg 'qua_vars' "
+                    f"which is not a tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.sliced(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.sliced(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"
+            ),
+        )
+        return tuple(qua_vars)
 
 
 @quam_dataclass
@@ -366,26 +810,46 @@ class IQChannel(Channel):
     opx_output_I: Tuple[str, int]
     opx_output_Q: Tuple[str, int]
 
-    opx_output_offset_I: float = 0.0
-    opx_output_offset_Q: float = 0.0
+    opx_output_offset_I: float = None
+    opx_output_offset_Q: float = None
 
-    frequency_converter_up: FrequencyConverter
+    frequency_converter_up: BaseFrequencyConverter
 
     intermediate_frequency: float = 0.0
 
     _default_label: ClassVar[str] = "IQ"
 
     @property
-    def local_oscillator(self):
-        return self.frequency_converter_up.local_oscillator
+    def local_oscillator(self) -> Optional[LocalOscillator]:
+        return getattr(self.frequency_converter_up, "local_oscillator", None)
 
     @property
-    def mixer(self):
-        return self.frequency_converter_up.mixer
+    def mixer(self) -> Optional[Mixer]:
+        return getattr(self.frequency_converter_up, "mixer", None)
 
     @property
     def rf_frequency(self):
-        return self.local_oscillator.frequency + self.intermediate_frequency
+        return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
+
+    def set_dc_offset(self, offset: QuaNumberType, element_input: Literal["I", "Q"]):
+        """Set the DC offset of an element's input to the given value.
+        This value will remain the DC offset until changed or until the Quantum Machine
+        is closed.
+
+        Args:
+            offset (QuaNumberType): The DC offset to set the input to.
+                This is limited by the OPX output voltage range.
+                The number can be a QUA variable
+            element_input (Literal["I", "Q"]): The element input to set the offset for.
+
+        Raises:
+            ValueError: If element_input is not "I" or "Q"
+        """
+        if element_input not in ["I", "Q"]:
+            raise ValueError(
+                f"element_input should be either 'I' or 'Q', got {element_input}"
+            )
+        set_dc_offset(element=self.name, element_input=element_input, offset=offset)
 
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
@@ -398,26 +862,59 @@ class IQChannel(Channel):
         opx_outputs = {"I": tuple(self.opx_output_I), "Q": tuple(self.opx_output_Q)}
         offsets = {"I": self.opx_output_offset_I, "Q": self.opx_output_offset_Q}
 
-        config["elements"][self.name] = {
-            "mixInputs": {
-                **opx_outputs,
-            },
-            "intermediate_frequency": self.intermediate_frequency,
-            "operations": self.pulse_mapping,
-        }
-        mix_inputs = config["elements"][self.name]["mixInputs"]
-        if self.mixer is not None:
-            mix_inputs["mixer"] = self.mixer.name
-        if self.local_oscillator is not None:
-            mix_inputs["lo_frequency"] = self.local_oscillator.frequency
+        if str_ref.is_reference(self.name):
+            raise AttributeError(
+                f"Channel {self.get_reference()} cannot be added to the config because"
+                " it doesn't have a name. Either set channel.id to a string or"
+                " integer, or channel should be an attribute of another QuAM component"
+                " with a name."
+            )
+
+        element_cfg = config["elements"][self.name]
+        element_cfg["intermediate_frequency"] = self.intermediate_frequency
+
+        from quam.components.octave import OctaveUpConverter
+
+        if isinstance(self.frequency_converter_up, OctaveUpConverter):
+            octave = self.frequency_converter_up.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveUpConverter (id={self.frequency_converter_up.id}) without "
+                    "an attached Octave"
+                )
+            element_cfg["RF_inputs"] = {
+                "port": (octave.name, self.frequency_converter_up.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_up):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_up", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_up}"
+            )
+        else:
+            element_cfg["mixInputs"] = {**opx_outputs}
+            if self.mixer is not None:
+                element_cfg["mixInputs"]["mixer"] = self.mixer.name
+            if self.local_oscillator is not None:
+                element_cfg["mixInputs"][
+                    "lo_frequency"
+                ] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_outputs[I_or_Q]
-            controller = config["controllers"].setdefault(
-                controller_name,
-                {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-            )
-            controller["analog_outputs"][port] = {"offset": offsets[I_or_Q]}
+            controller_cfg = self._config_add_controller(config, controller_name)
+            analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
+            # If no offset specified, it will be added at the end of config generation
+            offset = offsets[I_or_Q]
+            if offset is not None:
+                if abs(analog_output.get("offset", offset) - offset) > 1e-4:
+                    raise ValueError(
+                        f"Channel {self.name} has conflicting output offsets: "
+                        f"{analog_output['offset']} and {offset}. Multiple channel "
+                        f"elements are trying to set different offsets to port {port}"
+                    )
+                analog_output["offset"] = offset
 
 
 @quam_dataclass
@@ -458,12 +955,12 @@ class InOutIQChannel(IQChannel):
     time_of_flight: int = 24
     smearing: int = 0
 
-    opx_input_offset_I: float = 0.0
-    opx_input_offset_Q: float = 0.0
+    opx_input_offset_I: float = None
+    opx_input_offset_Q: float = None
 
     input_gain: Optional[float] = None
 
-    frequency_converter_down: FrequencyConverter = None
+    frequency_converter_down: BaseFrequencyConverter = None
 
     _default_label: ClassVar[str] = "IQ"
 
@@ -479,48 +976,94 @@ class InOutIQChannel(IQChannel):
         offsets = {"I": self.opx_input_offset_I, "Q": self.opx_input_offset_Q}
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        config["elements"][self.name]["outputs"] = {
-            "out1": tuple(self.opx_input_I),
-            "out2": tuple(self.opx_input_Q),
-        }
-        config["elements"][self.name]["smearing"] = self.smearing
-        config["elements"][self.name]["time_of_flight"] = self.time_of_flight
+        element_cfg = config["elements"][self.name]
+        element_cfg["smearing"] = self.smearing
+        element_cfg["time_of_flight"] = self.time_of_flight
+
+        from quam.components.octave import OctaveDownConverter
+
+        if isinstance(self.frequency_converter_down, OctaveDownConverter):
+            octave = self.frequency_converter_down.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
+                    "without an attached Octave"
+                )
+            element_cfg["RF_outputs"] = {
+                "port": (octave.name, self.frequency_converter_down.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_down):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_down", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_down}"
+            )
+        else:
+            element_cfg["outputs"] = {
+                "out1": tuple(self.opx_input_I),
+                "out2": tuple(self.opx_input_Q),
+            }
 
         for I_or_Q in ["I", "Q"]:
             controller_name, port = opx_inputs[I_or_Q]
-            controller = config["controllers"].setdefault(
-                controller_name,
-                {"analog_outputs": {}, "digital_outputs": {}, "analog_inputs": {}},
-            )
-            controller["analog_inputs"][port] = {"offset": offsets[I_or_Q]}
+            controller_cfg = self._config_add_controller(config, controller_name)
+            analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
+            offset = offsets[I_or_Q]
+            # If no offset specified, it will be added at the end of config generation
+            if offset is not None:
+                if abs(analog_input.get("offset", offset) - offset) > 1e-4:
+                    warnings.warn(
+                        f"Channel {self.name} has conflicting input offsets: "
+                        f"{analog_input['offset']} V and {offset} V. Multiple channel "
+                        f"elements are trying to set different offsets to port {port}. "
+                        f"Using the last offset {offset} V"
+                    )
+                analog_input["offset"] = offset
 
             if self.input_gain is not None:
-                controller["analog_inputs"][port]["gain_db"] = self.input_gain
+                controller_cfg["analog_inputs"][port]["gain_db"] = self.input_gain
 
-    def measure(self, pulse_name: str, I_var=None, Q_var=None, stream=None):
+    def measure(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        qua_vars: Tuple[QuaVariableType, QuaVariableType] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType]:
         """Perform a full dual demodulation measurement on this channel.
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            I_var (QuaVariableType): QUA variable to store the I measurement result.
-                If not provided, a new variable  will be declared
-            Q_var (QuaVariableType): QUA variable to store the Q measurement result.
-                If not provided, a new variable  will be declared
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            qua_vars (Tuple[QuaVariableType, QuaVariableType], optional): Two QUA
+                variables to store the I and Q measurement results. If not provided,
+                new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
                 If not provided, the raw ADC signal will not be streamed.
 
         Returns:
-            I_var, Q_var: The QUA variables used to store the measurement results.
+            I, Q: The QUA variables used to store the measurement results.
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: ReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
 
-        if I_var is None:
-            I_var = declare(fixed)
-        if Q_var is None:
-            Q_var = declare(fixed)
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
+                raise ValueError(
+                    f"InOutIQChannel.measure received kwarg 'qua_vars' which is not a "
+                    f"tuple of two QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed) for _ in range(2)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -532,14 +1075,186 @@ class InOutIQChannel(IQChannel):
                 element_output1="out1",
                 iw2=integration_weight_labels[1],
                 element_output2="out2",
-                target=I_var,
+                target=qua_vars[0],
             ),
             dual_demod.full(
                 iw1=integration_weight_labels[2],
                 element_output1="out1",
                 iw2=integration_weight_labels[0],
                 element_output2="out2",
-                target=Q_var,
+                target=qua_vars[1],
             ),
         )
-        return I_var, Q_var
+        return tuple(qua_vars)
+
+    def measure_accumulated(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
+        """Perform an accumulated dual demodulation measurement on this channel.
+
+        Instead of two QUA variables (I and Q), this method returns four variables
+        (II, IQ, QI, QQ)
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate the
+                measurement.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Four QUA
+                variables to store the II, IQ, QI, QQ measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            II, IQ, QI, QQ: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_accumulated received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 4:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_accumulated received kwarg 'qua_vars' "
+                    f"which is not a tuple of four QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.accumulated(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.accumulated(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out2"
+            ),
+            demod.accumulated(
+                integration_weight_labels[2], qua_vars[2], segment_length, "out1"
+            ),
+            demod.accumulated(
+                integration_weight_labels[0], qua_vars[3], segment_length, "out2"
+            ),
+        )
+        return tuple(qua_vars)
+
+    def measure_sliced(
+        self,
+        pulse_name: str,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        num_segments: int = None,
+        segment_length: int = None,
+        qua_vars: Tuple[QuaVariableType, ...] = None,
+        stream=None,
+    ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
+        """Perform a sliced dual demodulation measurement on this channel.
+
+        Instead of two QUA variables (I and Q), this method returns four variables
+        (II, IQ, QI, QQ)
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            num_segments (int): The number of segments to accumulate.
+                Should either specify this or `segment_length`.
+            segment_length (int): The length of the segment to accumulate the
+                measurement.
+                Should either specify this or `num_segments`.
+            qua_vars (Tuple[QuaVariableType, ...], optional): Four QUA
+                variables to store the II, IQ, QI, QQ measurement results.
+                If not provided, new variables will be declared and returned.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+
+        Returns:
+            II, IQ, QI, QQ: The QUA variables used to store the measurement results.
+                If provided as input, the same variables will be returned.
+                If not provided, new variables will be declared and returned.
+        """
+        pulse: BaseReadoutPulse = self.operations[pulse_name]
+
+        if num_segments is None and segment_length is None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced requires either 'segment_length' "
+                "or 'num_segments' to be provided."
+            )
+        elif num_segments is not None and segment_length is not None:
+            raise ValueError(
+                "InOutSingleChannel.measure_sliced received both 'segment_length' "
+                "and 'num_segments'. Please provide only one."
+            )
+        elif num_segments is None:
+            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+        elif segment_length is None:
+            segment_length = int(pulse.length / (4 * num_segments))
+
+        if qua_vars is not None:
+            if not isinstance(qua_vars, Sequence) or len(qua_vars) != 4:
+                raise ValueError(
+                    f"InOutSingleChannel.measure_sliced received kwarg 'qua_vars' "
+                    f"which is not a tuple of four QUA variables. Received {qua_vars=}"
+                )
+        else:
+            qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
+
+        if amplitude_scale is not None:
+            if not isinstance(amplitude_scale, _PulseAmp):
+                amplitude_scale = amp(amplitude_scale)
+            pulse_name *= amplitude_scale
+
+        integration_weight_labels = list(pulse.integration_weights_mapping)
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            demod.sliced(
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+            ),
+            demod.sliced(
+                integration_weight_labels[1], qua_vars[1], segment_length, "out2"
+            ),
+            demod.sliced(
+                integration_weight_labels[2], qua_vars[2], segment_length, "out1"
+            ),
+            demod.sliced(
+                integration_weight_labels[0], qua_vars[3], segment_length, "out2"
+            ),
+        )
+        return tuple(qua_vars)
