@@ -1,8 +1,8 @@
 # Channels
 
-In the QuAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the `quam.components.channels` module.
+In the QuAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the [quam.components.channels][quam.components.channels] module.
 
-We distinguish between the following channel types:
+We distinguish between the following channel types, where the terms "output" and "input" are always from the perspective of the OPX hardware:
 
 **1. Analog output channels**
 
@@ -19,8 +19,6 @@ We distinguish between the following channel types:
 - [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel]: Represents a digital output channel.
 
 Each analog [Channel][quam.components.channels.Channel] corresponds to an element in QUA, whereas the digital channel is part of an analog channel.
-
-Note that in QuAM, the terms "output" and "input" are always from the perspective of the OPX hardware.
 
 These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QuAM release. If you need such channels, please create a [Github issue](https://github.com/qua-platform/quam/issues).
 
@@ -91,7 +89,7 @@ For this reason they have a specialized frequency converter such as the [OctaveU
 See the [octave][] documentation for details.
 
 
-### Adding pulses to channels
+### Analog output pulses
 QuAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
 These pulses can be registered as part of the analog channel via `Channel.operations` such that the channel can output the associated pulse waveforms:
 
@@ -103,10 +101,7 @@ channel.operations["X180"] = pulses.SquarePulse(
     length=16,  # ns
 )
 ```
-Details on pulses in quam can be found at [pulses][]
 
-
-### Playing pulses on a channel
 Once a pulse has been registered in a channel, it can be played within a QUA program:
 
 ```python
@@ -115,11 +110,49 @@ with program() as prog:
 ```
 [Channel.play()][quam.components.channels.Channel.play] is a light wrapper around [qm.qua.play()](https://docs.quantum-machines.co/latest/qm-qua-sdk/docs/Introduction/qua_overview/?h=play#play-statement) to attach it to the channel.
 
+Details on pulses in quam can be found at [pulses][].
 
 ## Analog output + input channels
+Aside from sending signals to the quantum hardware, data is usually also received back, and subsequently read out through the hardware's input ports.
+In QuAM, this is represented using the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel].
+These channels don't only have associated output port(s) but also input port(s):
+
+```python
+from quam.components import InOutSingleChannel, InOutIQChannel
+
+single_io_channel = InOutSingleChannel(
+    opx_output=("con1", 1),
+    opx_input=("con1", 1)
+    ...
+)
+IQ_io_channel = InOutIQChannel(
+    opx_output_I=("con1", 2),
+    opx_output_Q=("con1", 3),
+    opx_input_I=("con1", 1),
+    opx_input_Q=("con1", 2)
+    ...
+)
+```
+
+These are extensions of the [SingleChannel][quam.components.channels.SingleChannel] and the [IQChannel][quam.components.channels.IQChannel] that add relevant features for readout.
+
+Both the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel] combine output + input as in most cases a signal is also sent to probe the quantum hardware.
+Support for input-only analog channels is planned for a future release.
 
 
 ### Readout pulses
+Channels that have input ports can also have readout pulses:
+
+```python
+from quam.components import pulses
+io_channel.operations["readout"] = pulses.SquareReadoutPulse(
+    length=16,  # ns
+    amplitude=0.1,  # V
+    integration_weights_angle=0.0,  # rad, optional rotation of readout signal
+)
+```
+As can be seen, the readout pulse (in this case [SquareReadoutPulse][quam.components.pulses.SquareReadoutPulse]) is similar to the regular pulses, but with additional parameters for readout.
+Specifically, it contains the attributes `integration_weights_angle` and `integration_weights` to specify how the readout signal should be integrated.
 
 
 ## Digital channels
