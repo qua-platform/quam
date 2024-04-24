@@ -89,7 +89,7 @@ For this reason they have a specialized frequency converter such as the [OctaveU
 See the [octave][] documentation for details.
 
 
-### Analog output pulses
+### Analog pulses
 QuAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
 These pulses can be registered as part of the analog channel via `Channel.operations` such that the channel can output the associated pulse waveforms:
 
