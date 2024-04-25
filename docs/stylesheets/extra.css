@@ -101,3 +101,25 @@ a.autorefs-external:hover::after {
 .md-typeset table:not([class]) {
     font-size: 0.85rem;
 }
+
+
+.code-flex-container {
+    display: flex;
+    justify-content: space-between;
+    /* This will space out the flex items evenly */
+    align-items: left;
+    /* This will align items vertically in the center */
+    flex-wrap: wrap;
+    /* Allows items to wrap onto the next line */
+}
+
+.code-flex-item {
+    min-width: 500px;
+    width: 50%;
+    /* Each item takes up half of the container's width */
+    text-align: left;
+    /* Centers the text inside the flex items */
+    padding: 10px;
+    /* Optional: adds some padding inside each flex item */
+    padding-top: 0px;
+}

@@ -46,9 +46,9 @@ nav:
   - getting-started.md
   - migrating-to-quam.md
   - demonstration.md
-  - "QuAM features":
+  - "QuAM Features":
     - quam-references.md
-  - "QuAM components":
+  - "QuAM Components":
     - "components/channels.md"
     - "components/pulses.md"
     - "components/octave.md"

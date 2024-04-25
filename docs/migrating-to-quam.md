@@ -51,18 +51,17 @@ We also delay the discussion on the `"operations"` field for the next section on
 #### Single Analog Output Channel
 In the simplest case, a single output channel is defined in the QUA configuration.
 
-<table>
-<tr>
-<td style="width:50%">
+
+<div class="code-flex-container">
+  <div class="code-flex-item">
     ```json title='qua_configuration["elements"]'
     "qubit_z": {
         "singleInput": {"port": ("con1", 1)},
         "operations": {...}
     }
     ```
-</td>
-
-<td>
+  </div>
+  <div class="code-flex-item">
     ```python title="QuAM"
     from quam.components import SingleChannel
 
@@ -70,9 +69,8 @@ In the simplest case, a single output channel is defined in the QUA configuratio
         opx_output=("con1", 1),
     )
     ```
-</td>
-</tr>
-</table>
+  </div>
+</div>
 
 The corresponding QuAM component is the [SingleChannel][quam.components.SingleChannel].
 
@@ -80,9 +78,9 @@ The corresponding QuAM component is the [SingleChannel][quam.components.SingleCh
 
 In the case where the IQ channel is not connected to an
 
-<table>
-<tr>
-<td style="width:50%">
+
+<div class="code-flex-container">
+  <div class="code-flex-item">
     ```json title='qua_configuration["elements"]'
     "qubit_xy": {
         "intermediate_frequency": 100e6,
@@ -95,11 +93,11 @@ In the case where the IQ channel is not connected to an
         "operations": {...}
     },
     ```
-</td>
-
-<td>
+  </div>
+  <div class="code-flex-item">
     ```python title="QuAM"
     from quam.components import IQChannel
+
     channels["qubit_XY"] = IQChannel(
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
@@ -109,17 +107,15 @@ In the case where the IQ channel is not connected to an
         )
     )
     ```
-</tr>
-</table>
-
-
+  </div>
+</div>
 
 
 If an Octave is used for upconversion, the IQChannel should be connected to the OctaveUpConverter.
 
-<table>
-<tr>
-<td style="width:50%">
+
+<div class="code-flex-container">
+  <div class="code-flex-item">
     ```json title='qua_configuration["elements"]'
     "qubit_xy": {
         "intermediate_frequency": 100e6,
@@ -127,24 +123,23 @@ If an Octave is used for upconversion, the IQChannel should be connected to the 
         "operations": {...}
     },
     ```
-</td>
-
-<td>
-    ```python
+  </div>
+  <div class="code-flex-item">
+    ```python title="QuAM"
     from quam.components import IQChannel
 
+    # Note the output/input is switched w.r.t. the QUA configuration
     RF_output = machine.octaves["octave1"].RF_outputs[1]
-    channel = machine.channels["qubit_xy"] = IQChannel(
+
+    machine.channels["qubit_xy"] = channel = IQChannel(
         opx_output_I=("con1", 1), 
         opx_output_Q=("con1", 2),
         frequency_converter_up=RF_output.get_reference()
     )
     RF_output.channel = channel.get_reference()
     ```
-</tr>
-</table>
-
-
+  </div>
+</div>
 
 
 Detailed instructions can be found at the [Octave documentation][octave].
@@ -152,20 +147,65 @@ Detailed instructions can be found at the [Octave documentation][octave].
 #### Single Analog Output + Input Channel
 In the case where the channel is both an input and output channel, the [InOutSingleChannel][quam.components.InOutSingleChannel] should be used.
 
-```json title='qua_configuration["elements"] - Single input/output channel'
-"qubit_readout": {
-    "singleInput": {
-        "port": ("con1", 1),
+
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    ```json title='qua_configuration["elements"]'
+    "qubit_readout": {
+        "singleInput": {
+            "port": ("con1", 1),
+        },
+        "outputs": {"out1": ("con1", 2)},
+        "operations": {...}
+    }
+    ```
+  </div>
+  <div class="code-flex-item">
+    ```python title="QuAM"
+    from quam.components import InOutSingleChannel
+
+    machine.channels["readout_resonator"] = InOutSingleChannel(
+        opx_output=("con1", 1),
+        opx_input=("con1", 2),
+    )
+    ```
+  </div>
+</div>
+
+#### IQ Analog Output + Input Channel
+In the case where the channel is both an input and output channel with IQ (de)modulation, the [InOutIQChannel][quam.components.InOutIQChannel] should be used.
+
+
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    ```json title='qua_configuration["elements"]'
+    "qubit_xy": {
+        "intermediate_frequency": 100e6,
+        "RF_inputs": {"port": ["octave1", 1]},
+        "RF_outputs": {"port": ["octave1", 1]},
+        "operations": {...}
     },
-    "operations": {...}
-}
-```
-The corresponding QuAM component is the [SingleChannel][quam.components.SingleChannel].
+    ```
+  </div>
+  <div class="code-flex-item">
+    ```python title="QuAM"
+    from quam.components import IQChannel
 
-```python
-from quam.components import SingleChannel
+    # Note the output/input is switched w.r.t. the QUA configuration
+    RF_output = machine.octaves["octave1"].RF_outputs[1]
+    RF_input = machine.octaves["octave1"].RF_inputs[2]
 
-machine.channels["qubit_z"] = IQChannel(
-    opx_output=("con1", 1),
-)
-```
+    machine.channels["qubit_xy"] = channel = IQChannel(
+        opx_output_I=("con1", 1), 
+        opx_output_Q=("con1", 2),
+        opx_input_I=("con1", 1),
+        opx_input_Q=("con1", 2),
+        frequency_converter_up=RF_output.get_reference()
+        frequency_converter_down=RF_input.get_reference()
+    )
+    RF_output.channel = channel.get_reference()
+    ```
+  </div>
+</div>
+
+
