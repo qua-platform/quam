@@ -1,4 +1,4 @@
-# Getting started
+# Getting Started
 
 ## :one: Pre-requisites
 
@@ -81,7 +81,7 @@ pip install ./quam
 If this raises a similar error, it likely means that Python cannot be found. Please check that you have Python installed. If you've set up a virtual environment, please ensure that it has been activated (see `Pre-requisites`).
 ///
 
-## :three: Next steps
+## :three: Next Steps
 
 QuAM comes with a range of standard QuAM components that can kick-start experimental setups. An example of these components are used can be found at the [QuAM demonstration](demonstration.md).
 

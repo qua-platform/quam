@@ -1,4 +1,4 @@
-# QuAM demonstration
+# QuAM Demonstration
 
 In this demonstration we will create a basic superconducting setup using standard components. 
 Note that QuAM is not specific to superconducting setups but is meant to serve any quantum platform.
@@ -195,7 +195,7 @@ QuAM:
 ///
 
 
-## Saving and loading QuAM
+## Saving and Loading QuAM
 
 Now that we have defined our QuAM structure, we can save its contents to a JSON file:
 
@@ -325,7 +325,7 @@ This JSON file is a serialised representation of QuAM. As a result, QuAM can als
 loaded_machine = QuAM.load("state.json")
 ```
 
-## Generating the QUA configuration
+## Generating the QUA Configuration
 
 We can also generate the QUA config from QuAM. This recursively calls `QuamComponent.apply_to_config()` on all QuAM components.
 

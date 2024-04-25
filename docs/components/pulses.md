@@ -43,7 +43,7 @@ with program() as prog:
     channel.play("X180")
 ```
 
-## Readout pulses
+## Readout Pulses
 In addition to control pulses, QuAM also supports readout pulses, which are used to measure the state of a quantum system.
 These pulses should be attached to an input channel, either [InOutIQChannel][quam.components.channels.InOutIQChannel] or [InOutSingleChannel][quam.components.channels.InOutSingleChannel].
 
@@ -65,7 +65,7 @@ with program() as prog:
     qua_result = readout_channel.measure("readout")
 ```
 
-## Creating custom pulses
+## Creating Custom Pulses
 To create custom pulses in QuAM, you can extend the functionality of the Pulse class by subclassing it and defining your own waveform generation logic. This allows for precise control over the pulse characteristics.
 
 ### Example: Creating a Triangular Pulse
@@ -88,7 +88,7 @@ class TriangularPulse(pulses.Pulse):
 ```
 Ensure this code is saved in a properly structured Python module within your project so that it can be imported as needed. For details on organizing custom components, refer to the [Custom Components][custom-components] section of the QuAM documentation
 
-### Extending to readout pulses
+### Extending to Readout Pulses
 To create a readout pulse derived from a control pulse, subclass both the specific control pulse and the [ReadoutPulse][quam.components.pulses.ReadoutPulse] class. Below is an example of how to adapt the Triangular Pulse into a readout pulse.
 
 ```python
@@ -119,7 +119,7 @@ The handling of pulses in QuAM and QUA presents fundamental differences in desig
 In the QUA configuration, pulses are decomposed into multiple components, such as `"waveforms"` and `"integration_weights"`. These components are defined separately and referenced by name within the `"pulses"` section of the configuration:
 
 - **Decomposition**: Each pulse is linked to a specific waveform and optionally, integration weights. This modular approach is more memory-efficient but may lead to fragmented configuration, where information about a single pulse is scattered across multiple sections.
-- **Pulse Mapping**: The elements (channels) use a `pulse_mapping` to link a label (e.g., "X180") to  a specific pulse setup. This system allows multiple channels to share a pulse, enhancing reusability but potentially complicating pulse modifications.
+- **Pulse Mapping**: The elements (channels) use an `operations` mapping to link a label (e.g., "X180") to  a specific pulse setup. This system allows multiple channels to share a pulse, enhancing reusability but potentially complicating pulse modifications.
 - **External Functions**: Typically, the lack of a parametrized representation means that external functions are often required to populate waveform entries.
 
 ### QuAM Configuration

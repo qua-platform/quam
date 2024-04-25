@@ -23,12 +23,12 @@ Each analog [Channel][quam.components.channels.Channel] corresponds to an elemen
 These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QuAM release. If you need such channels, please create a [Github issue](https://github.com/qua-platform/quam/issues).
 
 
-## Analog output channels
+## Analog Output Channels
 
 Analog output channels are the primary means of controlling the quantum hardware. They can be used to send various types of signals, such as microwave or RF signals, to control the quantum system. The two types of analog output channels are the [SingleChannel][quam.components.channels.SingleChannel] and the [IQChannel][quam.components.channels.IQChannel]. 
 
 
-### Analog channel ports
+### Analog Channel Ports
 
 A [SingleChannel][quam.components.channels.SingleChannel] is always attached to a single OPX output port, and similarly an [IQChannel][quam.components.channels.IQChannel] has an associated pair of IQ ports:
 
@@ -47,7 +47,7 @@ IQ_channel = IQChannel(
 ```
 
 
-### DC offset
+### DC Offset
 Each analog channel can have a specified DC offset that remains for the duration of the QUA program.
 This can be set through `SingleChannel.opx_output_offset` for the `SingleChannel`, and through `IQChannel.opx_output_offset_I` and `IQChannel.opx_output_offset_Q` for the `IQChannel`.
 
@@ -66,7 +66,7 @@ The offsets can also be QUA variables.
 [Channel.set_dc_offset()][quam.components.channels.SingleChannel.set_dc_offset] is a light wrapper around `qm.qua.set_dc_offset` to attach it to the channel.
 
 
-### Frequency converters
+### Frequency Converters
 The `IQChannel` is usually connected to a mixer to upconvert the signal using a local oscillator.
 This frequency upconversion is represented in QuAM by a [FrequencyConverter][quam.components.hardware.FrequencyConverter]
 
@@ -89,7 +89,7 @@ For this reason they have a specialized frequency converter such as the [OctaveU
 See the [octave][] documentation for details.
 
 
-### Analog pulses
+### Analog Pulses
 QuAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
 These pulses can be registered as part of the analog channel via `Channel.operations` such that the channel can output the associated pulse waveforms:
 
@@ -112,7 +112,7 @@ with program() as prog:
 
 Details on pulses in quam can be found at [pulses][].
 
-## Analog output + input channels
+## Analog Output + Input Channels
 Aside from sending signals to the quantum hardware, data is usually also received back, and subsequently read out through the hardware's input ports.
 In QuAM, this is represented using the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel].
 These channels don't only have associated output port(s) but also input port(s):
@@ -140,7 +140,7 @@ Both the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and t
 Support for input-only analog channels is planned for a future release.
 
 
-### Readout pulses
+### Readout Pulses
 Channels that have input ports can also have readout pulses:
 
 ```python
@@ -155,7 +155,7 @@ As can be seen, the readout pulse (in this case [SquareReadoutPulse][quam.compon
 Specifically, it contains the attributes `integration_weights_angle` and `integration_weights` to specify how the readout signal should be integrated.
 
 
-## Digital channels
+## Digital Channels
 QuAM supports digital output channels (output from the OPX perspective) through the component [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel].
 These can be added to any analog channel through the attribute `Channel.digital_outputs`. As an example:
 
@@ -181,7 +181,7 @@ analog_channel.digital_outputs = {
 In this case, any digital pulses will be played to all digital channels.
 
 
-### Digital-only channel
+### Digital-only Channel
 It is also possible to create a digital-only channel, i.e. using digital ports without any analog ports.
 ```python
 from quam.components import Channel, DigitalOutputChannel
@@ -192,7 +192,7 @@ channel = Channel(
 ```
 
 
-## Digital pulses
+## Digital Pulses
 Once a [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel] is added to a [Channel][quam.components.channels.Channel], digital waveforms can be played on it. This is done by attaching a digital waveform to a [Pulse][quam.components.pulses.Pulse] through the attribute `Pulse.digital_marker`:
 
 ```python
@@ -207,7 +207,7 @@ pulse = pulses.SquarePulse(
 In the example above, the square pulse will also output digital waveform: "high" for 20 ns ⇨ "low" for 20 ns ⇨ "high" for 40 ns. This digital waveform will be played on all digital channels that are attached to the analog channel.
 
 
-### Digital-only pulses
+### Digital-only Pulses
 A digital pulse can also be played without a corresponding analog pulse.
 This can be done by directly using the base [pulses.Pulse][quam.components.pulses.Pulse] class:
 ```python

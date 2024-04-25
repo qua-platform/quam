@@ -1,6 +1,6 @@
-# Referencing between components
+# Referencing Between Components
 
-## QuAM tree structure
+## QuAM Tree Structure
 QuAM follows a tree structure, meaning that each QuAM component can have a parent component and it can have children.
 
 The top-level object is always an instance of QuAMRoot, e.g.
@@ -25,7 +25,7 @@ assert qubit.parent == machine
 
 However, situations often arise where a component needs access to another part of QuAM that is not directly one of its children. To accomodate this, we introduce the concept of references.
 
-## QuAM references
+## QuAM References
 A reference in QuAM is a way for a component's attribute to be a reference to another part of QuAM. An example is shown here
 
 ```python
@@ -42,7 +42,7 @@ As can be seen, the Quam component attribute `component.b` was set to a referenc
 
 Quam references follow the JSON pointer syntax (For a description see https://datatracker.ietf.org/doc/html/rfc6901), but further allow for relative references, i.e. references w.r.t the current Quam component. We will next describe the three types of references.
 
-### Absolute references
+### Absolute References
 Absolute references always start with `"#/"`, e.g. `"#/absolute/path/to/value`.
 They are references from the top-level QuAM object which inherits from `QuamRoot`
 For example:
@@ -53,7 +53,7 @@ machine.qubit = Transmon(frequency="#/frequency")
 print(machine.qubit.frequency)  # Prints 6e9
 ```
 
-### Relative references
+### Relative References
 Relative references start with `"#./"`, e.g. `"#./relative/path/to/value`  
 These are references with respect to the current QuAM component.
 An example was given above, and is reiterated here:
@@ -69,7 +69,7 @@ component.b = "#./a"
 print(component.b)  # Prints 42
 ```
 
-### Relative parent references
+### Relative Parent References
 Relative parent references start with `"#../"`, e.g. `"#../relative/path/from/parent/to/value`  
 These are references with respect to the parent of the current QuAM component.
 Note that the parent
@@ -86,9 +86,9 @@ component.b = "#./a"
 print(component.b)  # Prints 42
 ```
 
-## Additional notes on references
+## Additional Notes on References
 
-### Directly overwriting references is not allowed
+### Directly Overwriting References is not Allowed
 Since Quam references behave like regular attributes, the user might accidentally overwrite a reference without realizing it. To prohibit this, it is not possible to directly overwrite a reference:
 
 ```python

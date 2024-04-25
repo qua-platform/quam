@@ -7,7 +7,7 @@ Below we describe the three steps needed to configuring an Octave in QuAM:
 2. Adding frequency converters
 3. Attaching channels
 
-## :zero: Creating the root QuAM machine
+## :zero: Creating the Root QuAM Machine
 Before we get started, we need a top-level QuAM class that matches our components:
 
 ```python
@@ -30,11 +30,7 @@ This will be used later to generate our QUA configuration
 Below we show how an Octave is instantiated using some example arguments:
 
 ```python
-octave = Octave(
-    name="octave1",
-    ip="127.0.0.1",
-    port=80,
-)
+octave = Octave(name="octave1", ip="127.0.0.1", port=80)
 machine.octave = octave
 ```
 
@@ -49,7 +45,7 @@ qmm = QuantumMachinesManager(host={opx_host}, port={opx_port}, octave=octave_con
 At this point the channel connectivity of the Octave hasn't yet been configured.
 We can do so by adding frequency converters.
 
-## :two: Adding frequency converters
+## :two: Adding Frequency Converters
 A frequency converter is a grouping of the components needed to upconvert or downconvert a signal.
 These typically consist of a local oscillator, mixer, as well as IF, LO, and RF ports.
 For the Octave we have two types of frequency converters:
@@ -142,7 +138,7 @@ It is important to specify the `LO_frequency` of the frequency converters that a
 At this point, our `Octave` does not yet contain any information on which OPX output / input is connected to each `OctaveUpconverter` / `OctaveDownConverter`.
 This is done in the third stage
 
-## :three: Attaching channels
+## :three: Attaching Channels
 Once the frequency converters have been setup, it is time to attach the ones that are in use to corresponding channels in QuAM.
 In the example below, we connect an `IQChannel` to the `OctaveUpconverter` at `octave.RF_outputs[1]`
 ```python
@@ -173,7 +169,7 @@ octave.RF_outputs[2].LO_frequency = 2e9
 octave.RF_inputs[2].LO_frequency = 2e9
 ```
 
-## Generating the config
+## Generating the Config
 Once everything is setup, we can generate the QUA configuration
 
 ```python
@@ -183,142 +179,93 @@ qua_config = machine.generate_config()
 /// details | qua_config
 ```json
 {
-  "version": 1,
-  "controllers": {
-    "con1": {
-      "analog_outputs": {
-        "1": {
-          "offset": 0.0
-        },
-        "2": {
-          "offset": 0.0
-        },
-        "3": {
-          "offset": 0.0
-        },
-        "4": {
-          "offset": 0.0
+    "version": 1,
+    "controllers": {
+        "con1": {
+            "analog_outputs": {
+                "1": {"offset": 0.0},
+                "2": {"offset": 0.0},
+                "3": {"offset": 0.0},
+                "4": {"offset": 0.0},
+            },
+            "digital_outputs": {},
+            "analog_inputs": {"1": {"offset": 0.0}, "2": {"offset": 0.0}},
         }
-      },
-      "digital_outputs": {},
-      "analog_inputs": {
-        "1": {
-          "offset": 0.0
-        },
-        "2": {
-          "offset": 0.0
-        }
-      }
-    }
-  },
-  "elements": {
-    "IQ1": {
-      "operations": {},
-      "intermediate_frequency": 0.0,
-      "RF_outputs": {
-        "port": [
-          "octave1",
-          1
-        ]
-      }
     },
-    "IQ2": {
-      "operations": {},
-      "intermediate_frequency": 0.0,
-      "RF_outputs": {
-        "port": [
-          "octave1",
-          2
-        ]
-      },
-      "smearing": 0,
-      "time_of_flight": 24,
-      "RF_inputs": {
-        "port": [
-          "octave1",
-          1
-        ]
-      }
-    }
-  },
-  "pulses": {
-    "const_pulse": {
-      "operation": "control",
-      "length": 1000,
-      "waveforms": {
-        "I": "const_wf",
-        "Q": "zero_wf"
-      }
-    }
-  },
-  "waveforms": {
-    "zero_wf": {
-      "type": "constant",
-      "sample": 0.0
-    },
-    "const_wf": {
-      "type": "constant",
-      "sample": 0.1
-    }
-  },
-  "digital_waveforms": {
-    "ON": {
-      "samples": [
-        [
-          1,
-          0
-        ]
-      ]
-    }
-  },
-  "integration_weights": {},
-  "mixers": {},
-  "oscillators": {},
-  "octaves": {
-    "octave1": {
-      "RF_outputs": {
-        "1": {
-          "LO_frequency": 2000000000.0,
-          "LO_source": "internal",
-          "gain": 0,
-          "output_mode": "always_off",
-          "input_attenuators": "off",
-          "I_connection": [
-            "con1",
-            1
-          ],
-          "Q_connection": [
-            "con1",
-            2
-          ]
+    "elements": {
+        "IQ1": {
+            "operations": {},
+            "intermediate_frequency": 0.0,
+            "RF_inputs": {"port": ["octave1", 1]},
         },
-        "2": {
-          "LO_frequency": 2000000000.0,
-          "LO_source": "internal",
-          "gain": 0,
-          "output_mode": "always_off",
-          "input_attenuators": "off",
-          "I_connection": [
-            "con1",
-            3
-          ],
-          "Q_connection": [
-            "con1",
-            4
-          ]
+        "IQ2": {
+            "operations": {},
+            "intermediate_frequency": 0.0,
+            "RF_inputs": {"port": ["octave1", 2]},
+            "smearing": 0,
+            "time_of_flight": 24,
+            "RF_outputs": {"port": ["octave1", 1]},
+        },
+    },
+    "pulses": {
+        "const_pulse": {
+            "operation": "control",
+            "length": 1000,
+            "waveforms": {"I": "const_wf", "Q": "zero_wf"},
         }
-      },
-      "IF_outputs": {},
-      "RF_inputs": {},
-      "loopbacks": []
-    }
-  }
+    },
+    "waveforms": {
+        "zero_wf": {"type": "constant", "sample": 0.0},
+        "const_wf": {"type": "constant", "sample": 0.1},
+    },
+    "digital_waveforms": {"ON": {"samples": [[1, 0]]}},
+    "integration_weights": {},
+    "mixers": {},
+    "oscillators": {},
+    "octaves": {
+        "octave1": {
+            "RF_outputs": {
+                "1": {
+                    "LO_frequency": 2000000000.0,
+                    "LO_source": "internal",
+                    "gain": 0,
+                    "output_mode": "always_off",
+                    "input_attenuators": "off",
+                    "I_connection": ["con1", 1],
+                    "Q_connection": ["con1", 2],
+                },
+                "2": {
+                    "LO_frequency": 2000000000.0,
+                    "LO_source": "internal",
+                    "gain": 0,
+                    "output_mode": "always_off",
+                    "input_attenuators": "off",
+                    "I_connection": ["con1", 3],
+                    "Q_connection": ["con1", 4],
+                },
+            },
+            "IF_outputs": {
+                "IF_out1": {"port": ["con1", 1], "name": "out1"},
+                "IF_out2": {"port": ["con1", 2], "name": "out2"},
+            },
+            "RF_inputs": {
+                "1": {
+                    "RF_source": "RF_in",
+                    "LO_frequency": 2000000000.0,
+                    "LO_source": "internal",
+                    "IF_mode_I": "direct",
+                    "IF_mode_Q": "direct",
+                }
+            },
+            "loopbacks": [],
+        }
+    },
 }
 
 ```
 ///
 
-## Combined example
+## Combined Example
 ```python
 from typing import Dict
 from dataclasses import field
@@ -367,7 +314,7 @@ machine.channels["IQ2"] = InOutIQChannel(
 octave.RF_outputs[2].channel = machine.channels["IQ2"].get_reference()
 octave.RF_inputs[1].channel = machine.channels["IQ2"].get_reference()
 octave.RF_outputs[2].LO_frequency = 2e9
-octave.RF_inputs[2].LO_frequency = 2e9
+octave.RF_inputs[1].LO_frequency = 2e9
 
 
 qua_config = machine.generate_config()

@@ -12,7 +12,7 @@ Assuming you already have a QUA configuration, the migration process involves tw
 
 ## Migrate QUA Configuration to QuAM
 
-### Create a root QuAM object
+### Create a Root QuAM Object
 The QuAM structure needs a top-level [QuamRoot][quam.core.QuamRoot] which has features such as saving/loading QuAM.
 Typically one would subclass [QuamRoot][quam.core.QuamRoot] and add the necessary components as fields.
 However, as a basic example, we can use the [BasicQuAM][quam.components.BasicQuAM] class, which contains the fields necessary for the migration.
@@ -48,7 +48,7 @@ Here we show how to convert different types of elements to QuAM channels.
 We don't cover all possible properties, details for this can be found in the [Channels documentation][channels] and the relevant API documentation for each channel type.
 We also delay the discussion on the `"operations"` field for the next section on pulses.
 
-#### Single analog output channel
+#### Single Analog Output Channel
 In the simplest case, a single output channel is defined in the QUA configuration.
 
 <table>
@@ -76,7 +76,7 @@ In the simplest case, a single output channel is defined in the QUA configuratio
 
 The corresponding QuAM component is the [SingleChannel][quam.components.SingleChannel].
 
-#### IQ analog output channel
+#### IQ Analog Output Channel
 
 In the case where the IQ channel is not connected to an
 
@@ -149,7 +149,7 @@ If an Octave is used for upconversion, the IQChannel should be connected to the 
 
 Detailed instructions can be found at the [Octave documentation][octave].
 
-#### Single analog output + input channel
+#### Single Analog Output + Input Channel
 In the case where the channel is both an input and output channel, the [InOutSingleChannel][quam.components.InOutSingleChannel] should be used.
 
 ```json title='qua_configuration["elements"] - Single input/output channel'

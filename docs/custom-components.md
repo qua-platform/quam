@@ -1,11 +1,11 @@
-# Custom QuAM components
+# Custom QuAM Components
 
 To create custom QuAM components, their classes should be defined in a Python module that can be accessed from Python.
 The reason for this is that otherwise QuAM cannot load QuAM from a JSON file as it cannot determine where the classes are defined.
 If you already have a Python module that you use for your own QUA code, it is recommended to add QuAM components to that module.
 If you don't already have such a module, please follow the guide below.
 
-## Creating a custom Python module
+## Creating a Custom Python Module
 Here we describe how to create a minimal Python module that can be used for your custom QuAM components.
 In this example, we will give the top-level folder the name `my-quam` and the Python module will be called `my_quam` (note the underscore instead of dash).
 First create the following folder structure
@@ -49,7 +49,7 @@ from my_quam.components import *
 ```
 All the custom QuAM components should be placed as Python files in `my-quam/my_quam/components`.
 
-## Creating a custom QuAM component
+## Creating a Custom QuAM Component
 Once a designated Python module has been chosen / created, it can be populated with a custom component.
 We will assume that the newly-created Python module `my_quam` is used.
 In this example, we will make a basic QuAM component representing a DC gate, with two properties: `name` and `dc_voltage`:
@@ -113,7 +113,7 @@ An additional benefit is that `kw_only=True` is automatically passed along.
 From Python 3.10 onwards, `@quam_dataclass` is equivalent to `@dataclass(kw_only=True, eq=False)`
 ///
 
-## QuAM component subclassing
+## QuAM Component Subclassing
 QuAM components can also be subclassed to add functionalities to the parent class.
 For example, we now want to combine a DC and AC gate together, where the AC part corresponds to an OPX channel.
 To do this, we create a class called `AcDcGate` that inherits from both `DcGate` and [quam.components.channels.SingleChannel][]:
