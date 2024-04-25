@@ -1,4 +1,4 @@
-# Custom components
+# Custom QuAM components
 
 To create custom QuAM components, their classes should be defined in a Python module that can be accessed from Python.
 The reason for this is that otherwise QuAM cannot load QuAM from a JSON file as it cannot determine where the classes are defined.
