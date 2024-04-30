@@ -4,13 +4,21 @@ QuAM, the Quantum Abstract Machine, serves as a powerful abstraction framework b
 
 ## Overview of Migration Process
 
-The migration from QUA to QuAM involves five steps:
+Migrating from QUA to QuAM involves a structured, five-step process that methodically transitions your existing quantum programming framework. Here's a brief overview of each step:
 
-1. **Conversion of the QUA Configuration to QuAM Components:** This step involves translating your existing QUA configurations into QuAM's component-based structure, starting from the root object down to individual channels and pulses.
+1. **Create a Root QuAM Object:** Start by establishing a foundational `QuamRoot` object that serves as the top-level container for all other QuAM components. This is where you'll begin building your new QuAM configuration.
 
-2. **Creation of High-Level QuAM Components:** While optional, defining high-level components such as qubits can significantly enhance the manageability and scalability of your quantum programs by abstracting complex configurations.
+2. **Add Octaves:** If your original QUA setup includes Octave components, this step involves integrating these components into the QuAM configuration, utilizing existing connectivity settings.
 
-<!-- ## Step 1: Convert QUA Configuration to QuAM -->
+3. **Convert "elements" to Channels:** Each element in the QUA configuration that handles signal processing is mapped to a corresponding channel type in QuAM. This critical step ensures that the functional properties of your setup are preserved and adapted to the new architecture.
+
+4. **Convert Pulses:** After setting up the channels, the next step is to configure the pulses. This involves translating QUA pulse specifications into QuAM's consolidated and parameterized pulse framework.
+
+5. **Generate the QUA configuration:** Once the QuAM structure has been created and populated, you can generate the QUA configuration using the QuAM object. This configuration can then be used to run quantum programs on the OPX.
+
+5. **Create High-Level QuAM Components (Optional):** This final step is about abstracting complex configurations into high-level components like qubits, which can simplify the management and scalability of your quantum programs.
+
+Each of these steps is designed to ensure a seamless transition to QuAM, leveraging its robust abstraction capabilities to manage and organize your quantum computing elements more effectively.
 
 ## 1: Create a Root QuAM Object
 
@@ -26,7 +34,7 @@ machine.print_summary()  # outputs the current QuAM state
 
 Next we populate the root-level `machine` object with QuAM components
 
-## 2: Adding Octaves
+## 2: Add Octaves
 If you have one or more Octave components, you can add them to the QUA configuration:
 ```python
 from quam.components import Octave
@@ -199,7 +207,7 @@ For complex setups involving both IQ modulation and bidirectional communication,
   </div>
 </div>
 
-## 4: Converting Pulses
+## 4: Convert Pulses
 
 After converting elements into channels, the next step is to configure the pulses. Pulses in QUA are defined across several fields within the configuration, each contributing to how the pulse is shaped and controlled. In QuAM, these properties are consolidated, allowing for a more streamlined and parameterized approach to pulse definition.
 
@@ -271,7 +279,7 @@ This example highlights the transformation of a basic pulse from QUA into a QuAM
 For comprehensive details on configuring different types of pulses in QuAM, refer to the [Pulses Documentation][pulses].
 
 
-## 5: Generating the QUA configuration
+## 5: Generate the QUA configuration
 Once the QUA configuration has been converted to QuAM, QuAM can in turn be used to generate the QUA configuration:
 
 ```python
