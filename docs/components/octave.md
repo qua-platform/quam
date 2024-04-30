@@ -51,7 +51,7 @@ These typically consist of a local oscillator, mixer, as well as IF, LO, and RF 
 For the Octave we have two types of frequency converters:
 
 - [OctaveUpConverter][quam.components.octave.OctaveUpConverter]: Used to upconvert a pair of IF signals to an RF signal
-- [OctaveDownCovnerter][quam.components.octave.OctaveDownConverter]: Used to downconvert an RF signal to a pair of IF signals
+- [OctaveDownConverter][quam.components.octave.OctaveDownConverter]: Used to downconvert an RF signal to a pair of IF signals
 
 We can add all relevant frequency converters as follows:
 
