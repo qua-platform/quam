@@ -43,15 +43,17 @@ extra_css:
 
 nav:
   - index.md
-  - getting-started.md
+  - installation.md
   - demonstration.md
   - "QuAM Components":
+    - "components/index.md"
     - "components/channels.md"
     - "components/pulses.md"
     - "components/octave.md"
-    - custom-components.md
+    - "components/custom-components.md"
   - "QuAM Features":
-    - quam-references.md
+    - "features/index.md"
+    - "features/quam-references.md"
   - migrating-to-quam.md
 
 plugins:

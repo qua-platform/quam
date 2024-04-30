@@ -1,4 +1,4 @@
-# Getting Started
+# QuAM Installation
 
 ## :one: Pre-requisites
 
