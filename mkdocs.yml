@@ -44,15 +44,15 @@ extra_css:
 nav:
   - index.md
   - getting-started.md
-  - migrating-to-quam.md
   - demonstration.md
-  - "QuAM Features":
-    - quam-references.md
   - "QuAM Components":
     - "components/channels.md"
     - "components/pulses.md"
     - "components/octave.md"
     - custom-components.md
+  - "QuAM Features":
+    - quam-references.md
+  - migrating-to-quam.md
 
 plugins:
 # - mkdocs-jupyter:

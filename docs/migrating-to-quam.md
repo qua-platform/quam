@@ -211,7 +211,7 @@ In the QUA configuration, pulses are defined through the following components:
 - **"digital_waveforms"**: Digital signals that can be paired with analog waveforms to control pulse execution.
 - **"integration_weights"**: Used for defining how signals are integrated during readout.
 - **"pulses"**: This is a collection of pulse definitions, specifying labels, duration, and type of operation (`"control"` or `"measurement"`). Pulses may reference waveforms, digital waveforms, and integration weights specified in the other fields.
-- **`element["operations"]`**: Maps operation names to specific pulses defined in the `"pulses"` collection, linking them to the relevant channel.
+- **element["operations"]**: Maps operation names to specific pulses defined in the `"pulses"` collection, linking them to the relevant channel.
 
 ### QuAM Pulse Configuration
 
@@ -271,9 +271,46 @@ This example highlights the transformation of a basic pulse from QUA into a QuAM
 For comprehensive details on configuring different types of pulses in QuAM, refer to the [Pulses Documentation][pulses].
 
 
-## 5: Create High-Level QuAM Components (Optional)
-After converting the QUA configuration 
-This step involves defining more abstract components, which can simplify the interaction with the lower-level hardware details.
+## 5: Generating the QUA configuration
+Once the QUA configuration has been converted to QuAM, QuAM can in turn be used to generate the QUA configuration:
+
+```python
+qua_config = machine.generate_config()
+```
+
+This `qua_config` can then be used to create a `QuantumMachine` object, which can be used to run quantum programs on the OPX.
+
+## 6: Create High-Level QuAM Components (Optional)
+After converting the QUA configuration to the corresponding QuAM components, an optional next step is to group similar components into higher-level abstractions.
+As an example, in the code above we had multiple channels belonging to the same qubit (`qubit_xy`, `qubit_z`, `qubit_readout`).
+We can group these channels into a single `Qubit` object to simplify the management of the qubit's configuration:
+
+```python
+from quam.core import QuamComponent, quam_dataclass
+from quam.components import SingleChannel, IQChannel, InOutSingleChannel
+
+@quam_dataclass
+class Qubit(QuamComponent):
+    xy: IQChannel
+    z: SingleChannel
+    readout: InOutSingleChannel
+
+qubit = Qubit(xy=qubit_xy, z=qubit_z, readout=qubit_readout)
+```
+
+This `Qubit` object can then be used to access the individual channels and their associated pulses, simplifying the management of the qubit's configuration.
+
+Note that the root-level QuAM object also needs to be customized to support the new `Qubit` object:
+```python
+from typing import Dict
+from quam.core import QuamRoot
+
+@quam_dataclass
+class QuAM(QuamRoot):
+    qubits: Dict[str, Qubit]
+
+machine = QuAM(qubits={"qubit1": qubit})
+```
 
 See [Custom components][custom-components] for more information on creating custom QuAM components.
 
