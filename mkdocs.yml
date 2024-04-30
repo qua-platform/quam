@@ -72,6 +72,7 @@ plugins:
         paths: [quam]
 
 markdown_extensions:
+  - md_in_html
   - pymdownx.blocks.tab:  # Add tabs to markdown using: === "title"
       alternate_style: true  # Somehow this is required for tabs to work
   - pymdownx.blocks.details  # Enable collapsible elements, e.g.: ??? tip "title"

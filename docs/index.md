@@ -8,12 +8,41 @@ Welcome to the official documentation for the Quantum Abstract Machine (QuAM), a
 QuAM stands out by transforming the way quantum control is perceived and implemented. While QUA and its configurations tackle quantum control from a generic hardware perspective, QuAM introduces a higher level of abstraction. It allows you to think in terms of qubits and quantum operations rather than just channels and waveforms, aligning more closely with the thought processes of physicists.
 
 ## Why Choose QuAM?
-QuAM is not just a tool but a gateway to streamlined and efficient quantum computing:
+
+QuAM is not just a tool but a gateway to streamlined and efficient quantum computing: 
+<!-- <div class="grid" markdown> -->
 
 - **Component-Based Setup:** Utilize a standard set of QuAM components like Mixers and IQChannels to digitally represent and manipulate your quantum environment.
 - **Automated Configuration:** Automatically generate the necessary QUA configuration from your QuAM setup, simplifying the transition from design to deployment.
 - **Extensibility:** Easily extend QuAM with custom classes to accommodate complex quantum setups, providing flexibility and power in your quantum computing applications.
 - **State Management:** Effortlessly save and load your QuAM state, enabling consistent results and reproducibility in experiments.
+
+```python
+from quam.components import BasicQuAM, SingleChannel, pulses
+
+# Create a root-level QuAM instance
+machine = BasicQuAM()
+
+# Add an OPX output channel
+channel = SingleChannel(opx_output=("con1", 1))
+machine.channels["output"] = channel
+
+# Add a Gaussian pulse to the channel
+channel.operations["gaussian"] = pulses.Gaussian(
+    length=100,  # Pulse length in ns
+    amplitude=0.5,  # Peak amplitude of Gaussian pulse
+    sigma=20,  # Standard deviation of Guassian pulse
+)
+
+# Play the Gaussian pulse on the channel within a QUA program
+with program() as prog:
+    channel.play("gaussian")
+
+# Generate the QUA configuration from QuAM
+qua_configuration = machine.generate_config()
+```
+<!-- </div> -->
+
 
 ## Getting Started
 
