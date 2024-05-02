@@ -320,7 +320,7 @@ class QuAM(QuamRoot):
 machine = QuAM(qubits={"qubit1": qubit})
 ```
 
-See [Custom components][custom-components] for more information on creating custom QuAM components.
+See [Custom QuAM Components](/components/custom-components) for more information on creating custom QuAM components.
 
 ## Conclusion
 

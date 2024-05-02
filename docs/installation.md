@@ -85,7 +85,7 @@ If this raises a similar error, it likely means that Python cannot be found. Ple
 
 QuAM comes with a range of standard QuAM components that can kick-start experimental setups. An example of these components are used can be found at the [QuAM demonstration](demonstration.md).
 
-Beyond the standard components, QuAM provides a framework to create custom components that are tailored to a specific quantum setup. This allows you to create their own abstraction layers, enabling you to digitally represent and interact with your quantum setup. See [Creating custom QuAM components](custom-components.md) for details
+Beyond the standard components, QuAM provides a framework to create custom components that are tailored to a specific quantum setup. This allows you to create their own abstraction layers, enabling you to digitally represent and interact with your quantum setup. See [Creating custom QuAM components](/components/custom-components) for details
 
 <!-- ### Overview of components
 #### quam.components.hardware

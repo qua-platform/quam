@@ -56,6 +56,14 @@ nav:
     - "features/quam-references.md"
   - migrating-to-quam.md
 
+  - "API References":
+    - "API_references/index.md"
+    - "QuAM Components":
+      - "QuAM Channels API": "API_references/components/channels_API.md"
+      - "QuAM Pulses API": "API_references/components/pulses_API.md"
+      - "QuAM Hardware API": "API_references/components/hardware_API.md"
+      - "QuAM Octave API": "API_references/components/octave_API.md"
+    - "QuAM Core Classes API": "API_references/core/quam_classes_API.md"
 plugins:
 # - mkdocs-jupyter:
 #     include:

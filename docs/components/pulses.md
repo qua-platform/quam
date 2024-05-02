@@ -16,7 +16,7 @@ Users can also define custom pulses by subclassing the `Pulse` class. This flexi
 All pulses in QuAM are instances of the [Pulse][quam.components.pulses.Pulse] class.
 The QuAM library contains a set of common pulse types in the [pulses][quam.components.pulses] module.
 Typical examples are [SquarePulse][quam.components.pulses.SquarePulse], [GaussianPulse][quam.components.pulses.GaussianPulse], and [DragPulse][quam.components.pulses.DragPulse].
-Users can supplement these common pulses with their own custom pulses by subclassing the [Pulse][quam.components.pulses.Pulse] class (see [Custom QuAM components][custom-components] for details). 
+Users can supplement these common pulses with their own custom pulses by subclassing the [Pulse][quam.components.pulses.Pulse] class (see [Custom QuAM Components](/components/custom-components) for details). 
 
 
 ## Usage
@@ -86,7 +86,7 @@ class TriangularPulse(pulses.Pulse):
         # This function generates a linearly spaced array to form a triangular waveform
         return np.linspace(self.amplitude_start, self.amplitude_stop, self.length)
 ```
-Ensure this code is saved in a properly structured Python module within your project so that it can be imported as needed. For details on organizing custom components, refer to the [Custom Components][custom-components] section of the QuAM documentation
+Ensure this code is saved in a properly structured Python module within your project so that it can be imported as needed. For details on organizing custom components, refer to the [Custom QuAM Components](/components/custom-components) section of the QuAM documentation
 
 ### Extending to Readout Pulses
 To create a readout pulse derived from a control pulse, subclass both the specific control pulse and the [ReadoutPulse][quam.components.pulses.ReadoutPulse] class. Below is an example of how to adapt the Triangular Pulse into a readout pulse.
