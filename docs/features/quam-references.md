@@ -18,12 +18,21 @@ machine = QuAM()
 
 Next, we can add a qubit as a component:
 ```python
-qubit = superconducting_qubits.Transmon(xy=IQChannel())
+qubit = superconducting_qubits.Transmon(xy=IQChannel(opx_output_I=("con1", 1"), opx_output_Q=("con1", 2"))
 machine.qubit = qubit
 assert qubit.parent == machine
 ```
 
-However, situations often arise where a component needs access to another part of QuAM that is not directly one of its children. To accomodate this, we introduce the concept of references.
+One of the rules in QuAM is that a component can only have one parent. This is enforced by the `parent` attribute, which is set when a component is added to another component.
+As a result, the following raises an error:
+
+```python
+channel = IQChannel(opx_output_I=("con1", 1"), opx_output_Q=("con1", 2")
+qubit1 = superconducting_qubits.Transmon(xy=channel)
+qubit2 = superconducting_qubits.Transmon(xy=channel)  # Raises ValueError
+``` 
+additionally, situations often arise where a component needs access to another part of QuAM that is not directly one of its children. 
+To accomodate both of these situations, we introduce the concept of references.
 
 ## QuAM References
 A reference in QuAM is a way for a component's attribute to be a reference to another part of QuAM. An example is shown here

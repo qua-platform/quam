@@ -47,6 +47,7 @@ nav:
   - demonstration.md
   - "QuAM Components":
     - "components/index.md"
+    - "components/quam-root.md"
     - "components/channels.md"
     - "components/pulses.md"
     - "components/octave.md"
