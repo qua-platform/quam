@@ -1,37 +1,35 @@
 # QuAM Demonstration
 
-In this demonstration we will create a basic superconducting setup using standard components. 
-Note that QuAM is not specific to superconducting setups but is meant to serve any quantum platform.
+## Introduction
 
-The standard QuAM components can be imported using
+This demonstration will guide you through setting up a basic superconducting quantum circuit using QuAM, applicable to various quantum platforms beyond superconducting setups.
+
+## Setting Up
+
+Start by importing the necessary components for a superconducting quantum circuit from QuAM's library:
 
 ```python
 from quam.components import *
 from quam.examples.superconducting_qubits import Transmon, QuAM
 ```
 
-Since we're starting from scratch, we will have to instantiate all QuAM components. This has to be done once, after which we will generally save and load QuAM from a file.
-To begin, we create the top-level QuAM object, which inherits from [quam.core.quam_classes.QuamRoot][]. Generally the user is encouraged to create a custom component for this.
+## Initialization
 
-We will call our top-level object `machine`:
+QuAM requires an initial setup where all components are instantiated. Create the root QuAM object, which acts as the top-level container for your quantum setup. Although `QuAM` is predefined, you're encouraged to define your own custom components for specialized needs:
+
 ```python
 machine = QuAM()
 ```
 
-So far, this object `machine` is empty, so we'll populate it with objects.
-In this case, we will create two Transmon objects and fill them with contents. 
+Initially, `machine` is an empty container. You'll populate it with quantum circuit components, specifically Transmon qubits and associated resonators.
 
+## Populating the Machine
 
-/// details | Autocomplete with IDEs
-    type: tip
-Code editors with Python language support (e.g., VS Code, PyCharm) are very useful here because they explain what attributes each class has, what the type should be, and docstrings. This makes it a breeze to create a QuAM from scratch.
-///
-
+Define the number of qubits and initialize them, along with their resonators:
 
 ```python
 num_qubits = 2
 for idx in range(num_qubits):
-    # Create qubit components
     transmon = Transmon(
         id=idx,
         xy=IQChannel(
@@ -46,13 +44,12 @@ for idx in range(num_qubits):
     )
     machine.qubits.append(transmon)
 
-    # Create resonator components
     resonator = InOutIQChannel(
         opx_input_I=("con1", 1),
         opx_input_Q=("con1", 2),
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
-        id=idx, 
+        id=idx,
         frequency_converter_up=FrequencyConverter(
             local_oscillator=LocalOscillator(power=10, frequency=6e9),
             mixer=Mixer()
@@ -60,517 +57,112 @@ for idx in range(num_qubits):
     )
     machine.resonators.append(resonator)
 ```
-This example demonstrates that QuAM follows a tree structure: each component can have a parent and it can have children as attributes.
 
-We can print a summary of QuAM using
+This setup reflects QuAM's flexibility and the hierarchical structure of its component system where each component can be a parent or a child.
+
+Absolutely! We'll add a section on attaching a `ReadoutPulse` to the resonator associated with the first qubit. This example will continue from the previous section on adding a Gaussian pulse to the qubit.
+
+---
+
+## Adding a Pulse to a Qubit and its Resonator
+
+After configuring the qubits and resonators, you can further customize your setup by adding operational pulses. This example will show how to add a Gaussian pulse to the `xy` channel of a qubit and a `ReadoutPulse` to its resonator.
+
+### Defining and Attaching the Pulses
+
+#### Gaussian Pulse for Qubit Control
+
+Define a basic Gaussian pulse for qubit manipulation and attach it to the `xy` channel of the first qubit:
+
+```python
+from quam.pulses import GaussianPulse
+
+# Create a Gaussian pulse
+gaussian_pulse = GaussianPulse(length=20, amplitude=0.5, sigma=3)
+
+# Attach the pulse to the XY channel of the first qubit
+machine.qubits[0].xy.add_pulse('X90', gaussian_pulse)
+```
+
+#### Readout Pulse for Qubit Resonator
+
+Similarly, define a `ReadoutPulse` for the resonator associated with the same qubit to enable quantum state measurement:
+
+```python
+from quam.pulses import ReadoutPulse
+
+# Create a Readout pulse
+readout_pulse = ReadoutPulse(length=50, amplitude=0.7, digital_marker='ON')
+
+# Attach the pulse to the resonator of the first qubit
+machine.resonators[0].add_pulse('Readout', readout_pulse)
+```
+
+### Invoking the Pulses in a Function
+
+With the pulses defined and attached, you can create functions to apply these pulses during your quantum operations:
+
+```python
+def apply_qubit_pulse(qubit):
+    """
+    Apply the 'X90' Gaussian pulse to the specified qubit's XY channel.
+    """
+    qubit.xy.play_pulse('X90')
+
+def apply_readout_pulse(resonator):
+    """
+    Apply the 'Readout' pulse to the specified resonator.
+    """
+    resonator.play_pulse('Readout')
+
+# Call the functions with the first qubit and its resonator
+apply_qubit_pulse(machine.qubits[0])
+apply_readout_pulse(machine.resonators[0])
+```
+
+### Explanation
+
+In this example, the `apply_qubit_pulse` function triggers a control pulse on the qubit, essential for quantum operations such as gate applications. The `apply_readout_pulse` function, on the other hand, is crucial for reading out the state of the qubit through its resonator, which is a fundamental part of performing measurements in quantum experiments.
+
+
+## Overview of Configuration
+
+Display the current configuration of your QuAM setup:
+
 ```python
 machine.print_summary()
 ```
 
-/// details | `machine.print_summary()` output
-```json
-QuAM:
-  mixers: QuamList = []
-  qubits: QuamList:
-    0: Transmon
-      id: 0
-      xy: IQChannel
-        operations: QuamDict Empty
-        id: None
-        digital_outputs: QuamDict Empty
-        opx_output_I: ('con1', 3)
-        opx_output_Q: ('con1', 4)
-        opx_output_offset_I: None
-        opx_output_offset_Q: None
-        frequency_converter_up: FrequencyConverter
-          local_oscillator: LocalOscillator
-            frequency: 6000000000.0
-            power: 10
-          mixer: Mixer
-            local_oscillator_frequency: "#../local_oscillator/frequency"
-            intermediate_frequency: "#../../intermediate_frequency"
-            correction_gain: 0
-            correction_phase: 0
-          gain: None
-        intermediate_frequency: 0.0
-      z: SingleChannel
-        operations: QuamDict Empty
-        id: None
-        digital_outputs: QuamDict Empty
-        opx_output: ('con1', 5)
-        filter_fir_taps: None
-        filter_iir_taps: None
-        opx_output_offset: None
-        intermediate_frequency: None
-      resonator: None
-    1: Transmon
-      id: 1
-      xy: IQChannel
-        operations: QuamDict Empty
-        id: None
-        digital_outputs: QuamDict Empty
-        opx_output_I: ('con1', 6)
-        opx_output_Q: ('con1', 7)
-        opx_output_offset_I: None
-        opx_output_offset_Q: None
-        frequency_converter_up: FrequencyConverter
-          local_oscillator: LocalOscillator
-            frequency: 6000000000.0
-            power: 10
-          mixer: Mixer
-            local_oscillator_frequency: "#../local_oscillator/frequency"
-            intermediate_frequency: "#../../intermediate_frequency"
-            correction_gain: 0
-            correction_phase: 0
-          gain: None
-        intermediate_frequency: 0.0
-      z: SingleChannel
-        operations: QuamDict Empty
-        id: None
-        digital_outputs: QuamDict Empty
-        opx_output: ('con1', 8)
-        filter_fir_taps: None
-        filter_iir_taps: None
-        opx_output_offset: None
-        intermediate_frequency: None
-      resonator: None
-  resonators: QuamList:
-    0: InOutIQChannel
-      operations: QuamDict Empty
-      id: 0
-      digital_outputs: QuamDict Empty
-      opx_output_I: ('con1', 1)
-      opx_output_Q: ('con1', 2)
-      opx_output_offset_I: None
-      opx_output_offset_Q: None
-      frequency_converter_up: FrequencyConverter
-        local_oscillator: LocalOscillator
-          frequency: 6000000000.0
-          power: 10
-        mixer: Mixer
-          local_oscillator_frequency: "#../local_oscillator/frequency"
-          intermediate_frequency: "#../../intermediate_frequency"
-          correction_gain: 0
-          correction_phase: 0
-        gain: None
-      intermediate_frequency: 0.0
-      opx_input_I: ('con1', 1)
-      opx_input_Q: ('con1', 2)
-      time_of_flight: 24
-      smearing: 0
-      opx_input_offset_I: None
-      opx_input_offset_Q: None
-      input_gain: None
-      frequency_converter_down: None
-    1: InOutIQChannel
-      operations: QuamDict Empty
-      id: 1
-      digital_outputs: QuamDict Empty
-      opx_output_I: ('con1', 1)
-      opx_output_Q: ('con1', 2)
-      opx_output_offset_I: None
-      opx_output_offset_Q: None
-      frequency_converter_up: FrequencyConverter
-        local_oscillator: LocalOscillator
-          frequency: 6000000000.0
-          power: 10
-        mixer: Mixer
-          local_oscillator_frequency: "#../local_oscillator/frequency"
-          intermediate_frequency: "#../../intermediate_frequency"
-          correction_gain: 0
-          correction_phase: 0
-        gain: None
-      intermediate_frequency: 0.0
-      opx_input_I: ('con1', 1)
-      opx_input_Q: ('con1', 2)
-      time_of_flight: 24
-      smearing: 0
-      opx_input_offset_I: None
-      opx_input_offset_Q: None
-      input_gain: None
-      frequency_converter_down: None
-  local_oscillators: QuamList = []
-  wiring: QuamDict Empty
-```
-///
+The output provides a detailed hierarchical view of the machine's configuration, illustrating the connectivity and settings of each component.
 
+## Persisting the Setup
 
-## Saving and Loading QuAM
-
-Now that we have defined our QuAM structure, we can save its contents to a JSON file:
+Save the current state of your QuAM setup to a file for later use or inspection:
 
 ```python
 machine.save("state.json")
 ```
 
-/// details | state.json
-```json
-{
-    "qubits": [
-        {
-            "id": 0,
-            "xy": {
-                "opx_output_I": [
-                    "con1",
-                    3
-                ],
-                "opx_output_Q": [
-                    "con1",
-                    4
-                ],
-                "frequency_converter_up": {
-                    "local_oscillator": {
-                        "frequency": 6000000000.0,
-                        "power": 10
-                    },
-                    "mixer": {}
-                }
-            },
-            "z": {
-                "opx_output": [
-                    "con1",
-                    5
-                ]
-            }
-        },
-        {
-            "id": 1,
-            "xy": {
-                "opx_output_I": [
-                    "con1",
-                    6
-                ],
-                "opx_output_Q": [
-                    "con1",
-                    7
-                ],
-                "frequency_converter_up": {
-                    "local_oscillator": {
-                        "frequency": 6000000000.0,
-                        "power": 10
-                    },
-                    "mixer": {}
-                }
-            },
-            "z": {
-                "opx_output": [
-                    "con1",
-                    8
-                ]
-            }
-        }
-    ],
-    "resonators": [
-        {
-            "id": 0,
-            "opx_output_I": [
-                "con1",
-                1
-            ],
-            "opx_output_Q": [
-                "con1",
-                2
-            ],
-            "frequency_converter_up": {
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
-                },
-                "mixer": {}
-            },
-            "opx_input_I": [
-                "con1",
-                1
-            ],
-            "opx_input_Q": [
-                "con1",
-                2
-            ]
-        },
-        {
-            "id": 1,
-            "opx_output_I": [
-                "con1",
-                1
-            ],
-            "opx_output_Q": [
-                "con1",
-                2
-            ],
-            "frequency_converter_up": {
-                "local_oscillator": {
-                    "frequency": 6000000000.0,
-                    "power": 10
-                },
-                "mixer": {}
-            },
-            "opx_input_I": [
-                "con1",
-                1
-            ],
-            "opx_input_Q": [
-                "con1",
-                2
-            ]
-        }
-    ],
-    "__class__": "quam.components.superconducting_qubits.QuAM"
-}
-```
-///
+The contents of `state.json` will mirror the structure and settings of your QuAM machine.
 
-This JSON file is a serialised representation of QuAM. As a result, QuAM can also be loaded from this JSON file:
+## Loading the Configuration
+
+To resume work with a previously configured setup:
 
 ```python
 loaded_machine = QuAM.load("state.json")
 ```
 
-## Generating the QUA Configuration
+## Generating a QUA Configuration
 
-We can also generate the QUA config from QuAM. This recursively calls `QuamComponent.apply_to_config()` on all QuAM components.
+Generate a QUA configuration from the current QuAM setup. This is essential for interfacing with quantum hardware:
 
 ```python
 qua_config = machine.generate_config()
 ```
 
-/// details | qua_config
-```json
-{
-  "version": 1,
-  "controllers": {
-    "con1": {
-      "analog_outputs": {
-        "3": {
-          "offset": 0
-        },
-        "4": {
-          "offset": 0
-        },
-        "5": {
-          "offset": 0
-        },
-        "6": {
-          "offset": 0
-        },
-        "7": {
-          "offset": 0
-        },
-        "8": {
-          "offset": 0
-        },
-        "1": {
-          "offset": 0
-        },
-        "2": {
-          "offset": 0
-        }
-      },
-      "digital_outputs": {},
-      "analog_inputs": {
-        "1": {
-          "offset": 0
-        },
-        "2": {
-          "offset": 0
-        }
-      }
-    }
-  },
-  "elements": {
-    "q0.xy": {
-      "mixInputs": {
-        "I": [
-          "con1",
-          3
-        ],
-        "Q": [
-          "con1",
-          4
-        ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "q0.xy.mixer"
-      },
-      "intermediate_frequency": 0.0,
-      "operations": {}
-    },
-    "q0.z": {
-      "singleInput": {
-        "port": [
-          "con1",
-          5
-        ]
-      },
-      "operations": {}
-    },
-    "q1.xy": {
-      "mixInputs": {
-        "I": [
-          "con1",
-          6
-        ],
-        "Q": [
-          "con1",
-          7
-        ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "q1.xy.mixer"
-      },
-      "intermediate_frequency": 0.0,
-      "operations": {}
-    },
-    "q1.z": {
-      "singleInput": {
-        "port": [
-          "con1",
-          8
-        ]
-      },
-      "operations": {}
-    },
-    "IQ0": {
-      "mixInputs": {
-        "I": [
-          "con1",
-          1
-        ],
-        "Q": [
-          "con1",
-          2
-        ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "IQ0.mixer"
-      },
-      "intermediate_frequency": 0.0,
-      "operations": {},
-      "outputs": {
-        "out1": [
-          "con1",
-          1
-        ],
-        "out2": [
-          "con1",
-          2
-        ]
-      },
-      "smearing": 0,
-      "time_of_flight": 24
-    },
-    "IQ1": {
-      "mixInputs": {
-        "I": [
-          "con1",
-          1
-        ],
-        "Q": [
-          "con1",
-          2
-        ],
-        "lo_frequency": 6000000000.0,
-        "mixer": "IQ1.mixer"
-      },
-      "intermediate_frequency": 0.0,
-      "operations": {},
-      "outputs": {
-        "out1": [
-          "con1",
-          1
-        ],
-        "out2": [
-          "con1",
-          2
-        ]
-      },
-      "smearing": 0,
-      "time_of_flight": 24
-    }
-  },
-  "pulses": {
-    "const_pulse": {
-      "operation": "control",
-      "length": 1000,
-      "waveforms": {
-        "I": "const_wf",
-        "Q": "zero_wf"
-      }
-    }
-  },
-  "waveforms": {
-    "zero_wf": {
-      "type": "constant",
-      "sample": 0.0
-    },
-    "const_wf": {
-      "type": "constant",
-      "sample": 0.1
-    }
-  },
-  "digital_waveforms": {
-    "ON": {
-      "samples": [
-        [
-          1,
-          0
-        ]
-      ]
-    }
-  },
-  "integration_weights": {},
-  "mixers": {
-    "q0.xy.mixer": [
-      {
-        "intermediate_frequency": 0.0,
-        "lo_frequency": 6000000000.0,
-        "correction": [
-          1.0,
-          0.0,
-          0.0,
-          1.0
-        ]
-      }
-    ],
-    "q1.xy.mixer": [
-      {
-        "intermediate_frequency": 0.0,
-        "lo_frequency": 6000000000.0,
-        "correction": [
-          1.0,
-          0.0,
-          0.0,
-          1.0
-        ]
-      }
-    ],
-    "IQ0.mixer": [
-      {
-        "intermediate_frequency": 0.0,
-        "lo_frequency": 6000000000.0,
-        "correction": [
-          1.0,
-          0.0,
-          0.0,
-          1.0
-        ]
-      }
-    ],
-    "IQ1.mixer": [
-      {
-        "intermediate_frequency": 0.0,
-        "lo_frequency": 6000000000.0,
-        "correction": [
-          1.0,
-          0.0,
-          0.0,
-          1.0
-        ]
-      }
-    ]
-  },
-  "oscillators": {}
-}
-```
-///
+The resulting configuration is ready for use with QUA scripts to control quantum experiments.
 
-This QUA config can then be used in QUA to open a Quantum Machine:
 ```python
-qm = qmm.open_qm(qua_config)  # opens a quantum machine with configuration
+qm = qmm.open_qm(qua_config)  # Open a quantum machine with the configuration
 ```

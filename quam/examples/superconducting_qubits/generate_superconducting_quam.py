@@ -16,17 +16,17 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
     Returns:
         QuamRoot: A QuAM with the specified number of qubits.
     """
-    quam = QuAM()
-    quam.wiring = {
-        "qubits": [
-            {
-                "port_I": ("con1", 5 * k + 3),
-                "port_Q": ("con1", 5 * k + 4),
-                "port_Z": ("con1", 5 * k + 5),
+    machine = QuAM()
+    machine.wiring = {
+        "qubits": {
+            f"q{idx}": {
+                "port_I": ("con1", 3 * idx + 3),
+                "port_Q": ("con1", 3 * idx + 4),
+                "port_Z": ("con1", 3 * idx + 5),
             }
-            for k in range(num_qubits)
-        ],
-        "resonator": {
+            for idx in range(num_qubits)
+        },
+        "feedline": {
             "opx_output_I": ("con1", 1),
             "opx_output_Q": ("con1", 2),
             "opx_input_I": ("con1", 1),
@@ -39,34 +39,29 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         transmon = Transmon(
             id=idx,
             xy=IQChannel(
-                opx_output_I=f"#/wiring/qubits/{idx}/port_I",
-                opx_output_Q=f"#/wiring/qubits/{idx}/port_Q",
+                opx_output_I=f"#/wiring/qubits/q{idx}/port_I",
+                opx_output_Q=f"#/wiring/qubits/q{idx}/port_Q",
                 frequency_converter_up=FrequencyConverter(
                     mixer=Mixer(),
                     local_oscillator=LocalOscillator(power=10, frequency=6e9),
                 ),
                 intermediate_frequency=100e6,
             ),
-            z=SingleChannel(opx_output=f"#/wiring/qubits/{idx}/port_Z"),
+            z=SingleChannel(opx_output=f"#/wiring/qubits/q{idx}/port_Z"),
         )
-        quam.qubits.append(transmon)
-        quam.local_oscillators.append(f"#/qubits/{idx}/xy/local_oscillator")
-        quam.mixers.append(f"#/qubits/{idx}/xy/mixer")
-
+        machine.qubits[transmon.name] = transmon
         readout_resonator = InOutIQChannel(
             id=idx,
-            opx_output_I="#/wiring/resonator/opx_output_I",
-            opx_output_Q="#/wiring/resonator/opx_output_Q",
-            opx_input_I="#/wiring/resonator/opx_input_I",
-            opx_input_Q="#/wiring/resonator/opx_input_Q",
+            opx_output_I="#/wiring/feedline/opx_output_I",
+            opx_output_Q="#/wiring/feedline/opx_output_Q",
+            opx_input_I="#/wiring/feedline/opx_input_I",
+            opx_input_Q="#/wiring/feedline/opx_input_Q",
             frequency_converter_up=FrequencyConverter(
                 mixer=Mixer(), local_oscillator=LocalOscillator(power=10, frequency=6e9)
             ),
         )
-        quam.resonators.append(readout_resonator)
-        quam.local_oscillators.append(f"#/resonators/{idx}/xy/local_oscillator")
-        quam.mixers.append(f"#/resonators/{idx}/xy/mixer")
-    return quam
+        transmon.resonator = readout_resonator
+    return machine
 
 
 if __name__ == "__main__":

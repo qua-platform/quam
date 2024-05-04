@@ -45,6 +45,7 @@ nav:
   - index.md
   - installation.md
   - demonstration.md
+  - demonstration-original.md
   - "QuAM Components":
     - "components/index.md"
     - "components/quam-root.md"
