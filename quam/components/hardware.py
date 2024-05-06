@@ -116,6 +116,22 @@ class BaseFrequencyConverter(QuamComponent):
 
 @quam_dataclass
 class FrequencyConverter(BaseFrequencyConverter):
+    """Frequency up/down converter component.
+
+    This component encapsulates the local oscillator and mixer used to upconvert or
+    downconvert an RF signal.
+
+    The FrequencyConverter component is attached to IQ channels through
+
+    - `IQChannel.frequency_converter_up`
+    - `InOutIQChannel.frequency_converter_down`
+
+    Args:
+        local_oscillator (LocalOscillator): The local oscillator for the frequency converter.
+        mixer (Mixer): The mixer for the frequency converter.
+        gain (float): The gain of the frequency converter.
+    """
+
     local_oscillator: LocalOscillator = None
     mixer: Mixer = None
     gain: float = None
