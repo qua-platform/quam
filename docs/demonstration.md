@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to our QuAM tutorial! This guide will demonstrate setting up a basic superconducting quantum circuit with two Transmon qubits and their resonators. We'll equip these qubits with control and readout pulses and generate a QUA configuration for interacting with quantum hardware.
+Welcome to our QuAM tutorial! This guide will demonstrate setting up a basic superconducting quantum circuit with two transmon qubits and their resonators. We'll equip these qubits with control and readout pulses and generate a QUA configuration for interacting with quantum hardware.
 
 QuAM is not limited to any specific quantum hardware platform. It is designed to be adaptable and extensible for various quantum systems. You can customize components or expand the framework to add new functionalities as needed. For details on customization, visit [Custom QuAM Components](/components/custom-components).
 
@@ -279,7 +279,7 @@ QuAM:
 
 The output provides a detailed hierarchical view of the machine's configuration, illustrating the connectivity and settings of each component.
 
-## Persisting the Setup
+## Saving the QuAM Setup
 
 Save the current state of your QuAM setup to a file for later use or inspection:
 
@@ -374,10 +374,6 @@ To resume work with a previously configured setup:
 loaded_machine = QuAM.load("state.json")
 ```
 
-## Workflow
-Certainly! Here's an improved version of the "Workflow" section with a clearer structure and concise language:
-
----
 
 ## Workflow
 

@@ -18,7 +18,7 @@ machine = QuAM()
 
 Next, we can add a qubit as a component:
 ```python
-qubit = superconducting_qubits.Transmon(xy=IQChannel(opx_output_I=("con1", 1"), opx_output_Q=("con1", 2"))
+qubit = superconducting_qubits.Transmon(xy=IQChannel(opx_output_I=("con1", 1), opx_output_Q=("con1", 2"))
 machine.qubit = qubit
 assert qubit.parent == machine
 ```
@@ -27,7 +27,7 @@ One of the rules in QuAM is that a component can only have one parent. This is e
 As a result, the following raises an error:
 
 ```python
-channel = IQChannel(opx_output_I=("con1", 1"), opx_output_Q=("con1", 2")
+channel = IQChannel(opx_output_I=("con1", 1), opx_output_Q=("con1", 2")
 qubit1 = superconducting_qubits.Transmon(xy=channel)
 qubit2 = superconducting_qubits.Transmon(xy=channel)  # Raises ValueError
 ``` 
@@ -40,16 +40,15 @@ A reference in QuAM is a way for a component's attribute to be a reference to an
 ```python
 @quam_dataclass
 class Component(QuamComponent):
+    a: int
+    b: int
     
-
-component = Component()
-component.a = 42
-component.b = "#./a"
+component = Component(a=42, b="#./a")
 print(component.b)  # Prints 42
 ```
-As can be seen, the Quam component attribute `component.b` was set to a reference, i.e. a string starting with `"#"`. This reference indicates that when the component is retrieved, e.g. through the `print()` statement, it should instead return the value of its reference.
+As can be seen, the QuAM component attribute `component.b` was set to a reference, i.e. a string starting with `"#"`. This reference indicates that when the component is retrieved, e.g. through the `print()` statement, it should instead return the value of its reference.
 
-Quam references follow the JSON pointer syntax (For a description see https://datatracker.ietf.org/doc/html/rfc6901), but further allow for relative references, i.e. references w.r.t the current Quam component. We will next describe the three types of references.
+QuAM references follow the JSON reference syntax (For a description see [https://json-spec.readthedocs.io/reference.html](https://json-spec.readthedocs.io/reference.html)), but further allow for relative references, i.e. references w.r.t the current QuAM component. We will next describe the three types of references.
 
 ### Absolute References
 Absolute references always start with `"#/"`, e.g. `"#/absolute/path/to/value`.
@@ -70,35 +69,40 @@ An example was given above, and is reiterated here:
 ```python
 @quam_dataclass
 class Component(QuamComponent):
+    a: int
+    b: int
     
-
-component = Component()
-component.a = 42
-component.b = "#./a"
+component = Component(a=42, b="#./a")
 print(component.b)  # Prints 42
 ```
 
 ### Relative Parent References
 Relative parent references start with `"#../"`, e.g. `"#../relative/path/from/parent/to/value`  
 These are references with respect to the parent of the current QuAM component.
-Note that the parent
-An example was given above, and is reiterated here:
+
+To illustrate relative parent references, we modify `Component` to allow for a subcomponent:
 
 ```python
 @quam_dataclass
 class Component(QuamComponent):
-    
+    sub_component: "Component" = None
+    a: int = None
+    b: int = None
 
-component = Component()
-component.a = 42
-component.b = "#./a"
-print(component.b)  # Prints 42
+component = Component(a=42)
+component.subcomponent = Component(a="#../a")
+print(component.subcomponent.a)  # Prints 42
 ```
+
+As can be seen in this example, `component.subcomponent.a = "#../a"` is a relative parent reference, which means that `component.subcomponent.a` should be the same as `component.a`.
+
+Parent references can also be stacked, e.g. `"#../../a"` would be a reference to the grandparent of the current component.
+
 
 ## Additional Notes on References
 
 ### Directly Overwriting References is not Allowed
-Since Quam references behave like regular attributes, the user might accidentally overwrite a reference without realizing it. To prohibit this, it is not possible to directly overwrite a reference:
+Since QuAM references behave like regular attributes, the user might accidentally overwrite a reference without realizing it. To prohibit this, it is not possible to directly overwrite a reference:
 
 ```python
 component = Component()

@@ -49,7 +49,7 @@ IQ_channel = IQChannel(
 
 ### DC Offset
 Each analog channel can have a specified DC offset that remains for the duration of the QUA program.
-This can be set through `SingleChannel.opx_output_offset` for the `SingleChannel`, and through `IQChannel.opx_output_offset_I` and `IQChannel.opx_output_offset_Q` for the `IQChannel`.
+This can be set through `SingleChannel.opx_output_offset` for the [SingleChannel][quam.components.channels.SingleChannel], and through `IQChannel.opx_output_offset_I` and `IQChannel.opx_output_offset_Q` for the [IQChannel][quam.components.channels.IQChannel].
 
 Note that if multiple channels are attached to the same OPX output port(s), they may not have different output offsets.
 This raises a warning and chooses the DC offset of the last channel. 
@@ -86,7 +86,7 @@ IQ_channel = IQChannel(
 
 Integrated frequency conversion systems such as [QM's Octave](https://docs.quantum-machines.co/1.1.7/qm-qua-sdk/docs/Hardware/octave/) usually have additional features such as auto-calibration.
 For this reason they have a specialized frequency converter such as the [OctaveUpConverter][quam.components.octave.OctaveUpConverter].
-See the [octave][] documentation for details.
+See the [QuAM Octave Documentation][octave] documentation for details.
 
 
 ### Analog Pulses
@@ -110,7 +110,7 @@ with program() as prog:
 ```
 [Channel.play()][quam.components.channels.Channel.play] is a light wrapper around [qm.qua.play()](https://docs.quantum-machines.co/latest/qm-qua-sdk/docs/Introduction/qua_overview/?h=play#play-statement) to attach it to the channel.
 
-Details on pulses in quam can be found at [pulses][].
+Details on pulses in QuAM can be found at the [Pulses Documentation][pulses].
 
 ## Analog Output + Input Channels
 Aside from sending signals to the quantum hardware, data is usually also received back, and subsequently read out through the hardware's input ports.

@@ -20,7 +20,7 @@ Users can supplement these common pulses with their own custom pulses by subclas
 
 
 ## Usage
-To implement pulses in a QuAM program, you first need to register them to a specific channel. Here's how to set up a channel and register a square pulse for an operation labeled "X180":
+To implement pulses in a QuAM program, you first need to register them to a specific channel. Here's how to set up a channel and register a square pulse for an operation labeled `"X180"`:
 
 ```python
 from quam.components import pulses, SingleChannel
@@ -29,10 +29,10 @@ from quam.components import pulses, SingleChannel
 channel = SingleChannel(opx_output=("con1", 1))
 
 # Register a square pulse with a duration of 1000 units and amplitude of 0.5
-channel.operations["X180"] = pulses.SquarePulse(duration=1000, amplitude=0.5)```
+channel.operations["X180"] = pulses.SquarePulse(duration=1000, amplitude=0.5)
 ```
 
-After registering a pulse, you can utilize it in a QuAM program. Below is a simple example where the "X180" pulse is played:
+After registering a pulse, you can utilize it in a QuAM program. Below is a simple example where the `"X180"` pulse is played:
 
 ```python
 from qm.qua import program
@@ -68,8 +68,8 @@ with program() as prog:
 ## Creating Custom Pulses
 To create custom pulses in QuAM, you can extend the functionality of the Pulse class by subclassing it and defining your own waveform generation logic. This allows for precise control over the pulse characteristics.
 
-### Example: Creating a Triangular Pulse
-To illustrate, let's create a triangular pulse. This involves subclassing the Pulse class from the QuAM library and defining specific parameters and the waveform function.
+### Example: Creating a Ramp Pulse
+To illustrate, let's create a pulse that ramps in amplitude. This involves subclassing the Pulse class from the QuAM library and defining specific parameters and the waveform function.
 
 ```python
 import numpy as np
@@ -77,25 +77,25 @@ from quam.core import quam_dataclass
 from quam.components import pulses
 
 @quam_dataclass
-class TriangularPulse(pulses.Pulse):
-    # Define the starting and stopping amplitudes for the triangular pulse
+class RampPulse(pulses.Pulse):
+    # Define the starting and stopping amplitudes for the ramp pulse
     amplitude_start: float
     amplitude_stop: float
 
     def waveform_function(self) -> np.ndarray:
-        # This function generates a linearly spaced array to form a triangular waveform
+        # This function generates a linearly spaced array to form a ramp waveform
         return np.linspace(self.amplitude_start, self.amplitude_stop, self.length)
 ```
 Ensure this code is saved in a properly structured Python module within your project so that it can be imported as needed. For details on organizing custom components, refer to the [Custom QuAM Components](/components/custom-components) section of the QuAM documentation
 
 ### Extending to Readout Pulses
-To create a readout pulse derived from a control pulse, subclass both the specific control pulse and the [ReadoutPulse][quam.components.pulses.ReadoutPulse] class. Below is an example of how to adapt the Triangular Pulse into a readout pulse.
+To create a readout pulse derived from a control pulse, subclass both the specific control pulse and the [ReadoutPulse][quam.components.pulses.ReadoutPulse] class. Below is an example of how to adapt the RampPulse into a readout pulse.
 
 ```python
 @quam_dataclass
-class TriangularReadoutPulse(pulses.ReadoutPulse, TriangularPulse):
-    """Extend TriangularPulse to include readout-specific functionality."""
-    # No additional fields needed; inherits all from TriangularPulse and ReadoutPulse
+class RampReadoutPulse(pulses.ReadoutPulse, RampPulse):
+    """Extend RampPulse to include readout-specific functionality."""
+    # No additional fields needed; inherits all from RampPulse and ReadoutPulse
     pass
 ```
 Readout pulses utilize additional parameters for integration weights which are crucial for signal processing:
@@ -105,7 +105,7 @@ Readout pulses utilize additional parameters for integration weights which are c
 
 These two parameters are used to calculate the readout pulse's integration weights (`sine`, `-sine` and `cosine`), which are essential for signal processing in readout operations.
 
-These parameters are typically used to manage the integration weights (`sine`, `-sine`, and `cosine`) for the readout operations. By default, these weights assume a fixed angle. If variable angles are needed, subclass the BaseReadoutPulse class and override the integration_weights_function() to customize this behavior.
+These parameters are typically used to manage the integration weights (`sine`, `-sine`, and `cosine`) for the readout operations. By default, these weights assume a fixed angle. If variable angles are needed, subclass the [BaseReadoutPulse][quam.components.pulses.BaseReadoutPulse] class and override the `integration_weights_function()` to customize this behavior.
 
 This approach ensures your custom pulse configurations are both flexible and compatible with the broader QuAM framework.
 
@@ -127,7 +127,7 @@ In the QUA configuration, pulses are decomposed into multiple components, such a
 Conversely, QuAM adopts a parametrized approach that encapsulates all pulse characteristics within a single class, aiming to simplify pulse definition and manipulation:
 
 - **Parametrized Representation**: Pulses in QuAM are instances of a parametrized class, where the type of pulse and its parameters (such as length and amplitude) are directly defined by the user. This simplifies the initial setup and modification of pulse configurations.
-- **Waveform Generation**: These parameters are used to generate the waveform dynamically using the method `[Pulse.generate_waveform()][quam.components.pulses.Pulse.generate_waveform]`. This approach integrates waveform generation within the pulse definition, streamlining the configuration process.
+- **Waveform Generation**: These parameters are used to generate the waveform dynamically using the method `waveform_function()`. This approach integrates waveform generation within the pulse definition, streamlining the configuration process.
 - **No built-in waveform reuse**: QuAM does not currently support sharing waveforms across pulses, as each pulse is defined independently. This can have implications for memory usage on the OPX. Reusing waveforms in QuAM is planned in a future release.
 
 ### Conclusion

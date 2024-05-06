@@ -12,9 +12,9 @@ QuAM stands out by transforming the way quantum control is perceived and impleme
 QuAM is not just a tool but a gateway to streamlined and efficient quantum computing: 
 <div class="grid" markdown>
 
-- **Component-Based Setup:** Utilize a standard set of QuAM components like Mixers and IQChannels to digitally represent and manipulate your quantum environment.
+- **Component-Based Setup:** Utilize a standard set of QuAM components like [Mixers][quam.components.hardware.Mixer] and [IQChannels][quam.components.channels.IQChannel] to digitally represent and manipulate your quantum environment.
 - **Automated Configuration:** Automatically generate the necessary QUA configuration from your QuAM setup, simplifying the transition from design to deployment.
-- **Extensibility:** Easily extend QuAM with custom classes to accommodate complex quantum setups, providing flexibility and power in your quantum computing applications.
+- **Extensibility:** Easily extend QuAM with [custom classes](components/custom-components.md) to accommodate complex quantum setups, providing flexibility and power in your quantum computing applications.
 - **State Management:** Effortlessly save and load your QuAM state, enabling consistent results and reproducibility in experiments.
 
 ```python
@@ -48,12 +48,10 @@ machine.save("state.json")
 ## Getting Started
 
 - **[QuAM Installation](installation.md):** Set up QuAM on your system and get ready to explore its capabilities.
+- **[QuAM Demonstration](demonstration.md):** Witness QuAM in action with practical examples and hands-on tutorials.
 - **[QuAM Components](components/index.md):** Explore the core components that form the building blocks of the QuAM architecture.
 - **[QuAM Features](features/index.md):** Discover the unique features and capabilities that QuAM offers for your quantum projects.
-- **[QuAM Demonstration](demonstration.md):** Witness QuAM in action with practical examples and hands-on tutorials.
-- **[QuAM Migration](migrating-to-quam.md)**: Already using QUA? Our detailed guide on [migrating-to-quam] and tools are designed for a smooth transition to QuAM, letting you migrate your existing projects without hassle.
-
-## Explore More
-Delve into our [API documentation](API_references/index.md) to fully leverage QuAM’s capabilities and optimize your quantum applications.
+- **[QuAM Migration](migrating-to-quam.md)**: Already using QUA? Our detailed guide on migrating to QuAM are designed for a smooth transition to QuAM, letting you migrate your existing QUA projects without hassle.
+- **[API References](API_references/index.md)**: Dive into the detailed API documentation to explore the classes, methods, and attributes available in QuAM.
 
 We are thrilled to support your journey into the quantum future with QuAM. Together, let's push the boundaries of what's possible in quantum computing!

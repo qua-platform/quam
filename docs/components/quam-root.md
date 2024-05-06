@@ -20,13 +20,14 @@ For more complex setups requiring custom components, you can extend the QuAM roo
 ### Example of a Custom QuAM Class
 
 ```python title="custom_components/quam.py"
+from typing import Dict
 from quam.core import QuamRoot, quam_dataclass
 from quam.components import Octave
 from custom_components.qubit import Qubit
 
 @quam_dataclass
 class QuAM(QuamRoot):
-    qubit: Dict[str, Qubit]
+    qubits: Dict[str, Qubit]
     octaves: Dict[str, Octave]
 ```
 

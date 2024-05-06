@@ -6,7 +6,7 @@ QuAM, the Quantum Abstract Machine, serves as a powerful abstraction framework b
 
 Migrating from QUA to QuAM involves a structured, five-step process that methodically transitions your existing quantum programming framework. Here's a brief overview of each step:
 
-1. **Create a Root QuAM Object:** Start by establishing a foundational `QuamRoot` object that serves as the top-level container for all other QuAM components. This is where you'll begin building your new QuAM configuration.
+1. **Create a Root QuAM Object:** Start by establishing a foundational [QuamRoot][quam.core.quam_classes.QuamRoot] object that serves as the top-level container for all other QuAM components. This is where you'll begin building your new QuAM configuration.
 
 2. **Add Octaves:** If your original QUA setup includes Octave components, this step involves integrating these components into the QuAM configuration, utilizing existing connectivity settings.
 
@@ -22,7 +22,7 @@ Each of these steps is designed to ensure a seamless transition to QuAM, leverag
 
 ## 1: Create a Root QuAM Object
 
-Begin by establishing a `QuamRoot` object, which serves as the top-level container for all other QuAM components. For simplicity, you can use the pre-defined `BasicQuAM` class:
+Begin by establishing a [QuamRoot][quam.core.quam_classes.QuamRoot] object, which serves as the top-level container for all other QuAM components. For simplicity, you can use the pre-defined [BasicQuAM][quam.components.basic_quam.BasicQuAM] class:
 
 ```python
 from quam.components import BasicQuAM
@@ -30,7 +30,12 @@ from quam.components import BasicQuAM
 machine = BasicQuAM()
 machine.print_summary()  # outputs the current QuAM state
 ```
-<!-- TODO Add output -->
+
+```title="output"
+QuAM:
+  channels: QuamDict Empty
+  octaves: QuamDict Empty
+```
 
 Next we populate the root-level `machine` object with QuAM components
 

@@ -46,7 +46,6 @@ nav:
   - index.md
   - installation.md
   - demonstration.md
-  - demonstration-original.md
   - "QuAM Components":
     - "components/index.md"
     - "components/quam-root.md"
@@ -66,6 +65,7 @@ nav:
       - "QuAM Pulses API": "API_references/components/pulses_API.md"
       - "QuAM Hardware API": "API_references/components/hardware_API.md"
       - "QuAM Octave API": "API_references/components/octave_API.md"
+      - "BasicQuAM API": "API_references/components/basic_quam_API.md"
     - "QuAM Core Classes API": "API_references/core/quam_classes_API.md"
 plugins:
 # - mkdocs-jupyter:

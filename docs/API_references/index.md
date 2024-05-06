@@ -4,18 +4,21 @@ Welcome to the API Reference section of the Quantum Abstract Machine (QuAM) docu
 
 ## Quick Links
 
-- [**Core Components**](/API_references/core/quam_classes_API.md)  
+- [**Core Components**](/API_references/core/quam_classes_API)  
   Details on fundamental building blocks like [QuamBase][quam.core.quam_classes.QuamBase], [QuamComponent][quam.core.quam_classes.QuamComponent] and [QuamRoot][quam.core.quam_classes.QuamRoot].
   [QuamBase][quam.core.quam_classes.QuamBase]
 
-- [**Channel Components**](/API_references/components/channels_API.md)  
+- [**Channel Components**](/API_references/components/channels_API)  
   Learn about channel configurations and their operations within the QuAM framework.
 
-- [**Pulse Components**](/API_references/components/pulses_API.md)  
+- [**Pulse Components**](/API_references/components/pulses_API)  
   A detailed look at various pulse types and their properties used in quantum operations.
   
-- [**Hardware Components**](/API_references/components/hardware_API.md)  
+- [**Hardware Components**](/API_references/components/hardware_API)  
   Explore the hardware-related classes such as [Mixer][quam.components.hardware.Mixer], [LocalOscillator][quam.components.hardware.LocalOscillator], and [FrequencyConverter][quam.components.hardware.FrequencyConverter].
 
-- [**Octave Components**](/API_references/components/octave_API.md)  
+- [**Octave Components**](/API_references/components/octave_API)  
   Documentation on the `Octave` component and its associated up and down converters.
+
+- [**BasicQuAM Class**](/API_references/components/basic_quam_API)  
+  Details on the `BasicQuAM` class, the root-level QuAM instance that serves as the entry point for QuAM configurations.
