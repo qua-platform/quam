@@ -472,8 +472,8 @@ class SingleChannel(Channel):
 
 
 @quam_dataclass
-class InOutSingleChannel(SingleChannel):
-    """QuAM component for a single (not IQ) input & output channel.
+class InSingleChannel(Channel):
+    """QuAM component for a single (not IQ) input channel.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -481,16 +481,14 @@ class InOutSingleChannel(SingleChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port from OPX perspective,
-            a tuple of (controller_name, port).
         opx_input (Tuple[str, int]): Channel input port from OPX perspective,
             a tuple of (controller_name, port).
-        filter_fir_taps (List[float]): FIR filter taps for the output port.
-        filter_iir_taps (List[float]): IIR filter taps for the output port.
-        opx_output_offset (float): DC offset for the output port.
         opx_input_offset (float): DC offset for the input port.
-        intermediate_frequency (float): Intermediate frequency of OPX output, default
-            is None.
+        intermediate_frequency (float): Intermediate frequency of OPX input,
+            default is None.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
     """
 
     opx_input: Tuple[str, int]
@@ -500,7 +498,7 @@ class InOutSingleChannel(SingleChannel):
     smearing: int = 0
 
     def apply_to_config(self, config: dict):
-        """Adds this SingleChannel to the QUA configuration.
+        """Adds this InSingleChannel to the QUA configuration.
 
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
@@ -880,8 +878,8 @@ class IQChannel(Channel):
 
 
 @quam_dataclass
-class InOutIQChannel(IQChannel):
-    """QuAM component for an IQ channel with both input and output.
+class InIQChannel(Channel):
+    """QuAM component for an IQ input channel with both input and output.
 
     An example of such a channel is a readout resonator, where you may want to
     apply a readout tone and then measure the response.
@@ -909,6 +907,9 @@ class InOutIQChannel(IQChannel):
             for the IQ output.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
             QuAM component for the IQ input port. Only needed for the old Octave.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
     """
 
     opx_input_I: Tuple[str, int]
@@ -1220,3 +1221,56 @@ class InOutIQChannel(IQChannel):
             ),
         )
         return tuple(qua_vars)
+
+
+@quam_dataclass
+class InOutSingleChannel(SingleChannel, InSingleChannel):
+    pass
+
+
+@quam_dataclass
+class InOutIQChannel(IQChannel, InIQChannel):
+    """QuAM component for an IQ input channel with both input and output.
+
+    An example of such a channel is a readout resonator, where you may want to
+    apply a readout tone and then measure the response.
+
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "readout") and value is a
+            ReadoutPulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_output_offset_I float: The offset of the I channel. Default is 0.
+        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
+        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_input_offset_I float: The offset of the I channel. Default is 0.
+        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
+        intermediate_frequency (float): Intermediate frequency of the mixer.
+        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+            for the IQ output.
+        frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
+            QuAM component for the IQ input port. Only needed for the old Octave.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+    """
+
+    pass
+
+
+@quam_dataclass
+class InSingleOutIQChannel(IQChannel, InSingleChannel):
+    pass
+
+
+@quam_dataclass
+class InIQOutSingleChannel:
+    pass
