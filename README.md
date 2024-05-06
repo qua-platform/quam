@@ -1,7 +1,3 @@
-Here's a README template for the QuAM GitHub repository front page. This README provides a concise overview of QuAM, useful links, installation instructions, and a placeholder for code examples:
-
----
-
 # QuAM: Quantum Abstract Machine
 
 ## Overview
