@@ -207,3 +207,21 @@ def test_quam_dataclass_with_kw_only():
     assert len(f) == 2
     assert f[0].name == "int_val"
     assert f[1].name == "int_val_optional"
+
+
+def test_quam_dataclass_optional_field():
+    from quam.core import QuamComponent
+
+    @quam_dataclass
+    class RootClass(QuamComponent):
+        optional_root_attr: int = None
+
+    @quam_dataclass
+    class DerivedClass(RootClass):
+        pass
+
+    from quam.utils.dataclass import get_dataclass_attr_annotations
+
+    attr_annotations = get_dataclass_attr_annotations(DerivedClass)
+
+    assert list(attr_annotations["required"]) == []
