@@ -55,7 +55,19 @@ source {environment_name}/bin/activate
 ///
 
 ## :two: Installation
-To download and install QuAM using Git, open Powershell / terminal :octicons-terminal-16: in a desired installation folder and run the following command:
+QuAM can be installed directly using `pip` or by cloning the repository from GitHub.
+
+### Pip installation (recommended)
+
+The easiest way to install QuAM is directly using `pip`:
+
+```bash
+pip install git+https://github.com/qua-platform/quam.git
+```
+
+### Developer installation from Git
+
+Alternatively, The QuAM repository can be downloaded using Git. Open Powershell / terminal :octicons-terminal-16: in a desired installation folder and run the following command:
 ```bash
 git clone https://github.com/qua-platform/quam.git
 pip3 install ./quam
