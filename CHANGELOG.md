@@ -1,6 +1,7 @@
 ## [0.3.2]
 ### Added
 - Added full QuAM documentation, including web hosting
+- Added `BasicQuAM` to QuAM components
 
 ### Fixed
 - Fix error where a numpy array of integration weights raises an error
