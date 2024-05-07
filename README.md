@@ -4,7 +4,6 @@
 QuAM (Quantum Abstract Machine) is an innovative software framework designed to provide an abstraction layer over the QUA programming language, facilitating a more intuitive interaction with quantum computing platforms. Aimed primarily at physicists and researchers, QuAM allows users to think and operate in terms of qubits and quantum operations rather than the underlying hardware specifics.
 
 Explore detailed documentation and get started with QuAM here: [QuAM Documentation](https://docs.quantum-machines.co/quam/).
-<!-- TODO -->
 
 ## Key Features
 - **Abstraction Layer**: Simplifies quantum programming by providing higher-level abstractions for qubit operations.
@@ -14,18 +13,8 @@ Explore detailed documentation and get started with QuAM here: [QuAM Documentati
 - **State Management**: Features robust tools for saving and loading your quantum states, promoting reproducibility and consistency.
 
 ## Installation
-To install QuAM, follow these simple steps:
-
-1. Ensure you have Python ≥ 3.8 installed on your system.
-2. Clone the repository:
-   ```bash
-   git clone https://github.com/qua-platform/quam.git
-   ```
-3. Navigate to the cloned directory and install the required dependencies:
-   ```bash
-   cd quam
-   pip install .
-   ```
+To install QuAM, first ensure you have Python ≥ 3.8 installed on your system.  
+Then run `pip install git+https://github.com/qua-platform/quam.git`
 
 ## Quick Start
 Here’s a basic example to get you started with QuAM:
