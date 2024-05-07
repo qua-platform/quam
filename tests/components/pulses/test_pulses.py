@@ -4,6 +4,7 @@ import pytest
 from quam.core import *
 from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
+from quam.utils.dataclass import get_dataclass_attr_annotations
 
 
 def test_drag_pulse():
@@ -183,3 +184,11 @@ def test_pulses_referenced():
         machine_loaded.channel.operations.get_unreferenced_value("pulse_referenced")
         == "#./pulse"
     )
+
+
+def test_pulse_attr_annotations():
+    from quam.components import pulses
+
+    attr_annotations = get_dataclass_attr_annotations(pulses.SquareReadoutPulse)
+
+    assert list(attr_annotations["required"]) == ["length", "amplitude"]

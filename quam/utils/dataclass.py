@@ -16,7 +16,7 @@ class REQUIRED:
 
 
 def get_dataclass_attr_annotations(
-    cls_or_obj: Union[type, object]
+    cls_or_obj: Union[type, object],
 ) -> Dict[str, Dict[str, type]]:
     """Get the attributes and annotations of a dataclass
 
@@ -80,13 +80,6 @@ def dataclass_field_has_default(field: dataclasses.field) -> bool:
     return False
 
 
-def dataclass_has_default_fields(cls) -> bool:
-    """Check if dataclass has any default fields"""
-    fields = dataclasses.fields(cls)
-    fields_default = any(dataclass_field_has_default(field) for field in fields)
-    return fields_default
-
-
 def handle_inherited_required_fields(cls):
     """Adds a default REQUIRED flag for dataclass fields when necessary
 
@@ -95,13 +88,24 @@ def handle_inherited_required_fields(cls):
     if not is_dataclass(cls):
         return
 
-    # Check if dataclass has default fields
-    fields_required = dataclass_has_default_fields(cls)
-    if not fields_required:
+    # Check if dataclass has fields with default value
+    optional_fields = [
+        field.name
+        for field in dataclasses.fields(cls)
+        if dataclass_field_has_default(field)
+    ]
+    if not optional_fields:
+        # All fields of the dataclass are required, we don't have to handle situations
+        # where the parent class has fields with default values and the subclass has
+        # required fields.
         return
 
     # Check if class (not parents) has required fields
-    required_attrs = [attr for attr in cls.__annotations__ if attr not in cls.__dict__]
+    required_attrs = [
+        attr
+        for attr in cls.__annotations__
+        if attr not in cls.__dict__ and attr not in optional_fields
+    ]
     for attr in required_attrs:
         setattr(cls, attr, REQUIRED)
 
