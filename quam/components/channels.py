@@ -216,8 +216,7 @@ class Channel(QuamComponent):
                 time at which the operation occurred to a stream. If the
                 `timestamp_stream` is a string ``label``, then the timestamp
                 handle can be retrieved with
-                [`qm._results.JobResults.get`][qm.results.streaming_result_fetcher.StreamingResultFetcher] with the same
-                ``label``.
+                `qm._results.JobResults.get` with the same ``label``.
             validate (bool): If True (default), validate that the pulse is registered
                 in Channel.operations
 

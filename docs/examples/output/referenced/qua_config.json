@@ -10,7 +10,13 @@
           "offset": 0.0
         },
         "5": {
-          "offset": 0
+          "offset": 0.0
+        },
+        "1": {
+          "offset": 0.0
+        },
+        "2": {
+          "offset": 0.0
         },
         "6": {
           "offset": 0.0
@@ -19,12 +25,6 @@
           "offset": 0.0
         },
         "8": {
-          "offset": 0
-        },
-        "1": {
-          "offset": 0.0
-        },
-        "2": {
           "offset": 0.0
         }
       },
@@ -41,6 +41,8 @@
   },
   "elements": {
     "q0.xy": {
+      "operations": {},
+      "intermediate_frequency": 100000000.0,
       "mixInputs": {
         "I": [
           "con1",
@@ -52,45 +54,20 @@
         ],
         "mixer": "q0.xy.mixer",
         "lo_frequency": 6000000000.0
-      },
-      "intermediate_frequency": 0.0,
-      "operations": {}
+      }
     },
     "q0.z": {
+      "operations": {},
       "singleInput": {
         "port": [
           "con1",
           5
         ]
-      },
-      "operations": {}
-    },
-    "q1.xy": {
-      "mixInputs": {
-        "I": [
-          "con1",
-          6
-        ],
-        "Q": [
-          "con1",
-          7
-        ],
-        "mixer": "q1.xy.mixer",
-        "lo_frequency": 6000000000.0
-      },
-      "intermediate_frequency": 0.0,
-      "operations": {}
-    },
-    "q1.z": {
-      "singleInput": {
-        "port": [
-          "con1",
-          8
-        ]
-      },
-      "operations": {}
+      }
     },
     "IQ0": {
+      "operations": {},
+      "intermediate_frequency": 0.0,
       "mixInputs": {
         "I": [
           "con1",
@@ -103,8 +80,8 @@
         "mixer": "IQ0.mixer",
         "lo_frequency": 6000000000.0
       },
-      "intermediate_frequency": 0.0,
-      "operations": {},
+      "smearing": 0,
+      "time_of_flight": 24,
       "outputs": {
         "out1": [
           "con1",
@@ -114,11 +91,36 @@
           "con1",
           2
         ]
-      },
-      "smearing": 0,
-      "time_of_flight": 24
+      }
+    },
+    "q1.xy": {
+      "operations": {},
+      "intermediate_frequency": 100000000.0,
+      "mixInputs": {
+        "I": [
+          "con1",
+          6
+        ],
+        "Q": [
+          "con1",
+          7
+        ],
+        "mixer": "q1.xy.mixer",
+        "lo_frequency": 6000000000.0
+      }
+    },
+    "q1.z": {
+      "operations": {},
+      "singleInput": {
+        "port": [
+          "con1",
+          8
+        ]
+      }
     },
     "IQ1": {
+      "operations": {},
+      "intermediate_frequency": 0.0,
       "mixInputs": {
         "I": [
           "con1",
@@ -131,8 +133,8 @@
         "mixer": "IQ1.mixer",
         "lo_frequency": 6000000000.0
       },
-      "intermediate_frequency": 0.0,
-      "operations": {},
+      "smearing": 0,
+      "time_of_flight": 24,
       "outputs": {
         "out1": [
           "con1",
@@ -142,9 +144,7 @@
           "con1",
           2
         ]
-      },
-      "smearing": 0,
-      "time_of_flight": 24
+      }
     }
   },
   "pulses": {
@@ -181,19 +181,7 @@
   "mixers": {
     "q0.xy.mixer": [
       {
-        "intermediate_frequency": 0.0,
-        "lo_frequency": 6000000000.0,
-        "correction": [
-          1.0,
-          0.0,
-          0.0,
-          1.0
-        ]
-      }
-    ],
-    "q1.xy.mixer": [
-      {
-        "intermediate_frequency": 0.0,
+        "intermediate_frequency": 100000000.0,
         "lo_frequency": 6000000000.0,
         "correction": [
           1.0,
@@ -206,6 +194,18 @@
     "IQ0.mixer": [
       {
         "intermediate_frequency": 0.0,
+        "lo_frequency": 6000000000.0,
+        "correction": [
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "q1.xy.mixer": [
+      {
+        "intermediate_frequency": 100000000.0,
         "lo_frequency": 6000000000.0,
         "correction": [
           1.0,
