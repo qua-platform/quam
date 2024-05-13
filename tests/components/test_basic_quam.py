@@ -1,6 +1,5 @@
 from copy import deepcopy
 from quam.components import BasicQuAM, SingleChannel
-from quam.core.qua_config_template import qua_config_template
 
 
 def test_instantiate_basic_quam_empty():
@@ -28,16 +27,15 @@ def test_instantiate_basic_quam_with_channel():
     }
 
 
-def test_generate_basic_quam_config():
+def test_generate_basic_quam_config(qua_config):
     quam = BasicQuAM()
     cfg = quam.generate_config()
-    expected_cfg = deepcopy(qua_config_template)
-    assert cfg == expected_cfg
+    assert cfg == qua_config
 
     quam.channels = {"single": SingleChannel(opx_output=("con1", 1))}
     cfg = quam.generate_config()
 
-    quam.channels["single"].apply_to_config(expected_cfg)
-    expected_cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.0
+    quam.channels["single"].apply_to_config(qua_config)
+    qua_config["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.0
 
-    assert cfg == expected_cfg
+    assert cfg == qua_config
