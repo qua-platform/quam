@@ -1,3 +1,4 @@
+from copy import deepcopy
 import pytest
 
 from quam.core import *
@@ -24,3 +25,10 @@ def remove_quam_root():
     from quam.core import QuamBase
 
     QuamBase._root = None
+
+
+@pytest.fixture
+def qua_config():
+    from quam.core.qua_config_template import qua_config_template
+
+    return deepcopy(qua_config_template)
