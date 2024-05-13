@@ -37,9 +37,13 @@ __all__ = [
     "DigitalOutputChannel",
     "Channel",
     "SingleChannel",
-    "InOutSingleChannel",
+    "InSingleChannel",
     "IQChannel",
+    "InIQChannel",
+    "InOutSingleChannel",
     "InOutIQChannel",
+    "InSingleOutIQChannel",
+    "InIQOutSingleChannel",
 ]
 
 
@@ -473,6 +477,8 @@ class SingleChannel(Channel):
 @quam_dataclass
 class InSingleChannel(Channel):
     """QuAM component for a single (not IQ) input channel.
+
+    This could be used for 
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
