@@ -7,7 +7,6 @@ def test_in_single_channel_attr_annotations():
     assert set(attr_annotations["required"]) == {"opx_input"}
     assert set(attr_annotations["optional"]) == {
         "operations",
-        "_default_label",
         "id",
         "digital_outputs",
         "opx_input_offset",
@@ -16,4 +15,26 @@ def test_in_single_channel_attr_annotations():
     }
 
 
-# def test_generate_config():
+def test_generate_config(qua_config):
+    channel = InSingleChannel(id="input_channel", opx_input=("con1", 1))
+
+    channel.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_inputs": {
+                1: {},
+            },
+            "analog_outputs": {},
+            "digital_outputs": {},
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "input_channel": {
+            "operations": {},
+            "outputs": {"out1": ("con1", 1)},
+            "smearing": 0,
+            "time_of_flight": 24,
+        }
+    }

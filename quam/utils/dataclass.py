@@ -3,7 +3,7 @@ from dataclasses import dataclass, fields, is_dataclass
 import functools
 import sys
 import warnings
-from typing import Dict, Union, get_type_hints
+from typing import Dict, Union, ClassVar, get_type_hints
 
 
 __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
@@ -44,6 +44,8 @@ def get_dataclass_attr_annotations(
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
+        if getattr(attr_type, "__origin__", None) == ClassVar:
+            continue
         # TODO Try to combine with third elif statement
         if getattr(cls_or_obj, attr, None) is REQUIRED:  # See "patch_dataclass()"
             if attr not in getattr(cls_or_obj, "__dataclass_fields__", {}):
@@ -101,12 +103,13 @@ def handle_inherited_required_fields(cls):
         return
 
     # Check if class (not parents) has required fields
-    required_attrs = [
-        attr
-        for attr in cls.__annotations__
-        if attr not in cls.__dict__ and attr not in optional_fields
-    ]
-    for attr in required_attrs:
+    for attr, attr_type in cls.__annotations__.items():
+        if attr in cls.__dict__:
+            continue
+        if attr in optional_fields:
+            continue
+        if getattr(attr_type, "__origin__", None) is ClassVar:
+            continue
         setattr(cls, attr, REQUIRED)
 
 
