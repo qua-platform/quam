@@ -385,7 +385,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
 
         phase = np.exp(1j * self.integration_weights_angle)
 
-        if self.integration_weights is None or not self.integration_weights:
+        if self.integration_weights is None or not len(self.integration_weights):
             integration_weights = [(1, self.length)]
         elif isinstance(self.integration_weights[0], float):
             integration_weights = convert_integration_weights(self.integration_weights)

@@ -6,6 +6,23 @@
     
 ### Changed
 - Deprecated the `rf_frequency` property in favor of the `RF_frequency` parameter in `IQChannel`
+- Added channel types: `InSingleChannel`, `InIQChannel`, `InSingleOutIQChannel`, `InIQOutSingleChannel`
+- Restructured channels to allow for other channel types.
+
+### Fixed
+- Fixed dataclass ClassVar parameters being wrongly classified as optional or required dataclass args
+
+
+## [0.3.2]
+### Added
+- Added full QuAM documentation, including web hosting
+- Added `BasicQuAM` to QuAM components
+
+### Fixed
+- Fix error where a numpy array of integration weights raises an error
+- Fix instantiation of a dictionary where the value is a reference
+- Fix optional parameters of a quam component parent class were sometimes categorized as a required parameter (ReadoutPulse)
+
 
 ## [0.3.1]
 ### Added
@@ -23,6 +40,7 @@
   no longer raises an error
 - The qua config entries from OctaveUpConverter entries I/Q_connection were of type 
   QuamList, resulting in errors during deepcopy. Converted to tuple
+
 
 ## [0.3.0]
 ### Added
@@ -59,9 +77,11 @@
 - JSON serializer doesn't break if an item is added to ignore that isn't part of QuAM
 - Allow `QuamDict` keys to be integers
 
+
 ## [0.2.2] -
 ### Added
 - Overwriting a reference now raises an error. A referencing attribute must first be set to None
+
 
 ## [0.2.1] -
 This release primarily targets Octave compatibility
@@ -73,9 +93,11 @@ This release primarily targets Octave compatibility
 - Remove `_value_annotation` when calling `get_dataclass_attr_annotation`
 - Slightly expanded error message in `validate_obj_type`
 
+
 ## [0.2.0] -
 ### Changed
 - Quam components now user `@quam_dataclass` decorator instead of `@dataclass(kw_only=True)`
+
 
 ## [0.1.1] -
 Only registering changes from November 29th

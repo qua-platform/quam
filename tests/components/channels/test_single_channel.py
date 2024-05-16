@@ -4,7 +4,6 @@ from copy import deepcopy
 
 from quam.components import *
 from quam.core import quam_dataclass, QuamRoot
-from quam.core.qua_config_template import qua_config_template
 
 
 @pytest.fixture
@@ -92,7 +91,7 @@ def test_single_channel_differing_offsets(bare_cfg):
     assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1 + 0.5e-4}
 
 
-def test_single_channel_offset_quam(bare_cfg):
+def test_single_channel_offset_quam(qua_config):
     @quam_dataclass
     class QuamTest(QuamRoot):
         channel: SingleChannel
@@ -102,28 +101,27 @@ def test_single_channel_offset_quam(bare_cfg):
 
     cfg = machine.generate_config()
 
-    expected_cfg = deepcopy(qua_config_template)
-    expected_cfg["controllers"] = {
+    qua_config["controllers"] = {
         "con1": {
             "analog_inputs": {},
             "digital_outputs": {},
             "analog_outputs": {1: {"offset": 0.0}},
         }
     }
-    expected_cfg["elements"] = {
+    qua_config["elements"] = {
         "channel": {
             "singleInput": {"port": ("con1", 1)},
             "operations": {},
         }
     }
 
-    assert cfg == expected_cfg
+    assert cfg == qua_config
 
     channel.opx_output_offset = 0.1
 
     cfg = machine.generate_config()
-    expected_cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.1
-    assert cfg == expected_cfg
+    qua_config["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.1
+    assert cfg == qua_config
 
 
 def test_single_channel_set_dc_offset(mocker):

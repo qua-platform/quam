@@ -2,6 +2,7 @@ import pytest
 from typing import List, Literal, Optional, Tuple
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
+from quam.core.quam_classes import QuamDict
 from quam.examples.superconducting_qubits.components import Transmon
 from quam.core.quam_instantiation import *
 from quam.utils import get_dataclass_attr_annotations
@@ -326,3 +327,14 @@ def test_isntantiate_tuple():
 
     obj = instantiate_quam_class(TestQuamTuple, {"tuple_val": [42, "hello"]})
     assert obj.tuple_val == (42, "hello")
+
+
+def test_instantiate_dict_referenced():
+    attrs = instantiate_attrs_from_dict(
+        attr_dict={"test_attr": "#./reference"},
+        required_type=Dict[str, QuamComponentTest],
+        fix_attrs=True,
+        validate_type=True,
+    )
+
+    assert attrs == {"test_attr": "#./reference"}
