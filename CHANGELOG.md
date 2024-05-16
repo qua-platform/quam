@@ -7,6 +7,7 @@
 
 ### Fixed
 - Fixed dataclass ClassVar parameters being wrongly classified as optional or required dataclass args
+- Made `ConstantReadoutPulse` a dataclass, and removed some wrong docstring
 
 
 ## [0.3.2]
