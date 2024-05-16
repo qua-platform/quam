@@ -786,42 +786,45 @@ class IQChannel(Channel):
 
     @property
     def inferred_RF_frequency(self) -> float:
+        name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
-            raise ValueError(
-                f"Error inferring RF frequency for channel {self.name}: "
+            raise AttributeError(
+                f"Error inferring RF frequency for channel {name}: "
                 f"LO_frequency is not a number: {self.LO_frequency}"
             )
         if not isinstance(self.intermediate_frequency, (float, int)):
-            raise ValueError(
-                f"Error inferring RF frequency for channel {self.name}: "
+            raise AttributeError(
+                f"Error inferring RF frequency for channel {name}: "
                 f"intermediate_frequency is not a number: {self.intermediate_frequency}"
             )
         return self.LO_frequency + self.intermediate_frequency
 
     @property
     def inferred_intermediate_frequency(self) -> float:
+        name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
-            raise ValueError(
-                f"Error inferring intermediate frequency for channel {self.name}: "
+            raise AttributeError(
+                f"Error inferring intermediate frequency for channel {name}: "
                 f"LO_frequency is not a number: {self.LO_frequency}"
             )
         if not isinstance(self.RF_frequency, (float, int)):
-            raise ValueError(
-                f"Error inferring intermediate frequency for channel {self.name}: "
+            raise AttributeError(
+                f"Error inferring intermediate frequency for channel {name}: "
                 f"RF_frequency is not a number: {self.RF_frequency}"
             )
         return self.RF_frequency - self.LO_frequency
 
     @property
     def inferred_LO_frequency(self) -> float:
+        name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.RF_frequency, (float, int)):
-            raise ValueError(
-                f"Error inferring LO frequency for channel {self.name}: "
+            raise AttributeError(
+                f"Error inferring LO frequency for channel {name}: "
                 f"RF_frequency is not a number: {self.RF_frequency}"
             )
         if not isinstance(self.intermediate_frequency, (float, int)):
-            raise ValueError(
-                f"Error inferring LO frequency for channel {self.name}: "
+            raise AttributeError(
+                f"Error inferring LO frequency for channel {name}: "
                 f"intermediate_frequency is not a number: {self.intermediate_frequency}"
             )
         return self.RF_frequency - self.intermediate_frequency
