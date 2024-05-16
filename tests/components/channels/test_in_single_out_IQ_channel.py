@@ -13,6 +13,8 @@ def test_in_single_channel_attr_annotations():
     assert set(attr_annotations["optional"]) == {
         "operations",
         "intermediate_frequency",
+        "LO_frequency",
+        "RF_frequency",
         "opx_output_offset_I",
         "opx_output_offset_Q",
         "id",

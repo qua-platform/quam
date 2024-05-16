@@ -1,9 +1,17 @@
 ## [Unreleased]
 ### Added
-- Added channel types: `InSingleChannel`, `InIQChannel`, `InSingleOutIQChannel`, `InIQOutSingleChannel`
+- Added the following parameters to `IQChannel`: `RF_frequency`, `LO_frequency`, `intermediate_frequency`
+- Added the following properties to `IQChannel`: `inferred_RF_frequency`, `inferred_LO_frequency`, `inferred_intermediate_frequency`
+    These properties can be attached to the relevant parameters to infer the frequency from the remaining two parameters.
+- Added `IQChannel.inferred_RF/LO/intermediate_frequency`
+  These can be used to infer the frequency from the remaining two frequencies
 
 ### Changed
+- Deprecated the `rf_frequency` property in favor of the `RF_frequency` parameter in `IQChannel`
+- Added channel types: `InSingleChannel`, `InIQChannel`, `InSingleOutIQChannel`, `InIQOutSingleChannel`
 - Restructured channels to allow for other channel types.
+- `IQChannel` now has all three frequency parameters: `RF_frequency`, `LO_frequency`, `intermediate_frequency`
+- Deprecated `IQChannel.rf_frequency` in favor of `IQChannel.RF_frequency`
 
 ### Fixed
 - Fixed dataclass ClassVar parameters being wrongly classified as optional or required dataclass args
