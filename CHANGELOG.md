@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.3.3]
 ### Added
 - Added the following parameters to `IQChannel`: `RF_frequency`, `LO_frequency`, `intermediate_frequency`
 - Added the following properties to `IQChannel`: `inferred_RF_frequency`, `inferred_LO_frequency`, `inferred_intermediate_frequency`
