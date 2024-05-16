@@ -363,11 +363,6 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
         length (int): The length of the pulse in samples.
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
-        amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel or the I port
-                of an IQ channel
-            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
         integration_weights (list[float], list[tuple[float, int]], optional): The
             integration weights, can be either
             - a list of floats (one per sample), the length must match the pulse length
@@ -506,6 +501,7 @@ class SquareReadoutPulse(ReadoutPulse, SquarePulse):
     ...
 
 
+@quam_dataclass
 class ConstantReadoutPulse(SquareReadoutPulse):
     def __post_init__(self) -> None:
         warnings.warn(
