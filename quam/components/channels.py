@@ -766,6 +766,11 @@ class IQChannel(Channel):
         opx_output_offset_I float: The offset of the I channel. Default is 0.
         opx_output_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+            Default is 0.0
+        LO_frequency (float): Local oscillator frequency. Default is the LO frequency
+            of the frequency converter up component.
+        RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
+            is inferred by adding the LO frequency and the intermediate frequency.
         frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
             for the IQ output.
     """
@@ -786,6 +791,12 @@ class IQChannel(Channel):
 
     @property
     def inferred_RF_frequency(self) -> float:
+        """Inferred RF frequency by adding LO and IF
+
+        Can be used by having reference `RF_frequency = "#./inferred_RF_frequency"`
+        Returns:
+            self.LO_frequency + self.intermediate_frequency
+        """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
             raise AttributeError(
@@ -801,6 +812,14 @@ class IQChannel(Channel):
 
     @property
     def inferred_intermediate_frequency(self) -> float:
+        """Inferred intermediate frequency by subtracting LO from RF
+
+        Can be used by having reference
+        `intermediate_frequency = "#./inferred_intermediate_frequency"`
+
+        Returns:
+            self.RF_frequency - self.LO_frequency
+        """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
             raise AttributeError(
@@ -816,6 +835,13 @@ class IQChannel(Channel):
 
     @property
     def inferred_LO_frequency(self) -> float:
+        """Inferred LO frequency by subtracting IF from RF
+
+        Can be used by having reference `LO_frequency = "#./inferred_LO_frequency"`
+
+        Returns:
+            self.RF_frequency - self.intermediate_frequency
+        """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.RF_frequency, (float, int)):
             raise AttributeError(
@@ -1320,6 +1346,11 @@ class InOutIQChannel(IQChannel, InIQChannel):
         opx_input_offset_I float: The offset of the I channel. Default is 0.
         opx_input_offset_Q float: The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+            Default is 0.0
+        LO_frequency (float): Local oscillator frequency. Default is the LO frequency
+            of the frequency converter up component.
+        RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
+            is inferred by adding the LO frequency and the intermediate frequency.
         frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
             for the IQ output.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
@@ -1353,6 +1384,11 @@ class InSingleOutIQChannel(IQChannel, InSingleChannel):
             a tuple of (controller_name, port).
         opx_input_offset (float): DC offset for the input port.
         intermediate_frequency (float): Intermediate frequency of the mixer.
+            Default is 0.0
+        LO_frequency (float): Local oscillator frequency. Default is the LO frequency
+            of the frequency converter up component.
+        RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
+            is inferred by adding the LO frequency and the intermediate frequency.
         frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
             for the IQ output.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
