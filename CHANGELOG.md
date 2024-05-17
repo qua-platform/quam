@@ -1,7 +1,7 @@
 ## [Unreleased]
 ### Added
 - Added `Channel.frame_rotation_2pi` to allow for frame rotation in multiples of 2pi
-
+- Added `Channel.update_frequency` to allow for updating the frequency of a channel
 
 ## [0.3.3]
 ### Added
