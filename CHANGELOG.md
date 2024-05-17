@@ -1,3 +1,8 @@
+## [Unreleased]
+### Added
+- Added `Channel.frame_rotation_2pi` to allow for frame rotation in multiples of 2pi
+
+
 ## [0.3.3]
 ### Added
 - Added the following parameters to `IQChannel`: `RF_frequency`, `LO_frequency`, `intermediate_frequency`
