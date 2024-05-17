@@ -22,6 +22,7 @@ from qm.qua import (
     dual_demod,
     update_frequency,
     frame_rotation,
+    frame_rotation_2pi,
 )
 from qm.qua._dsl import (
     _PulseAmp,
@@ -362,6 +363,28 @@ class Channel(QuamComponent):
 
         """
         frame_rotation(angle, self.name)
+
+    def frame_rotation_2pi(self, angle: QuaNumberType):
+        r"""Shift the phase of the oscillator associated with an element by the given
+        angle in units of 2pi radians.
+
+        This is typically used for virtual z-rotations.
+
+        Note:
+            Unlike the case of frame_rotation(), this method performs the 2-pi radian
+            wrap around of the angle automatically.
+
+        Note:
+            The phase is accumulated with a resolution of 16 bit.
+            Therefore, *N* changes to the phase can result in a phase inaccuracy of
+            about :math:`N \cdot 2^{-16}`. To null out this accumulated error, it is
+            recommended to use `reset_frame(el)` from time to time.
+
+        Args:
+            angle (Union[float,QUA variable of type real]): The angle to add
+                to the current phase (in $2\pi$ radians)
+        """
+        frame_rotation_2pi(angle, self.name)
 
     def _config_add_controller(
         self, config: Dict[str, dict], controller_name: str
