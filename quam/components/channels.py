@@ -20,6 +20,7 @@ from qm.qua import (
     fixed,
     demod,
     dual_demod,
+    update_frequency,
     frame_rotation,
     frame_rotation_2pi,
 )
@@ -297,6 +298,44 @@ class Channel(QuamComponent):
                 for element in other_elements
             ]
             align(self.name, *other_elements_str)
+
+    def update_frequency(
+        self,
+        new_frequency: QuaNumberType,
+        units: str = "Hz",
+        keep_phase: bool = False,
+    ):
+        """Dynamically update the frequency of the associated oscillator.
+
+        This changes the frequency from the value defined in the channel.
+
+        The behavior of the phase (continuous vs. coherent) is controlled by the
+        ``keep_phase`` parameter and is discussed in the documentation.
+
+        Args:
+            new_frequency (int): The new frequency value to set in units set
+                by ``units`` parameter. In steps of 1.
+            units (str): units of new frequency. Useful when sub-Hz
+                precision is required. Allowed units are "Hz", "mHz", "uHz",
+                "nHz", "pHz"
+            keep_phase (bool): Determine whether phase will be continuous
+                through the change (if ``True``) or it will be coherent,
+                only the frequency will change (if ``False``).
+
+        Example:
+            ```python
+            with program() as prog:
+                update_frequency("q1", 4e6) # will set the frequency to 4 MHz
+
+                ### Example for sub-Hz resolution
+                # will set the frequency to 100 Hz (due to casting to int)
+                update_frequency("q1", 100.7)
+
+                # will set the frequency to 100.7 Hz
+                update_frequency("q1", 100700, units='mHz')
+            ```
+        """
+        update_frequency(self.name, new_frequency, units, keep_phase)
 
     def frame_rotation(self, angle: QuaNumberType):
         r"""Shift the phase of the channel element's oscillator by the given angle.
