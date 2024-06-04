@@ -3,6 +3,9 @@
 - Added `Channel.frame_rotation_2pi` to allow for frame rotation in multiples of 2pi
 - Added `Channel.update_frequency` to allow for updating the frequency of a channel
 
+### Changed
+- Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
+
 ## [0.3.3]
 ### Added
 - Added the following parameters to `IQChannel`: `RF_frequency`, `LO_frequency`, `intermediate_frequency`
