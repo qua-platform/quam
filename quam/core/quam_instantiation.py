@@ -51,27 +51,14 @@ def instantiate_attrs_from_dict(
 
     instantiated_attr_dict = {}
     for attr_name, attr_val in attr_dict.items():
-        if not required_subtype:
-            instantiated_attr_dict[attr_name] = attr_val
-            continue
-        if string_reference.is_reference(attr_val):
-            instantiated_attr_dict[attr_name] = attr_val
-            continue
-        if isclass(required_subtype) and issubclass(required_subtype, QuamComponent):
-            instantiated_attr = instantiate_quam_class(
-                required_subtype,
-                attr_val,
-                fix_attrs=fix_attrs,
-                validate_type=validate_type,
-                str_repr=f'{str_repr}["{attr_name}"]',
-            )
-        else:
-            instantiated_attr = attr_val
-        # Add custom __class__ QuamComponent logic here
-
-        validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
-
-        instantiated_attr_dict[attr_name] = instantiated_attr
+        instantiated_attr_dict[attr_name] = instantiate_attr(
+            attr_val=attr_val,
+            expected_type=required_subtype,
+            allow_none=False,
+            fix_attrs=fix_attrs,
+            validate_type=validate_type if required_subtype is not None else False,
+            str_repr=f'{str_repr}["{attr_name}"]',
+        )
 
     return instantiated_attr_dict
 
