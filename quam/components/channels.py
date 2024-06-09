@@ -102,10 +102,18 @@ class DigitalOutputChannel(QuamComponent):
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
-        controller_name, port = self.opx_output
-        controller_cfg = config["controllers"].setdefault(controller_name, {})
-        controller_cfg.setdefault("digital_outputs", {})
-        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+        if len(self.opx_output) == 2:
+            controller_name, port = self.opx_output
+            controller_cfg = config["controllers"].setdefault(controller_name, {})
+            controller_cfg.setdefault("digital_outputs", {})
+            port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+        else:
+            controller_name, fem, port = self.opx_output
+            controller_cfg = config["controllers"].setdefault(controller_name, {})
+            controller_cfg.setdefault("fems", {})
+            fem_cfg = controller_cfg["fems"].setdefault(fem, {"type": "LF"})
+            fem_cfg.setdefault("digital_outputs", {})
+            port_cfg = fem_cfg["digital_outputs"].setdefault(port, {})
 
         if self.shareable is not None:
             if port_cfg.get("shareable", self.shareable) != self.shareable:
@@ -1481,11 +1489,11 @@ def _config_add_octo_dac_controller(config: Dict[str, dict], controller_name: st
     """
     config["controllers"].setdefault(controller_name, {})
     controller_cfg = config["controllers"][controller_name]
-    controller_cfg.setdefault("fems", {"type": "LF"})
+    controller_cfg.setdefault("fems", {})
     fem_config = controller_cfg["fems"]
-    fem_config.setdefault(fem_idx, {})
+    fem_config.setdefault(fem_idx, {"type": "LF"})
     fem_config = fem_config[fem_idx]
     for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
         fem_config.setdefault(key, {})
 
-    return controller_cfg
+    return fem_config
