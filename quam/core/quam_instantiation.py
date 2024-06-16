@@ -224,6 +224,20 @@ def instantiate_attr(
         )
         if typing.get_origin(expected_type) == dict:
             expected_type = dict
+    elif typing.get_origin(expected_type) == typing.Union:
+        for union_type in typing.get_args(expected_type):
+            try:
+                instantiated_attr = instantiate_attr(
+                    attr_val=attr_val,
+                    expected_type=union_type,
+                    allow_none=allow_none,
+                    fix_attrs=fix_attrs,
+                    validate_type=validate_type,
+                    str_repr=str_repr,
+                )
+                break
+            except TypeError:
+                continue
     elif (
         isinstance(expected_type, list)
         or typing.get_origin(expected_type) == list
@@ -240,8 +254,6 @@ def instantiate_attr(
             expected_type = list
         elif typing.get_origin(expected_type) == tuple:
             instantiated_attr = tuple(instantiated_attr)
-    elif typing.get_origin(expected_type) == typing.Union:
-        instantiated_attr = attr_val
     elif typing.get_origin(expected_type) == tuple:
         if isinstance(attr_val, list):
             attr_val = tuple(attr_val)
