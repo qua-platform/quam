@@ -400,16 +400,17 @@ class Channel(QuamComponent):
             controller_cfg = _config_add_opx_controller(config, controller_name)
         else:
             controller_name, fem, port = address
-            controller_cfg = _config_add_octo_dac_controller(config, controller_name, fem)
+            controller_cfg = _config_add_opx1000_controller(config, controller_name, fem)
 
         port_config = controller_cfg[f"analog_{port_type}s"].setdefault(port, {})
         # If no offset specified, it will be added at the end of config generation
         if offset is not None:
             if abs(port_config.get("offset", offset) - offset) > 1e-4:
-                raise ValueError(
+                warnings.warn(
                     f"Channel {self.name} has conflicting {port_type} offsets: "
                     f"{port_config['offset']} and {offset}. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}"
+                    f"elements are trying to set different offsets to port {port}",
+                    UserWarning,
                 )
             port_config["offset"] = offset
         return port_config
@@ -1474,7 +1475,7 @@ def _config_add_opx_controller(config: Dict[str, dict], controller_name: str) ->
     return controller_cfg
 
 
-def _config_add_octo_dac_controller(config: Dict[str, dict], controller_name: str, fem_idx: int) -> Dict[str, dict]:
+def _config_add_opx1000_controller(config: Dict[str, dict], controller_name: str, fem_idx: int) -> Dict[str, dict]:
     """Adds a controller to the config if it doesn't exist, and returns its config.
 
     config.controllers.<controller_name> will be created if it doesn't exist.
