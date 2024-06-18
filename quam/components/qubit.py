@@ -1,10 +1,17 @@
-from typing import Dict, Any
+from typing import Dict, Union
 from dataclasses import field
 
 from quam.components.channels import Channel
 from quam.core import quam_dataclass, QuamComponent
 from .gates.single_qubit_gates import SingleQubitGate
-from .gates.two_qubit_gates import TwoQubitGate
+
+from qm.qua._dsl import (
+    AmpValuesType,
+    QuaNumberType,
+    QuaExpressionType,
+    ChirpType,
+    StreamType,
+)
 
 
 __all__ = ["Qubit"]
