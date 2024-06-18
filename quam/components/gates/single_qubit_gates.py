@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, Union
 from dataclasses import field
 from quam.core import quam_dataclass, QuamComponent
 from quam.components.pulses import Pulse
@@ -30,11 +30,16 @@ class SingleQubitGate(QuamComponent, ABC):
 
 @quam_dataclass
 class SinglePulseGate(SingleQubitGate):
-    """Single-qubit gate for a qubit consisting of a single pulse"""
+    """Single-qubit gate for a qubit consisting of a single pulse
 
-    pulse_label: str
+    Args:
+        pulse (Union[Pulse, str]): The pulse to be played
+
+    """
+
+    pulse: Union[Pulse, str]
 
     def execute(self, amplitude_scale=None, duration=None):
-        self.qubit.xy.play(  # TODO Introduce a "play" method to the qubit
+        self.qubit.play_pulse(
             self.pulse_label, amplitude_scale=amplitude_scale, duration=duration
         )

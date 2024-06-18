@@ -76,7 +76,6 @@ class CZGate(TwoQubitGate):
             amplitude_scale=amplitude_scale,
         )
         self.qubit_control.align(self.qubit_target)
-        
 
         self.qubit_control.xy.frame_rotation(self.phase_shift_control)
         self.qubit_target.xy.frame_rotation(self.phase_shift_target)
