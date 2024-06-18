@@ -33,11 +33,12 @@ class SinglePulseGate(SingleQubitGate):
     """Single-qubit gate for a qubit consisting of a single pulse
 
     Args:
-        pulse (Union[Pulse, str]): The pulse to be played
+        pulse: Name of pulse to be played on qubit. Should be a key in
+            `channel.operations` for one of the qubit's channels
 
     """
 
-    pulse: Union[Pulse, str]
+    pulse: str
 
     def execute(self, amplitude_scale=None, duration=None):
         self.qubit.play_pulse(

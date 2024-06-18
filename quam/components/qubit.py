@@ -60,7 +60,8 @@ class Qubit(QuamComponent):
         target: str = "",
         validate: bool = True,
     ):
-        """Play a pulse on this channel.
+        """Play a pulse on the qubit, the corresponding channel will be determined
+        based on the pulse name.
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
@@ -98,6 +99,8 @@ class Qubit(QuamComponent):
             The `element` argument from `qm.qua.play()`is not needed, as it is
             automatically set to `self.name`.
 
+        Raises:
+            ValueError: If the pulse name is not found in any channel operations of the qubit.
         """
         attrs = self.get_attrs(follow_references=False, include_defaults=True)
         channels = {key: val for key, val in attrs.items() if isinstance(val, Channel)}
