@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Union
-from dataclasses import field
 from quam.core import quam_dataclass, QuamComponent
-from quam.components.pulses import Pulse
 
 
 @quam_dataclass
