@@ -394,13 +394,21 @@ class Channel(QuamComponent):
         """
         frame_rotation_2pi(angle, self.name)
 
-    def _add_analog_port_to_config(self, address: Union[Tuple[str, int], Tuple[str, int, int]], config, offset: float, port_type: Literal["input", "output"]) -> Dict[str, Any]:
+    def _add_analog_port_to_config(
+        self,
+        address: Union[Tuple[str, int], Tuple[str, int, int]],
+        config,
+        offset: float,
+        port_type: Literal["input", "output"],
+    ) -> Dict[str, Any]:
         if len(address) == 2:
             controller_name, port = address
             controller_cfg = _config_add_opx_controller(config, controller_name)
         else:
             controller_name, fem, port = address
-            controller_cfg = _config_add_opx1000_controller(config, controller_name, fem)
+            controller_cfg = _config_add_opx1000_controller(
+                config, controller_name, fem
+            )
 
         port_config = controller_cfg[f"analog_{port_type}s"].setdefault(port, {})
         # If no offset specified, it will be added at the end of config generation
@@ -519,7 +527,9 @@ class SingleChannel(Channel):
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
-        port_config = self._add_analog_port_to_config(self.opx_output, config, self.opx_output_offset, "output")
+        port_config = self._add_analog_port_to_config(
+            self.opx_output, config, self.opx_output_offset, "output"
+        )
 
         if self.filter_fir_taps is not None:
             output_filter = port_config.setdefault("filter", {})
@@ -570,7 +580,9 @@ class InSingleChannel(Channel):
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
-        self._add_analog_port_to_config(self.opx_input, config, self.opx_input_offset, "input")
+        self._add_analog_port_to_config(
+            self.opx_input, config, self.opx_input_offset, "input"
+        )
 
     def measure(
         self,
@@ -1073,7 +1085,9 @@ class InIQChannel(Channel):
         for I_or_Q in ["I", "Q"]:
             curr_input = opx_inputs[I_or_Q]
             offset = offsets[I_or_Q]
-            port_config = self._add_analog_port_to_config(curr_input, config, offset, port_type="input")
+            port_config = self._add_analog_port_to_config(
+                curr_input, config, offset, port_type="input"
+            )
 
             if self.input_gain is not None:
                 port_config["gain_db"] = self.input_gain
@@ -1454,7 +1468,9 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
     pass
 
 
-def _config_add_opx_controller(config: Dict[str, dict], controller_name: str) -> Dict[str, dict]:
+def _config_add_opx_controller(
+    config: Dict[str, dict], controller_name: str
+) -> Dict[str, dict]:
     """Adds a controller to the config if it doesn't exist, and returns its config.
 
     config.controllers.<controller_name> will be created if it doesn't exist.
@@ -1475,7 +1491,9 @@ def _config_add_opx_controller(config: Dict[str, dict], controller_name: str) ->
     return controller_cfg
 
 
-def _config_add_opx1000_controller(config: Dict[str, dict], controller_name: str, fem_idx: int) -> Dict[str, dict]:
+def _config_add_opx1000_controller(
+    config: Dict[str, dict], controller_name: str, fem_idx: int
+) -> Dict[str, dict]:
     """Adds a controller to the config if it doesn't exist, and returns its config.
 
     config.controllers.<controller_name> will be created if it doesn't exist.
@@ -1488,12 +1506,9 @@ def _config_add_opx1000_controller(config: Dict[str, dict], controller_name: str
     Returns:
         Dict[str, dict]: The config entry for the controller.
     """
-    config["controllers"].setdefault(controller_name, {})
-    controller_cfg = config["controllers"][controller_name]
-    controller_cfg.setdefault("fems", {})
-    fem_config = controller_cfg["fems"]
-    fem_config.setdefault(fem_idx, {"type": "LF"})
-    fem_config = fem_config[fem_idx]
+    controller_cfg = config["controllers"].setdefault(controller_name, {})
+    fems_config = controller_cfg.setdefault("fems", {})
+    fem_config = fems_config.setdefault(fem_idx, {"type": "LF"})
     for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
         fem_config.setdefault(key, {})
 
