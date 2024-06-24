@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union, Any
 import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
@@ -69,7 +69,7 @@ class DigitalOutputChannel(QuamComponent):
             Default is False.
     ."""
 
-    opx_output: Tuple[str, int]
+    opx_output: Union[Tuple[str, int], Tuple[str, int, int]]
     delay: int = None
     buffer: int = None
 
@@ -102,10 +102,18 @@ class DigitalOutputChannel(QuamComponent):
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
-        controller_name, port = self.opx_output
-        controller_cfg = config["controllers"].setdefault(controller_name, {})
-        controller_cfg.setdefault("digital_outputs", {})
-        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+        if len(self.opx_output) == 2:
+            controller_name, port = self.opx_output
+            controller_cfg = config["controllers"].setdefault(controller_name, {})
+            controller_cfg.setdefault("digital_outputs", {})
+            port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+        else:
+            controller_name, fem, port = self.opx_output
+            controller_cfg = config["controllers"].setdefault(controller_name, {})
+            controller_cfg.setdefault("fems", {})
+            fem_cfg = controller_cfg["fems"].setdefault(fem, {"type": "LF"})
+            fem_cfg.setdefault("digital_outputs", {})
+            port_cfg = fem_cfg["digital_outputs"].setdefault(port, {})
 
         if self.shareable is not None:
             if port_cfg.get("shareable", self.shareable) != self.shareable:
@@ -386,27 +394,34 @@ class Channel(QuamComponent):
         """
         frame_rotation_2pi(angle, self.name)
 
-    def _config_add_controller(
-        self, config: Dict[str, dict], controller_name: str
-    ) -> Dict[str, dict]:
-        """Adds a controller to the config if it doesn't exist, and returns its config.
+    def _add_analog_port_to_config(
+        self,
+        address: Union[Tuple[str, int], Tuple[str, int, int]],
+        config,
+        offset: float,
+        port_type: Literal["input", "output"],
+    ) -> Dict[str, Any]:
+        if len(address) == 2:
+            controller_name, port = address
+            controller_cfg = _config_add_opx_controller(config, controller_name)
+        else:
+            controller_name, fem, port = address
+            controller_cfg = _config_add_opx1000_controller(
+                config, controller_name, fem
+            )
 
-        config.controllers.<controller_name> will be created if it doesn't exist.
-        It will also add the analog_outputs, digital_outputs, and analog_inputs keys
-
-        Args:
-            config (dict): The QUA config that's in the process of being generated.
-            controller_name (str): The name of the controller.
-
-        Returns:
-            Dict[str, dict]: The config entry for the controller.
-        """
-        config["controllers"].setdefault(controller_name, {})
-        controller_cfg = config["controllers"][controller_name]
-        for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
-            controller_cfg.setdefault(key, {})
-
-        return controller_cfg
+        port_config = controller_cfg[f"analog_{port_type}s"].setdefault(port, {})
+        # If no offset specified, it will be added at the end of config generation
+        if offset is not None:
+            if abs(port_config.get("offset", offset) - offset) > 1e-4:
+                warnings.warn(
+                    f"Channel {self.name} has conflicting {port_type} offsets: "
+                    f"{port_config['offset']} and {offset}. Multiple channel "
+                    f"elements are trying to set different offsets to port {port}",
+                    UserWarning,
+                )
+            port_config["offset"] = offset
+        return port_config
 
     def _config_add_digital_outputs(self, config: Dict[str, dict]) -> None:
         """Adds the digital outputs to the QUA config.
@@ -470,7 +485,7 @@ class SingleChannel(Channel):
             is None.
     """
 
-    opx_output: Tuple[str, int]
+    opx_output: Union[Tuple[str, int], Tuple[str, int, int]]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
@@ -512,27 +527,16 @@ class SingleChannel(Channel):
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
-        controller_name, port = self.opx_output
-        controller_cfg = self._config_add_controller(config, controller_name)
-        analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
-        # If no offset specified, it will be added at the end of the config generation
-        offset = self.opx_output_offset
-        if offset is not None:
-            if abs(analog_output.get("offset", offset) - offset) > 1e-4:
-                warnings.warn(
-                    f"Channel {self.name} has conflicting output offsets: "
-                    f"{analog_output['offset']} V and {offset} V. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}. "
-                    f"Using the last offset {offset} V"
-                )
-            analog_output["offset"] = offset
+        port_config = self._add_analog_port_to_config(
+            self.opx_output, config, self.opx_output_offset, "output"
+        )
 
         if self.filter_fir_taps is not None:
-            output_filter = analog_output.setdefault("filter", {})
+            output_filter = port_config.setdefault("filter", {})
             output_filter["feedforward"] = list(self.filter_fir_taps)
 
         if self.filter_iir_taps is not None:
-            output_filter = analog_output.setdefault("filter", {})
+            output_filter = port_config.setdefault("filter", {})
             output_filter["feedback"] = list(self.filter_iir_taps)
 
 
@@ -556,7 +560,7 @@ class InSingleChannel(Channel):
             Used to account for signal smearing.
     """
 
-    opx_input: Tuple[str, int]
+    opx_input: Union[Tuple[str, int], Tuple[str, int, int]]
     opx_input_offset: float = None
 
     time_of_flight: int = 24
@@ -576,19 +580,9 @@ class InSingleChannel(Channel):
         config["elements"][self.name]["smearing"] = self.smearing
         config["elements"][self.name]["time_of_flight"] = self.time_of_flight
 
-        controller_name, port = self.opx_input
-        controller_cfg = self._config_add_controller(config, controller_name)
-        analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
-        offset = self.opx_input_offset
-        # If no offset specified, it will be added at the end of the config generation
-        if offset is not None:
-            if abs(analog_input.get("offset", offset) - offset) > 1e-4:
-                raise ValueError(
-                    f"Channel {self.name} has conflicting input offsets: "
-                    f"{analog_input['offset']} and {offset}. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}"
-                )
-            analog_input["offset"] = offset
+        self._add_analog_port_to_config(
+            self.opx_input, config, self.opx_input_offset, "input"
+        )
 
     def measure(
         self,
@@ -837,8 +831,8 @@ class IQChannel(Channel):
             for the IQ output.
     """
 
-    opx_output_I: Tuple[str, int]
-    opx_output_Q: Tuple[str, int]
+    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int]]
 
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
@@ -1003,19 +997,9 @@ class IQChannel(Channel):
                 ] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
-            controller_name, port = opx_outputs[I_or_Q]
-            controller_cfg = self._config_add_controller(config, controller_name)
-            analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
-            # If no offset specified, it will be added at the end of config generation
+            port_output = opx_outputs[I_or_Q]
             offset = offsets[I_or_Q]
-            if offset is not None:
-                if abs(analog_output.get("offset", offset) - offset) > 1e-4:
-                    raise ValueError(
-                        f"Channel {self.name} has conflicting output offsets: "
-                        f"{analog_output['offset']} and {offset}. Multiple channel "
-                        f"elements are trying to set different offsets to port {port}"
-                    )
-                analog_output["offset"] = offset
+            self._add_analog_port_to_config(port_output, config, offset, "output")
 
 
 @quam_dataclass
@@ -1042,8 +1026,8 @@ class InIQChannel(Channel):
     input_gain (float): The gain of the input channel. Default is None.
     """
 
-    opx_input_I: Tuple[str, int]
-    opx_input_Q: Tuple[str, int]
+    opx_input_I: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_input_Q: Union[Tuple[str, int], Tuple[str, int, int]]
 
     time_of_flight: int = 24
     smearing: int = 0
@@ -1099,23 +1083,14 @@ class InIQChannel(Channel):
             }
 
         for I_or_Q in ["I", "Q"]:
-            controller_name, port = opx_inputs[I_or_Q]
-            controller_cfg = self._config_add_controller(config, controller_name)
-            analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
+            curr_input = opx_inputs[I_or_Q]
             offset = offsets[I_or_Q]
-            # If no offset specified, it will be added at the end of config generation
-            if offset is not None:
-                if abs(analog_input.get("offset", offset) - offset) > 1e-4:
-                    warnings.warn(
-                        f"Channel {self.name} has conflicting input offsets: "
-                        f"{analog_input['offset']} V and {offset} V. Multiple channel "
-                        f"elements are trying to set different offsets to port {port}. "
-                        f"Using the last offset {offset} V"
-                    )
-                analog_input["offset"] = offset
+            port_config = self._add_analog_port_to_config(
+                curr_input, config, offset, port_type="input"
+            )
 
             if self.input_gain is not None:
-                controller_cfg["analog_inputs"][port]["gain_db"] = self.input_gain
+                port_config["gain_db"] = self.input_gain
 
     def measure(
         self,
@@ -1491,3 +1466,50 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
     """
 
     pass
+
+
+def _config_add_opx_controller(
+    config: Dict[str, dict], controller_name: str
+) -> Dict[str, dict]:
+    """Adds a controller to the config if it doesn't exist, and returns its config.
+
+    config.controllers.<controller_name> will be created if it doesn't exist.
+    It will also add the analog_outputs, digital_outputs, and analog_inputs keys
+
+    Args:
+        config (dict): The QUA config that's in the process of being generated.
+        controller_name (str): The name of the controller.
+
+    Returns:
+        Dict[str, dict]: The config entry for the controller.
+    """
+    config["controllers"].setdefault(controller_name, {})
+    controller_cfg = config["controllers"][controller_name]
+    for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
+        controller_cfg.setdefault(key, {})
+
+    return controller_cfg
+
+
+def _config_add_opx1000_controller(
+    config: Dict[str, dict], controller_name: str, fem_idx: int
+) -> Dict[str, dict]:
+    """Adds a controller to the config if it doesn't exist, and returns its config.
+
+    config.controllers.<controller_name> will be created if it doesn't exist.
+    It will also add the analog_outputs, digital_outputs, and analog_inputs keys
+
+    Args:
+        config (dict): The QUA config that's in the process of being generated.
+        controller_name (str): The name of the controller.
+
+    Returns:
+        Dict[str, dict]: The config entry for the controller.
+    """
+    controller_cfg = config["controllers"].setdefault(controller_name, {})
+    fems_config = controller_cfg.setdefault("fems", {})
+    fem_config = fems_config.setdefault(fem_idx, {"type": "LF"})
+    for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
+        fem_config.setdefault(key, {})
+
+    return fem_config
