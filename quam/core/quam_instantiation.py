@@ -238,6 +238,10 @@ def instantiate_attr(
                 break
             except TypeError:
                 continue
+        else:
+            raise TypeError(
+                f"Could not instantiate {str_repr} with any of the types in {expected_type}"
+            )
     elif (
         isinstance(expected_type, list)
         or typing.get_origin(expected_type) == list

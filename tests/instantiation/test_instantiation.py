@@ -1,5 +1,5 @@
 import pytest
-from typing import List, Literal, Optional, Tuple
+from typing import List, Literal, Optional, Tuple, Union
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
@@ -338,3 +338,22 @@ def test_instantiate_dict_referenced():
     )
 
     assert attrs == {"test_attr": "#./reference"}
+
+@quam_dataclass
+class TestQuamComponent(QuamComponent):
+    a: int
+
+
+def test_instantiate_union_type():
+    @quam_dataclass
+    class TestQuamUnion(QuamComponent):
+        union_val: Union[int, TestQuamComponent]
+
+    obj = instantiate_quam_class(TestQuamUnion, {"union_val": 42})
+    assert obj.union_val == 42
+
+    obj = instantiate_quam_class(TestQuamUnion, {"union_val": {"a": 42}})
+    assert obj.union_val.a == 42
+
+    with pytest.raises(TypeError):
+        instantiate_quam_class(TestQuamUnion, {"union_val": {"a": "42"}})
