@@ -1,10 +1,24 @@
 from dataclasses import field
-from typing import Dict, List, Literal, Optional, Tuple
+from typing import ClassVar, Dict, List, Literal, Optional, Tuple
 from quam.core import QuamComponent, quam_dataclass
 
 
 @quam_dataclass
-class OPXPlusAnalogOutputPort(QuamComponent):
+class Port(QuamComponent):
+    port_type: ClassVar[str]
+
+
+@quam_dataclass
+class LFAnalogOutputPort(QuamComponent):
+    port_type: ClassVar[str] = "analog_output"
+
+
+class LFAnalogInputPort(QuamComponent):
+    port_type: ClassVar[str] = "analog_input"
+
+
+@quam_dataclass
+class OPXPlusAnalogOutputPort(LFAnalogOutputPort):
     port: Tuple[str, int]
     offset: float = 0.0
     delay: int = 0
@@ -13,9 +27,20 @@ class OPXPlusAnalogOutputPort(QuamComponent):
     feedback_filter: List[float] = field(default_factory=list)
     shareable: bool = False
 
+    def get_port_config(self):
+        return {
+            "port": self.port,
+            "offset": self.offset,
+            "delay": self.delay,
+            "crosstalk": self.crosstalk,
+            "feedforward_filter": self.feedforward_filter,
+            "feedback_filter": self.feedback_filter,
+            "shareable": self.shareable,
+        }
+
 
 @quam_dataclass
-class OPXPlusAnalogInputPort(QuamComponent):
+class OPXPlusAnalogInputPort(LFAnalogInputPort):
     port: Tuple[str, int]
     offset: float = 0.0
     gain_db: int = 0
@@ -39,7 +64,7 @@ class OPXPlusDigitalInputPort(QuamComponent):
 
 
 @quam_dataclass
-class LFFEMAnalogOutputPort(QuamComponent):
+class LFFEMAnalogOutputPort(LFAnalogOutputPort):
     port: Tuple[str, int]
     offset: float = 0.0
     delay: int = 0
@@ -53,7 +78,7 @@ class LFFEMAnalogOutputPort(QuamComponent):
 
 
 @quam_dataclass
-class LFFEMAnalogInputPort(QuamComponent):
+class LFFEMAnalogInputPort(LFAnalogInputPort):
     port: Tuple[str, int]
     offset: float = 0.0
     gain_db: int = 0

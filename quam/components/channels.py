@@ -4,6 +4,7 @@ import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, BaseReadoutPulse
+from quam.components.ports import LFAnalogOutputPort, LFAnalogInputPort
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
@@ -485,7 +486,7 @@ class SingleChannel(Channel):
             is None.
     """
 
-    opx_output: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_output: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
@@ -560,7 +561,7 @@ class InSingleChannel(Channel):
             Used to account for signal smearing.
     """
 
-    opx_input: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_input: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
     opx_input_offset: float = None
 
     time_of_flight: int = 24
@@ -831,8 +832,8 @@ class IQChannel(Channel):
             for the IQ output.
     """
 
-    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int]]
-    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
+    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
 
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
@@ -1026,8 +1027,8 @@ class InIQChannel(Channel):
     input_gain (float): The gain of the input channel. Default is None.
     """
 
-    opx_input_I: Union[Tuple[str, int], Tuple[str, int, int]]
-    opx_input_Q: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_input_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
+    opx_input_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
 
     time_of_flight: int = 24
     smearing: int = 0
