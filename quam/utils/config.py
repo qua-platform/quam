@@ -10,16 +10,15 @@ def generate_config_final_actions(qua_config):
     Args:
         qua_config (dict): The generated qua config.
     """
+    # Add default dc offset 0V to all analog outputs and inputs if not set
     for controller_cfg in qua_config["controllers"].values():
-        if "fems" in controller_cfg:
-            for fem in controller_cfg["fems"].values():
-                if fem.get("type") == "LF":
-                    if "analog_outputs" in fem:
-                        for analog_output in fem["analog_outputs"].values():
-                            analog_output.setdefault("offset", 0.0)
-                    if "analog_inputs" in fem:
-                        for analog_input in fem["analog_inputs"].values():
-                            analog_input.setdefault("offset", 0.0)
+        for fem in controller_cfg.get("fems", {}).values():
+            if fem.get("type") != "LF":
+                continue
+            for analog_output in fem.get("analog_outputs", {}).values():
+                analog_output.setdefault("offset", 0.0)
+            for analog_input in fem.get("analog_inputs", {}).values():
+                analog_input.setdefault("offset", 0.0)
 
         if "analog_outputs" in controller_cfg:
             for analog_output in controller_cfg["analog_outputs"].values():
