@@ -114,14 +114,16 @@ class LFAnalogOutputPort(QuamComponent, ABC):
     shareable: bool = False
 
     def get_port_properties(self):
-        return {
-            "offset": self.offset,
+        port_properties = {
             "delay": self.delay,
             "crosstalk": self.crosstalk,
             "feedforward_filter": self.feedforward_filter,
             "feedback_filter": self.feedback_filter,
             "shareable": self.shareable,
         }
+        if self.offset is not None:
+            port_properties["offset"] = self.offset
+        return port_properties
 
 
 @quam_dataclass

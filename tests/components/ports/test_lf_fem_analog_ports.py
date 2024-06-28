@@ -10,7 +10,7 @@ def test_lf_fem_analog_output_port():
     port = LFFEMAnalogOutputPort(port=("con1", 1, 2))
     assert port.port == ("con1", 1, 2)
     assert port.port_type == "analog_output"
-    assert port.offset == 0.0
+    assert port.offset == None
     assert port.delay == 0
     assert port.crosstalk == {}
     assert port.feedforward_filter == []
@@ -21,7 +21,6 @@ def test_lf_fem_analog_output_port():
     assert port.upsampling_mode == "mw"
 
     assert port.get_port_properties() == {
-        "offset": 0.0,
         "delay": 0,
         "crosstalk": {},
         "feedforward_filter": [],
@@ -42,7 +41,6 @@ def test_lf_fem_analog_output_port():
                     1: {
                         "analog_outputs": {
                             2: {
-                                "offset": 0.0,
                                 "delay": 0,
                                 "crosstalk": {},
                                 "feedforward_filter": [],
@@ -57,6 +55,19 @@ def test_lf_fem_analog_output_port():
                 }
             }
         }
+    }
+
+    port.offset = 0.1
+    assert port.get_port_properties() == {
+        "delay": 0,
+        "crosstalk": {},
+        "feedforward_filter": [],
+        "feedback_filter": [],
+        "shareable": False,
+        "output_mode": "direct",
+        "sampling_rate": 1e9,
+        "upsampling_mode": "mw",
+        "offset": 0.1,
     }
 
 
