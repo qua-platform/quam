@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import field
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple, Union
 from quam.core import QuamComponent, quam_dataclass
 
 
@@ -106,6 +106,7 @@ class LFAnalogOutputPort(QuamComponent, ABC):
         }
 
 
+@quam_dataclass
 class LFAnalogInputPort(QuamComponent, ABC):
     port_type: ClassVar[str] = "analog_input"
 
