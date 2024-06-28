@@ -11,6 +11,8 @@ from quam.components.ports import (
     LFAnalogInputPort,
     LFFEMAnalogInputPort,
     LFFEMAnalogOutputPort,
+    MWFEMAnalogInputPort,
+    MWFEMAnalogOutputPort,
     OPXPlusAnalogInputPort,
     OPXPlusAnalogOutputPort,
     OPXPlusDigitalOutputPort,
@@ -1476,4 +1478,33 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
             Used to account for signal smearing.
     """
 
+    pass
+
+
+@quam_dataclass
+class MWChannel(QuamComponent):
+    opx_output: MWFEMAnalogOutputPort
+    upconverter: int = 1
+
+    def apply_to_config(self, config: Dict) -> None:
+        super().apply_to_config(config)
+
+        element_cfg = config["elements"][self.name]
+        element_cfg["MWInput"] = tuple(self.opx_output.port)
+        element_cfg["upconverter"] = self.upconverter
+
+
+@quam_dataclass
+class InMWChannel(QuamComponent):
+    opx_input: MWFEMAnalogInputPort
+
+    def apply_to_config(self, config: Dict) -> None:
+        super().apply_to_config(config)
+
+        element_cfg = config["elements"][self.name]
+        element_cfg["MWOutput"] = tuple(self.opx_input.port)
+
+
+@quam_dataclass
+class InOutMWChannel(MWChannel, InMWChannel):
     pass
