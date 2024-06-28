@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import field
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple, Union
+import warnings
 from quam.core import QuamComponent, quam_dataclass
 
 
@@ -20,12 +21,27 @@ class Port(QuamComponent, ABC):
     def get_port_properties(self) -> Dict[str, Any]:
         pass
 
+    @staticmethod
+    def _update_port_config(port_config, port_properties):
+        for key, value in port_properties.items():
+            try:
+                if key in port_config and value != port_config[key]:
+                    warnings.warn(
+                        f"Error generating QUA config: Controller {self.port_type} "
+                        f"port {self.port} already has entry for {key}. This likely "
+                        f"means that the port is being configured multiple times. "
+                        f"Overwriting {port_config['key']} → {value}."
+                    )
+            except Exception:
+                pass
+            port_config[key] = value
+
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
         port_cfg = self.get_port_config(config)
         port_properties = self.get_port_properties()
-        port_cfg.update(port_properties)
+        self._update_port_config(port_cfg, port_properties)
 
 
 @quam_dataclass
