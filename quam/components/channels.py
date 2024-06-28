@@ -4,7 +4,13 @@ import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.pulses import Pulse, BaseReadoutPulse
-from quam.components.ports import LFAnalogOutputPort, LFAnalogInputPort
+from quam.components.ports import (
+    DigitalOutputPort,
+    FEMDigitalOutputPort,
+    LFAnalogOutputPort,
+    LFAnalogInputPort,
+    OPXPlusDigitalOutputPort,
+)
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
@@ -70,7 +76,7 @@ class DigitalOutputChannel(QuamComponent):
             Default is False.
     ."""
 
-    opx_output: Union[Tuple[str, int], Tuple[str, int, int]]
+    opx_output: Union[Tuple[str, int], Tuple[str, int, int], DigitalOutputPort]
     delay: int = None
     buffer: int = None
 
@@ -87,7 +93,12 @@ class DigitalOutputChannel(QuamComponent):
             Dict[str, int]: The digital channel config entry.
                 Contains "port", and optionally "delay", "buffer" if specified
         """
-        digital_cfg = {"port": tuple(self.opx_output)}
+        if isinstance(self.opx_output, DigitalOutputPort):
+            opx_output = self.opx_output.port
+        else:
+            opx_output = self.opx_output
+
+        digital_cfg: Dict[str, Any] = {"port": tuple(opx_output)}
         if self.delay is not None:
             digital_cfg["delay"] = self.delay
         if self.buffer is not None:
@@ -103,33 +114,28 @@ class DigitalOutputChannel(QuamComponent):
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
-        if len(self.opx_output) == 2:
-            controller_name, port = self.opx_output
-            controller_cfg = config["controllers"].setdefault(controller_name, {})
-            controller_cfg.setdefault("digital_outputs", {})
-            port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
-        else:
-            controller_name, fem, port = self.opx_output
-            controller_cfg = config["controllers"].setdefault(controller_name, {})
-            controller_cfg.setdefault("fems", {})
-            fem_cfg = controller_cfg["fems"].setdefault(fem, {"type": "LF"})
-            fem_cfg.setdefault("digital_outputs", {})
-            port_cfg = fem_cfg["digital_outputs"].setdefault(port, {})
+        if isinstance(self.opx_output, DigitalOutputPort):
+            if self.shareable is not None:
+                warnings.warn(
+                    f"Property {self.name}.shareable (={self.shareable}) is ignored "
+                    "because it should be set in {self.name}.opx_output.shareable"
+                )
+            if self.inverted is not None:
+                warnings.warn(
+                    f"Property {self.name}.inverted (={self.inverted}) is ignored "
+                    "because it should be set in {self.name}.opx_output.inverted"
+                )
+            return
 
-        if self.shareable is not None:
-            if port_cfg.get("shareable", self.shareable) != self.shareable:
-                raise ValueError(
-                    f"Channel {self.name} has conflicting shareable settings: "
-                    f"{port_cfg['shareable']} and {self.shareable}"
-                )
-            port_cfg["shareable"] = self.shareable
-        if self.inverted is not None:
-            if port_cfg.get("inverted", self.inverted) != self.inverted:
-                raise ValueError(
-                    f"Channel {self.name} has conflicting inverted settings: "
-                    f"{port_cfg['inverted']} and {self.inverted}"
-                )
-            port_cfg["inverted"] = self.inverted
+        if len(self.opx_output) == 2:
+            digital_output_port = OPXPlusDigitalOutputPort(
+                port=self.opx_output, shareable=self.shareable, inverted=self.inverted
+            )
+        else:
+            digital_output_port = FEMDigitalOutputPort(
+                port=self.opx_output, shareable=self.shareable, inverted=self.inverted
+            )
+        digital_output_port.apply_to_config(config)
 
 
 @quam_dataclass
@@ -395,7 +401,7 @@ class Channel(QuamComponent):
         """
         frame_rotation_2pi(angle, self.name)
 
-    def _add_analog_port_to_config(
+    def _config_add_analog_port(
         self,
         address: Union[Tuple[str, int], Tuple[str, int, int]],
         config,
@@ -523,22 +529,25 @@ class SingleChannel(Channel):
             )
 
         element_config = config["elements"][self.name]
-        element_config["singleInput"] = {"port": tuple(self.opx_output)}
 
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
-        port_config = self._add_analog_port_to_config(
-            self.opx_output, config, self.opx_output_offset, "output"
-        )
+        if isinstance(self.opx_output, LFAnalogOutputPort):
+            element_config["singleInput"] = {"port": tuple(self.opx_output.port)}
+        else:
+            element_config["singleInput"] = {"port": tuple(self.opx_output)}
+            port_config = self._config_add_analog_port(
+                self.opx_output, config, self.opx_output_offset, "output"
+            )
 
-        if self.filter_fir_taps is not None:
-            output_filter = port_config.setdefault("filter", {})
-            output_filter["feedforward"] = list(self.filter_fir_taps)
+            if self.filter_fir_taps is not None:
+                output_filter = port_config.setdefault("filter", {})
+                output_filter["feedforward"] = list(self.filter_fir_taps)
 
-        if self.filter_iir_taps is not None:
-            output_filter = port_config.setdefault("filter", {})
-            output_filter["feedback"] = list(self.filter_iir_taps)
+            if self.filter_iir_taps is not None:
+                output_filter = port_config.setdefault("filter", {})
+                output_filter["feedback"] = list(self.filter_iir_taps)
 
 
 @quam_dataclass
@@ -577,13 +586,16 @@ class InSingleChannel(Channel):
         super().apply_to_config(config)
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        config["elements"][self.name]["outputs"] = {"out1": tuple(self.opx_input)}
-        config["elements"][self.name]["smearing"] = self.smearing
-        config["elements"][self.name]["time_of_flight"] = self.time_of_flight
+        element_config = config["elements"][self.name]
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
 
-        self._add_analog_port_to_config(
-            self.opx_input, config, self.opx_input_offset, "input"
-        )
+        if isinstance(self.opx_input, LFAnalogInputPort):
+            element_config["outputs"] = {"out1": tuple(self.opx_input.port)}
+        else:
+            self._config_add_analog_port(
+                self.opx_input, config, self.opx_input_offset, "input"
+            )
 
     def measure(
         self,
@@ -955,7 +967,12 @@ class IQChannel(Channel):
         """
         # Add pulses & waveforms
         super().apply_to_config(config)
-        opx_outputs = {"I": tuple(self.opx_output_I), "Q": tuple(self.opx_output_Q)}
+
+        opx_outputs = {"I": self.opx_output_I, "Q": self.opx_output_Q}
+        opx_ports = {
+            key: tuple(val.port if isinstance(val, LFAnalogOutputPort) else val)
+            for key, val in opx_outputs.items()
+        }
         offsets = {"I": self.opx_output_offset_I, "Q": self.opx_output_offset_Q}
 
         if str_ref.is_reference(self.name):
@@ -989,7 +1006,7 @@ class IQChannel(Channel):
                 f"reference: {self.frequency_converter_up}"
             )
         else:
-            element_cfg["mixInputs"] = {**opx_outputs}
+            element_cfg["mixInputs"] = {**opx_ports}
             if self.mixer is not None:
                 element_cfg["mixInputs"]["mixer"] = self.mixer.name
             if self.local_oscillator is not None:
@@ -998,9 +1015,10 @@ class IQChannel(Channel):
                 ] = self.local_oscillator.frequency
 
         for I_or_Q in ["I", "Q"]:
-            port_output = opx_outputs[I_or_Q]
+            opx_output = opx_outputs[I_or_Q]
             offset = offsets[I_or_Q]
-            self._add_analog_port_to_config(port_output, config, offset, "output")
+            if not isinstance(opx_output, LFAnalogOutputPort):
+                self._config_add_analog_port(opx_output, config, offset, "output")
 
 
 @quam_dataclass
@@ -1086,7 +1104,7 @@ class InIQChannel(Channel):
         for I_or_Q in ["I", "Q"]:
             curr_input = opx_inputs[I_or_Q]
             offset = offsets[I_or_Q]
-            port_config = self._add_analog_port_to_config(
+            port_config = self._config_add_analog_port(
                 curr_input, config, offset, port_type="input"
             )
 
