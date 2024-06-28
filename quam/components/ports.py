@@ -94,7 +94,9 @@ class FEMPort(Port, ABC):
                 )
 
         controller_cfg = config["controllers"].setdefault(controller_name, {})
-        ports_cfg = controller_cfg.setdefault(f"{self.port_type}s", {})
+        fems_cfg = controller_cfg.setdefault("fems", {})
+        fem_cfg = fems_cfg.setdefault(fem, {})
+        ports_cfg = fem_cfg.setdefault(f"{self.port_type}s", {})
         port_cfg = ports_cfg.setdefault(port, {})
         return port_cfg
 
@@ -185,15 +187,18 @@ class MWFEMAnalogOutputPort(FEMPort):
     full_scale_power_dbm: int = -11
 
     def get_port_properties(self) -> Dict[str, Any]:
-        return {
+        port_cfg = {
             "band": self.band,
-            "upconverter_frequency": self.upconverter_frequency,
-            "upconverters": self.upconverters,
             "delay": self.delay,
             "shareable": self.shareable,
             "sampling_rate": self.sampling_rate,
             "full_scale_power_dbm": self.full_scale_power_dbm,
         }
+        if self.upconverter_frequency is not None:
+            port_cfg["upconverter_frequency"] = self.upconverter_frequency
+        if self.upconverters is not None:
+            port_cfg["upconverters"] = self.upconverters
+        return port_cfg
 
 
 @quam_dataclass
@@ -233,8 +238,10 @@ class OPXPlusDigitalOutputPort(DigitalOutputPort, OPXPlusPort):
 
 @quam_dataclass
 class OPXPlusDigitalInputPort(OPXPlusPort):
+    port_type: ClassVar[str] = "digital_input"
+
     deadtime: int = 4
-    polarity: Literal["Rising", "Falling"] = "Rising"
+    polarity: Literal["rising", "falling"] = "rising"
     threshold: float = 2.0
     shareable: bool = False
 
