@@ -51,7 +51,7 @@ class BasePort(QuamComponent, ABC):
 
 @quam_dataclass
 class OPXPlusPort(BasePort, ABC):
-    controller_name: str
+    controller_id: Union[str, int]
     port_id: int
 
     def get_port_config(
@@ -60,15 +60,15 @@ class OPXPlusPort(BasePort, ABC):
 
         if not create:
             try:
-                controller_cfg = config["controllers"][self.controller_name]
+                controller_cfg = config["controllers"][self.controller_id]
                 return controller_cfg[f"{self.port_type}"][self.port_id]
             except KeyError:
                 raise KeyError(
-                    f"Error generating config: controller {self.controller_name} does "
+                    f"Error generating config: controller {self.controller_id} does "
                     f"not have entry {self.port_type}s for port {self.port_tuple}"
                 )
 
-        controller_cfg = config["controllers"].setdefault(self.controller_name, {})
+        controller_cfg = config["controllers"].setdefault(self.controller_id, {})
         ports_cfg = controller_cfg.setdefault(f"{self.port_type}s", {})
         port_cfg = ports_cfg.setdefault(self.port_id, {})
         return port_cfg
@@ -76,7 +76,7 @@ class OPXPlusPort(BasePort, ABC):
 
 @quam_dataclass
 class FEMPort(BasePort, ABC):
-    controller_name: str
+    controller_id: Union[str, int]
     fem_id: int
     port_id: int
 
@@ -86,11 +86,11 @@ class FEMPort(BasePort, ABC):
 
         if not create:
             try:
-                controller_cfg = config["controllers"][self.controller_name]
+                controller_cfg = config["controllers"][self.controller_id]
                 fem_cfg = controller_cfg["fems"][self.fem_id]
             except KeyError:
                 raise KeyError(
-                    f"Error generating config: controller {self.controller_name} does "
+                    f"Error generating config: controller {self.controller_id} does "
                     f"not have entry for FEM {self.fem_id} for "
                     f"port {self.port_id}"
                 )
@@ -98,11 +98,11 @@ class FEMPort(BasePort, ABC):
                 return fem_cfg[f"{self.port_type}s"][self.port_id]
             except KeyError:
                 raise KeyError(
-                    f"Error generating config: controller {self.controller_name} does "
+                    f"Error generating config: controller {self.controller_id} does "
                     f"not have entry {self.port_type}s for port {self.port_tuple}"
                 )
 
-        controller_cfg = config["controllers"].setdefault(self.controller_name, {})
+        controller_cfg = config["controllers"].setdefault(self.controller_id, {})
         fems_cfg = controller_cfg.setdefault("fems", {})
         fem_cfg = fems_cfg.setdefault(self.fem_id, {})
         ports_cfg = fem_cfg.setdefault(f"{self.port_type}s", {})
