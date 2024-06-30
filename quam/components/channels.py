@@ -1482,7 +1482,7 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
 
 
 @quam_dataclass
-class MWChannel(QuamComponent):
+class MWChannel(Channel):
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
@@ -1495,7 +1495,7 @@ class MWChannel(QuamComponent):
 
 
 @quam_dataclass
-class InMWChannel(QuamComponent):
+class InMWChannel(Channel):
     opx_input: MWFEMAnalogInputPort
 
     def apply_to_config(self, config: Dict) -> None:
