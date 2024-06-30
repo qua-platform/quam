@@ -3,19 +3,25 @@ from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Uni
 import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
-from quam.components.pulses import Pulse, BaseReadoutPulse
-from quam.components.ports import (
+from quam.components.ports.digital_outputs import (
     DigitalOutputPort,
-    FEMDigitalOutputPort,
-    LFAnalogOutputPort,
+    OPXPlusDigitalOutputPort,
+)
+from quam.components.ports.analog_inputs import (
     LFAnalogInputPort,
     LFFEMAnalogInputPort,
-    LFFEMAnalogOutputPort,
     MWFEMAnalogInputPort,
-    MWFEMAnalogOutputPort,
     OPXPlusAnalogInputPort,
+)
+from quam.components.ports.analog_outputs import (
+    LFAnalogOutputPort,
+    LFFEMAnalogOutputPort,
+    MWFEMAnalogOutputPort,
     OPXPlusAnalogOutputPort,
-    OPXPlusDigitalOutputPort,
+)
+from quam.components.pulses import Pulse, BaseReadoutPulse
+from quam.components.ports.digital_outputs import (
+    FEMDigitalOutputPort,
 )
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict

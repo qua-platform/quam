@@ -1,9 +1,11 @@
 import pytest
 
-from quam.components.ports import (
+from quam.components.ports.digital_outputs import (
     FEMDigitalOutputPort,
-    OPXPlusDigitalInputPort,
     OPXPlusDigitalOutputPort,
+)
+from quam.components.ports.digital_inputs import (
+    OPXPlusDigitalInputPort,
 )
 
 

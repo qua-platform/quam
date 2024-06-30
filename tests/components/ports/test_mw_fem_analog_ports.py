@@ -1,6 +1,7 @@
 import pytest
 
-from quam.components.ports import MWFEMAnalogInputPort, MWFEMAnalogOutputPort
+from quam.components.ports.analog_outputs import MWFEMAnalogOutputPort
+from quam.components.ports.analog_inputs import MWFEMAnalogInputPort
 
 
 def test_mw_fem_analog_output_port():
