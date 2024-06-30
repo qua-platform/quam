@@ -11,8 +11,6 @@ __all__ = ["BasePort", "OPXPlusPort", "FEMPort"]
 @quam_dataclass
 class BasePort(QuamComponent, ABC):
     port_type: ClassVar[str]
-    controller_name: str
-    port_id: int
 
     @abstractmethod
     def get_port_config(
@@ -53,6 +51,8 @@ class BasePort(QuamComponent, ABC):
 
 @quam_dataclass
 class OPXPlusPort(BasePort, ABC):
+    controller_name: str
+    port_id: int
 
     def get_port_config(
         self, config: Dict[str, Any], create: bool = True
