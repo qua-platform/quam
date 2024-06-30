@@ -12,7 +12,7 @@ __all__ = ["BasePort", "OPXPlusPort", "FEMPort"]
 class BasePort(QuamComponent, ABC):
     port_type: ClassVar[str]
     controller_name: str
-    port_number: int
+    port_id: int
 
     @abstractmethod
     def get_port_config(
@@ -26,7 +26,7 @@ class BasePort(QuamComponent, ABC):
 
     @property
     @abstractmethod
-    def port_id(self) -> Union[Tuple[str, int], Tuple[str, int, int]]:
+    def port_tuple(self) -> Union[Tuple[str, int], Tuple[str, int, int]]:
         pass
 
     def _update_port_config(self, port_config, port_properties):
@@ -35,7 +35,7 @@ class BasePort(QuamComponent, ABC):
                 if key in port_config and value != port_config[key]:
                     warnings.warn(
                         f"Error generating QUA config: Controller {self.port_type} "
-                        f"port {self.port_id} already has entry for {key}. This likely "
+                        f"port {self.port_tuple} already has entry for {key}. This likely "
                         f"means that the port is being configured multiple times. "
                         f"Overwriting {port_config['key']} → {value}."
                     )
@@ -61,24 +61,24 @@ class OPXPlusPort(BasePort, ABC):
         if not create:
             try:
                 controller_cfg = config["controllers"][self.controller_name]
-                return controller_cfg[f"{self.port_type}"][self.port_number]
+                return controller_cfg[f"{self.port_type}"][self.port_id]
             except KeyError:
                 raise KeyError(
                     f"Error generating config: controller {self.controller_name} does "
-                    f"not have entry {self.port_type}s for port {self.port_id}"
+                    f"not have entry {self.port_type}s for port {self.port_tuple}"
                 )
 
         controller_cfg = config["controllers"].setdefault(self.controller_name, {})
         ports_cfg = controller_cfg.setdefault(f"{self.port_type}s", {})
-        port_cfg = ports_cfg.setdefault(self.port_number, {})
+        port_cfg = ports_cfg.setdefault(self.port_id, {})
         return port_cfg
 
 
 @quam_dataclass
 class FEMPort(BasePort, ABC):
     controller_name: str
-    fem_number: int
-    port_number: int
+    fem_id: int
+    port_id: int
 
     def get_port_config(
         self, config: Dict[str, Any], create: bool = True
@@ -87,24 +87,24 @@ class FEMPort(BasePort, ABC):
         if not create:
             try:
                 controller_cfg = config["controllers"][self.controller_name]
-                fem_cfg = controller_cfg["fems"][self.fem_number]
+                fem_cfg = controller_cfg["fems"][self.fem_id]
             except KeyError:
                 raise KeyError(
                     f"Error generating config: controller {self.controller_name} does "
-                    f"not have entry for FEM {self.fem_number} for "
-                    f"port {self.port_number}"
+                    f"not have entry for FEM {self.fem_id} for "
+                    f"port {self.port_id}"
                 )
             try:
-                return fem_cfg[f"{self.port_type}s"][self.port_number]
+                return fem_cfg[f"{self.port_type}s"][self.port_id]
             except KeyError:
                 raise KeyError(
                     f"Error generating config: controller {self.controller_name} does "
-                    f"not have entry {self.port_type}s for port {self.port_id}"
+                    f"not have entry {self.port_type}s for port {self.port_tuple}"
                 )
 
         controller_cfg = config["controllers"].setdefault(self.controller_name, {})
         fems_cfg = controller_cfg.setdefault("fems", {})
-        fem_cfg = fems_cfg.setdefault(self.fem_number, {})
+        fem_cfg = fems_cfg.setdefault(self.fem_id, {})
         ports_cfg = fem_cfg.setdefault(f"{self.port_type}s", {})
-        port_cfg = ports_cfg.setdefault(self.port_number, {})
+        port_cfg = ports_cfg.setdefault(self.port_id, {})
         return port_cfg
