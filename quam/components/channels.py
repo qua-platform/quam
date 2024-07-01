@@ -106,11 +106,11 @@ class DigitalOutputChannel(QuamComponent):
                 Contains "port", and optionally "delay", "buffer" if specified
         """
         if isinstance(self.opx_output, DigitalOutputPort):
-            opx_output = self.opx_output.port
+            opx_output = self.opx_output.port_tuple
         else:
-            opx_output = self.opx_output
+            opx_output = tuple(self.opx_output)
 
-        digital_cfg: Dict[str, Any] = {"port": tuple(opx_output)}
+        digital_cfg: Dict[str, Any] = {"port": opx_output}
         if self.delay is not None:
             digital_cfg["delay"] = self.delay
         if self.buffer is not None:
@@ -520,22 +520,22 @@ class SingleChannel(Channel):
             opx_port = self.opx_output
         elif len(self.opx_output) == 2:
             opx_port = OPXPlusAnalogOutputPort(
-                port=self.opx_output,
+                *self.opx_output,
                 offset=self.opx_output_offset,
-                feedforward_filter=list(self.filter_fir_taps),
-                feedback_filter=list(self.filter_iir_taps),
+                feedforward_filter=self.filter_fir_taps,
+                feedback_filter=self.filter_iir_taps,
             )
             opx_port.apply_to_config(config)
         else:
             opx_port = LFFEMAnalogOutputPort(
-                port=self.opx_output,
+                *self.opx_output,
                 offset=self.opx_output_offset,
-                feedforward_filter=list(self.filter_fir_taps),
-                feedback_filter=list(self.filter_iir_taps),
+                feedforward_filter=self.filter_fir_taps,
+                feedback_filter=self.filter_iir_taps,
             )
             opx_port.apply_to_config(config)
 
-        element_config["singleInput"] = {"port": tuple(opx_port.port)}
+        element_config["singleInput"] = {"port": opx_port.port_tuple}
 
 
 @quam_dataclass
@@ -582,16 +582,16 @@ class InSingleChannel(Channel):
             opx_port = self.opx_input
         elif len(self.opx_input) == 2:
             opx_port = OPXPlusAnalogInputPort(
-                port=self.opx_input, offset=self.opx_input_offset
+                *self.opx_input, offset=self.opx_input_offset
             )
             opx_port.apply_to_config(config)
         else:
             opx_port = LFFEMAnalogInputPort(
-                port=self.opx_input, offset=self.opx_input_offset
+                *self.opx_input, offset=self.opx_input_offset
             )
             opx_port.apply_to_config(config)
 
-        element_config["outputs"] = {"out1": tuple(opx_port.port)}
+        element_config["outputs"] = {"out1": opx_port.port_tuple}
 
     def measure(
         self,
@@ -1100,16 +1100,16 @@ class InIQChannel(Channel):
                 opx_port = opx_input
             elif len(opx_input) == 2:
                 opx_port = OPXPlusAnalogInputPort(
-                    port=opx_input, offset=offset, gain_db=self.input_gain
+                    *opx_input, offset=offset, gain_db=self.input_gain
                 )
                 opx_port.apply_to_config(config)
             else:
                 opx_port = LFFEMAnalogInputPort(
-                    port=opx_input, offset=offset, gain_db=self.input_gain
+                    *opx_input, offset=offset, gain_db=self.input_gain
                 )
                 opx_port.apply_to_config(config)
             if not isinstance(self.frequency_converter_down, OctaveDownConverter):
-                element_cfg["outputs"][f"out{k}"] = tuple(opx_port.port)
+                element_cfg["outputs"][f"out{k}"] = opx_port.port_tuple
 
     def measure(
         self,
@@ -1496,7 +1496,7 @@ class MWChannel(Channel):
         super().apply_to_config(config)
 
         element_cfg = config["elements"][self.name]
-        element_cfg["MWInput"] = tuple(self.opx_output.port)
+        element_cfg["MWInput"] = self.opx_output.port_tuple
         element_cfg["upconverter"] = self.upconverter
 
 
@@ -1508,7 +1508,7 @@ class InMWChannel(Channel):
         super().apply_to_config(config)
 
         element_cfg = config["elements"][self.name]
-        element_cfg["MWOutput"] = tuple(self.opx_input.port)
+        element_cfg["MWOutput"] = self.opx_input.port_tuple
 
 
 @quam_dataclass
