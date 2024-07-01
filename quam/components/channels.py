@@ -141,11 +141,11 @@ class DigitalOutputChannel(QuamComponent):
 
         if len(self.opx_output) == 2:
             digital_output_port = OPXPlusDigitalOutputPort(
-                port=self.opx_output, shareable=self.shareable, inverted=self.inverted
+                *self.opx_output, shareable=self.shareable, inverted=self.inverted
             )
         else:
             digital_output_port = FEMDigitalOutputPort(
-                port=self.opx_output, shareable=self.shareable, inverted=self.inverted
+                *self.opx_output, shareable=self.shareable, inverted=self.inverted
             )
         digital_output_port.apply_to_config(config)
 
@@ -1011,10 +1011,10 @@ class IQChannel(Channel):
             if isinstance(opx_output, LFAnalogOutputPort):
                 opx_port = opx_output
             elif len(opx_output) == 2:
-                opx_port = OPXPlusAnalogOutputPort(port=opx_output, offset=offset)
+                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogOutputPort(port=opx_output, offset=offset)
+                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
                 opx_port.apply_to_config(config)
 
 
