@@ -1,31 +1,31 @@
 import pytest
 from quam.components.ports.analog_inputs import OPXPlusAnalogInputPort
 from quam.components.ports.analog_outputs import OPXPlusAnalogOutputPort
-from quam.components.ports.digital_outputs import (
-    OPXPlusDigitalOutputPort,
-)
 
 
 def test_opx_plus_analog_output_port():
     with pytest.raises(TypeError):
         OPXPlusAnalogOutputPort()
 
-    port = OPXPlusAnalogOutputPort(port=("con1", 2))
-    assert port.port == ("con1", 2)
+    port = OPXPlusAnalogOutputPort("con1", 2)
+    assert port.controller_id == "con1"
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 2)
     assert port.port_type == "analog_output"
-    assert port.offset == 0.0
+    assert port.offset is None
     assert port.delay == 0
-    assert port.crosstalk == {}
-    assert port.feedforward_filter == []
-    assert port.feedback_filter == []
+    assert port.crosstalk is None
+    assert port.feedforward_filter is None
+    assert port.feedback_filter is None
     assert port.shareable == False
 
     assert port.get_port_properties() == {
-        "offset": 0.0,
         "delay": 0,
-        "crosstalk": {},
-        "feedforward_filter": [],
-        "feedback_filter": [],
+        "shareable": False,
+    }
+
+    assert port.get_port_properties() == {
+        "delay": 0,
         "shareable": False,
     }
 
@@ -37,11 +37,7 @@ def test_opx_plus_analog_output_port():
             "con1": {
                 "analog_outputs": {
                     2: {
-                        "offset": 0.0,
                         "delay": 0,
-                        "crosstalk": {},
-                        "feedforward_filter": [],
-                        "feedback_filter": [],
                         "shareable": False,
                     }
                 }
@@ -54,15 +50,21 @@ def test_opx_plus_analog_input_port():
     with pytest.raises(TypeError):
         OPXPlusAnalogInputPort()
 
-    port = OPXPlusAnalogInputPort(port=("con1", 2))
-    assert port.port == ("con1", 2)
+    port = OPXPlusAnalogInputPort("con1", 2)
+    assert port.controller_id == "con1"
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 2)
     assert port.port_type == "analog_input"
-    assert port.offset == 0.0
+    assert port.offset is None
     assert port.gain_db == 0
     assert port.shareable == False
 
     assert port.get_port_properties() == {
-        "offset": 0.0,
+        "gain_db": 0,
+        "shareable": False,
+    }
+
+    assert port.get_port_properties() == {
         "gain_db": 0,
         "shareable": False,
     }
@@ -75,7 +77,6 @@ def test_opx_plus_analog_input_port():
             "con1": {
                 "analog_inputs": {
                     2: {
-                        "offset": 0.0,
                         "gain_db": 0,
                         "shareable": False,
                     }

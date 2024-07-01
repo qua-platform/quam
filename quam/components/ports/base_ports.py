@@ -54,6 +54,10 @@ class OPXPlusPort(BasePort, ABC):
     controller_id: Union[str, int]
     port_id: int
 
+    @property
+    def port_tuple(self) -> Tuple[Union[str, int], int]:
+        return self.controller_id, self.port_id
+
     def get_port_config(
         self, config: Dict[str, Any], create: bool = True
     ) -> Dict[str, Any]:
@@ -79,6 +83,10 @@ class FEMPort(BasePort, ABC):
     controller_id: Union[str, int]
     fem_id: int
     port_id: int
+
+    @property
+    def port_tuple(self) -> Tuple[Union[str, int], int, int]:
+        return self.controller_id, self.fem_id, self.port_id
 
     def get_port_config(
         self, config: Dict[str, Any], create: bool = True

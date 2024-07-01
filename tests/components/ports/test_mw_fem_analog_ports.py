@@ -9,35 +9,40 @@ def test_mw_fem_analog_output_port():
         MWFEMAnalogOutputPort()
 
     with pytest.raises(TypeError):
-        port = MWFEMAnalogOutputPort(port=("con1", 1, 2))
+        port = MWFEMAnalogOutputPort("con1", 1, 2)
 
-    port = MWFEMAnalogOutputPort(port=("con1", 1, 2), band=1)
-    assert port.port == ("con1", 1, 2)
+    with pytest.raises(ValueError):
+        port = MWFEMAnalogOutputPort("con1", 1, 2, band=1)
+
+    port = MWFEMAnalogOutputPort("con1", 1, 2, band=1, upconverter_frequency=5e9)
+    assert port.controller_id == "con1"
+    assert port.fem_id == 1
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 1, 2)
     assert port.port_type == "analog_output"
     assert port.band == 1
-    assert port.upconverter_frequency is None
+    assert port.upconverter_frequency == 5e9
     assert port.upconverters is None
     assert port.delay == 0
     assert port.shareable == False
     assert port.sampling_rate == 1e9
     assert port.full_scale_power_dbm == -11
 
-    assert port.get_port_properties() == {
-        "band": 1,
-        "delay": 0,
-        "shareable": False,
-        "sampling_rate": 1e9,
-        "full_scale_power_dbm": -11,
-    }
-
-    port.upconverter_frequency = 5e9
-    assert port.get_port_properties() == {
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "fem_id": 1,
+        "port_id": 2,
         "band": 1,
         "upconverter_frequency": 5e9,
+    }
+
+    assert port.get_port_properties() == {
+        "band": 1,
         "delay": 0,
         "shareable": False,
         "sampling_rate": 1e9,
         "full_scale_power_dbm": -11,
+        "upconverter_frequency": 5e9,
     }
 
     cfg = {"controllers": {}}
@@ -70,18 +75,27 @@ def test_mw_fem_analog_input_ports():
         MWFEMAnalogInputPort()
 
     with pytest.raises(TypeError):
-        port = MWFEMAnalogInputPort(port=("con1", 1, 2))
+        port = MWFEMAnalogInputPort("con1", 1, 2)
 
-    port = MWFEMAnalogInputPort(
-        port=("con1", 1, 2), band=1, downconverter_frequency=5e9
-    )
+    port = MWFEMAnalogInputPort("con1", 1, 2, band=1, downconverter_frequency=5e9)
 
-    assert port.port == ("con1", 1, 2)
+    assert port.controller_id == "con1"
+    assert port.fem_id == 1
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 1, 2)
     assert port.port_type == "analog_input"
     assert port.band == 1
     assert port.downconverter_frequency == 5e9
     assert port.sampling_rate == 1e9
     assert port.shareable == False
+
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "fem_id": 1,
+        "port_id": 2,
+        "band": 1,
+        "downconverter_frequency": 5e9,
+    }
 
     assert port.get_port_properties() == {
         "band": 1,

@@ -8,24 +8,30 @@ def test_lf_fem_analog_output_port():
     with pytest.raises(TypeError):
         LFFEMAnalogOutputPort()
 
-    port = LFFEMAnalogOutputPort(port=("con1", 1, 2))
-    assert port.port == ("con1", 1, 2)
+    port = LFFEMAnalogOutputPort("con1", 1, 2)
+    assert port.controller_id == "con1"
+    assert port.fem_id == 1
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 1, 2)
     assert port.port_type == "analog_output"
     assert port.offset == None
     assert port.delay == 0
-    assert port.crosstalk == {}
-    assert port.feedforward_filter == []
-    assert port.feedback_filter == []
+    assert port.crosstalk is None
+    assert port.feedforward_filter is None
+    assert port.feedback_filter is None
     assert port.shareable == False
     assert port.output_mode == "direct"
     assert port.sampling_rate == 1e9
     assert port.upsampling_mode == "mw"
 
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "fem_id": 1,
+        "port_id": 2,
+    }
+
     assert port.get_port_properties() == {
         "delay": 0,
-        "crosstalk": {},
-        "feedforward_filter": [],
-        "feedback_filter": [],
         "shareable": False,
         "output_mode": "direct",
         "sampling_rate": 1e9,
@@ -43,9 +49,6 @@ def test_lf_fem_analog_output_port():
                         "analog_outputs": {
                             2: {
                                 "delay": 0,
-                                "crosstalk": {},
-                                "feedforward_filter": [],
-                                "feedback_filter": [],
                                 "shareable": False,
                                 "output_mode": "direct",
                                 "sampling_rate": 1e9,
@@ -61,9 +64,6 @@ def test_lf_fem_analog_output_port():
     port.offset = 0.1
     assert port.get_port_properties() == {
         "delay": 0,
-        "crosstalk": {},
-        "feedforward_filter": [],
-        "feedback_filter": [],
         "shareable": False,
         "output_mode": "direct",
         "sampling_rate": 1e9,
@@ -76,16 +76,25 @@ def test_lf_fem_analog_input_port():
     with pytest.raises(TypeError):
         LFFEMAnalogInputPort()
 
-    port = LFFEMAnalogInputPort(port=("con1", 1, 2))
-    assert port.port == ("con1", 1, 2)
+    port = LFFEMAnalogInputPort("con1", 1, 2)
+    assert port.controller_id == "con1"
+    assert port.fem_id == 1
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 1, 2)
+
     assert port.port_type == "analog_input"
-    assert port.offset == 0.0
+    assert port.offset is None
     assert port.gain_db == 0
     assert port.shareable == False
     assert port.sampling_rate == 1e9
 
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "fem_id": 1,
+        "port_id": 2,
+    }
+
     assert port.get_port_properties() == {
-        "offset": 0.0,
         "gain_db": 0,
         "shareable": False,
         "sampling_rate": 1e9,
@@ -101,7 +110,6 @@ def test_lf_fem_analog_input_port():
                     1: {
                         "analog_inputs": {
                             2: {
-                                "offset": 0.0,
                                 "gain_db": 0,
                                 "shareable": False,
                                 "sampling_rate": 1e9,

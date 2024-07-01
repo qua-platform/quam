@@ -1,5 +1,4 @@
 from abc import ABC
-from dataclasses import field
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
@@ -18,7 +17,7 @@ __all__ = [
 class LFAnalogOutputPort(BasePort, ABC):
     port_type: ClassVar[str] = "analog_output"
 
-    offset: float = 0.0
+    offset: Optional[float] = None
     delay: int = 0
     crosstalk: Optional[Dict[int, float]] = None
     feedforward_filter: Optional[List[float]] = None

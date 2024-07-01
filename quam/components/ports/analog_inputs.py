@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, ClassVar, Dict
+from typing import Any, ClassVar, Dict, Optional
 
 from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
 from quam.core import quam_dataclass
@@ -17,16 +17,18 @@ __all__ = [
 class LFAnalogInputPort(BasePort, ABC):
     port_type: ClassVar[str] = "analog_input"
 
-    offset: float = 0.0
+    offset: Optional[float] = None
     gain_db: int = 0
     shareable: bool = False
 
     def get_port_properties(self):
-        return {
-            "offset": self.offset,
+        port_cfg = {
             "gain_db": self.gain_db,
             "shareable": self.shareable,
         }
+        if self.offset is not None:
+            port_cfg["offset"] = self.offset
+        return port_cfg
 
 
 @quam_dataclass

@@ -13,11 +13,18 @@ def test_opx_plus_digital_output_port():
     with pytest.raises(TypeError):
         OPXPlusDigitalOutputPort()
 
-    port = OPXPlusDigitalOutputPort(port=("con1", 2))
-    assert port.port == ("con1", 2)
+    port = OPXPlusDigitalOutputPort("con1", 2)
+    assert port.controller_id == "con1"
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 2)
     assert port.port_type == "digital_output"
-    assert port.inverted == False
-    assert port.shareable == False
+    assert port.inverted is False
+    assert port.shareable is False
+
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "port_id": 2,
+    }
 
     assert port.get_port_properties() == {
         "inverted": False,
@@ -45,13 +52,20 @@ def test_opx_plus_digital_input_port():
     with pytest.raises(TypeError):
         OPXPlusDigitalInputPort()
 
-    port = OPXPlusDigitalInputPort(port=("con1", 2))
-    assert port.port == ("con1", 2)
+    port = OPXPlusDigitalInputPort("con1", 2)
+    assert port.controller_id == "con1"
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 2)
     assert port.port_type == "digital_input"
     assert port.deadtime == 4
     assert port.polarity == "rising"
     assert port.threshold == 2.0
     assert port.shareable == False
+
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "port_id": 2,
+    }
 
     assert port.get_port_properties() == {
         "deadtime": 4,
@@ -83,13 +97,22 @@ def test_fem_digital_output_port():
     with pytest.raises(TypeError):
         FEMDigitalOutputPort()
 
-    port = FEMDigitalOutputPort(port=("con1", 1, 2))
+    port = FEMDigitalOutputPort("con1", 1, 2)
+    assert port.controller_id == "con1"
+    assert port.fem_id == 1
+    assert port.port_id == 2
+    assert port.port_tuple == ("con1", 1, 2)
 
-    assert port.port == ("con1", 1, 2)
     assert port.port_type == "digital_output"
     assert port.inverted == False
     assert port.shareable == False
     assert port.level == "LVTTL"
+
+    assert port.to_dict() == {
+        "controller_id": "con1",
+        "fem_id": 1,
+        "port_id": 2,
+    }
 
     assert port.get_port_properties() == {
         "inverted": False,
