@@ -20,19 +20,22 @@ class LFAnalogOutputPort(BasePort, ABC):
 
     offset: float = 0.0
     delay: int = 0
-    crosstalk: Dict[int, float] = field(default_factory=dict)
-    feedforward_filter: List[float] = field(default_factory=list)
-    feedback_filter: List[float] = field(default_factory=list)
+    crosstalk: Optional[Dict[int, float]] = None
+    feedforward_filter: Optional[List[float]] = None
+    feedback_filter: Optional[List[float]] = None
     shareable: bool = False
 
     def get_port_properties(self):
         port_properties = {
             "delay": self.delay,
-            "crosstalk": self.crosstalk,
-            "feedforward_filter": self.feedforward_filter,
-            "feedback_filter": self.feedback_filter,
             "shareable": self.shareable,
         }
+        if self.crosstalk is not None:
+            port_properties["crosstalk"] = self.crosstalk
+        if self.feedforward_filter is not None:
+            port_properties["feedforward_filter"] = self.feedforward_filter
+        if self.feedback_filter is not None:
+            port_properties["feedback_filter"] = self.feedback_filter
         if self.offset is not None:
             port_properties["offset"] = self.offset
         return port_properties
@@ -68,6 +71,14 @@ class MWFEMAnalogOutputPort(FEMPort):
     shareable: bool = False
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     full_scale_power_dbm: int = -11
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.upconverter_frequency is None and self.upconverters is None:
+            raise ValueError(
+                "MWAnalogOutputPort: Either upconverter_frequency or upconverters must "
+                "be provided"
+            )
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_cfg = {
