@@ -1,5 +1,3 @@
-from abc import ABC, abstractmethod
-from functools import partial, wraps
 from typing import ClassVar, Dict, Union
 from dataclasses import field
 from quam.core import quam_dataclass, QuamComponent
@@ -18,82 +16,6 @@ from .digital_inputs import OPXPlusDigitalInputPort
 
 
 __all__ = ["OPXPlusPortsContainer", "FEMPortsContainer"]
-
-
-# @quam_dataclass
-# class PortsContainer(QuamComponent, ABC):
-
-#     def _get_port(
-#         self,
-#         *ports_tuple,
-#         port_type: str,
-#         create: bool = False,
-#         **kwargs,
-#     ):
-
-#         controllers = getattr(self, f"{port_type}s")
-
-#         if not create:
-#             return controllers[controller_id][port_id]
-
-#         ports = controllers.setdefault(controller_id, {})
-
-#         if port_type == "analog_output":
-#             ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)
-#         elif port_type == "analog_input":
-#             ports[port_id] = OPXPlusAnalogInputPort(controller_id, port_id, **kwargs)
-#         elif port_type == "digital_output":
-#             ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)
-#         elif port_type == "digital_input":
-#             ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)
-#         else:
-#             raise ValueError(f"Invalid port type: {port_type}")
-
-#         return ports[port_id]
-
-#     def get_analog_output(
-#         self,
-#         controller_id: Union[str, int],
-#         port_id: int,
-#         create: bool = False,
-#         **kwargs,
-#     ):
-#         return self._get_port(
-#             controller_id, port_id, port_type="analog_output", create=create, **kwargs
-#         )
-
-#     def get_analog_input(
-#         self,
-#         controller_id: Union[str, int],
-#         port_id: int,
-#         create: bool = False,
-#         **kwargs,
-#     ):
-#         return self._get_port(
-#             controller_id, port_id, port_type="analog_input", create=create, **kwargs
-#         )
-
-#     def get_digital_output(
-#         self,
-#         controller_id: Union[str, int],
-#         port_id: int,
-#         create: bool = False,
-#         **kwargs,
-#     ):
-#         return self._get_port(
-#             controller_id, port_id, port_type="digital_output", create=create, **kwargs
-#         )
-
-#     def get_digital_input(
-#         self,
-#         controller_id: Union[str, int],
-#         port_id: int,
-#         create: bool = False,
-#         **kwargs,
-#     ):
-#         return self._get_port(
-#             controller_id, port_id, port_type="digital_input", create=create, **kwargs
-#         )
 
 
 @quam_dataclass
@@ -121,8 +43,13 @@ class OPXPlusPortsContainer(QuamComponent):
     ):
         controllers = getattr(self, f"{port_type}s")
 
-        if not create:
+        try:
             return controllers[controller_id][port_id]
+        except KeyError:
+            if not create:
+                raise KeyError(
+                    f"Port {port_id} not found in controller {controller_id}"
+                )
 
         ports = controllers.setdefault(controller_id, {})
 
@@ -145,7 +72,7 @@ class OPXPlusPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> OPXPlusAnalogOutputPort:
         return self._get_port(
             controller_id, port_id, port_type="analog_output", create=create, **kwargs
         )
@@ -156,7 +83,7 @@ class OPXPlusPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> OPXPlusAnalogInputPort:
         return self._get_port(
             controller_id, port_id, port_type="analog_input", create=create, **kwargs
         )
@@ -167,7 +94,7 @@ class OPXPlusPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> OPXPlusDigitalOutputPort:
         return self._get_port(
             controller_id, port_id, port_type="digital_output", create=create, **kwargs
         )
@@ -178,7 +105,7 @@ class OPXPlusPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> OPXPlusDigitalInputPort:
         return self._get_port(
             controller_id, port_id, port_type="digital_input", create=create, **kwargs
         )
@@ -250,7 +177,7 @@ class FEMPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> LFFEMAnalogOutputPort:
         return self._get_port(
             controller_id,
             fem_id,
@@ -267,7 +194,7 @@ class FEMPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> LFFEMAnalogInputPort:
         return self._get_port(
             controller_id,
             fem_id,
@@ -284,7 +211,7 @@ class FEMPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> MWFEMAnalogOutputPort:
         return self._get_port(
             controller_id,
             fem_id,
@@ -301,7 +228,7 @@ class FEMPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> MWFEMAnalogInputPort:
         return self._get_port(
             controller_id,
             fem_id,
@@ -318,7 +245,7 @@ class FEMPortsContainer(QuamComponent):
         port_id: int,
         create: bool = False,
         **kwargs,
-    ):
+    ) -> FEMDigitalOutputPort:
         return self._get_port(
             controller_id,
             fem_id,
