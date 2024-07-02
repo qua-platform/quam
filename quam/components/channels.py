@@ -1018,7 +1018,8 @@ class IQChannel(Channel):
                 opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
                 opx_port.apply_to_config(config)
 
-            element_cfg["mixInputs"][I_or_Q] = opx_port.port_tuple
+            if "mixInputs" in element_cfg:
+                element_cfg["mixInputs"][I_or_Q] = opx_port.port_tuple
 
 
 @quam_dataclass
@@ -1054,7 +1055,7 @@ class InIQChannel(Channel):
     opx_input_offset_I: float = None
     opx_input_offset_Q: float = None
 
-    input_gain: Optional[float] = None
+    input_gain: Optional[int] = None
 
     frequency_converter_down: BaseFrequencyConverter = None
 

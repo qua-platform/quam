@@ -15,6 +15,7 @@ __all__ = [
 
 @quam_dataclass
 class LFAnalogOutputPort(BasePort, ABC):
+    fem_type: ClassVar[str] = "LF"
     port_type: ClassVar[str] = "analog_output"
 
     offset: Optional[float] = None
@@ -47,6 +48,7 @@ class OPXPlusAnalogOutputPort(LFAnalogOutputPort, OPXPlusPort):
 
 @quam_dataclass
 class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
+    fem_type: ClassVar[str] = "LF"
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     upsampling_mode: Literal["mw", "pulse"] = "mw"
     output_mode: Literal["direct", "amplified"] = "direct"
@@ -61,6 +63,7 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
 
 @quam_dataclass
 class MWFEMAnalogOutputPort(FEMPort):
+    fem_type: ClassVar[str] = "MW"
     port_type: ClassVar[str] = "analog_output"
 
     band: int

@@ -46,6 +46,7 @@ def test_lf_fem_analog_output_port():
             "con1": {
                 "fems": {
                     1: {
+                        "type": "LF",
                         "analog_outputs": {
                             2: {
                                 "delay": 0,
@@ -54,7 +55,7 @@ def test_lf_fem_analog_output_port():
                                 "sampling_rate": 1e9,
                                 "upsampling_mode": "mw",
                             }
-                        }
+                        },
                     }
                 }
             }
@@ -108,13 +109,14 @@ def test_lf_fem_analog_input_port():
             "con1": {
                 "fems": {
                     1: {
+                        "type": "LF",
                         "analog_inputs": {
                             2: {
                                 "gain_db": 0,
                                 "shareable": False,
                                 "sampling_rate": 1e9,
                             }
-                        }
+                        },
                     }
                 }
             }

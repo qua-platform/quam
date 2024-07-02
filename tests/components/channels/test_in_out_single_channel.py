@@ -30,9 +30,8 @@ def test_in_out_single_channel():
     expected_cfg = {
         "controllers": {
             "con1": {
-                "analog_inputs": {2: {}},
-                "analog_outputs": {1: {}},
-                "digital_outputs": {},
+                "analog_inputs": {2: {"gain_db": 0, "shareable": False}},
+                "analog_outputs": {1: {"delay": 0, "shareable": False}},
             }
         },
         "elements": {

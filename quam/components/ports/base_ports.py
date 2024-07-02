@@ -33,9 +33,9 @@ class BasePort(QuamComponent, ABC):
                 if key in port_config and value != port_config[key]:
                     warnings.warn(
                         f"Error generating QUA config: Controller {self.port_type} "
-                        f"port {self.port_tuple} already has entry for {key}. This likely "
-                        f"means that the port is being configured multiple times. "
-                        f"Overwriting {port_config['key']} → {value}."
+                        f"port {self.port_tuple} already has entry for {key}. This "
+                        f"likely means that the port is being configured multiple "
+                        f"times. Overwriting {port_config[key]} → {value}."
                     )
             except Exception:
                 pass
@@ -80,6 +80,7 @@ class OPXPlusPort(BasePort, ABC):
 
 @quam_dataclass
 class FEMPort(BasePort, ABC):
+    fem_type: ClassVar[str]
     controller_id: Union[str, int]
     fem_id: int
     port_id: int
@@ -113,6 +114,14 @@ class FEMPort(BasePort, ABC):
         controller_cfg = config["controllers"].setdefault(self.controller_id, {})
         fems_cfg = controller_cfg.setdefault("fems", {})
         fem_cfg = fems_cfg.setdefault(self.fem_id, {})
+        if hasattr(self, "fem_type"):
+            if fem_cfg.get("type", self.fem_type) != self.fem_type:
+                raise ValueError(
+                    f"Error generating config: FEM {self.fem_id} is not of type "
+                    f"{self.fem_type}"
+                )
+            fem_cfg["type"] = self.fem_type
+
         ports_cfg = fem_cfg.setdefault(f"{self.port_type}s", {})
         port_cfg = ports_cfg.setdefault(self.port_id, {})
         return port_cfg

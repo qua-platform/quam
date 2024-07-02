@@ -53,6 +53,7 @@ def test_mw_fem_analog_output_port():
             "con1": {
                 "fems": {
                     1: {
+                        "type": "MW",
                         "analog_outputs": {
                             2: {
                                 "band": 1,
@@ -112,6 +113,7 @@ def test_mw_fem_analog_input_ports():
             "con1": {
                 "fems": {
                     1: {
+                        "type": "MW",
                         "analog_inputs": {
                             2: {
                                 "band": 1,

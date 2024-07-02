@@ -15,6 +15,7 @@ __all__ = [
 
 @quam_dataclass
 class LFAnalogInputPort(BasePort, ABC):
+    fem_type: ClassVar[str] = "LF"
     port_type: ClassVar[str] = "analog_input"
 
     offset: Optional[float] = None
@@ -48,6 +49,7 @@ class LFFEMAnalogInputPort(LFAnalogInputPort, FEMPort):
 
 @quam_dataclass
 class MWFEMAnalogInputPort(FEMPort):
+    fem_type: ClassVar[str] = "MW"
     port_type: ClassVar[str] = "analog_input"
 
     band: int

@@ -63,9 +63,10 @@ def test_transmon_xy():
         },
         "controllers": {
             "con1": {
-                "analog_outputs": {1: {}, 2: {}},
-                "digital_outputs": {},
-                "analog_inputs": {},
+                "analog_outputs": {
+                    1: {"delay": 0, "shareable": False},
+                    2: {"delay": 0, "shareable": False},
+                },
             }
         },
     }
@@ -121,9 +122,22 @@ def test_transmon_xy_opx1000():
                 "fems": {
                     2: {
                         "type": "LF",
-                        "analog_outputs": {1: {}, 2: {}},
-                        "digital_outputs": {},
-                        "analog_inputs": {},
+                        "analog_outputs": {
+                            1: {
+                                "delay": 0,
+                                "shareable": False,
+                                "sampling_rate": 1e9,
+                                "upsampling_mode": "mw",
+                                "output_mode": "direct",
+                            },
+                            2: {
+                                "delay": 0,
+                                "shareable": False,
+                                "sampling_rate": 1e9,
+                                "upsampling_mode": "mw",
+                                "output_mode": "direct",
+                            },
+                        },
                     }
                 }
             }
@@ -182,9 +196,16 @@ def test_transmon_add_pulse():
     assert config == {
         "controllers": {
             "con1": {
-                "analog_outputs": {1: {}, 2: {}},
-                "digital_outputs": {},
-                "analog_inputs": {},
+                "analog_outputs": {
+                    1: {
+                        "delay": 0,
+                        "shareable": False,
+                    },
+                    2: {
+                        "delay": 0,
+                        "shareable": False,
+                    },
+                },
             }
         },
         "elements": {

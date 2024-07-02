@@ -64,14 +64,13 @@ def test_empty_in_out_IQ_channel():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    3: {},
-                    4: {},
+                    3: {"gain_db": 0, "shareable": False},
+                    4: {"gain_db": 0, "shareable": False},
                 },
                 "analog_outputs": {
-                    1: {},
-                    2: {},
+                    1: {"delay": 0, "shareable": False},
+                    2: {"delay": 0, "shareable": False},
                 },
-                "digital_outputs": {},
             }
         },
         "elements": {
@@ -159,14 +158,13 @@ def test_readout_resonator_with_readout():
         "controllers": {
             "con1": {
                 "analog_inputs": {
-                    3: {},
-                    4: {},
+                    3: {"gain_db": 0, "shareable": False},
+                    4: {"gain_db": 0, "shareable": False},
                 },
                 "analog_outputs": {
-                    1: {},
-                    2: {},
+                    1: {"delay": 0, "shareable": False},
+                    2: {"delay": 0, "shareable": False},
                 },
-                "digital_outputs": {},
             }
         },
         "elements": {
