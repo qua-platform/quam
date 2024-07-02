@@ -18,7 +18,7 @@ def test_digital_only_channel(qua_config):
     quam = QuamTest(channel=channel)
     cfg = quam.generate_config()
 
-    qua_config["controllers"] = {"con1": {"digital_outputs": {1: {}}}}
+    qua_config["controllers"] = {"con1": {"digital_outputs": {1: {"inverted": False, "shareable": False}}}}
     qua_config["elements"] = {
         "channel": {"digitalInputs": {"1": {"port": ("con1", 1)}}, "operations": {}}
     }

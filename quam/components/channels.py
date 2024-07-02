@@ -139,13 +139,15 @@ class DigitalOutputChannel(QuamComponent):
                 )
             return
 
+        shareable = self.shareable if self.shareable is not None else False
+        inverted = self.inverted if self.inverted is not None else False
         if len(self.opx_output) == 2:
             digital_output_port = OPXPlusDigitalOutputPort(
-                *self.opx_output, shareable=self.shareable, inverted=self.inverted
+                *self.opx_output, shareable=shareable, inverted=inverted
             )
         else:
             digital_output_port = FEMDigitalOutputPort(
-                *self.opx_output, shareable=self.shareable, inverted=self.inverted
+                *self.opx_output, shareable=shareable, inverted=inverted
             )
         digital_output_port.apply_to_config(config)
 
@@ -964,8 +966,6 @@ class IQChannel(Channel):
         # Add pulses & waveforms
         super().apply_to_config(config)
 
-        opx_outputs = {"I": self.opx_output_I, "Q": self.opx_output_Q}
-
         if str_ref.is_reference(self.name):
             raise AttributeError(
                 f"Channel {self.get_reference()} cannot be added to the config because"
@@ -997,7 +997,8 @@ class IQChannel(Channel):
                 f"reference: {self.frequency_converter_up}"
             )
         else:
-            element_cfg["mixInputs"] = {**opx_ports}
+
+            element_cfg["mixInputs"] = {}  # To be filled in next section
             if self.mixer is not None:
                 element_cfg["mixInputs"]["mixer"] = self.mixer.name
             if self.local_oscillator is not None:
@@ -1007,7 +1008,7 @@ class IQChannel(Channel):
 
         opx_outputs = [self.opx_output_I, self.opx_output_Q]
         offsets = [self.opx_output_offset_I, self.opx_output_offset_Q]
-        for opx_output, offset in zip(opx_outputs, offsets):
+        for I_or_Q, opx_output, offset in zip("IQ", opx_outputs, offsets):
             if isinstance(opx_output, LFAnalogOutputPort):
                 opx_port = opx_output
             elif len(opx_output) == 2:
@@ -1016,6 +1017,8 @@ class IQChannel(Channel):
             else:
                 opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
                 opx_port.apply_to_config(config)
+
+            element_cfg["mixInputs"][I_or_Q] = opx_port.port_tuple
 
 
 @quam_dataclass
@@ -1095,17 +1098,18 @@ class InIQChannel(Channel):
 
         opx_inputs = [self.opx_input_I, self.opx_input_Q]
         offsets = [self.opx_input_offset_I, self.opx_input_offset_Q]
+        input_gain = int(self.input_gain if self.input_gain is not None else 0)
         for k, (opx_input, offset) in enumerate(zip(opx_inputs, offsets), start=1):
             if isinstance(opx_input, LFAnalogInputPort):
                 opx_port = opx_input
             elif len(opx_input) == 2:
                 opx_port = OPXPlusAnalogInputPort(
-                    *opx_input, offset=offset, gain_db=self.input_gain
+                    *opx_input, offset=offset, gain_db=input_gain
                 )
                 opx_port.apply_to_config(config)
             else:
                 opx_port = LFFEMAnalogInputPort(
-                    *opx_input, offset=offset, gain_db=self.input_gain
+                    *opx_input, offset=offset, gain_db=input_gain
                 )
                 opx_port.apply_to_config(config)
             if not isinstance(self.frequency_converter_down, OctaveDownConverter):
