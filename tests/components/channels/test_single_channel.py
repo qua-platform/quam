@@ -3,6 +3,7 @@ import json
 from copy import deepcopy
 
 from quam.components import *
+from quam.components.ports.analog_outputs import OPXPlusAnalogOutputPort
 from quam.core import quam_dataclass, QuamRoot
 
 
@@ -147,3 +148,46 @@ def test_instantiate_single_channel():
     d_loaded = json.loads(d_json)
 
     instantiate_quam_class(SingleChannel, d_loaded)
+
+
+def test_generate_config(qua_config):
+    channel = SingleChannel(
+        id="out_channel",
+        opx_output=("con1", 1),
+    )
+
+    channel.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_outputs": {
+                1: {"delay": 0, "shareable": False},
+            },
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "out_channel": {"operations": {}, "singleInput": {"port": ("con1", 1)}}
+    }
+
+
+def test_generate_config_port(qua_config):
+    channel = SingleChannel(
+        id="out_channel",
+        opx_output=OPXPlusAnalogOutputPort("con1", 1),
+    )
+
+    channel.apply_to_config(qua_config)
+    channel.opx_output.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_outputs": {
+                1: {"delay": 0, "shareable": False},
+            },
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "out_channel": {"operations": {}, "singleInput": {"port": ("con1", 1)}}
+    }

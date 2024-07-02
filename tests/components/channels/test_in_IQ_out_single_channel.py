@@ -1,4 +1,6 @@
 from quam.components.channels import InIQOutSingleChannel
+from quam.components.ports.analog_inputs import OPXPlusAnalogInputPort
+from quam.components.ports.analog_outputs import OPXPlusAnalogOutputPort
 from quam.utils.dataclass import get_dataclass_attr_annotations
 
 
@@ -46,6 +48,41 @@ def test_generate_config(qua_config):
             "analog_outputs": {1: {"delay": 0, "shareable": False}},
         }
     }
+
+    assert qua_config["elements"] == {
+        "in_out_channel": {
+            "operations": {},
+            "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
+            "singleInput": {"port": ("con1", 1)},
+            "smearing": 0,
+            "time_of_flight": 24,
+        }
+    }
+
+
+def test_generate_config_ports(qua_config):
+    channel = InIQOutSingleChannel(
+        id="in_out_channel",
+        opx_output=OPXPlusAnalogOutputPort("con1", 1),
+        opx_input_I=OPXPlusAnalogInputPort("con1", 1),
+        opx_input_Q=OPXPlusAnalogInputPort("con1", 2),
+        frequency_converter_down=None,
+    )
+
+    channel.apply_to_config(qua_config)
+    channel.opx_output.apply_to_config(qua_config)
+    channel.opx_input_I.apply_to_config(qua_config)
+    channel.opx_input_Q.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_inputs": {
+                1: {"gain_db": 0, "shareable": False},
+                2: {"gain_db": 0, "shareable": False},
+            },
+            "analog_outputs": {1: {"delay": 0, "shareable": False}},
+        }
+    }    
 
     assert qua_config["elements"] == {
         "in_out_channel": {
