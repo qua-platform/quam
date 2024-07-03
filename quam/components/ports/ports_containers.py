@@ -83,18 +83,16 @@ class OPXPlusPortsContainer(QuamComponent):
 
         return ports[port_id]
 
-    def get_port_from_reference(
-        self, port_reference: str, create=False
-    ) -> OPXPlusPortTypes:
+    def reference_to_port(self, port_reference: str, create=False) -> OPXPlusPortTypes:
         elems = port_reference.split("/")
         port_type, controller_id, port_id = elems[-3:]
 
+        port_type = port_type[:-1]
         if controller_id.isdigit():
             controller_id = int(controller_id)
-        fem_id = int(fem_id)
         port_id = int(port_id)
 
-        return self._get_port(controller_id, fem_id, port_id, port_type, create=create)
+        return self._get_port(controller_id, port_id, port_type, create=create)
 
     def get_analog_output(
         self,
@@ -217,7 +215,7 @@ class FEMPortsContainer(QuamComponent):
 
         return ports[port_id]
 
-    def get_port_from_reference(
+    def reference_to_port(
         self,
         port_reference: Union[QuamComponent, str],
         attr: Optional[str] = None,
@@ -232,6 +230,7 @@ class FEMPortsContainer(QuamComponent):
         elems = port_reference.split("/")
         port_type, controller_id, fem_id, port_id = elems[-4:]
 
+        port_type = port_type[:-1]
         if controller_id.isdigit():
             controller_id = int(controller_id)
         fem_id = int(fem_id)

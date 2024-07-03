@@ -70,6 +70,40 @@ def test_opx_plus_ports_container_add_ports(port_type):
 
 
 @pytest.mark.parametrize(
+    "port_type", ["analog_output", "analog_input", "digital_output", "digital_input"]
+)
+def test_opx_plus_ports_container_reference_to_port(port_type):
+    port_mapping = {
+        "analog_output": OPXPlusAnalogOutputPort,
+        "analog_input": OPXPlusAnalogInputPort,
+        "digital_output": OPXPlusDigitalOutputPort,
+        "digital_input": OPXPlusDigitalInputPort,
+    }
+
+    ports_container = OPXPlusPortsContainer()
+
+    port_reference = f"#/{port_type}s/con1/3"
+
+    with pytest.raises(KeyError):
+        ports_container.reference_to_port(port_reference)
+
+    port = ports_container.reference_to_port(port_reference, create=True)
+    assert isinstance(port, port_mapping[port_type])
+
+    assert port.controller_id == "con1"
+    assert port.port_id == 3
+
+    port2 = ports_container.reference_to_port(port_reference, create=False)
+    assert port is port2
+
+    port3 = ports_container.reference_to_port(port_reference, create=True)
+    assert port is port3
+
+    ports_group = getattr(ports_container, f"{port_type}s")
+    assert port is ports_group["con1"][3]
+
+
+@pytest.mark.parametrize(
     "port_type",
     ["analog_output", "analog_input", "mw_output", "mw_input", "digital_output"],
 )
@@ -104,3 +138,40 @@ def test_fem_ports_container_add_ports(port_type):
 
     ports_group = getattr(ports_container, f"{port_type}s")
     assert port is ports_group["con2"][2][3]
+
+
+@pytest.mark.parametrize(
+    "port_type",
+    ["analog_output", "analog_input", "mw_output", "mw_input", "digital_output"],
+)
+def test_fem_ports_container_reference_to_port(port_type):
+    port_mapping = {
+        "analog_output": LFFEMAnalogOutputPort,
+        "analog_input": LFFEMAnalogInputPort,
+        "mw_output": MWFEMAnalogOutputPort,
+        "mw_input": MWFEMAnalogInputPort,
+        "digital_output": FEMDigitalOutputPort,
+    }
+
+    port_reference = f"#/{port_type}s/con1/2/3"
+
+    ports_container = FEMPortsContainer()
+
+    with pytest.raises(KeyError):
+        ports_container.reference_to_port(port_reference)
+
+    port = ports_container.reference_to_port(port_reference, create=True)
+    assert isinstance(port, port_mapping[port_type])
+
+    assert port.controller_id == "con1"
+    assert port.fem_id == 2
+    assert port.port_id == 3
+
+    port2 = ports_container.reference_to_port(port_reference, create=False)
+    assert port is port2
+
+    port3 = ports_container.reference_to_port(port_reference, create=True)
+    assert port is port3
+
+    ports_group = getattr(ports_container, f"{port_type}s")
+    assert port is ports_group["con1"][2][3]
