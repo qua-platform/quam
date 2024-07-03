@@ -7,7 +7,9 @@
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
 
 ### Fixed
+- Fix quam object instantiation error when a parameter type uses pipe operator
 - Allow int keys to be serialised / loaded in QuAM using JSONSerialiser
+
 
 ## [0.3.3]
 ### Added
