@@ -128,8 +128,8 @@ def test_serialise_int_dict_keys(tmp_path):
     assert d == {
         "a": 1,
         "d": {
-            "1": "a",
-            "2": "b",
+            1: "a",
+            2: "b",
         },
         "__class__": "test_json_serialisation.QuAMWithIntDict",
     }
