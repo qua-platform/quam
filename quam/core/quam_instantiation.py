@@ -1,4 +1,5 @@
 from __future__ import annotations
+import sys
 import types
 import typing
 from typing import TYPE_CHECKING, Dict, Any
@@ -15,6 +16,12 @@ from .deprecations import instantiation_deprecations
 
 if TYPE_CHECKING:
     from quam.core import QuamBase
+
+
+if sys.version_info < (3, 10):
+    union_types = (typing.Union,)
+else:
+    union_types = [typing.Union, types.UnionType]
 
 
 def instantiate_attrs_from_dict(
@@ -225,7 +232,7 @@ def instantiate_attr(
         )
         if typing.get_origin(expected_type) == dict:
             expected_type = dict
-    elif typing.get_origin(expected_type) in [typing.Union, types.UnionType]:
+    elif typing.get_origin(expected_type) in union_types:
         for union_type in typing.get_args(expected_type):
             try:
                 instantiated_attr = instantiate_attr(
