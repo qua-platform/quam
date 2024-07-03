@@ -357,3 +357,18 @@ def test_instantiate_union_type():
 
     with pytest.raises(TypeError):
         instantiate_quam_class(TestQuamUnion, {"union_val": {"a": "42"}})
+
+
+def test_instantiation_pipe_union_type():
+    @quam_dataclass
+    class TestQuamUnion(QuamComponent):
+        union_val: int | TestQuamComponent
+
+    obj = instantiate_quam_class(TestQuamUnion, {"union_val": 42})
+    assert obj.union_val == 42
+
+    obj = instantiate_quam_class(TestQuamUnion, {"union_val": {"a": 42}})
+    assert obj.union_val.a == 42
+
+    with pytest.raises(TypeError):
+        instantiate_quam_class(TestQuamUnion, {"union_val": {"a": "42"}})

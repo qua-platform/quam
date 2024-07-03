@@ -1,4 +1,5 @@
 from __future__ import annotations
+import types
 import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
@@ -224,7 +225,7 @@ def instantiate_attr(
         )
         if typing.get_origin(expected_type) == dict:
             expected_type = dict
-    elif typing.get_origin(expected_type) == typing.Union:
+    elif typing.get_origin(expected_type) in [typing.Union, types.UnionType]:
         for union_type in typing.get_args(expected_type):
             try:
                 instantiated_attr = instantiate_attr(
