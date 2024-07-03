@@ -1,5 +1,6 @@
-from typing import ClassVar, Dict, Union
+from typing import ClassVar, Dict, Optional, TypeVar, Union
 from dataclasses import field
+from quam.components.ports.base_ports import FEMPort
 from quam.core import quam_dataclass, QuamComponent
 from .analog_outputs import (
     OPXPlusAnalogOutputPort,
@@ -16,6 +17,20 @@ from .digital_inputs import OPXPlusDigitalInputPort
 
 
 __all__ = ["OPXPlusPortsContainer", "FEMPortsContainer"]
+
+OPXPlusPortTypes = Union[
+    OPXPlusAnalogInputPort,
+    OPXPlusAnalogOutputPort,
+    OPXPlusDigitalOutputPort,
+    OPXPlusDigitalInputPort,
+]
+FEMPortTypes = Union[
+    LFFEMAnalogInputPort,
+    LFFEMAnalogOutputPort,
+    MWFEMAnalogInputPort,
+    MWFEMAnalogOutputPort,
+    FEMDigitalOutputPort,
+]
 
 
 @quam_dataclass
@@ -48,10 +63,12 @@ class OPXPlusPortsContainer(QuamComponent):
         except KeyError:
             if not create:
                 raise KeyError(
-                    f"Port {port_id} not found in controller {controller_id}"
+                    f"Could not find existing {port_type} port: "
+                    f"{port_type} ({controller_id}, {port_id}"
                 )
 
-        ports = controllers.setdefault(controller_id, {})
+        controllers.setdefault(controller_id, {})
+        ports = controllers[controller_id]
 
         if port_type == "analog_output":
             ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)
@@ -65,6 +82,19 @@ class OPXPlusPortsContainer(QuamComponent):
             raise ValueError(f"Invalid port type: {port_type}")
 
         return ports[port_id]
+
+    def get_port_from_reference(
+        self, port_reference: str, create=False
+    ) -> OPXPlusPortTypes:
+        elems = port_reference.split("/")
+        port_type, controller_id, port_id = elems[-3:]
+
+        if controller_id.isdigit():
+            controller_id = int(controller_id)
+        fem_id = int(fem_id)
+        port_id = int(port_id)
+
+        return self._get_port(controller_id, fem_id, port_id, port_type, create=create)
 
     def get_analog_output(
         self,
@@ -141,19 +171,33 @@ class FEMPortsContainer(QuamComponent):
     ):
         controllers = getattr(self, f"{port_type}s")
 
-        if not create:
+        try:
             return controllers[controller_id][fem_id][port_id]
+        except KeyError:
+            if not create:
+                raise KeyError(
+                    f"Could not find existing {port_type} port: "
+                    f"{port_type} ({controller_id}, {fem_id}, {port_id}"
+                )
 
-        fems = controllers.setdefault(controller_id, {})
-        ports = fems.setdefault(controller_id, {})
+        controllers.setdefault(controller_id, {})
+        fems = controllers[controller_id]
+        fems.setdefault(fem_id, {})
+        ports = fems[fem_id]
 
         if port_type == "analog_output":
-            ports[port_id] = LFFEMAnalogOutputPort(controller_id, fem_id, port_id)
+            ports[port_id] = LFFEMAnalogOutputPort(
+                controller_id, fem_id, port_id, **kwargs
+            )
         elif port_type == "analog_input":
-            ports[port_id] = LFFEMAnalogInputPort(controller_id, fem_id, port_id)
+            ports[port_id] = LFFEMAnalogInputPort(
+                controller_id, fem_id, port_id, **kwargs
+            )
         elif port_type == "mw_output":
+            if "upconverter_frequency" not in kwargs and "upconverters" not in kwargs:
+                kwargs["upconverter_frequency"] = 5e9
             ports[port_id] = MWFEMAnalogOutputPort(
-                controller_id, fem_id, port_id, band=kwargs.get("band", 1)
+                controller_id, fem_id, port_id, band=kwargs.get("band", 1), **kwargs
             )
         elif port_type == "mw_input":
             ports[port_id] = MWFEMAnalogInputPort(
@@ -162,13 +206,38 @@ class FEMPortsContainer(QuamComponent):
                 port_id,
                 band=kwargs.get("band", 1),  # TODO Are default values the best here?
                 downconverter_frequency=kwargs.get("downconverter_frequency", 5e9),
+                **kwargs,
             )
         elif port_type == "digital_output":
-            ports[port_id] = FEMDigitalOutputPort(controller_id, fem_id, port_id)
+            ports[port_id] = FEMDigitalOutputPort(
+                controller_id, fem_id, port_id, **kwargs
+            )
         else:
             raise ValueError(f"Invalid port type: {port_type}")
 
         return ports[port_id]
+
+    def get_port_from_reference(
+        self,
+        port_reference: Union[QuamComponent, str],
+        attr: Optional[str] = None,
+        create=False,
+    ) -> FEMPortTypes:
+        if isinstance(port_reference, QuamComponent):
+            reference = port_reference.get_reference(attr=attr)
+            if reference is None:
+                raise ValueError("Cannot get port from reference {port_reference}")
+            port_reference = reference
+
+        elems = port_reference.split("/")
+        port_type, controller_id, fem_id, port_id = elems[-4:]
+
+        if controller_id.isdigit():
+            controller_id = int(controller_id)
+        fem_id = int(fem_id)
+        port_id = int(port_id)
+
+        return self._get_port(controller_id, fem_id, port_id, port_type, create=create)
 
     def get_analog_output(
         self,
