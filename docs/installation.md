@@ -4,7 +4,7 @@
 
 /// tab | For Windows
 - Windows 10 (build 1809 and later), or Windows 11
-- Python 3.9 or higher, we recommend Python 3.10 or higher
+- 3.8 ≤ Python ≤ 3.11, we recommend Python 3.10 or 3.11
     <!-- For Python 3.8 and 3.9, please see additional notes (TODO add note reference) -->
 - [Git version control system](https://git-scm.com/), or a Git GUI such as [GitHub Desktop](https://desktop.github.com/) or [GitKraken](https://www.gitkraken.com/)
 
