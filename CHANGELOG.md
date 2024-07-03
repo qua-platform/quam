@@ -6,6 +6,10 @@
 ### Changed
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
 
+### Fixed
+- Fix quam object instantiation error when a parameter type uses pipe operator
+
+
 ## [0.3.3]
 ### Added
 - Added the following parameters to `IQChannel`: `RF_frequency`, `LO_frequency`, `intermediate_frequency`
