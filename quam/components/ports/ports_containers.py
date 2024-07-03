@@ -2,6 +2,7 @@ from typing import ClassVar, Dict, Optional, TypeVar, Union
 from dataclasses import field
 from quam.components.ports.base_ports import FEMPort
 from quam.core import quam_dataclass, QuamComponent
+from quam.core.quam_classes import QuamBase
 from .analog_outputs import (
     OPXPlusAnalogOutputPort,
     LFFEMAnalogOutputPort,
@@ -83,7 +84,17 @@ class OPXPlusPortsContainer(QuamComponent):
 
         return ports[port_id]
 
-    def reference_to_port(self, port_reference: str, create=False) -> OPXPlusPortTypes:
+    def reference_to_port(
+        self,
+        port_reference: Union[QuamComponent, str],
+        attr: Optional[str] = None,
+        create=False,
+    ) -> OPXPlusPortTypes:
+        if isinstance(port_reference, QuamComponent):
+            reference = port_reference.get_reference(attr=attr)
+            if reference is None:
+                raise ValueError("Cannot get port from reference {port_reference}")
+            port_reference = reference
         elems = port_reference.split("/")
         port_type, controller_id, port_id = elems[-3:]
 
@@ -221,7 +232,7 @@ class FEMPortsContainer(QuamComponent):
         attr: Optional[str] = None,
         create=False,
     ) -> FEMPortTypes:
-        if isinstance(port_reference, QuamComponent):
+        if isinstance(port_reference, QuamBase):
             reference = port_reference.get_reference(attr=attr)
             if reference is None:
                 raise ValueError("Cannot get port from reference {port_reference}")
