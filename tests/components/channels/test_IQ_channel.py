@@ -100,8 +100,6 @@ def test_generate_config(qua_config):
     )
 
     channel.apply_to_config(qua_config)
-    channel.opx_output_I.apply_to_config(qua_config)
-    channel.opx_output_Q.apply_to_config(qua_config)
 
     assert qua_config["controllers"] == {
         "con1": {
