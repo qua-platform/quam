@@ -49,7 +49,7 @@ class BasePort(QuamComponent, ABC):
         self._update_port_config(port_cfg, port_properties)
 
 
-@quam_dataclass
+@quam_dataclass(kw_only=False)
 class OPXPlusPort(BasePort, ABC):
     controller_id: Union[str, int]
     port_id: int
@@ -78,7 +78,7 @@ class OPXPlusPort(BasePort, ABC):
         return port_cfg
 
 
-@quam_dataclass
+@quam_dataclass(kw_only=False)
 class FEMPort(BasePort, ABC):
     fem_type: ClassVar[str]
     controller_id: Union[str, int]
