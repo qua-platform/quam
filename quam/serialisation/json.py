@@ -174,7 +174,7 @@ class JSONSerialiser(AbstractSerialiser):
                     continue
 
                 with open(file, "r") as f:
-                    file_contents = json.load(f)
+                    file_contents = json.load(f, object_hook=convert_int_keys)
                 contents.update(file_contents)
 
                 if file.name == self.default_filename:
