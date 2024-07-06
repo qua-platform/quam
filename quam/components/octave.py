@@ -229,7 +229,7 @@ class OctaveUpConverter(OctaveFrequencyConverter):
     LO_source: Literal["internal", "external"] = "internal"
     gain: float = 0
     output_mode: Literal[
-        "always_on", "always_off", "triggered", "triggered_reersed"
+        "always_on", "always_off", "triggered", "triggered_reversed"
     ] = "always_off"
     input_attenuators: Literal["off", "on"] = "off"
 
