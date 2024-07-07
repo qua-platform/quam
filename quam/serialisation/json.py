@@ -27,6 +27,7 @@ class JSONSerialiser(AbstractSerialiser):
     default_filename = "state.json"
     default_foldername = "quam"
     content_mapping = {}
+    contents = {}
 
     def _save_dict_to_json(self, contents: Dict[str, Any], path: Path):
         """Save a dictionary to a JSON file.
@@ -104,6 +105,7 @@ class JSONSerialiser(AbstractSerialiser):
         content_mapping = content_mapping.copy()
 
         contents = quam_obj.to_dict(include_defaults=include_defaults)
+        self.contents = contents.copy()
 
         # TODO This should ideally go to the QuamRoot.to_dict method
         for key in ignore or []:
@@ -181,6 +183,8 @@ class JSONSerialiser(AbstractSerialiser):
                     metadata["default_filename"] = file.name
                 else:
                     metadata["content_mapping"][file.name] = list(file_contents.keys())
+
+        self.contents = contents
 
         return contents, metadata
 
