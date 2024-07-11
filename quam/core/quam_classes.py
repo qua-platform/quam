@@ -32,7 +32,7 @@ from quam.utils import (
     generate_config_final_actions,
 )
 from quam.core.quam_instantiation import instantiate_quam_class
-from quam.utils.state_update_tracker import StateTracker
+from quam.utils.state_tracker import StateTracker
 from .qua_config_template import qua_config_template
 
 
@@ -612,7 +612,7 @@ class QuamRoot(QuamBase):
             include_defaults=include_defaults,
             ignore=ignore,
         )
-        self._state_tracker.change_state(serialiser.contents)
+        self._state_tracker.update_state(serialiser.contents)
 
     def to_dict(
         self, follow_references: bool = False, include_defaults: bool = False
@@ -663,8 +663,7 @@ class QuamRoot(QuamBase):
             validate_type=validate_type,
         )
 
-        quam_obj._state_tracker.clear()
-        quam_obj._state_tracker.state = contents
+        quam_obj._state_tracker.update_.state = contents
         return quam_obj
 
     def generate_config(self) -> Dict[str, Any]:
@@ -729,6 +728,9 @@ class QuamComponent(QuamBase):
             The config has a starting template, defined at [`quam.core.qua_config_template`][]
         """
         ...
+
+    # def print_state_changes(self):
+    #     self._root.print_state_changes(self.to_dict(), mode="update")
 
 
 @quam_dataclass
