@@ -10,6 +10,7 @@
 - Fix quam object instantiation error when a parameter type uses pipe operator
 - Allow int keys to be serialised / loaded in QuAM using JSONSerialiser
 - Fix type `OctaveUpconverter.triggered_reersed` -> `OctaveUpconverter.triggered_reversed`
+- Fix tuples not being instantiated properly in specific circumstances
 
 
 ## [0.3.3]

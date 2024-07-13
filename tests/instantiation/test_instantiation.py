@@ -322,7 +322,7 @@ def test_instance_attr_literal_fail():
         )
 
 
-def test_isntantiate_tuple():
+def test_instantiate_tuple():
     @quam_dataclass
     class TestQuamTuple(QuamComponent):
         tuple_val: Tuple[int, str]
