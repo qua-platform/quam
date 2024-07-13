@@ -105,48 +105,16 @@ def instantiate_attrs_from_list(
 
     instantiated_attr_list = []
     for k, attr_val in enumerate(attr_list):
-        if isinstance(attr_val, dict) and "__class__" in attr_val:
-            instantiated_attr = instantiate_quam_class(
-                get_class_from_path(attr_val["__class__"]),
-                attr_val,
+        instantiated_attr_list.append(
+            instantiate_attr(
+                attr_val=attr_val,
+                expected_type=required_subtype,
+                allow_none=False,
                 fix_attrs=fix_attrs,
-                validate_type=validate_type,
+                validate_type=validate_type if required_subtype is not None else False,
                 str_repr=f"{str_repr}[{k}]",
             )
-        elif not required_subtype:
-            instantiated_attr_list.append(attr_val)
-            continue
-        elif typing.get_origin(required_subtype) == list:
-            assert typing.get_origin(required_subtype) == list
-
-            instantiated_attr = instantiate_attrs_from_list(
-                attr_list=attr_val,
-                required_type=required_subtype,
-                fix_attrs=fix_attrs,
-                validate_type=validate_type,
-                str_repr=f"{str_repr}[{k}]",
-            )
-        elif not isclass(required_subtype):
-            instantiated_attr = attr_val
-        elif issubclass(required_subtype, QuamComponent):
-            if string_reference.is_reference(attr_val):
-                instantiated_attr = attr_val
-            else:
-                instantiated_attr = instantiate_quam_class(
-                    required_subtype,
-                    attr_val,
-                    fix_attrs=fix_attrs,
-                    validate_type=validate_type,
-                    str_repr=f"{str_repr}[{k}]",
-                )
-        else:
-            instantiated_attr = attr_val
-        # Add custom __class__ QuamComponent logic here
-        if required_subtype:
-            validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
-
-        instantiated_attr_list.append(instantiated_attr)
-
+        )
     return instantiated_attr_list
 
 
