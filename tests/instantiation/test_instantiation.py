@@ -322,7 +322,7 @@ def test_instance_attr_literal_fail():
         )
 
 
-def test_isntantiate_tuple():
+def test_instantiate_tuple():
     @quam_dataclass
     class TestQuamTuple(QuamComponent):
         tuple_val: Tuple[int, str]
@@ -376,3 +376,14 @@ def test_instantiation_pipe_union_type():
 
     with pytest.raises(TypeError):
         instantiate_quam_class(TestQuamUnion, {"union_val": {"a": "42"}})
+
+
+def test_instantiation_nested_tuple():
+    @quam_dataclass
+    class NestedTupleComponent(QuamComponent):
+        nested_tuple: Union[List[Tuple[int, str]], List[Tuple[int]]]
+
+    instantiate_quam_class(
+        quam_class=NestedTupleComponent,
+        contents={"nested_tuple": [[1, "a"], [2, "b"]]},
+    )
