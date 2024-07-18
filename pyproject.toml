@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quam"
 version = "0.3.3"
+#dynamic = ["version"]
 description = "Quantum Abstract Machine (QuAM) facilitates development of abstraction layers in experiments."
 authors = [
     { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
@@ -52,6 +53,7 @@ dev = [
     "pytest-mock >= 3.6.1",
 ]
 docs = ["mkdocstrings[python]>=0.18", "mkdocs-gen-files", "mkdocs-jupyter"]
+build = ["setuptools >= 71", "setuptools-scm >= 8.1.0", "build >= 1.2.1"]
 
 [tool.black]
 target-version = ["py38"]
@@ -63,6 +65,11 @@ max-line-length = 88
 
 [tool.setuptools]
 packages = ["quam"]
+
+# ASK: Verify that we should use scm
+[tool.setuptools_scm]
+version_scheme = "only-version"
+local_scheme = "no-local-version"
 
 
 # Previous quam settings
