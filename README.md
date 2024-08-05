@@ -3,7 +3,7 @@
 ## Overview
 QuAM (Quantum Abstract Machine) is an innovative software framework designed to provide an abstraction layer over the QUA programming language, facilitating a more intuitive interaction with quantum computing platforms. Aimed primarily at physicists and researchers, QuAM allows users to think and operate in terms of qubits and quantum operations rather than the underlying hardware specifics.
 
-Explore detailed documentation and get started with QuAM here: [QuAM Documentation](https://docs.quantum-machines.co/quam/).
+Explore detailed documentation and get started with QuAM here: [QuAM Documentation](https://qua-platform.github.io/quam/).
 
 ## Key Features
 - **Abstraction Layer**: Simplifies quantum programming by providing higher-level abstractions for qubit operations.
