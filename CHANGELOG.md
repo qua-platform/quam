@@ -11,6 +11,7 @@
 - Allow int keys to be serialised / loaded in QuAM using JSONSerialiser
 - Fix type `OctaveUpconverter.triggered_reersed` -> `OctaveUpconverter.triggered_reversed`
 - Fix tuples not being instantiated properly in specific circumstances
+- Fix filter_fir/iir_taps being passed as QuamList when generating config, resulting in an error due to parent reassignment
 
 
 ## [0.3.3]

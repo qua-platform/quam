@@ -518,22 +518,29 @@ class SingleChannel(Channel):
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
+        filter_fir_taps = self.filter_fir_taps
+        if filter_fir_taps is not None:
+            filter_fir_taps = list(filter_fir_taps)
+        filter_iir_taps = self.filter_iir_taps
+        if filter_iir_taps is not None:
+            filter_iir_taps = list(filter_iir_taps)
+
         if isinstance(self.opx_output, LFAnalogOutputPort):
             opx_port = self.opx_output
         elif len(self.opx_output) == 2:
             opx_port = OPXPlusAnalogOutputPort(
                 *self.opx_output,
                 offset=self.opx_output_offset,
-                feedforward_filter=self.filter_fir_taps,
-                feedback_filter=self.filter_iir_taps,
+                feedforward_filter=filter_fir_taps,
+                feedback_filter=filter_iir_taps,
             )
             opx_port.apply_to_config(config)
         else:
             opx_port = LFFEMAnalogOutputPort(
                 *self.opx_output,
                 offset=self.opx_output_offset,
-                feedforward_filter=self.filter_fir_taps,
-                feedback_filter=self.filter_iir_taps,
+                feedforward_filter=filter_fir_taps,
+                feedback_filter=filter_iir_taps,
             )
             opx_port.apply_to_config(config)
 
