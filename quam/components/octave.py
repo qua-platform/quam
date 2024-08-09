@@ -416,6 +416,7 @@ class OctaveOld(QuamComponent):
     qmm_host: str
     qmm_port: int
     connection_headers: Dict[str, str] = None
+    connectivity: str = None
 
     calibration_db: str = None
 
