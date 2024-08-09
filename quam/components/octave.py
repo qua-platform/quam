@@ -3,11 +3,7 @@ import os
 from typing import Any, Optional, Union, ClassVar, Dict, List, Tuple, Literal
 from dataclasses import field
 
-from quam.components.ports.analog_outputs import (
-    LFAnalogOutputPort,
-    LFFEMAnalogOutputPort,
-    OPXPlusAnalogOutputPort,
-)
+from quam.components.ports.analog_outputs import LFAnalogOutputPort
 from quam.components.ports.base_ports import BasePort
 from quam.core import QuamComponent, quam_dataclass
 from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter
@@ -102,6 +98,18 @@ class Octave(QuamComponent):
 
         for idx in range(1, 3):
             self.RF_inputs[idx] = OctaveDownConverter(id=idx, LO_frequency=None)
+
+    def get_octave_config(self) -> QmOctaveConfig:
+        """Return a QmOctaveConfig object with the current Octave configuration."""
+        octave_config = QmOctaveConfig()
+
+        if self.calibration_db_path is not None:
+            octave_config.set_calibration_db(self.calibration_db_path)
+        else:
+            octave_config.set_calibration_db(os.getcwd())
+
+        octave_config.add_device_info(self.name, self.ip, self.port)
+        return octave_config
 
     def apply_to_config(self, config: Dict) -> None:
         """Add the Octave configuration to a config dictionary.
@@ -224,7 +232,6 @@ class OctaveUpConverter(OctaveFrequencyConverter):
         "always_on", "always_off", "triggered", "triggered_reversed"
     ] = "always_off"
     input_attenuators: Literal["off", "on"] = "off"
-    connectivity: str = None
 
     def apply_to_config(self, config: Dict) -> None:
         """Add information about the frequency up-converter to the QUA config
@@ -409,6 +416,7 @@ class OctaveOld(QuamComponent):
     qmm_host: str
     qmm_port: int
     connection_headers: Dict[str, str] = None
+    connectivity: str = None
 
     calibration_db: str = None
 
