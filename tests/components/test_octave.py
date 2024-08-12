@@ -329,7 +329,7 @@ def test_load_octave(octave):
     d_expected = {
         "__class__": "test_octave.OctaveQuAM",
         "octave": {
-            "RF_inputs": {1: {"id": 1}, 2: {"id": 2}},
+            "RF_inputs": {1: {"id": 1}, 2: {"id": 2, "LO_source": "external"}},
             "RF_outputs": {
                 1: {"id": 1},
                 2: {"id": 2},
