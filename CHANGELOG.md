@@ -13,6 +13,7 @@
 - Fix type `OctaveUpconverter.triggered_reersed` -> `OctaveUpconverter.triggered_reversed`
 - Fix tuples not being instantiated properly in specific circumstances
 - Fix filter_fir/iir_taps being passed as QuamList when generating config, resulting in an error due to parent reassignment
+- Fix warning messages in QuamComponent instantiation
 
 
 ## [0.3.3]

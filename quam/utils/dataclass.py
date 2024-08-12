@@ -143,7 +143,14 @@ def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
         with warnings.catch_warnings():  # Ignore warnings of failed references
             warnings.filterwarnings("ignore", category=UserWarning)
             for f in fields(self):
-                if getattr(self, f.name, None) is REQUIRED:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore",
+                        message="^Could not get reference*",
+                        category=UserWarning,
+                    )
+                    attr_val = getattr(self, f.name, None)
+                if attr_val is REQUIRED:
                     raise TypeError(
                         f"Please provide {cls.__name__}.{f.name} as it is a"
                         " required arg"
