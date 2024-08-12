@@ -32,6 +32,7 @@ from quam.utils import (
     generate_config_final_actions,
 )
 from quam.core.quam_instantiation import instantiate_quam_class
+from quam.utils.state_tracker import StateTracker
 from .qua_config_template import qua_config_template
 
 
@@ -571,6 +572,7 @@ class QuamRoot(QuamBase):
 
     def __post_init__(self):
         QuamBase._root = self
+        self._state_tracker = StateTracker()
         super().__post_init__()
 
     def __setattr__(self, name, value):
@@ -610,6 +612,7 @@ class QuamRoot(QuamBase):
             include_defaults=include_defaults,
             ignore=ignore,
         )
+        self._state_tracker.update_state(serialiser.contents)
 
     def to_dict(
         self, follow_references: bool = False, include_defaults: bool = False
@@ -653,12 +656,15 @@ class QuamRoot(QuamBase):
             serialiser = cls.serialiser()
             contents, _ = serialiser.load(filepath_or_dict)
 
-        return instantiate_quam_class(
+        quam_obj = instantiate_quam_class(
             quam_class=cls,
             contents=contents,
             fix_attrs=fix_attrs,
             validate_type=validate_type,
         )
+
+        quam_obj._state_tracker.update_.state = contents
+        return quam_obj
 
     def generate_config(self) -> Dict[str, Any]:
         """Generate the QUA configuration from the QuAM object.
@@ -684,6 +690,9 @@ class QuamRoot(QuamBase):
 
     def get_unreferenced_value(self, attr: str):
         return getattr(self, attr)
+
+    def print_state_changes(self):
+        self._state_tracker.print_state_changes(self.to_dict(), mode="save")
 
 
 class QuamComponent(QuamBase):
@@ -719,6 +728,9 @@ class QuamComponent(QuamBase):
             The config has a starting template, defined at [`quam.core.qua_config_template`][]
         """
         ...
+
+    # def print_state_changes(self):
+    #     self._root.print_state_changes(self.to_dict(), mode="update")
 
 
 @quam_dataclass
