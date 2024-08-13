@@ -6,6 +6,7 @@
 
 ### Changed
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
+- Octave RF input 2 has `LO_source = "external"` by default
 
 ### Fixed
 - Fix quam object instantiation error when a parameter type uses pipe operator
@@ -14,6 +15,7 @@
 - Fix tuples not being instantiated properly in specific circumstances
 - Fix filter_fir/iir_taps being passed as QuamList when generating config, resulting in an error due to parent reassignment
 - Fix warning messages in QuamComponent instantiation
+
 
 
 ## [0.3.3]

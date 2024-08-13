@@ -97,7 +97,10 @@ class Octave(QuamComponent):
             )
 
         for idx in range(1, 3):
-            self.RF_inputs[idx] = OctaveDownConverter(id=idx, LO_frequency=None)
+            LO_source = "internal" if idx == 1 else "external"
+            self.RF_inputs[idx] = OctaveDownConverter(
+                id=idx, LO_frequency=None, LO_source=LO_source
+            )
 
     def get_octave_config(self) -> QmOctaveConfig:
         """Return a QmOctaveConfig object with the current Octave configuration."""
