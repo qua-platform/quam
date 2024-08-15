@@ -1,8 +1,9 @@
-## [Unreleased]
+## [0.3.4]
 ### Added
 - Added `Channel.frame_rotation_2pi` to allow for frame rotation in multiples of 2pi
 - Added `Channel.update_frequency` to allow for updating the frequency of a channel
 - Added `OctaveOld.connectivity` as it was needed for (deprecated) compatibility with multiple OPX instruments
+- Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
 
 ### Changed
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
