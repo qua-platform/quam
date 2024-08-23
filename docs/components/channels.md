@@ -213,3 +213,13 @@ This can be done by directly using the base [pulses.Pulse][quam.components.pulse
 ```python
 channel.operations["digital"] = pulses.Pulse(length=100, digital_marker=[(1, 20, 0, 10)])
 ```
+
+## Sticky channels
+A channel can be set to be sticky, meaning that the voltage after a pulse will remain at the last value of the pulse.
+Details can be found in the [Sticky channel QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#sticky-element).
+Any channel can be made sticky by adding the [channels.StickyChannelAddon][quam.components.channels.StickyChannelAddon] to it:
+```python
+from quam.components.channels import StickyChannelAddon
+
+channel.sticky = StickyChannelAddon(duration=...)
+```
