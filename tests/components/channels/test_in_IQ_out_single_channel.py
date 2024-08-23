@@ -12,6 +12,7 @@ def test_in_single_channel_attr_annotations():
         "opx_input_Q",
     }
     assert set(attr_annotations["optional"]) == {
+        "sticky",
         "operations",
         "filter_fir_taps",
         "filter_iir_taps",
@@ -82,7 +83,7 @@ def test_generate_config_ports(qua_config):
             },
             "analog_outputs": {1: {"delay": 0, "shareable": False}},
         }
-    }    
+    }
 
     assert qua_config["elements"] == {
         "in_out_channel": {

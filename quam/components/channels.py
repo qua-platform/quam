@@ -55,6 +55,7 @@ from qm.qua._dsl import (
 
 
 __all__ = [
+    "Channel",
     "DigitalOutputChannel",
     "StickyChannelAddon",
     "SingleChannel",
@@ -165,6 +166,7 @@ class StickyChannelAddon(QuamComponent):
         digital (bool, optional): If False, the sticky parameters are not applied to
             digital outputs. Default is True.
     """
+
     duration: int
     enabled: bool = True
     analog: bool = True
