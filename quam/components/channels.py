@@ -154,6 +154,17 @@ class DigitalOutputChannel(QuamComponent):
 
 @quam_dataclass
 class StickyChannelAddon(QuamComponent):
+    """Addon to make channels sticky.
+
+    Args:
+        duration (int): The ramp to zero duration, in ns.
+        enabled (bool, optional): If False, the sticky parameters are not applied.
+            Default is True.
+        analog (bool, optional): If False, the sticky parameters are not applied to
+            analog outputs. Default is True.
+        digital (bool, optional): If False, the sticky parameters are not applied to
+            digital outputs. Default is True.
+    """
     duration: int
     enabled: bool = True
     analog: bool = True
