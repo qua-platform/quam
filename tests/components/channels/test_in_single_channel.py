@@ -8,6 +8,7 @@ def test_in_single_channel_attr_annotations():
     assert set(attr_annotations["required"]) == {"opx_input"}
     assert set(attr_annotations["optional"]) == {
         "operations",
+        "sticky",
         "id",
         "digital_outputs",
         "opx_input_offset",
