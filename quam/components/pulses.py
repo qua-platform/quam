@@ -12,6 +12,8 @@ __all__ = [
     "Pulse",
     "BaseReadoutPulse",
     "ReadoutPulse",
+    "DragGaussianPulse",
+    "DragCosinePulse",
     "DragPulse",
     "SquarePulse",
     "SquareReadoutPulse",
@@ -396,7 +398,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
 
 
 @quam_dataclass
-class DragPulse(Pulse):
+class DragGaussianPulse(Pulse):
     """Gaussian-based DRAG pulse that compensate for the leakage and AC stark shift.
 
     These DRAG waveforms has been implemented following the next Refs.:
@@ -431,6 +433,9 @@ class DragPulse(Pulse):
     detuning: float = 0.0
     subtracted: bool = True
 
+    def __post_init__(self) -> None:
+        return super().__post_init__()
+
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 
@@ -442,6 +447,66 @@ class DragPulse(Pulse):
             anharmonicity=self.anharmonicity,
             detuning=self.detuning,
             subtracted=self.subtracted,
+        )
+        I, Q = np.array(I), np.array(Q)
+
+        I_rot = I * np.cos(self.axis_angle) - Q * np.sin(self.axis_angle)
+        Q_rot = I * np.sin(self.axis_angle) + Q * np.cos(self.axis_angle)
+
+        return I_rot + 1.0j * Q_rot
+
+
+@quam_dataclass
+class DragPulse(DragGaussianPulse):
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "DragPulse is deprecated. Use DragGaussianPulse instead.",
+            DeprecationWarning,
+        )
+        return super().__post_init__()
+
+
+@quam_dataclass
+class DragCosinePulse(Pulse):
+    """Cosine based DRAG pulse that compensate for the leakage and AC stark shift.
+
+    These DRAG waveforms has been implemented following the next Refs.:
+    Chen et al. PRL, 116, 020501 (2016)
+    https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.020501
+    and Chen's thesis
+    https://web.physics.ucsb.edu/~martinisgroup/theses/Chen2018.pdf
+
+    Args:
+        length (int): The pulse length in ns.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        amplitude (float): The amplitude in volts.
+        alpha (float): The DRAG coefficient.
+        anharmonicity (float): f_21 - f_10 - The differences in energy between the 2-1
+            and the 1-0 energy levels, in Hz.
+        detuning (float): The frequency shift to correct for AC stark shift, in Hz.
+    """
+
+    axis_angle: float
+    amplitude: float
+    alpha: float
+    anharmonicity: float
+    detuning: float = 0.0
+
+    def __post_init__(self) -> None:
+        return super().__post_init__()
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import drag_cosine_pulse_waveforms
+
+        I, Q = drag_cosine_pulse_waveforms(
+            amplitude=self.amplitude,
+            length=self.length,
+            alpha=self.alpha,
+            anharmonicity=self.anharmonicity,
+            detuning=self.detuning,
         )
         I, Q = np.array(I), np.array(Q)
 
