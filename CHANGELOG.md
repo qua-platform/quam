@@ -4,10 +4,12 @@
 - Added `Channel.update_frequency` to allow for updating the frequency of a channel
 - Added `OctaveOld.connectivity` as it was needed for (deprecated) compatibility with multiple OPX instruments
 - Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+- Added `DragCosinePulse`.
 
 ### Changed
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
 - Octave RF input 2 has `LO_source = "external"` by default
+- Rename `DragPulse -> DragGaussianPulse`, deprecate `DragPulse`
 
 ### Fixed
 - Fix quam object instantiation error when a parameter type uses pipe operator
