@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 import pytest
 
 from quam.serialisation import JSONSerialiser
@@ -27,8 +28,7 @@ def test_serialise_random_object(tmp_path):
         "__class__": "test_json_serialisation.QuAM",
     }
 
-    class RandomObject:
-        ...
+    class RandomObject: ...
 
     quam_root.b = RandomObject()
 
@@ -47,6 +47,22 @@ def test_serialise_ignore(tmp_path):
 
     assert d == {
         "a": 1,
+        "__class__": "test_json_serialisation.QuAM",
+    }
+
+
+def test_serialise_ignore_nonexisting(tmp_path):
+    quam_root = QuAM(a=1, b=[1, 2, 3])
+
+    serialiser = JSONSerialiser()
+    path = tmp_path / "quam_root.json"
+    serialiser.save(quam_root, path, ignore=["c"])
+
+    d = json.loads(path.read_text())
+
+    assert d == {
+        "a": 1,
+        "b": [1, 2, 3],
         "__class__": "test_json_serialisation.QuAM",
     }
 
@@ -91,4 +107,29 @@ def test_component_mamping_ignore(tmp_path):
             "__class__": "test_json_serialisation.Component",
             "a": 4,
         }
+    }
+
+
+@quam_dataclass
+class QuAMWithIntDict(QuamRoot):
+    a: int
+    d: Dict[int, str]
+
+
+def test_serialise_int_dict_keys(tmp_path):
+    quam_root = QuAMWithIntDict(a=1, d={1: "a", 2: "b"})
+
+    serialiser = JSONSerialiser()
+    path = tmp_path / "quam_root.json"
+    serialiser.save(quam_root, path)
+
+    d, _ = serialiser.load(path)
+
+    assert d == {
+        "a": 1,
+        "d": {
+            1: "a",
+            2: "b",
+        },
+        "__class__": "test_json_serialisation.QuAMWithIntDict",
     }

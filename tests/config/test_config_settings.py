@@ -1,5 +1,16 @@
-
 from quam.core import QuamComponent, QuamRoot, quam_dataclass
+
+
+@quam_dataclass
+class EmptyRoot(QuamRoot):
+    pass
+
+
+def test_empty_root(qua_config):
+    root = EmptyRoot()
+    cfg = root.generate_config()
+
+    assert cfg == qua_config
 
 
 @quam_dataclass

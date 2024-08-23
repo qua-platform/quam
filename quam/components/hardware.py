@@ -26,8 +26,7 @@ class LocalOscillator(QuamComponent):
     frequency: float = None
     power: float = None
 
-    def configure(self): 
-        ...
+    def configure(self): ...
 
 
 @quam_dataclass
@@ -109,10 +108,37 @@ class Mixer(QuamComponent):
 
 
 @quam_dataclass
-class FrequencyConverter(QuamComponent):
+class BaseFrequencyConverter(QuamComponent):
+    """Base class for frequency converters."""
+
+    pass
+
+
+@quam_dataclass
+class FrequencyConverter(BaseFrequencyConverter):
+    """Frequency up/down converter component.
+
+    This component encapsulates the local oscillator and mixer used to upconvert or
+    downconvert an RF signal.
+
+    The FrequencyConverter component is attached to IQ channels through
+
+    - `IQChannel.frequency_converter_up`
+    - `InOutIQChannel.frequency_converter_down`
+
+    Args:
+        local_oscillator (LocalOscillator): The local oscillator for the frequency converter.
+        mixer (Mixer): The mixer for the frequency converter.
+        gain (float): The gain of the frequency converter.
+    """
+
     local_oscillator: LocalOscillator = None
     mixer: Mixer = None
     gain: float = None
+
+    @property
+    def LO_frequency(self):
+        return self.local_oscillator.frequency
 
     def configure(self):
         if self.local_oscillator is not None:

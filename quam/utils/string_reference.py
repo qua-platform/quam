@@ -79,10 +79,12 @@ def get_relative_reference_value(obj, string: str) -> Any:
         except KeyError as e:
             raise AttributeError(f"Object {obj} has no attribute {next_attr}") from e
     elif isinstance(obj, (dict, UserDict)):
-        try:
+        if next_attr in obj:
             obj_attr = obj[next_attr]
-        except KeyError as e:
-            raise AttributeError(f"Object {obj} has no attribute {next_attr}") from e
+        elif next_attr.isdigit() and int(next_attr) in obj:
+            obj_attr = obj[int(next_attr)]
+        else:
+            raise AttributeError(f"Object {obj} has no attribute {next_attr}")
     else:
         obj_attr = getattr(obj, next_attr)
 

@@ -31,7 +31,7 @@ def test_basic_quam_dataclass():
     with pytest.raises(TypeError):
         c = C()
 
-    c = C(1)
+    c = C(int_val=1)
     assert is_dataclass(c)
     assert c.int_val == 1
 
@@ -50,7 +50,7 @@ def test_quam_dataclass_with_default():
     with pytest.raises(TypeError):
         c = C()
 
-    c = C(2)
+    c = C(int_val=2)
     assert is_dataclass(c)
     assert c.int_val == 2
     assert c.int_val_optional == 42
@@ -75,7 +75,7 @@ def test_dataclass_inheritance():
     with pytest.raises(TypeError):
         d = DerivedClass(42)
 
-    d = DerivedClass(42, 43)
+    d = DerivedClass(int_val=42, int_val2=43)
 
     f = fields(d)
     assert len(f) == 2
@@ -94,8 +94,10 @@ def test_dataclass_inheritance_optional_derived():
 
     with pytest.raises(TypeError):
         d = DerivedClass()
+    with pytest.raises(TypeError):
+        d = DerivedClass(int_val2=42)
 
-    d = DerivedClass(42)
+    d = DerivedClass(int_val=42)
 
     assert d.int_val == 42
     assert d.int_val2 == 43
@@ -104,7 +106,7 @@ def test_dataclass_inheritance_optional_derived():
     assert f[0].name == "int_val"
     assert f[1].name == "int_val2"
 
-    d = DerivedClass(42, 44)
+    d = DerivedClass(int_val=42, int_val2=44)
 
     assert d.int_val == 42
     assert d.int_val2 == 44
@@ -131,12 +133,18 @@ def test_dataclass_inheritance_optional_base():
     with pytest.raises(TypeError):
         d = DerivedClass(43)
 
-    d = DerivedClass(43, 45)
+    with pytest.raises(TypeError):
+        d = DerivedClass(int_val=43)
+
+    with pytest.raises(TypeError):
+        d = DerivedClass(int_val3=43)
+
+    d = DerivedClass(int_val=43, int_val2=45)
     assert d.int_val == 43
     assert d.int_val2 == 45
     assert d.int_val3 == 44
 
-    d = DerivedClass(43, 45, 46)
+    d = DerivedClass(int_val=43, int_val2=45, int_val3=46)
     assert d.int_val == 43
     assert d.int_val2 == 45
     assert d.int_val3 == 46
@@ -187,8 +195,10 @@ def test_quam_dataclass_with_kw_only():
     assert is_dataclass(C)
     with pytest.raises(TypeError):
         c = C()
+    with pytest.raises(TypeError):
+        c = C(int_val_optional=42)
 
-    c = C(2)
+    c = C(int_val=2)
     assert is_dataclass(c)
     assert c.int_val == 2
     assert c.int_val_optional == 42
@@ -197,3 +207,21 @@ def test_quam_dataclass_with_kw_only():
     assert len(f) == 2
     assert f[0].name == "int_val"
     assert f[1].name == "int_val_optional"
+
+
+def test_quam_dataclass_optional_field():
+    from quam.core import QuamComponent
+
+    @quam_dataclass
+    class RootClass(QuamComponent):
+        optional_root_attr: int = None
+
+    @quam_dataclass
+    class DerivedClass(RootClass):
+        pass
+
+    from quam.utils.dataclass import get_dataclass_attr_annotations
+
+    attr_annotations = get_dataclass_attr_annotations(DerivedClass)
+
+    assert list(attr_annotations["required"]) == []

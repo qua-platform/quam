@@ -8,6 +8,7 @@ additional
 .idea
 build
 site
+calibration_db.json
 
 dependency_links.txt
 PKG-INFO

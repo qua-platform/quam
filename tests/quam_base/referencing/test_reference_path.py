@@ -52,3 +52,10 @@ def test_quam_list_reference():
     assert (
         root.quam_elem_list[1].test_str.get_reference() == "#/quam_elem_list/1/test_str"
     )
+
+
+def test_get_reference_attr():
+    component = QuamComponentTest(test_str="hi")
+    root = QuamRootTest(quam_elem=component, quam_elem_list=[])
+    assert component.get_reference() == "#/quam_elem"
+    assert component.get_reference("test_str") == "#/quam_elem/test_str"
