@@ -1,10 +1,17 @@
+## [Unreleased]
+### Added
+- Added `DragCosinePulse`.
+- Added support for sticky channels through the `StickyChannelAddon` (see documentation)
+
+### Changed
+- Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+
+
 ## [0.3.4]
 ### Added
 - Added `Channel.frame_rotation_2pi` to allow for frame rotation in multiples of 2pi
 - Added `Channel.update_frequency` to allow for updating the frequency of a channel
 - Added `OctaveOld.connectivity` as it was needed for (deprecated) compatibility with multiple OPX instruments
-- Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
-- Added `DragCosinePulse`.
 
 ### Changed
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
@@ -18,7 +25,6 @@
 - Fix tuples not being instantiated properly in specific circumstances
 - Fix filter_fir/iir_taps being passed as QuamList when generating config, resulting in an error due to parent reassignment
 - Fix warning messages in QuamComponent instantiation
-
 
 
 ## [0.3.3]
