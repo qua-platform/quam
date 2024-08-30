@@ -1578,17 +1578,12 @@ class MWChannel(Channel):
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
-    time_of_flight: int = 24
-    smearing: int = 0
-
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
         element_config = config["elements"][self.name]
         element_config["MWInput"] = self.opx_output.port_tuple
         element_config["upconverter"] = self.upconverter
-        element_config["smearing"] = self.smearing
-        element_config["time_of_flight"] = self.time_of_flight
 
 
 @quam_dataclass
@@ -1608,11 +1603,16 @@ class InMWChannel(Channel):
 
     opx_input: MWFEMAnalogInputPort
 
+    time_of_flight: int = 24
+    smearing: int = 0
+
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
         element_config = config["elements"][self.name]
         element_config["MWOutput"] = self.opx_input.port_tuple
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
 
 
 @quam_dataclass
