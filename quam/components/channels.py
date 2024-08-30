@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union, Any
 import warnings
@@ -200,7 +201,7 @@ class StickyChannelAddon(QuamComponent):
 
 
 @quam_dataclass
-class Channel(QuamComponent):
+class Channel(QuamComponent, ABC):
     """Base QuAM component for a channel, can be output, input or both.
 
     Args:
@@ -221,6 +222,8 @@ class Channel(QuamComponent):
 
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
     sticky: Optional[StickyChannelAddon] = None
+
+    intermediate_frequency: Optional[float] = None
 
     @property
     def name(self) -> str:
@@ -505,6 +508,10 @@ class Channel(QuamComponent):
                 f"exists. Existing entry: {config['elements'][self.name]}"
             )
         config["elements"][self.name] = {"operations": self.pulse_mapping}
+        element_config = config["elements"][self.name]
+
+        if self.intermediate_frequency is not None:
+            element_config["intermediate_frequency"] = self.intermediate_frequency
 
         self._config_add_digital_outputs(config)
 
@@ -533,7 +540,6 @@ class SingleChannel(Channel):
     filter_iir_taps: List[float] = None
 
     opx_output_offset: float = None
-    intermediate_frequency: float = None
 
     def set_dc_offset(self, offset: QuaNumberType):
         """Set the DC offset of an element's input to the given value.
@@ -565,9 +571,6 @@ class SingleChannel(Channel):
             )
 
         element_config = config["elements"][self.name]
-
-        if self.intermediate_frequency is not None:
-            element_config["intermediate_frequency"] = self.intermediate_frequency
 
         filter_fir_taps = self.filter_fir_taps
         if filter_fir_taps is not None:
@@ -908,7 +911,6 @@ class IQChannel(Channel):
 
     frequency_converter_up: BaseFrequencyConverter
 
-    intermediate_frequency: float = 0.0
     LO_frequency: float = "#./frequency_converter_up/LO_frequency"
     RF_frequency: float = "#./inferred_RF_frequency"
 
@@ -1033,7 +1035,6 @@ class IQChannel(Channel):
             )
 
         element_cfg = config["elements"][self.name]
-        element_cfg["intermediate_frequency"] = self.intermediate_frequency
 
         from quam.components.octave import OctaveUpConverter
 
