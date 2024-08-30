@@ -485,12 +485,12 @@ class Channel(QuamComponent, ABC):
         if not self.digital_outputs:
             return
 
-        element_cfg = config["elements"][self.name]
-        element_cfg.setdefault("digitalInputs", {})
+        element_config = config["elements"][self.name]
+        element_config.setdefault("digitalInputs", {})
 
         for name, digital_output in self.digital_outputs.items():
             digital_cfg = digital_output.generate_element_config()
-            element_cfg["digitalInputs"][name] = digital_cfg
+            element_config["digitalInputs"][name] = digital_cfg
 
     def apply_to_config(self, config: Dict[str, dict]) -> None:
         """Adds this Channel to the QUA configuration.
@@ -1038,7 +1038,7 @@ class IQChannel(Channel):
                 " with a name."
             )
 
-        element_cfg = config["elements"][self.name]
+        element_config = config["elements"][self.name]
 
         from quam.components.octave import OctaveUpConverter
 
@@ -1050,7 +1050,7 @@ class IQChannel(Channel):
                     f"OctaveUpConverter (id={self.frequency_converter_up.id}) without "
                     "an attached Octave"
                 )
-            element_cfg["RF_inputs"] = {
+            element_config["RF_inputs"] = {
                 "port": (octave.name, self.frequency_converter_up.id)
             }
         elif str_ref.is_reference(self.frequency_converter_up):
@@ -1061,11 +1061,11 @@ class IQChannel(Channel):
             )
         else:
 
-            element_cfg["mixInputs"] = {}  # To be filled in next section
+            element_config["mixInputs"] = {}  # To be filled in next section
             if self.mixer is not None:
-                element_cfg["mixInputs"]["mixer"] = self.mixer.name
+                element_config["mixInputs"]["mixer"] = self.mixer.name
             if self.local_oscillator is not None:
-                element_cfg["mixInputs"][
+                element_config["mixInputs"][
                     "lo_frequency"
                 ] = self.local_oscillator.frequency
 
@@ -1081,8 +1081,8 @@ class IQChannel(Channel):
                 opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
                 opx_port.apply_to_config(config)
 
-            if "mixInputs" in element_cfg:
-                element_cfg["mixInputs"][I_or_Q] = opx_port.port_tuple
+            if "mixInputs" in element_config:
+                element_config["mixInputs"][I_or_Q] = opx_port.port_tuple
 
 
 @quam_dataclass
@@ -1133,9 +1133,9 @@ class InIQChannel(Channel):
         super().apply_to_config(config)
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        element_cfg = config["elements"][self.name]
-        element_cfg["smearing"] = self.smearing
-        element_cfg["time_of_flight"] = self.time_of_flight
+        element_config = config["elements"][self.name]
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
 
         from quam.components.octave import OctaveDownConverter
 
@@ -1147,7 +1147,7 @@ class InIQChannel(Channel):
                     f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
                     "without an attached Octave"
                 )
-            element_cfg["RF_outputs"] = {
+            element_config["RF_outputs"] = {
                 "port": (octave.name, self.frequency_converter_down.id)
             }
         elif str_ref.is_reference(self.frequency_converter_down):
@@ -1158,7 +1158,7 @@ class InIQChannel(Channel):
             )
         else:
             # To be filled in next section
-            element_cfg["outputs"] = {}
+            element_config["outputs"] = {}
 
         opx_inputs = [self.opx_input_I, self.opx_input_Q]
         offsets = [self.opx_input_offset_I, self.opx_input_offset_Q]
@@ -1177,7 +1177,7 @@ class InIQChannel(Channel):
                 )
                 opx_port.apply_to_config(config)
             if not isinstance(self.frequency_converter_down, OctaveDownConverter):
-                element_cfg["outputs"][f"out{k}"] = opx_port.port_tuple
+                element_config["outputs"][f"out{k}"] = opx_port.port_tuple
 
     def measure(
         self,
@@ -1560,12 +1560,17 @@ class MWChannel(Channel):
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
+    time_of_flight: int = 24
+    smearing: int = 0
+
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        element_cfg = config["elements"][self.name]
-        element_cfg["MWInput"] = self.opx_output.port_tuple
-        element_cfg["upconverter"] = self.upconverter
+        element_config = config["elements"][self.name]
+        element_config["MWInput"] = self.opx_output.port_tuple
+        element_config["upconverter"] = self.upconverter
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
 
 
 @quam_dataclass
@@ -1575,8 +1580,8 @@ class InMWChannel(Channel):
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
-        element_cfg = config["elements"][self.name]
-        element_cfg["MWOutput"] = self.opx_input.port_tuple
+        element_config = config["elements"][self.name]
+        element_config["MWOutput"] = self.opx_input.port_tuple
 
 
 @quam_dataclass
