@@ -1089,24 +1089,25 @@ class IQChannel(Channel):
 class InIQChannel(Channel):
     """QuAM component for an IQ input channel
 
-    operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
-        channel. The key is the pulse label (e.g. "readout") and value is a
-        ReadoutPulse.
-    id (str, int): The id of the channel, used to generate the name.
-        Can be a string, or an integer in which case it will add
-        `Channel._default_label`.
-    opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
-        a tuple of (controller_name, port).
-    opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
-        a tuple of (controller_name, port).
-    opx_input_offset_I float: The offset of the I channel. Default is 0.
-    opx_input_offset_Q float: The offset of the Q channel. Default is 0.
-    frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
-        QuAM component for the IQ input port. Only needed for the old Octave.
-    time_of_flight (int): Round-trip signal duration in nanoseconds.
-    smearing (int): Additional window of ADC integration in nanoseconds.
-        Used to account for signal smearing.
-    input_gain (float): The gain of the input channel. Default is None.
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "readout") and value is a
+            ReadoutPulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_input_offset_I float: The offset of the I channel. Default is 0.
+        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
+        frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
+            QuAM component for the IQ input port. Only needed for the old Octave.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+        input_gain (float): The gain of the input channel. Default is None.
     """
 
     opx_input_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
@@ -1557,6 +1558,23 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
 
 @quam_dataclass
 class MWChannel(Channel):
+    """QuAM component for a MW FEM output channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX perspective.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
+        upconverter (int): The upconverter to use. Default is 1.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+    """
+
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
@@ -1575,6 +1593,19 @@ class MWChannel(Channel):
 
 @quam_dataclass
 class InMWChannel(Channel):
+    """QuAM component for a MW FEM input channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_input (MWFEMAnalogInputPort)): Channel input port from the OPX perspective.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
+    """
+
     opx_input: MWFEMAnalogInputPort
 
     def apply_to_config(self, config: Dict) -> None:
@@ -1586,4 +1617,22 @@ class InMWChannel(Channel):
 
 @quam_dataclass
 class InOutMWChannel(MWChannel, InMWChannel):
+    """QuAM component for a MW FEM input channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX perspective.
+        opx_input (MWFEMAnalogInputPort)): Channel input port from the OPX perspective.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
+        upconverter (int): The upconverter to use. Default is 1.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+    """
+
     pass
