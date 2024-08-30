@@ -5,6 +5,8 @@
 
 ### Changed
 - Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+- `Channel` is now an abstract base class.
+- Moved `intermediate_frequency` to `Channel` from `SingleChannel/IQChannel`.
 
 
 ## [0.3.4]
