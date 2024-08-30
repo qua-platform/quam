@@ -224,6 +224,7 @@ class Channel(QuamComponent, ABC):
     sticky: Optional[StickyChannelAddon] = None
 
     intermediate_frequency: Optional[float] = None
+    thread: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -512,6 +513,9 @@ class Channel(QuamComponent, ABC):
 
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
+
+        if self.thread is not None:
+            element_config["thread"] = self.thread
 
         self._config_add_digital_outputs(config)
 
