@@ -7,6 +7,7 @@ def test_in_single_channel_attr_annotations():
     attr_annotations = get_dataclass_attr_annotations(InSingleChannel)
     assert set(attr_annotations["required"]) == {"opx_input"}
     assert set(attr_annotations["optional"]) == {
+        "intermediate_frequency",
         "operations",
         "sticky",
         "id",
@@ -14,6 +15,7 @@ def test_in_single_channel_attr_annotations():
         "opx_input_offset",
         "time_of_flight",
         "smearing",
+        "thread",
     }
 
 

@@ -25,6 +25,7 @@ def test_in_single_channel_attr_annotations():
         "opx_input_offset",
         "time_of_flight",
         "smearing",
+        "thread"
     }
 
 
@@ -85,7 +86,7 @@ def test_generate_config(qua_config):
             "analog_inputs": {
                 1: {"gain_db": 0, "shareable": False},
             },
-            "analog_outputs": {
+            "analog_outputs": {     
                 1: {"delay": 0, "shareable": False},
                 2: {"delay": 0, "shareable": False},
             },
@@ -94,7 +95,6 @@ def test_generate_config(qua_config):
 
     assert qua_config["elements"] == {
         "in_out_channel": {
-            "intermediate_frequency": 0.0,
             "mixInputs": {
                 "I": ("con1", 1),
                 "Q": ("con1", 2),
