@@ -1087,6 +1087,17 @@ class IQChannel(Channel):
 
 @quam_dataclass
 class _InComplexChannel(Channel, ABC):
+    """A specialized channel class for performing complex demodulation measurements.
+
+    This class extends the basic `Channel` class and provides functionality
+    for performing full dual demodulation measurements on a channel. It allows
+    for the measurement of both in-phase (I) and quadrature (Q) components of
+    a signal, which are essential for characterizing quantum signals.
+
+    This class is used for both input IQ channels on low-frequency analog inputs and for
+    MW inputs in the MW FEM.
+    """
+
     def measure(
         self,
         pulse_name: str,
