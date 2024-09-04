@@ -182,10 +182,11 @@ class Pulse(QuamComponent):
 
         Raises:
             ValueError: If the waveform type (single or IQ) does not match the parent
-                channel type (SingleChannel, IQChannel, InOutIQChannel).
+                channel type (SingleChannel, IQChannel, InOutIQChannel, MWChannel,
+                InOutMWChannel).
         """
 
-        from quam.components.channels import SingleChannel, IQChannel
+        from quam.components.channels import SingleChannel, IQChannel, MWChannel
 
         pulse_config = config["pulses"][self.pulse_name]
 
@@ -199,7 +200,7 @@ class Pulse(QuamComponent):
             wf_type = "constant"
             if isinstance(waveform, complex):
                 waveforms = {"I": waveform.real, "Q": waveform.imag}
-            elif isinstance(self.channel, IQChannel):
+            elif isinstance(self.channel, (IQChannel, MWChannel)):
                 waveforms = {"I": waveform, "Q": 0.0}
             else:
                 waveforms = {"single": waveform}
@@ -208,7 +209,7 @@ class Pulse(QuamComponent):
             wf_type = "arbitrary"
             if np.iscomplexobj(waveform):
                 waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
-            elif isinstance(self.channel, IQChannel):
+            elif isinstance(self.channel, (IQChannel, MWChannel)):
                 waveforms = {"I": waveform, "Q": np.zeros_like(waveform)}
             else:
                 waveforms = {"single": list(waveform)}
@@ -218,10 +219,10 @@ class Pulse(QuamComponent):
         # Add check that waveform type (single or IQ) matches parent
         if "single" in waveforms and not isinstance(self.channel, SingleChannel):
             raise ValueError(
-                "Waveform type 'single' not allowed for IQChannel"
+                "Waveform type 'single' not allowed for (IQChannel, MWChannel)"
                 f" '{self.channel.name}'"
             )
-        elif "I" in waveforms and not isinstance(self.channel, IQChannel):
+        elif "I" in waveforms and not isinstance(self.channel, (IQChannel, MWChannel)):
             raise ValueError(
                 "Waveform type 'IQ' not allowed for SingleChannel"
                 f" '{self.channel.name}'"

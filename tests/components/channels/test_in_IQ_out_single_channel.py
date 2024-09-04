@@ -26,6 +26,7 @@ def test_in_single_channel_attr_annotations():
         "opx_input_offset_I",
         "opx_input_offset_Q",
         "frequency_converter_down",
+        "thread",
     }
 
 

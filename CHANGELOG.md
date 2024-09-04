@@ -2,9 +2,14 @@
 ### Added
 - Added `DragCosinePulse`.
 - Added support for sticky channels through the `StickyChannelAddon` (see documentation)
+- Added `Channel.thread`, which defaults to None
 
 ### Changed
 - Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+- `Channel` is now an abstract base class.
+- Moved `intermediate_frequency` to `Channel` from `SingleChannel/IQChannel`.
+  The default is `None`. A consequence of this is that `SingleChannel` no longer adds
+    `intermediate_frequency` to the config if it's not set.
 
 
 ## [0.3.4]

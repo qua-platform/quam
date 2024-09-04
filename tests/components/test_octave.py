@@ -280,7 +280,6 @@ def test_channel_add_RF_outputs(octave, qua_config):
 
     expected_cfg_elements = {
         "ch": {
-            "intermediate_frequency": 0.0,
             "RF_inputs": {"port": ("octave1", 2)},
             "operations": {},
         }
@@ -308,7 +307,6 @@ def test_channel_add_RF_inputs(octave, qua_config):
 
     expected_cfg_elements = {
         "ch": {
-            "intermediate_frequency": 0.0,
             "RF_inputs": {"port": ("octave1", 3)},
             "RF_outputs": {"port": ("octave1", 4)},
             "operations": {},

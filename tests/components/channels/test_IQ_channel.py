@@ -35,7 +35,7 @@ def test_IQ_channel_inferred_RF_frequency():
         frequency_converter_up=None,
     )
 
-    assert channel.intermediate_frequency == 0.0
+    assert channel.intermediate_frequency is None
     assert channel.LO_frequency == "#./frequency_converter_up/LO_frequency"
     assert channel.RF_frequency == "#./inferred_RF_frequency"
     with pytest.raises(AttributeError):
@@ -112,7 +112,6 @@ def test_generate_config(qua_config):
 
     assert qua_config["elements"] == {
         "out_channel": {
-            "intermediate_frequency": 0.0,
             "mixInputs": {
                 "I": ("con1", 1),
                 "Q": ("con1", 2),
@@ -145,7 +144,6 @@ def test_generate_config_ports(qua_config):
 
     assert qua_config["elements"] == {
         "out_channel": {
-            "intermediate_frequency": 0.0,
             "mixInputs": {
                 "I": ("con1", 1),
                 "Q": ("con1", 2),
