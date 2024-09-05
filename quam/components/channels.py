@@ -1596,8 +1596,10 @@ class MWChannel(Channel):
         super().apply_to_config(config)
 
         element_config = config["elements"][self.name]
-        element_config["MWInput"] = self.opx_output.port_tuple
-        element_config["upconverter"] = self.upconverter
+        element_config["MWInput"] = {
+            "port": self.opx_output.port_tuple,
+            "upconverter": self.upconverter
+        }
 
 
 @quam_dataclass
@@ -1624,7 +1626,9 @@ class InMWChannel(_InComplexChannel):
         super().apply_to_config(config)
 
         element_config = config["elements"][self.name]
-        element_config["MWOutput"] = self.opx_input.port_tuple
+        element_config["MWOutput"] = {
+            "port": self.opx_input.port_tuple
+        }
         element_config["smearing"] = self.smearing
         element_config["time_of_flight"] = self.time_of_flight
 
