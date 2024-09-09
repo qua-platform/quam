@@ -1588,6 +1588,7 @@ class MWChannel(Channel):
         smearing (int): Additional window of ADC integration in nanoseconds.
             Used to account for signal smearing.
     """
+
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
