@@ -1588,9 +1588,10 @@ class MWChannel(Channel):
         smearing (int): Additional window of ADC integration in nanoseconds.
             Used to account for signal smearing.
     """
-
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
+
+    LO_frequency: float = "#./opx_output/upconverter_frequency"
 
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
