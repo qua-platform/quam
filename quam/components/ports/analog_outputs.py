@@ -56,7 +56,8 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
         port_properties["sampling_rate"] = self.sampling_rate
-        port_properties["upsampling_mode"] = self.upsampling_mode
+        if self.sampling_rate == 1e9:
+            port_properties["upsampling_mode"] = self.upsampling_mode
         port_properties["output_mode"] = self.output_mode
         return port_properties
 
