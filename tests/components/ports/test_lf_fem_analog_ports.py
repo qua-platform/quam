@@ -72,6 +72,16 @@ def test_lf_fem_analog_output_port():
         "offset": 0.1,
     }
 
+    port.sampling_rate = 2e9
+
+    assert port.get_port_properties() == {
+        "delay": 0,
+        "shareable": False,
+        "output_mode": "direct",
+        "sampling_rate": 2e9,
+        "offset": 0.1,
+    }
+
 
 def test_lf_fem_analog_input_port():
     with pytest.raises(TypeError):
