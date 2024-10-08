@@ -956,7 +956,7 @@ class _OutComplexChannel(Channel, ABC):
 
 
 @quam_dataclass
-class IQChannel(Channel):
+class IQChannel(_OutComplexChannel):
     """QuAM component for an IQ output channel.
 
     Args:
