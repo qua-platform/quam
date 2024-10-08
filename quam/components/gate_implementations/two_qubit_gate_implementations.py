@@ -8,11 +8,11 @@ from quam.core import quam_dataclass, QuamComponent
 from quam.utils import string_reference as str_ref
 
 
-__all__ = ["TwoQubitGate", "CZGate"]
+__all__ = ["TwoQubitGateImplementation", "CZGateImplementation"]
 
 
 @quam_dataclass
-class TwoQubitGate(QuamComponent, ABC):
+class TwoQubitGateImplementation(QuamComponent, ABC):
     @property
     def qubit_pair(self):
         from ..qubit_pair import QubitPair
@@ -41,7 +41,7 @@ class TwoQubitGate(QuamComponent, ABC):
 
 
 @quam_dataclass
-class CZGate(TwoQubitGate):
+class CZGateImplementation(TwoQubitGateImplementation):
     """CZ Operation for a qubit pair"""
 
     # Pulses will be added to qubit elements

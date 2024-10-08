@@ -3,7 +3,7 @@ from quam.core import quam_dataclass, QuamComponent
 
 
 @quam_dataclass
-class SingleQubitGate(QuamComponent, ABC):
+class SingleQubitGateImplementation(QuamComponent, ABC):
     @property
     def qubit(self):
         from ..qubit import Qubit
@@ -26,7 +26,7 @@ class SingleQubitGate(QuamComponent, ABC):
 
 
 @quam_dataclass
-class SinglePulseGate(SingleQubitGate):
+class SinglePulseGateImplementation(SingleQubitGateImplementation):
     """Single-qubit gate for a qubit consisting of a single pulse
 
     Args:

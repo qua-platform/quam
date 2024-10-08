@@ -3,7 +3,9 @@ from dataclasses import field
 
 from quam.components.channels import Channel
 from quam.core import quam_dataclass, QuamComponent
-from .gates.single_qubit_gates import SingleQubitGate
+from .gate_implementations.single_qubit_gate_implementations import (
+    SingleQubitGateImplementation,
+)
 
 from qm.qua._dsl import (
     AmpValuesType,
@@ -20,7 +22,7 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuamComponent):
     id: str
-    gates: Dict[str, SingleQubitGate] = field(default_factory=dict)
+    gates: Dict[str, SingleQubitGateImplementation] = field(default_factory=dict)
 
     @property
     def name(self):
