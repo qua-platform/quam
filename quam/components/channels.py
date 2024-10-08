@@ -1,9 +1,29 @@
+from abc import ABC
 from dataclasses import field
-from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union
+from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union, Any
 import warnings
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
+from quam.components.ports.digital_outputs import (
+    DigitalOutputPort,
+    OPXPlusDigitalOutputPort,
+)
+from quam.components.ports.analog_inputs import (
+    LFAnalogInputPort,
+    LFFEMAnalogInputPort,
+    MWFEMAnalogInputPort,
+    OPXPlusAnalogInputPort,
+)
+from quam.components.ports.analog_outputs import (
+    LFAnalogOutputPort,
+    LFFEMAnalogOutputPort,
+    MWFEMAnalogOutputPort,
+    OPXPlusAnalogOutputPort,
+)
 from quam.components.pulses import Pulse, BaseReadoutPulse
+from quam.components.ports.digital_outputs import (
+    FEMDigitalOutputPort,
+)
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
@@ -36,8 +56,9 @@ from qm.qua._dsl import (
 
 
 __all__ = [
-    "DigitalOutputChannel",
     "Channel",
+    "DigitalOutputChannel",
+    "StickyChannelAddon",
     "SingleChannel",
     "InSingleChannel",
     "IQChannel",
@@ -69,7 +90,7 @@ class DigitalOutputChannel(QuamComponent):
             Default is False.
     ."""
 
-    opx_output: Tuple[str, int]
+    opx_output: Union[Tuple[str, int], Tuple[str, int, int], DigitalOutputPort]
     delay: int = None
     buffer: int = None
 
@@ -86,7 +107,12 @@ class DigitalOutputChannel(QuamComponent):
             Dict[str, int]: The digital channel config entry.
                 Contains "port", and optionally "delay", "buffer" if specified
         """
-        digital_cfg = {"port": tuple(self.opx_output)}
+        if isinstance(self.opx_output, DigitalOutputPort):
+            opx_output = self.opx_output.port_tuple
+        else:
+            opx_output = tuple(self.opx_output)
+
+        digital_cfg: Dict[str, Any] = {"port": opx_output}
         if self.delay is not None:
             digital_cfg["delay"] = self.delay
         if self.buffer is not None:
@@ -102,29 +128,80 @@ class DigitalOutputChannel(QuamComponent):
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
-        controller_name, port = self.opx_output
-        controller_cfg = config["controllers"].setdefault(controller_name, {})
-        controller_cfg.setdefault("digital_outputs", {})
-        port_cfg = controller_cfg["digital_outputs"].setdefault(port, {})
+        if isinstance(self.opx_output, DigitalOutputPort):
+            if self.shareable is not None:
+                warnings.warn(
+                    f"Property {self.name}.shareable (={self.shareable}) is ignored "
+                    "because it should be set in {self.name}.opx_output.shareable"
+                )
+            if self.inverted is not None:
+                warnings.warn(
+                    f"Property {self.name}.inverted (={self.inverted}) is ignored "
+                    "because it should be set in {self.name}.opx_output.inverted"
+                )
+            return
 
-        if self.shareable is not None:
-            if port_cfg.get("shareable", self.shareable) != self.shareable:
-                raise ValueError(
-                    f"Channel {self.name} has conflicting shareable settings: "
-                    f"{port_cfg['shareable']} and {self.shareable}"
-                )
-            port_cfg["shareable"] = self.shareable
-        if self.inverted is not None:
-            if port_cfg.get("inverted", self.inverted) != self.inverted:
-                raise ValueError(
-                    f"Channel {self.name} has conflicting inverted settings: "
-                    f"{port_cfg['inverted']} and {self.inverted}"
-                )
-            port_cfg["inverted"] = self.inverted
+        shareable = self.shareable if self.shareable is not None else False
+        inverted = self.inverted if self.inverted is not None else False
+        if len(self.opx_output) == 2:
+            digital_output_port = OPXPlusDigitalOutputPort(
+                *self.opx_output, shareable=shareable, inverted=inverted
+            )
+        else:
+            digital_output_port = FEMDigitalOutputPort(
+                *self.opx_output, shareable=shareable, inverted=inverted
+            )
+        digital_output_port.apply_to_config(config)
 
 
 @quam_dataclass
-class Channel(QuamComponent):
+class StickyChannelAddon(QuamComponent):
+    """Addon to make channels sticky.
+
+    Args:
+        duration (int): The ramp to zero duration, in ns.
+        enabled (bool, optional): If False, the sticky parameters are not applied.
+            Default is True.
+        analog (bool, optional): If False, the sticky parameters are not applied to
+            analog outputs. Default is True.
+        digital (bool, optional): If False, the sticky parameters are not applied to
+            digital outputs. Default is True.
+    """
+
+    duration: int
+    enabled: bool = True
+    analog: bool = True
+    digital: bool = True
+
+    @property
+    def channel(self) -> Optional["Channel"]:
+        """If the parent is a channel, returns the parent, otherwise returns None."""
+        if isinstance(self.parent, Channel):
+            return self.parent
+        else:
+            return
+
+    @property
+    def config_settings(self):
+        if self.channel is not None:
+            return {"after": [self.channel]}
+
+    def apply_to_config(self, config: dict) -> None:
+        if self.channel is None:
+            return
+
+        if not self.enabled:
+            return
+
+        config["elements"][self.channel.name]["sticky"] = {
+            "analog": self.analog,
+            "digital": self.digital,
+            "duration": self.duration,
+        }
+
+
+@quam_dataclass
+class Channel(QuamComponent, ABC):
     """Base QuAM component for a channel, can be output, input or both.
 
     Args:
@@ -133,6 +210,9 @@ class Channel(QuamComponent):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
+        sticky (Sticky): Optional sticky parameters for the channel, i.e. defining
+            whether successive pulses are applied w.r.t the previous pulse or w.r.t 0 V.
+            If not specified, this channel is not sticky.
     """
 
     operations: Dict[str, Pulse] = field(default_factory=dict)
@@ -141,6 +221,10 @@ class Channel(QuamComponent):
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
 
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
+    sticky: Optional[StickyChannelAddon] = None
+
+    intermediate_frequency: Optional[float] = None
+    thread: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -386,28 +470,6 @@ class Channel(QuamComponent):
         """
         frame_rotation_2pi(angle, self.name)
 
-    def _config_add_controller(
-        self, config: Dict[str, dict], controller_name: str
-    ) -> Dict[str, dict]:
-        """Adds a controller to the config if it doesn't exist, and returns its config.
-
-        config.controllers.<controller_name> will be created if it doesn't exist.
-        It will also add the analog_outputs, digital_outputs, and analog_inputs keys
-
-        Args:
-            config (dict): The QUA config that's in the process of being generated.
-            controller_name (str): The name of the controller.
-
-        Returns:
-            Dict[str, dict]: The config entry for the controller.
-        """
-        config["controllers"].setdefault(controller_name, {})
-        controller_cfg = config["controllers"][controller_name]
-        for key in ["analog_outputs", "digital_outputs", "analog_inputs"]:
-            controller_cfg.setdefault(key, {})
-
-        return controller_cfg
-
     def _config_add_digital_outputs(self, config: Dict[str, dict]) -> None:
         """Adds the digital outputs to the QUA config.
 
@@ -423,12 +485,12 @@ class Channel(QuamComponent):
         if not self.digital_outputs:
             return
 
-        element_cfg = config["elements"][self.name]
-        element_cfg.setdefault("digitalInputs", {})
+        element_config = config["elements"][self.name]
+        element_config.setdefault("digitalInputs", {})
 
         for name, digital_output in self.digital_outputs.items():
             digital_cfg = digital_output.generate_element_config()
-            element_cfg["digitalInputs"][name] = digital_cfg
+            element_config["digitalInputs"][name] = digital_cfg
 
     def apply_to_config(self, config: Dict[str, dict]) -> None:
         """Adds this Channel to the QUA configuration.
@@ -447,6 +509,13 @@ class Channel(QuamComponent):
                 f"exists. Existing entry: {config['elements'][self.name]}"
             )
         config["elements"][self.name] = {"operations": self.pulse_mapping}
+        element_config = config["elements"][self.name]
+
+        if self.intermediate_frequency is not None:
+            element_config["intermediate_frequency"] = self.intermediate_frequency
+
+        if self.thread is not None:
+            element_config["thread"] = self.thread
 
         self._config_add_digital_outputs(config)
 
@@ -470,12 +539,11 @@ class SingleChannel(Channel):
             is None.
     """
 
-    opx_output: Tuple[str, int]
+    opx_output: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
     opx_output_offset: float = None
-    intermediate_frequency: float = None
 
     def set_dc_offset(self, offset: QuaNumberType):
         """Set the DC offset of an element's input to the given value.
@@ -507,33 +575,34 @@ class SingleChannel(Channel):
             )
 
         element_config = config["elements"][self.name]
-        element_config["singleInput"] = {"port": tuple(self.opx_output)}
 
-        if self.intermediate_frequency is not None:
-            element_config["intermediate_frequency"] = self.intermediate_frequency
+        filter_fir_taps = self.filter_fir_taps
+        if filter_fir_taps is not None:
+            filter_fir_taps = list(filter_fir_taps)
+        filter_iir_taps = self.filter_iir_taps
+        if filter_iir_taps is not None:
+            filter_iir_taps = list(filter_iir_taps)
 
-        controller_name, port = self.opx_output
-        controller_cfg = self._config_add_controller(config, controller_name)
-        analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
-        # If no offset specified, it will be added at the end of the config generation
-        offset = self.opx_output_offset
-        if offset is not None:
-            if abs(analog_output.get("offset", offset) - offset) > 1e-4:
-                warnings.warn(
-                    f"Channel {self.name} has conflicting output offsets: "
-                    f"{analog_output['offset']} V and {offset} V. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}. "
-                    f"Using the last offset {offset} V"
-                )
-            analog_output["offset"] = offset
+        if isinstance(self.opx_output, LFAnalogOutputPort):
+            opx_port = self.opx_output
+        elif len(self.opx_output) == 2:
+            opx_port = OPXPlusAnalogOutputPort(
+                *self.opx_output,
+                offset=self.opx_output_offset,
+                feedforward_filter=filter_fir_taps,
+                feedback_filter=filter_iir_taps,
+            )
+            opx_port.apply_to_config(config)
+        else:
+            opx_port = LFFEMAnalogOutputPort(
+                *self.opx_output,
+                offset=self.opx_output_offset,
+                feedforward_filter=filter_fir_taps,
+                feedback_filter=filter_iir_taps,
+            )
+            opx_port.apply_to_config(config)
 
-        if self.filter_fir_taps is not None:
-            output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedforward"] = list(self.filter_fir_taps)
-
-        if self.filter_iir_taps is not None:
-            output_filter = analog_output.setdefault("filter", {})
-            output_filter["feedback"] = list(self.filter_iir_taps)
+        element_config["singleInput"] = {"port": opx_port.port_tuple}
 
 
 @quam_dataclass
@@ -556,7 +625,7 @@ class InSingleChannel(Channel):
             Used to account for signal smearing.
     """
 
-    opx_input: Tuple[str, int]
+    opx_input: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
     opx_input_offset: float = None
 
     time_of_flight: int = 24
@@ -572,23 +641,24 @@ class InSingleChannel(Channel):
         super().apply_to_config(config)
 
         # Note outputs instead of inputs because it's w.r.t. the QPU
-        config["elements"][self.name]["outputs"] = {"out1": tuple(self.opx_input)}
-        config["elements"][self.name]["smearing"] = self.smearing
-        config["elements"][self.name]["time_of_flight"] = self.time_of_flight
+        element_config = config["elements"][self.name]
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
 
-        controller_name, port = self.opx_input
-        controller_cfg = self._config_add_controller(config, controller_name)
-        analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
-        offset = self.opx_input_offset
-        # If no offset specified, it will be added at the end of the config generation
-        if offset is not None:
-            if abs(analog_input.get("offset", offset) - offset) > 1e-4:
-                raise ValueError(
-                    f"Channel {self.name} has conflicting input offsets: "
-                    f"{analog_input['offset']} and {offset}. Multiple channel "
-                    f"elements are trying to set different offsets to port {port}"
-                )
-            analog_input["offset"] = offset
+        if isinstance(self.opx_input, LFAnalogInputPort):
+            opx_port = self.opx_input
+        elif len(self.opx_input) == 2:
+            opx_port = OPXPlusAnalogInputPort(
+                *self.opx_input, offset=self.opx_input_offset
+            )
+            opx_port.apply_to_config(config)
+        else:
+            opx_port = LFFEMAnalogInputPort(
+                *self.opx_input, offset=self.opx_input_offset
+            )
+            opx_port.apply_to_config(config)
+
+        element_config["outputs"] = {"out1": opx_port.port_tuple}
 
     def measure(
         self,
@@ -837,15 +907,14 @@ class IQChannel(Channel):
             for the IQ output.
     """
 
-    opx_output_I: Tuple[str, int]
-    opx_output_Q: Tuple[str, int]
+    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
+    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
 
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
 
     frequency_converter_up: BaseFrequencyConverter
 
-    intermediate_frequency: float = 0.0
     LO_frequency: float = "#./frequency_converter_up/LO_frequency"
     RF_frequency: float = "#./inferred_RF_frequency"
 
@@ -960,8 +1029,6 @@ class IQChannel(Channel):
         """
         # Add pulses & waveforms
         super().apply_to_config(config)
-        opx_outputs = {"I": tuple(self.opx_output_I), "Q": tuple(self.opx_output_Q)}
-        offsets = {"I": self.opx_output_offset_I, "Q": self.opx_output_offset_Q}
 
         if str_ref.is_reference(self.name):
             raise AttributeError(
@@ -971,8 +1038,7 @@ class IQChannel(Channel):
                 " with a name."
             )
 
-        element_cfg = config["elements"][self.name]
-        element_cfg["intermediate_frequency"] = self.intermediate_frequency
+        element_config = config["elements"][self.name]
 
         from quam.components.octave import OctaveUpConverter
 
@@ -984,7 +1050,7 @@ class IQChannel(Channel):
                     f"OctaveUpConverter (id={self.frequency_converter_up.id}) without "
                     "an attached Octave"
                 )
-            element_cfg["RF_inputs"] = {
+            element_config["RF_inputs"] = {
                 "port": (octave.name, self.frequency_converter_up.id)
             }
         elif str_ref.is_reference(self.frequency_converter_up):
@@ -994,128 +1060,43 @@ class IQChannel(Channel):
                 f"reference: {self.frequency_converter_up}"
             )
         else:
-            element_cfg["mixInputs"] = {**opx_outputs}
+
+            element_config["mixInputs"] = {}  # To be filled in next section
             if self.mixer is not None:
-                element_cfg["mixInputs"]["mixer"] = self.mixer.name
+                element_config["mixInputs"]["mixer"] = self.mixer.name
             if self.local_oscillator is not None:
-                element_cfg["mixInputs"][
+                element_config["mixInputs"][
                     "lo_frequency"
                 ] = self.local_oscillator.frequency
 
-        for I_or_Q in ["I", "Q"]:
-            controller_name, port = opx_outputs[I_or_Q]
-            controller_cfg = self._config_add_controller(config, controller_name)
-            analog_output = controller_cfg["analog_outputs"].setdefault(port, {})
-            # If no offset specified, it will be added at the end of config generation
-            offset = offsets[I_or_Q]
-            if offset is not None:
-                if abs(analog_output.get("offset", offset) - offset) > 1e-4:
-                    raise ValueError(
-                        f"Channel {self.name} has conflicting output offsets: "
-                        f"{analog_output['offset']} and {offset}. Multiple channel "
-                        f"elements are trying to set different offsets to port {port}"
-                    )
-                analog_output["offset"] = offset
+        opx_outputs = [self.opx_output_I, self.opx_output_Q]
+        offsets = [self.opx_output_offset_I, self.opx_output_offset_Q]
+        for I_or_Q, opx_output, offset in zip("IQ", opx_outputs, offsets):
+            if isinstance(opx_output, LFAnalogOutputPort):
+                opx_port = opx_output
+            elif len(opx_output) == 2:
+                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)
+                opx_port.apply_to_config(config)
+            else:
+                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
+                opx_port.apply_to_config(config)
+
+            if "mixInputs" in element_config:
+                element_config["mixInputs"][I_or_Q] = opx_port.port_tuple
 
 
 @quam_dataclass
-class InIQChannel(Channel):
-    """QuAM component for an IQ input channel
+class _InComplexChannel(Channel, ABC):
+    """A specialized channel class for performing complex demodulation measurements.
 
-    operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
-        channel. The key is the pulse label (e.g. "readout") and value is a
-        ReadoutPulse.
-    id (str, int): The id of the channel, used to generate the name.
-        Can be a string, or an integer in which case it will add
-        `Channel._default_label`.
-    opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
-        a tuple of (controller_name, port).
-    opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
-        a tuple of (controller_name, port).
-    opx_input_offset_I float: The offset of the I channel. Default is 0.
-    opx_input_offset_Q float: The offset of the Q channel. Default is 0.
-    frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
-        QuAM component for the IQ input port. Only needed for the old Octave.
-    time_of_flight (int): Round-trip signal duration in nanoseconds.
-    smearing (int): Additional window of ADC integration in nanoseconds.
-        Used to account for signal smearing.
-    input_gain (float): The gain of the input channel. Default is None.
+    This class extends the basic `Channel` class and provides functionality
+    for performing full dual demodulation measurements on a channel. It allows
+    for the measurement of both in-phase (I) and quadrature (Q) components of
+    a signal, which are essential for characterizing quantum signals.
+
+    This class is used for both input IQ channels on low-frequency analog inputs and for
+    MW inputs in the MW FEM.
     """
-
-    opx_input_I: Tuple[str, int]
-    opx_input_Q: Tuple[str, int]
-
-    time_of_flight: int = 24
-    smearing: int = 0
-
-    opx_input_offset_I: float = None
-    opx_input_offset_Q: float = None
-
-    input_gain: Optional[float] = None
-
-    frequency_converter_down: BaseFrequencyConverter = None
-
-    _default_label: ClassVar[str] = "IQ"
-
-    def apply_to_config(self, config: dict):
-        """Adds this InOutIQChannel to the QUA configuration.
-
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
-        for details.
-        """
-        super().apply_to_config(config)
-
-        opx_inputs = {"I": tuple(self.opx_input_I), "Q": tuple(self.opx_input_Q)}
-        offsets = {"I": self.opx_input_offset_I, "Q": self.opx_input_offset_Q}
-
-        # Note outputs instead of inputs because it's w.r.t. the QPU
-        element_cfg = config["elements"][self.name]
-        element_cfg["smearing"] = self.smearing
-        element_cfg["time_of_flight"] = self.time_of_flight
-
-        from quam.components.octave import OctaveDownConverter
-
-        if isinstance(self.frequency_converter_down, OctaveDownConverter):
-            octave = self.frequency_converter_down.octave
-            if octave is None:
-                raise ValueError(
-                    f"Error generating config: channel {self.name} has an "
-                    f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
-                    "without an attached Octave"
-                )
-            element_cfg["RF_outputs"] = {
-                "port": (octave.name, self.frequency_converter_down.id)
-            }
-        elif str_ref.is_reference(self.frequency_converter_down):
-            raise ValueError(
-                f"Error generating config: channel {self.name} could not determine "
-                f'"frequency_converter_down", it seems to point to a non-existent '
-                f"reference: {self.frequency_converter_down}"
-            )
-        else:
-            element_cfg["outputs"] = {
-                "out1": tuple(self.opx_input_I),
-                "out2": tuple(self.opx_input_Q),
-            }
-
-        for I_or_Q in ["I", "Q"]:
-            controller_name, port = opx_inputs[I_or_Q]
-            controller_cfg = self._config_add_controller(config, controller_name)
-            analog_input = controller_cfg["analog_inputs"].setdefault(port, {})
-            offset = offsets[I_or_Q]
-            # If no offset specified, it will be added at the end of config generation
-            if offset is not None:
-                if abs(analog_input.get("offset", offset) - offset) > 1e-4:
-                    warnings.warn(
-                        f"Channel {self.name} has conflicting input offsets: "
-                        f"{analog_input['offset']} V and {offset} V. Multiple channel "
-                        f"elements are trying to set different offsets to port {port}. "
-                        f"Using the last offset {offset} V"
-                    )
-                analog_input["offset"] = offset
-
-            if self.input_gain is not None:
-                controller_cfg["analog_inputs"][port]["gain_db"] = self.input_gain
 
     def measure(
         self,
@@ -1183,10 +1164,10 @@ class InIQChannel(Channel):
     def measure_accumulated(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
-        num_segments: int = None,
-        segment_length: int = None,
-        qua_vars: Tuple[QuaVariableType, ...] = None,
+        amplitude_scale: Optional[Union[float, AmpValuesType]] = None,
+        num_segments: Optional[int] = None,
+        segment_length: Optional[int] = None,
+        qua_vars: Optional[Tuple[QuaVariableType, ...]] = None,
         stream=None,
     ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
         """Perform an accumulated dual demodulation measurement on this channel.
@@ -1269,10 +1250,10 @@ class InIQChannel(Channel):
     def measure_sliced(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
-        num_segments: int = None,
-        segment_length: int = None,
-        qua_vars: Tuple[QuaVariableType, ...] = None,
+        amplitude_scale: Optional[Union[float, AmpValuesType]] = None,
+        num_segments: Optional[int] = None,
+        segment_length: Optional[int] = None,
+        qua_vars: Optional[Tuple[QuaVariableType, ...]] = None,
         stream=None,
     ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
         """Perform a sliced dual demodulation measurement on this channel.
@@ -1351,6 +1332,102 @@ class InIQChannel(Channel):
             ),
         )
         return tuple(qua_vars)
+
+
+@quam_dataclass
+class InIQChannel(_InComplexChannel):
+    """QuAM component for an IQ input channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "readout") and value is a
+            ReadoutPulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_input_offset_I float: The offset of the I channel. Default is 0.
+        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
+        frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
+            QuAM component for the IQ input port. Only needed for the old Octave.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+        input_gain (float): The gain of the input channel. Default is None.
+    """
+
+    opx_input_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
+    opx_input_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
+
+    time_of_flight: int = 24
+    smearing: int = 0
+
+    opx_input_offset_I: float = None
+    opx_input_offset_Q: float = None
+
+    input_gain: Optional[int] = None
+
+    frequency_converter_down: BaseFrequencyConverter = None
+
+    _default_label: ClassVar[str] = "IQ"
+
+    def apply_to_config(self, config: dict):
+        """Adds this InOutIQChannel to the QUA configuration.
+
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        for details.
+        """
+        super().apply_to_config(config)
+
+        # Note outputs instead of inputs because it's w.r.t. the QPU
+        element_config = config["elements"][self.name]
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
+
+        from quam.components.octave import OctaveDownConverter
+
+        if isinstance(self.frequency_converter_down, OctaveDownConverter):
+            octave = self.frequency_converter_down.octave
+            if octave is None:
+                raise ValueError(
+                    f"Error generating config: channel {self.name} has an "
+                    f"OctaveDownConverter (id={self.frequency_converter_down.id}) "
+                    "without an attached Octave"
+                )
+            element_config["RF_outputs"] = {
+                "port": (octave.name, self.frequency_converter_down.id)
+            }
+        elif str_ref.is_reference(self.frequency_converter_down):
+            raise ValueError(
+                f"Error generating config: channel {self.name} could not determine "
+                f'"frequency_converter_down", it seems to point to a non-existent '
+                f"reference: {self.frequency_converter_down}"
+            )
+        else:
+            # To be filled in next section
+            element_config["outputs"] = {}
+
+        opx_inputs = [self.opx_input_I, self.opx_input_Q]
+        offsets = [self.opx_input_offset_I, self.opx_input_offset_Q]
+        input_gain = int(self.input_gain if self.input_gain is not None else 0)
+        for k, (opx_input, offset) in enumerate(zip(opx_inputs, offsets), start=1):
+            if isinstance(opx_input, LFAnalogInputPort):
+                opx_port = opx_input
+            elif len(opx_input) == 2:
+                opx_port = OPXPlusAnalogInputPort(
+                    *opx_input, offset=offset, gain_db=input_gain
+                )
+                opx_port.apply_to_config(config)
+            else:
+                opx_port = LFFEMAnalogInputPort(
+                    *opx_input, offset=offset, gain_db=input_gain
+                )
+                opx_port.apply_to_config(config)
+            if not isinstance(self.frequency_converter_down, OctaveDownConverter):
+                element_config["outputs"][f"out{k}"] = opx_port.port_tuple
 
 
 @quam_dataclass
@@ -1485,6 +1562,92 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
         filter_iir_taps (List[float]): IIR filter taps for the output port.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+    """
+
+    pass
+
+
+@quam_dataclass
+class MWChannel(Channel):
+    """QuAM component for a MW FEM output channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX perspective.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
+        upconverter (int): The upconverter to use. Default is 1.
+        time_of_flight (int): Round-trip signal duration in nanoseconds.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing.
+    """
+
+    opx_output: MWFEMAnalogOutputPort
+    upconverter: int = 1
+
+    def apply_to_config(self, config: Dict) -> None:
+        super().apply_to_config(config)
+
+        element_config = config["elements"][self.name]
+        element_config["MWInput"] = {
+            "port": self.opx_output.port_tuple,
+            "upconverter": self.upconverter
+        }
+
+
+@quam_dataclass
+class InMWChannel(_InComplexChannel):
+    """QuAM component for a MW FEM input channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_input (MWFEMAnalogInputPort)): Channel input port from the OPX perspective.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
+    """
+
+    opx_input: MWFEMAnalogInputPort
+
+    time_of_flight: int = 24
+    smearing: int = 0
+
+    def apply_to_config(self, config: Dict) -> None:
+        super().apply_to_config(config)
+
+        element_config = config["elements"][self.name]
+        element_config["MWOutput"] = {
+            "port": self.opx_input.port_tuple
+        }
+        element_config["smearing"] = self.smearing
+        element_config["time_of_flight"] = self.time_of_flight
+
+
+@quam_dataclass
+class InOutMWChannel(MWChannel, InMWChannel):
+    """QuAM component for a MW FEM input channel
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX perspective.
+        opx_input (MWFEMAnalogInputPort)): Channel input port from the OPX perspective.
+        intermediate_frequency (float): Intermediate frequency of OPX output, default
+            is None.
+        upconverter (int): The upconverter to use. Default is 1.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
         smearing (int): Additional window of ADC integration in nanoseconds.
             Used to account for signal smearing.

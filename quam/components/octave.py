@@ -3,6 +3,8 @@ import os
 from typing import Any, Optional, Union, ClassVar, Dict, List, Tuple, Literal
 from dataclasses import field
 
+from quam.components.ports.analog_outputs import LFAnalogOutputPort
+from quam.components.ports.base_ports import BasePort
 from quam.core import QuamComponent, quam_dataclass
 from quam.components.hardware import BaseFrequencyConverter, FrequencyConverter
 from quam.components.channels import (
@@ -95,7 +97,10 @@ class Octave(QuamComponent):
             )
 
         for idx in range(1, 3):
-            self.RF_inputs[idx] = OctaveDownConverter(id=idx, LO_frequency=None)
+            LO_source = "internal" if idx == 1 else "external"
+            self.RF_inputs[idx] = OctaveDownConverter(
+                id=idx, LO_frequency=None, LO_source=LO_source
+            )
 
     def get_octave_config(self) -> QmOctaveConfig:
         """Return a QmOctaveConfig object with the current Octave configuration."""
@@ -227,7 +232,7 @@ class OctaveUpConverter(OctaveFrequencyConverter):
     LO_source: Literal["internal", "external"] = "internal"
     gain: float = 0
     output_mode: Literal[
-        "always_on", "always_off", "triggered", "triggered_reersed"
+        "always_on", "always_off", "triggered", "triggered_reversed"
     ] = "always_off"
     input_attenuators: Literal["off", "on"] = "off"
 
@@ -274,10 +279,19 @@ class OctaveUpConverter(OctaveFrequencyConverter):
             "input_attenuators": self.input_attenuators,
         }
         if isinstance(self.channel, SingleChannel):
-            output_config["I_connection"] = self.channel.opx_output
+            if isinstance(self.channel.opx_output, LFAnalogOutputPort):
+                output_config["I_connection"] = self.channel.opx_output.port_tuple
+            else:
+                output_config["I_connection"] = self.channel.opx_output
         elif isinstance(self.channel, IQChannel):
-            output_config["I_connection"] = tuple(self.channel.opx_output_I)
-            output_config["Q_connection"] = tuple(self.channel.opx_output_Q)
+            if isinstance(self.channel.opx_output_I, LFAnalogOutputPort):
+                output_config["I_connection"] = self.channel.opx_output_I.port_tuple
+            else:
+                output_config["I_connection"] = tuple(self.channel.opx_output_I)
+            if isinstance(self.channel.opx_output_Q, LFAnalogOutputPort):
+                output_config["Q_connection"] = self.channel.opx_output_Q.port_tuple
+            else:
+                output_config["Q_connection"] = tuple(self.channel.opx_output_Q)
 
 
 @quam_dataclass
@@ -379,14 +393,20 @@ class OctaveDownConverter(OctaveFrequencyConverter):
             IF_channels = []
             opx_channels = []
 
+        opx_port_tuples = [
+            p.port_tuple if isinstance(p, BasePort) else tuple(p) for p in opx_channels
+        ]
+
         IF_config = config["octaves"][self.octave.name]["IF_outputs"]
-        for k, (IF_ch, opx_ch) in enumerate(zip(IF_channels, opx_channels), start=1):
+        for k, (IF_ch, opx_port_tuples) in enumerate(
+            zip(IF_channels, opx_port_tuples), start=1
+        ):
             label = f"IF_out{IF_ch}"
-            IF_config.setdefault(label, {"port": tuple(opx_ch), "name": f"out{k}"})
-            if IF_config[label]["port"] != tuple(opx_ch):
+            IF_config.setdefault(label, {"port": opx_port_tuples, "name": f"out{k}"})
+            if IF_config[label]["port"] != opx_port_tuples:
                 raise ValueError(
                     f"Error generating config for Octave downconverter id={self.id}: "
-                    f"Unable to assign {label} to  port {opx_ch} because it is already "
+                    f"Unable to assign {label} to  port {opx_port_tuples} because it is already "
                     f"assigned to port {IF_config[label]['port']} "
                 )
 
@@ -399,6 +419,7 @@ class OctaveOld(QuamComponent):
     qmm_host: str
     qmm_port: int
     connection_headers: Dict[str, str] = None
+    connectivity: str = None
 
     calibration_db: str = None
 

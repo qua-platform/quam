@@ -1,10 +1,36 @@
 ## [Unreleased]
 ### Added
+- Added `DragCosinePulse`.
+- Added support for sticky channels through the `StickyChannelAddon` (see documentation)
+- Added `Channel.thread`, which defaults to None
+
+### Changed
+- Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+- `Channel` is now an abstract base class.
+- Moved `intermediate_frequency` to `Channel` from `SingleChannel/IQChannel`.
+  The default is `None`. A consequence of this is that `SingleChannel` no longer adds
+    `intermediate_frequency` to the config if it's not set.
+
+
+## [0.3.4]
+### Added
 - Added `Channel.frame_rotation_2pi` to allow for frame rotation in multiples of 2pi
 - Added `Channel.update_frequency` to allow for updating the frequency of a channel
+- Added `OctaveOld.connectivity` as it was needed for (deprecated) compatibility with multiple OPX instruments
 
 ### Changed
 - Allow `QuamBase.get_reference(attr)` to return a reference of one of its attributes
+- Octave RF input 2 has `LO_source = "external"` by default
+- Rename `DragPulse -> DragGaussianPulse`, deprecate `DragPulse`
+
+### Fixed
+- Fix quam object instantiation error when a parameter type uses pipe operator
+- Allow int keys to be serialised / loaded in QuAM using JSONSerialiser
+- Fix type `OctaveUpconverter.triggered_reersed` -> `OctaveUpconverter.triggered_reversed`
+- Fix tuples not being instantiated properly in specific circumstances
+- Fix filter_fir/iir_taps being passed as QuamList when generating config, resulting in an error due to parent reassignment
+- Fix warning messages in QuamComponent instantiation
+
 
 ## [0.3.3]
 ### Added

@@ -63,9 +63,83 @@ def test_transmon_xy():
         },
         "controllers": {
             "con1": {
-                "analog_outputs": {1: {}, 2: {}},
-                "digital_outputs": {},
-                "analog_inputs": {},
+                "analog_outputs": {
+                    1: {"delay": 0, "shareable": False},
+                    2: {"delay": 0, "shareable": False},
+                },
+            }
+        },
+    }
+    assert cfg == expected_cfg
+
+
+def test_transmon_xy_opx1000():
+    transmon = Transmon(
+        id=1,
+        xy=IQChannel(
+            opx_output_I=("con1", 2, 1),
+            opx_output_Q=("con1", 2, 2),
+            frequency_converter_up=FrequencyConverter(
+                mixer=Mixer(),
+                local_oscillator=LocalOscillator(frequency=5e9),
+            ),
+            intermediate_frequency=100e6,
+        ),
+    )
+
+    assert transmon.xy.name == "q1.xy"
+    assert transmon.xy.mixer.name == "q1.xy.mixer"
+    assert not transmon.xy.operations
+    assert transmon.xy.mixer.intermediate_frequency == 100e6
+    assert transmon.z is None
+
+    cfg = {"controllers": {}, "elements": {}}
+
+    # References first have to be set to None
+    with pytest.raises(ValueError):
+        transmon.xy.mixer.local_oscillator_frequency = 5e9
+    transmon.xy.mixer.local_oscillator_frequency = None
+    transmon.xy.mixer.local_oscillator_frequency = 5e9
+
+    assert transmon.xy.rf_frequency == 5.1e9
+
+    transmon.xy.apply_to_config(cfg)
+    expected_cfg = {
+        "elements": {
+            "q1.xy": {
+                "mixInputs": {
+                    "I": ("con1", 2, 1),
+                    "Q": ("con1", 2, 2),
+                    "lo_frequency": 5000000000.0,
+                    "mixer": "q1.xy.mixer",
+                },
+                "intermediate_frequency": 100e6,
+                "operations": {},
+            },
+        },
+        "controllers": {
+            "con1": {
+                "fems": {
+                    2: {
+                        "type": "LF",
+                        "analog_outputs": {
+                            1: {
+                                "delay": 0,
+                                "shareable": False,
+                                "sampling_rate": 1e9,
+                                "upsampling_mode": "mw",
+                                "output_mode": "direct",
+                            },
+                            2: {
+                                "delay": 0,
+                                "shareable": False,
+                                "sampling_rate": 1e9,
+                                "upsampling_mode": "mw",
+                                "output_mode": "direct",
+                            },
+                        },
+                    }
+                }
             }
         },
     }
@@ -122,9 +196,16 @@ def test_transmon_add_pulse():
     assert config == {
         "controllers": {
             "con1": {
-                "analog_outputs": {1: {}, 2: {}},
-                "digital_outputs": {},
-                "analog_inputs": {},
+                "analog_outputs": {
+                    1: {
+                        "delay": 0,
+                        "shareable": False,
+                    },
+                    2: {
+                        "delay": 0,
+                        "shareable": False,
+                    },
+                },
             }
         },
         "elements": {

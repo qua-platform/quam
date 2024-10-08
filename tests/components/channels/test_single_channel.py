@@ -3,6 +3,7 @@ import json
 from copy import deepcopy
 
 from quam.components import *
+from quam.components.ports.analog_outputs import OPXPlusAnalogOutputPort
 from quam.core import quam_dataclass, QuamRoot
 
 
@@ -33,9 +34,7 @@ def test_single_channel_offset(bare_cfg):
     expected_cfg = {
         "controllers": {
             "con1": {
-                "analog_inputs": {},
-                "digital_outputs": {},
-                "analog_outputs": {1: {}},
+                "analog_outputs": {1: {"delay": 0, "shareable": False}},
             }
         },
         "elements": {
@@ -61,21 +60,24 @@ def test_single_channel_differing_offsets(bare_cfg):
     cfg = deepcopy(bare_cfg)
     channel1.apply_to_config(cfg)
     channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {}
+    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {
+        "delay": 0,
+        "shareable": False,
+    }
 
     channel1.opx_output_offset = 0.1
 
     cfg = deepcopy(bare_cfg)
     channel1.apply_to_config(cfg)
     channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1}
+    assert cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] == 0.1
 
     channel2.opx_output_offset = 0.1
 
     cfg = deepcopy(bare_cfg)
     channel1.apply_to_config(cfg)
     channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1}
+    assert cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] == 0.1
 
     channel2.opx_output_offset = 0.2
 
@@ -88,7 +90,7 @@ def test_single_channel_differing_offsets(bare_cfg):
     channel1.apply_to_config(cfg)
     channel2.opx_output_offset = 0.1 + 0.5e-4
     channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {"offset": 0.1 + 0.5e-4}
+    assert cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] == 0.1 + 0.5e-4
 
 
 def test_single_channel_offset_quam(qua_config):
@@ -103,9 +105,7 @@ def test_single_channel_offset_quam(qua_config):
 
     qua_config["controllers"] = {
         "con1": {
-            "analog_inputs": {},
-            "digital_outputs": {},
-            "analog_outputs": {1: {"offset": 0.0}},
+            "analog_outputs": {1: {"delay": 0, "shareable": False, "offset": 0.0}},
         }
     }
     qua_config["elements"] = {
@@ -148,3 +148,46 @@ def test_instantiate_single_channel():
     d_loaded = json.loads(d_json)
 
     instantiate_quam_class(SingleChannel, d_loaded)
+
+
+def test_generate_config(qua_config):
+    channel = SingleChannel(
+        id="out_channel",
+        opx_output=("con1", 1),
+    )
+
+    channel.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_outputs": {
+                1: {"delay": 0, "shareable": False},
+            },
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "out_channel": {"operations": {}, "singleInput": {"port": ("con1", 1)}}
+    }
+
+
+def test_generate_config_port(qua_config):
+    channel = SingleChannel(
+        id="out_channel",
+        opx_output=OPXPlusAnalogOutputPort("con1", 1),
+    )
+
+    channel.apply_to_config(qua_config)
+    channel.opx_output.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_outputs": {
+                1: {"delay": 0, "shareable": False},
+            },
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "out_channel": {"operations": {}, "singleInput": {"port": ("con1", 1)}}
+    }

@@ -60,3 +60,24 @@ def test_instantiate_explicit_class_with_union_type():
     assert isinstance(component, QuamOuterComponent)
     assert isinstance(component.list_basic_components[0], QuamBasicComponent)
     assert component.to_dict() == quam_component.to_dict()
+
+
+@quam_dataclass
+class Component1(QuamComponent):
+    pass
+
+@quam_dataclass
+class Component2(QuamComponent):
+    pass
+
+
+def test_instantiation_unknown_error():
+
+
+    instantiate_attr(
+        attr_val={"a": {"__class__": get_full_class_path(Component1)}},
+        expected_type=Dict[str, Union[Component1, Component2]],
+        fix_attrs=True,
+        validate_type=True,
+        str_repr="hi"
+    )

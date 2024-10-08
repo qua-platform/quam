@@ -280,7 +280,6 @@ def test_channel_add_RF_outputs(octave, qua_config):
 
     expected_cfg_elements = {
         "ch": {
-            "intermediate_frequency": 0.0,
             "RF_inputs": {"port": ("octave1", 2)},
             "operations": {},
         }
@@ -308,7 +307,6 @@ def test_channel_add_RF_inputs(octave, qua_config):
 
     expected_cfg_elements = {
         "ch": {
-            "intermediate_frequency": 0.0,
             "RF_inputs": {"port": ("octave1", 3)},
             "RF_outputs": {"port": ("octave1", 4)},
             "operations": {},
@@ -329,7 +327,7 @@ def test_load_octave(octave):
     d_expected = {
         "__class__": "test_octave.OctaveQuAM",
         "octave": {
-            "RF_inputs": {1: {"id": 1}, 2: {"id": 2}},
+            "RF_inputs": {1: {"id": 1}, 2: {"id": 2, "LO_source": "external"}},
             "RF_outputs": {
                 1: {"id": 1},
                 2: {"id": 2},

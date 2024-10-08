@@ -1,5 +1,6 @@
 import pytest
 from quam.components import IQChannel
+from quam.components.ports.analog_outputs import OPXPlusAnalogOutputPort
 
 
 def test_IQ_channel_set_dc_offset(mocker):
@@ -34,7 +35,7 @@ def test_IQ_channel_inferred_RF_frequency():
         frequency_converter_up=None,
     )
 
-    assert channel.intermediate_frequency == 0.0
+    assert channel.intermediate_frequency is None
     assert channel.LO_frequency == "#./frequency_converter_up/LO_frequency"
     assert channel.RF_frequency == "#./inferred_RF_frequency"
     with pytest.raises(AttributeError):
@@ -88,3 +89,65 @@ def test_IQ_channel_inferred_LO_frequency():
     channel.intermediate_frequency = None
     with pytest.raises(AttributeError):
         channel.inferred_LO_frequency
+
+
+def test_generate_config(qua_config):
+    channel = IQChannel(
+        id="out_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+    )
+
+    channel.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_outputs": {
+                1: {"delay": 0, "shareable": False},
+                2: {"delay": 0, "shareable": False},
+            },
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "out_channel": {
+            "mixInputs": {
+                "I": ("con1", 1),
+                "Q": ("con1", 2),
+            },
+            "operations": {},
+        }
+    }
+
+
+def test_generate_config_ports(qua_config):
+    channel = IQChannel(
+        id="out_channel",
+        opx_output_I=OPXPlusAnalogOutputPort("con1", 1),
+        opx_output_Q=OPXPlusAnalogOutputPort("con1", 2),
+        frequency_converter_up=None,
+    )
+
+    channel.apply_to_config(qua_config)
+    channel.opx_output_I.apply_to_config(qua_config)
+    channel.opx_output_Q.apply_to_config(qua_config)
+
+    assert qua_config["controllers"] == {
+        "con1": {
+            "analog_outputs": {
+                1: {"delay": 0, "shareable": False},
+                2: {"delay": 0, "shareable": False},
+            },
+        }
+    }
+
+    assert qua_config["elements"] == {
+        "out_channel": {
+            "mixInputs": {
+                "I": ("con1", 1),
+                "Q": ("con1", 2),
+            },
+            "operations": {},
+        }
+    }
