@@ -1,8 +1,9 @@
-## [Unreleased]
+## [0.3.5]
 ### Added
 - Added `DragCosinePulse`.
 - Added support for sticky channels through the `StickyChannelAddon` (see documentation)
 - Added `Channel.thread`, which defaults to None
+- QUAM can now be installed through PyPi
 
 ### Changed
 - Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
