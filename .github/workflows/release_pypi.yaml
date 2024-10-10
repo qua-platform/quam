@@ -18,12 +18,12 @@ jobs:
     name: Publish from release
     if: github.event_name == 'release'
     uses: qua-platform/quam/.github/workflows/reusable-build.yaml@main
-    with:
-      ref: ${{inputs.ref}}
   build-manually:
     name: Publish from manual trigger
     if: github.event_name == 'workflow_dispatch'
     uses: qua-platform/quam/.github/workflows/reusable-build.yaml@main
+    with:
+      ref: ${{inputs.ref}}
 
   release:
     name: Release package to PyPi
