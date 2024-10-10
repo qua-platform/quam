@@ -17,7 +17,7 @@ To install QuAM, first ensure you have 3.8 ≤ Python ≤ 3.11 installed on your
 Then run the following command: 
 
 ```bash
-pip install git+https://github.com/qua-platform/quam.git
+pip install quam
 ```
 
 ## Quick Start
