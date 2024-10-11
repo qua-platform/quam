@@ -1,3 +1,8 @@
+## [Unreleased]
+### Changed
+- Modified `MWChannel` to also have `RF_frequency` and `LO_frequency` to match the signature of `IQChannel`.
+  This is done by letting both inherit from a new base class `_OutComplexChannel`.
+
 ## [0.3.5]
 ### Added
 - Added `DragCosinePulse`.
