@@ -19,6 +19,7 @@ QuAM is not just a tool but a gateway to streamlined and efficient quantum compu
 
 ```python
 from quam.components import *
+from qm import qua
 
 # Create a root-level QuAM instance
 machine = BasicQuAM()
@@ -28,12 +29,12 @@ channel = SingleChannel(opx_output=("con1", 1))
 machine.channels["output"] = channel
 
 # Add a Gaussian pulse to the channel
-channel.operations["gaussian"] = pulses.Gaussian(
+channel.operations["gaussian"] = pulses.GaussianPulse(
     length=100, amplitude=0.5, sigma=20
 )
 
 # Play the Gaussian pulse within a QUA program
-with program() as prog:
+with qua.program() as prog:
     channel.play("gaussian")
 
 # Generate the QUA configuration from QuAM

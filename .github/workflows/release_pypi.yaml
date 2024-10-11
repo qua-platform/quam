@@ -1,0 +1,59 @@
+name: Publish release to PyPI
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        description: Ref to checkout
+        required: true
+env:
+  # make sure the poetry creates the venv inside the workspace under .venv
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+
+jobs:
+  build-release:
+    name: Publish from release
+    if: github.event_name == 'release'
+    uses: qua-platform/quam/.github/workflows/reusable-build.yaml@main
+  build-manually:
+    name: Publish from manual trigger
+    if: github.event_name == 'workflow_dispatch'
+    uses: qua-platform/quam/.github/workflows/reusable-build.yaml@main
+    with:
+      ref: ${{inputs.ref}}
+
+  release:
+    name: Release package to PyPi
+    runs-on: ubuntu-latest
+    needs:
+      - build-release
+      - build-manually
+    if: |  # TODO: remove when only release trigger be kept
+      always()
+      && contains(needs.*.result, 'success')
+      && !contains(needs.*.result, 'failure')
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # This is necessary so that we have the tags.
+          fetch-depth: 0
+          ref: ${{inputs.ref}}
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+          pattern: python-package-*
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.10.3
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
