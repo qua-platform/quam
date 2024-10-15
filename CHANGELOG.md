@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- Change location of port feedforward and feedback filters in config
+
 ## [0.3.6]
 ### Changed
 - Modified `MWChannel` to also have `RF_frequency` and `LO_frequency` to match the signature of `IQChannel`.
