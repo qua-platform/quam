@@ -30,12 +30,12 @@ from qm import qua
 # Create a root-level QuAM instance
 machine = BasicQuAM()
 
-# Add an OPX output channel
-channel = SingleChannel(opx_output=("con1", 1))
-machine.channels["output"] = channel
+# Add a qubit connected to an OPX output channel
+qubit = SingleChannel(opx_output=("con1", 1))
+machine.channels["qubit"] = qubit
 
 # Add a Gaussian pulse to the channel
-channel.operations["gaussian"] = pulses.GaussianPulse(
+qubit.operations["gaussian"] = pulses.GaussianPulse(
     length=100,  # Pulse length in ns
     amplitude=0.5,  # Peak amplitude of Gaussian pulse
     sigma=20,  # Standard deviation of Guassian pulse
@@ -43,7 +43,7 @@ channel.operations["gaussian"] = pulses.GaussianPulse(
 
 # Play the Gaussian pulse on the channel within a QUA program
 with qua.program() as prog:
-    channel.play("gaussian")
+    qubit.play("gaussian")
 
 # Generate the QUA configuration from QuAM
 qua_configuration = machine.generate_config()
