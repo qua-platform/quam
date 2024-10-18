@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from quam.components.pulses import Pulse
 from quam.core import quam_dataclass, QuamComponent
 
 
@@ -35,9 +36,7 @@ class SinglePulseGateImplementation(SingleQubitGateImplementation):
 
     """
 
-    pulse: str
+    pulse: Pulse
 
-    def execute(self, amplitude_scale=None, duration=None):
-        self.qubit.play_pulse(
-            self.pulse_label, amplitude_scale=amplitude_scale, duration=duration
-        )
+    def execute(self, *, amplitude_scale=None, duration=None, **kwargs):
+        self.pulse.play(amplitude_scale=amplitude_scale, duration=duration, **kwargs)
