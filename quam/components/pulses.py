@@ -12,6 +12,7 @@ __all__ = [
     "Pulse",
     "BaseReadoutPulse",
     "ReadoutPulse",
+    "WaveformPulse",
     "DragGaussianPulse",
     "DragCosinePulse",
     "DragPulse",
