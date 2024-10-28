@@ -1,3 +1,8 @@
+## [Unreleased]
+### Added
+- Added `WaveformPulse` to allow for pre-defined waveforms.
+
+
 ## [0.3.6]
 ### Changed
 - Modified `MWChannel` to also have `RF_frequency` and `LO_frequency` to match the signature of `IQChannel`.

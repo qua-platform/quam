@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 import numbers
 import warnings
-from typing import Any, ClassVar, Dict, List, Union, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple
 import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
@@ -12,6 +13,7 @@ __all__ = [
     "Pulse",
     "BaseReadoutPulse",
     "ReadoutPulse",
+    "WaveformPulse",
     "DragGaussianPulse",
     "DragCosinePulse",
     "DragPulse",
@@ -396,6 +398,50 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             "minus_real": [(-phase.real * w, l) for w, l in integration_weights],
             "minus_imag": [(-phase.imag * w, l) for w, l in integration_weights],
         }
+
+
+@quam_dataclass
+class WaveformPulse(Pulse):
+    """Pulse that uses a pre-defined waveform, as opposed to a function.
+
+    For a single channel, only `waveform_I` is required.
+    For an IQ channel, both `waveform_I` and `waveform_Q` are required.
+
+    The length of the pulse is derived from the length of `waveform_I`.
+
+    Args:
+        waveform_I (list[float]): The in-phase waveform.
+        waveform_Q (list[float], optional): The quadrature waveform.
+    """
+
+    waveform_I: List[float]  # pyright: ignore
+    waveform_Q: Optional[List[float]] = None
+    # Length is derived from the waveform_I length, but still needs to be declared
+    # to satisfy the dataclass, but we'll override its behavior
+    length: Optional[int] = None  # pyright: ignore
+
+    @property
+    def length(self):  # noqa: 811
+        if not isinstance(self.waveform_I, Iterable):
+            return None
+        return len(self.waveform_I)
+
+    @length.setter
+    def length(self, length: Optional[int]):
+        if length is not None and not isinstance(length, property):
+            raise AttributeError(f"length is not writable with value {length}")
+
+    def waveform_function(self):
+        if self.waveform_Q is None:
+            return np.array(self.waveform_I)
+        return np.array(self.waveform_I) + 1.0j * np.array(self.waveform_Q)
+
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> Dict[str, Any]:
+        d = super().to_dict(follow_references, include_defaults)
+        d.pop("length")
+        return d
 
 
 @quam_dataclass
