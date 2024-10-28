@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 import numbers
 import warnings
 from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple
@@ -421,6 +422,8 @@ class WaveformPulse(Pulse):
 
     @property
     def length(self):  # noqa: 811
+        if not isinstance(self.waveform_I, Iterable):
+            return None
         return len(self.waveform_I)
 
     @length.setter

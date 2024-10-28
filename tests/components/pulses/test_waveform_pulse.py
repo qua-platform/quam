@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 import numpy as np
 import pytest
 from quam.components.pulses import WaveformPulse
@@ -20,6 +21,7 @@ def test_waveform_pulse_IQ():
     assert np.all(
         pulse.waveform_function() == np.array([1, 2, 3]) + 1.0j * np.array([4, 5, 6])
     )
+    assert pulse.length
 
 
 def test_waveform_pulse_IQ_mismatch():
@@ -34,3 +36,12 @@ def test_waveform_pulse_to_dict():
         "waveform_I": [1, 2, 3],
         "waveform_Q": [4, 5, 6],
     }
+
+
+def test_waveform_pulse_length_error():
+    with pytest.raises(AttributeError):
+        pulse = WaveformPulse(waveform_I=[1, 2, 3], length=11)
+
+    pulse = WaveformPulse(waveform_I=[1, 2, 3])
+    with pytest.raises(AttributeError):
+        pulse.length = 11
