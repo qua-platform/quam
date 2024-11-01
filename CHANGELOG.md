@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.3.7]
 ### Added
 - Added `WaveformPulse` to allow for pre-defined waveforms.
 
