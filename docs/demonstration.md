@@ -63,8 +63,8 @@ for idx in range(num_qubits):
     # Add resonator channel
     transmon.resonator = InOutIQChannel(
         id=idx,
-        opx_output_I=("con1", 3 * idx + 1),
-        opx_output_Q=("con1", 3 * idx + 2),
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
         opx_input_I=("con1", 1),
         opx_input_Q=("con1", 2,),
         frequency_converter_up=FrequencyConverter(
