@@ -1,3 +1,8 @@
+## [Unreleased]
+### Fixed
+- Change location of port feedforward and feedback filters in config
+
+
 ## [0.3.7]
 ### Added
 - Added `WaveformPulse` to allow for pre-defined waveforms.
