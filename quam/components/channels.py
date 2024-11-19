@@ -43,6 +43,7 @@ from qm.qua import (
     update_frequency,
     frame_rotation,
     frame_rotation_2pi,
+    time_tagging,
 )
 from qm.qua._dsl import (
     _PulseAmp,
@@ -200,6 +201,43 @@ class StickyChannelAddon(QuamComponent):
         }
 
 
+class TimeTaggingAddon(QuamComponent):
+    """Addon to perform time tagging on a channel."""
+
+    signal_threshold: int = 800
+    signal_polarity: Literal["above", "below"] = "below"
+    derivative_threshold: int = 300
+    derivative_polarity: Literal["above", "below"] = "below"
+    enabled: bool = True
+
+    @property
+    def channel(self) -> Optional["Channel"]:
+        """If the parent is a channel, returns the parent, otherwise returns None."""
+        if isinstance(self.parent, Channel):
+            return self.parent
+        else:
+            return
+
+    @property
+    def config_settings(self):
+        if self.channel is not None:
+            return {"after": [self.channel]}
+
+    def apply_to_config(self, config: dict) -> None:
+        if self.channel is None:
+            return
+
+        if not self.enabled:
+            return
+
+        config["elements"][self.channel.name]["outputPulseParameters"] = {
+            "signalThreshold": self.signal_threshold,
+            "signalPolarity": self.signal_polarity,
+            "derivativeThreshold": self.derivative_threshold,
+            "derivativePolarity": self.derivative_polarity,
+        }
+
+
 @quam_dataclass
 class Channel(QuamComponent, ABC):
     """Base QuAM component for a channel, can be output, input or both.
@@ -222,7 +260,7 @@ class Channel(QuamComponent, ABC):
 
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
     sticky: Optional[StickyChannelAddon] = None
-
+    time_tagging: Optional[TimeTaggingAddon] = None
     intermediate_frequency: Optional[float] = None
     thread: Optional[str] = None
 
@@ -879,6 +917,58 @@ class InSingleChannel(Channel):
             ),
         )
         return tuple(qua_vars)
+
+    def measure_time_tagging(
+        self,
+        pulse_name: str,
+        size: int,
+        max_time: QuaNumberType,
+        stream: Optional[StreamType] = None,
+        mode: Literal["analog", "high_res", "digital"] = "analog",
+    ) -> Tuple[QuaVariableType, QuaNumberType]:
+        """Perform a time tagging measurement on this channel.
+
+        For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            size (int): The size of the QUA array to store the times of the detected
+                pulses.
+            max_time (QuaNumberType): The maximum time to search for pulses.
+            stream (Optional[StreamType]): The stream to save the measurement result to.
+                If not provided, the raw ADC signal will not be streamed.
+            mode (Literal["analog", "high_res", "digital"]): The time tagging mode.
+
+        Returns:
+            times (QuaVariableType): The QUA variable to store the times of the detected
+                pulses.
+            counts (QuaNumberType): The number of detected pulses.
+
+        Example:
+            ```python
+            times, counts = channel.measure_time_tagging("readout", size=1000, max_time=1000)
+            ```
+        """
+        if mode == "analog":
+            time_tagging_func = time_tagging.analog
+        elif mode == "high_res":
+            time_tagging_func = time_tagging.high_res
+        elif mode == "digital":
+            time_tagging_func = time_tagging.digital
+        else:
+            raise ValueError(f"Invalid time tagging mode: {mode}")
+
+        times = declare(fixed, size=size)
+        counts = declare(int)
+
+        measure(
+            pulse_name,
+            self.name,
+            stream,
+            time_tagging_func(target=times, max_time=max_time, targetLen=counts),
+        )
+        return times, counts
 
 
 @quam_dataclass
