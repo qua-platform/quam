@@ -18,30 +18,29 @@ QuAM is not just a tool but a gateway to streamlined and efficient quantum compu
 - **State Management:** Effortlessly save and load your QuAM state, enabling consistent results and reproducibility in experiments.
 
 ```python
-from quam.components import *
+from quam.components import BasicQuAM, SingleChannel, pulses
 from qm import qua
 
 # Create a root-level QuAM instance
 machine = BasicQuAM()
 
-# Add an OPX output channel
-channel = SingleChannel(opx_output=("con1", 1))
-machine.channels["output"] = channel
+# Add a qubit connected to an OPX output channel
+qubit = SingleChannel(opx_output=("con1", 1))
+machine.channels["qubit"] = qubit
 
 # Add a Gaussian pulse to the channel
-channel.operations["gaussian"] = pulses.GaussianPulse(
-    length=100, amplitude=0.5, sigma=20
+qubit.operations["gaussian"] = pulses.GaussianPulse(
+    length=100,  # Pulse length in ns
+    amplitude=0.5,  # Peak amplitude of Gaussian pulse
+    sigma=20,  # Standard deviation of Guassian pulse
 )
 
-# Play the Gaussian pulse within a QUA program
+# Play the Gaussian pulse on the channel within a QUA program
 with qua.program() as prog:
-    channel.play("gaussian")
+    qubit.play("gaussian")
 
 # Generate the QUA configuration from QuAM
 qua_configuration = machine.generate_config()
-
-# Save QuAM to a JSON file
-machine.save("state.json")
 ```
 </div>
 

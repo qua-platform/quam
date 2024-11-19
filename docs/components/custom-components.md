@@ -12,11 +12,12 @@ First create the following folder structure
 ```
 my-quam
 ├── my_quam
+│   └── __init__.py
 │   └── components
 │       └── __init__.py
 └── pyproject.toml
 ```
-The file `__init__.py` should be empty, and `pyproject.toml` should have the following contents:
+The `__init__.py` files should be empty, and `pyproject.toml` should have the following contents:
 
 /// details | pyproject.toml
 ```toml
