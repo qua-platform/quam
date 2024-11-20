@@ -202,11 +202,24 @@ class StickyChannelAddon(QuamComponent):
 
 
 class TimeTaggingAddon(QuamComponent):
-    """Addon to perform time tagging on a channel."""
+    """Addon to perform time tagging on a channel.
 
-    signal_threshold: int = 800
+    Args:
+        signal_threshold (float, optional): The signal threshold in volts.
+            If not specified, the default value is 800 / 4096 ≈ 0.195 V.
+        signal_polarity (Literal["above", "below"]): The polarity of the signal 
+            threshold. Default is "below".
+        derivative_threshold (float, optional): The derivative threshold in volts/ns.
+            If not specified, the default value is 300 / 4096 ≈ 0.073 V/ns.
+        derivative_polarity (Literal["above", "below"]): The polarity of the derivative
+            threshold. Default is "below".
+
+    For details see [Time Tagging](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging)
+    """
+
+    signal_threshold: Optional[float] = None
     signal_polarity: Literal["above", "below"] = "below"
-    derivative_threshold: int = 300
+    derivative_threshold: Optional[float] = None
     derivative_polarity: Literal["above", "below"] = "below"
     enabled: bool = True
 
@@ -230,12 +243,24 @@ class TimeTaggingAddon(QuamComponent):
         if not self.enabled:
             return
 
-        config["elements"][self.channel.name]["outputPulseParameters"] = {
-            "signalThreshold": self.signal_threshold,
+        if self.signal_threshold is not None and abs(self.signal_threshold) > 1:
+            raise ValueError("TimeTaggingAddon.signal_threshold must be a voltage")
+        # TODO should we also check derivative threshold? What should the max value be?
+
+        ch_cfg = config["elements"][self.channel.name]
+        ch_cfg["outputPulseParameters"] = {
             "signalPolarity": self.signal_polarity,
-            "derivativeThreshold": self.derivative_threshold,
             "derivativePolarity": self.derivative_polarity,
         }
+
+        if self.signal_threshold is not None:
+            # TODO Replace with units.volts2raw() when it's added
+            threshold_raw_units = int(self.signal_threshold * 4096)
+            ch_cfg["outputPulseParameters"]["signalThreshold"] = threshold_raw_units
+
+        if self.derivative_threshold is not None:
+            threshold_raw_units = int(self.derivative_threshold * 4096)
+            ch_cfg["outputPulseParameters"]["derivativeThreshold"] = threshold_raw_units
 
 
 @quam_dataclass
@@ -923,6 +948,7 @@ class InSingleChannel(Channel):
         pulse_name: str,
         size: int,
         max_time: QuaNumberType,
+        qua_vars: Optional[Tuple[QuaVariableType, QuaNumberType] = None,
         stream: Optional[StreamType] = None,
         mode: Literal["analog", "high_res", "digital"] = "analog",
     ) -> Tuple[QuaVariableType, QuaNumberType]:
@@ -934,8 +960,11 @@ class InSingleChannel(Channel):
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
             size (int): The size of the QUA array to store the times of the detected
-                pulses.
+                pulses. Ignored if `qua_vars` is provided.
             max_time (QuaNumberType): The maximum time to search for pulses.
+            qua_vars (Tuple[QuaVariableType, QuaNumberType], optional): QUA variables
+                to store the times and counts of the detected pulses. If not provided,
+                new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
                 If not provided, the raw ADC signal will not be streamed.
             mode (Literal["analog", "high_res", "digital"]): The time tagging mode.
@@ -959,8 +988,11 @@ class InSingleChannel(Channel):
         else:
             raise ValueError(f"Invalid time tagging mode: {mode}")
 
-        times = declare(fixed, size=size)
-        counts = declare(int)
+        if qua_vars is None:
+            times = declare(fixed, size=size)
+            counts = declare(int)
+        else:
+            times, counts = qua_vars
 
         measure(
             pulse_name,
