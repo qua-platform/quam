@@ -8,14 +8,14 @@ All pulses in QuAM are instances of the [Pulse][quam.components.pulses.Pulse] cl
 
 - **[SquarePulse][quam.components.pulses.SquarePulse]**: Typically used for simple quantum operations like flips or resets, characterized by a constant amplitude throughout its duration.
 - **[GaussianPulse][quam.components.pulses.GaussianPulse]**: Ideal for minimizing spectral leakage due to its smooth rise and fall, commonly used in operations requiring high fidelity.
-- **[DragPulse][quam.components.pulses.DragPulse]**: Designed to correct phase errors in quantum gates, enhancing the accuracy of operations involving superconducting qubits.
+- **[DragGaussianPulse][quam.components.pulses.DragGaussianPulse]**: Designed to correct phase errors in quantum gates, enhancing the accuracy of operations involving superconducting qubits.
 
 The full list of predefined pulses can be found in the [pulses][quam.components.pulses] module.
 Users can also define custom pulses by subclassing the `Pulse` class. This flexibility allows the creation of tailored waveforms that suit specific experimental requirements.
 
 All pulses in QuAM are instances of the [Pulse][quam.components.pulses.Pulse] class.
 The QuAM library contains a set of common pulse types in the [pulses][quam.components.pulses] module.
-Typical examples are [SquarePulse][quam.components.pulses.SquarePulse], [GaussianPulse][quam.components.pulses.GaussianPulse], and [DragPulse][quam.components.pulses.DragPulse].
+Typical examples are [SquarePulse][quam.components.pulses.SquarePulse], [GaussianPulse][quam.components.pulses.GaussianPulse], and [DragGaussianPulse][quam.components.pulses.DragGaussianPulse].
 Users can supplement these common pulses with their own custom pulses by subclassing the [Pulse][quam.components.pulses.Pulse] class (see [Custom QuAM Components](/components/custom-components) for details). 
 
 
