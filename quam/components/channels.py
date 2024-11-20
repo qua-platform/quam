@@ -279,7 +279,6 @@ class Channel(QuamComponent, ABC):
 
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
     sticky: Optional[StickyChannelAddon] = None
-    time_tagging: Optional[TimeTaggingAddon] = None
     intermediate_frequency: Optional[float] = None
     thread: Optional[str] = None
 
@@ -687,6 +686,8 @@ class InSingleChannel(Channel):
 
     time_of_flight: int = 24
     smearing: int = 0
+
+    time_tagging: Optional[TimeTaggingAddon] = None
 
     def apply_to_config(self, config: dict):
         """Adds this InSingleChannel to the QUA configuration.

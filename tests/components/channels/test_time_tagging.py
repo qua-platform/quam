@@ -1,14 +1,14 @@
-from quam.components.channels import SingleChannel, TimeTaggingAddon
+from quam.components.channels import InSingleChannel, TimeTaggingAddon
 from quam.core.quam_classes import QuamRoot, quam_dataclass
 
 
 @quam_dataclass
 class SingleChannelQuAM(QuamRoot):
-    channel: SingleChannel
+    channel: InSingleChannel
 
 
 def test_time_tagging_cfg():
-    channel = SingleChannel(id="channel", opx_output=("con1", 1))
+    channel = InSingleChannel(id="channel", opx_input=("con1", 1))
     channel.time_tagging = TimeTaggingAddon()
 
     machine = SingleChannelQuAM(channel=channel)
@@ -24,7 +24,7 @@ def test_time_tagging_cfg():
 
 
 def test_time_tagging_cfg_disabled():
-    channel = SingleChannel(id="channel", opx_output=("con1", 1))
+    channel = InSingleChannel(id="channel", opx_input=("con1", 1))
     channel.time_tagging = TimeTaggingAddon(enabled=False)
 
     machine = SingleChannelQuAM(channel=channel)
@@ -33,7 +33,7 @@ def test_time_tagging_cfg_disabled():
 
 
 def test_time_tagging_cfg_custom_thresholds():
-    channel = SingleChannel(id="channel", opx_output=("con1", 1))
+    channel = InSingleChannel(id="channel", opx_input=("con1", 1))
     channel.time_tagging = TimeTaggingAddon(
         signal_threshold=0.2, derivative_threshold=0.1
     )
