@@ -201,6 +201,7 @@ class StickyChannelAddon(QuamComponent):
         }
 
 
+@quam_dataclass
 class TimeTaggingAddon(QuamComponent):
     """Addon to perform time tagging on a channel.
 
