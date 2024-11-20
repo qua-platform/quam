@@ -261,3 +261,5 @@ Two QUA variables are returned:
 - `times` is a QUA array containing the times of arrival of the signal.
   It will contain at most `size` entries, though it may contain fewer if the maximum duration is reached first.
 - `counts` is a QUA integer containing the number of measured events, being at most equal to `size`.
+
+Additional information on time tagging can be found in the [Time Tagging QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging).
