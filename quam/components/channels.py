@@ -207,7 +207,7 @@ class TimeTaggingAddon(QuamComponent):
     Args:
         signal_threshold (float, optional): The signal threshold in volts.
             If not specified, the default value is 800 / 4096 ≈ 0.195 V.
-        signal_polarity (Literal["above", "below"]): The polarity of the signal 
+        signal_polarity (Literal["above", "below"]): The polarity of the signal
             threshold. Default is "below".
         derivative_threshold (float, optional): The derivative threshold in volts/ns.
             If not specified, the default value is 300 / 4096 ≈ 0.073 V/ns.
@@ -217,9 +217,9 @@ class TimeTaggingAddon(QuamComponent):
     For details see [Time Tagging](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging)
     """
 
-    signal_threshold: Optional[float] = None
+    signal_threshold: float = 800 / 4096
     signal_polarity: Literal["above", "below"] = "below"
-    derivative_threshold: Optional[float] = None
+    derivative_threshold: float = 300 / 4096
     derivative_polarity: Literal["above", "below"] = "below"
     enabled: bool = True
 
@@ -249,18 +249,11 @@ class TimeTaggingAddon(QuamComponent):
 
         ch_cfg = config["elements"][self.channel.name]
         ch_cfg["outputPulseParameters"] = {
+            "signalThreshold": int(self.signal_threshold * 4096),
             "signalPolarity": self.signal_polarity,
+            "derivativeThreshold": int(self.derivative_threshold * 4096),
             "derivativePolarity": self.derivative_polarity,
         }
-
-        if self.signal_threshold is not None:
-            # TODO Replace with units.volts2raw() when it's added
-            threshold_raw_units = int(self.signal_threshold * 4096)
-            ch_cfg["outputPulseParameters"]["signalThreshold"] = threshold_raw_units
-
-        if self.derivative_threshold is not None:
-            threshold_raw_units = int(self.derivative_threshold * 4096)
-            ch_cfg["outputPulseParameters"]["derivativeThreshold"] = threshold_raw_units
 
 
 @quam_dataclass
@@ -948,7 +941,7 @@ class InSingleChannel(Channel):
         pulse_name: str,
         size: int,
         max_time: QuaNumberType,
-        qua_vars: Optional[Tuple[QuaVariableType, QuaNumberType] = None,
+        qua_vars: Optional[Tuple[QuaVariableType, QuaNumberType]] = None,
         stream: Optional[StreamType] = None,
         mode: Literal["analog", "high_res", "digital"] = "analog",
     ) -> Tuple[QuaVariableType, QuaNumberType]:
