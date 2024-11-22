@@ -62,7 +62,7 @@ QuAM can be installed directly using `pip` or by cloning the repository from Git
 The easiest way to install QuAM is directly using `pip`:
 
 ```bash
-pip install git+https://github.com/qua-platform/quam.git
+pip install quam
 ```
 
 ### Developer installation from Git

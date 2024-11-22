@@ -33,9 +33,13 @@ class LFAnalogOutputPort(BasePort, ABC):
         if self.crosstalk is not None:
             port_properties["crosstalk"] = self.crosstalk
         if self.feedforward_filter is not None:
-            port_properties["feedforward_filter"] = list(self.feedforward_filter)
+            port_properties.setdefault("filter", {})["feedforward"] = list(
+                self.feedforward_filter
+            )
         if self.feedback_filter is not None:
-            port_properties["feedback_filter"] = list(self.feedback_filter)
+            port_properties.setdefault("filter", {})["feedback"] = list(
+                self.feedback_filter
+            )
         if self.offset is not None:
             port_properties["offset"] = self.offset
         return port_properties

@@ -17,7 +17,7 @@ To install QuAM, first ensure you have 3.8 ≤ Python ≤ 3.11 installed on your
 Then run the following command: 
 
 ```bash
-pip install git+https://github.com/qua-platform/quam.git
+pip install quam
 ```
 
 ## Quick Start
@@ -25,24 +25,25 @@ Here’s a basic example to get you started with QuAM:
 
 ```python
 from quam.components import BasicQuAM, SingleChannel, pulses
+from qm import qua
 
 # Create a root-level QuAM instance
 machine = BasicQuAM()
 
-# Add an OPX output channel
-channel = SingleChannel(opx_output=("con1", 1))
-machine.channels["output"] = channel
+# Add a qubit connected to an OPX output channel
+qubit = SingleChannel(opx_output=("con1", 1))
+machine.channels["qubit"] = qubit
 
 # Add a Gaussian pulse to the channel
-channel.operations["gaussian"] = pulses.Gaussian(
+qubit.operations["gaussian"] = pulses.GaussianPulse(
     length=100,  # Pulse length in ns
     amplitude=0.5,  # Peak amplitude of Gaussian pulse
     sigma=20,  # Standard deviation of Guassian pulse
 )
 
 # Play the Gaussian pulse on the channel within a QUA program
-with program() as prog:
-    channel.play("gaussian")
+with qua.program() as prog:
+    qubit.play("gaussian")
 
 # Generate the QUA configuration from QuAM
 qua_configuration = machine.generate_config()

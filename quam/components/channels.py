@@ -882,43 +882,11 @@ class InSingleChannel(Channel):
 
 
 @quam_dataclass
-class IQChannel(Channel):
-    """QuAM component for an IQ output channel.
+class _OutComplexChannel(Channel, ABC):
+    """Base class for IQ and MW output channels."""
 
-    Args:
-        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
-            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
-        id (str, int): The id of the channel, used to generate the name.
-            Can be a string, or an integer in which case it will add
-            `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_offset_I float: The offset of the I channel. Default is 0.
-        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
-        intermediate_frequency (float): Intermediate frequency of the mixer.
-            Default is 0.0
-        LO_frequency (float): Local oscillator frequency. Default is the LO frequency
-            of the frequency converter up component.
-        RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
-            is inferred by adding the LO frequency and the intermediate frequency.
-        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
-            for the IQ output.
-    """
-
-    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
-    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
-
-    opx_output_offset_I: float = None
-    opx_output_offset_Q: float = None
-
-    frequency_converter_up: BaseFrequencyConverter
-
-    LO_frequency: float = "#./frequency_converter_up/LO_frequency"
-    RF_frequency: float = "#./inferred_RF_frequency"
-
-    _default_label: ClassVar[str] = "IQ"
+    LO_frequency: float
+    RF_frequency: float
 
     @property
     def inferred_RF_frequency(self) -> float:
@@ -985,6 +953,46 @@ class IQChannel(Channel):
                 f"intermediate_frequency is not a number: {self.intermediate_frequency}"
             )
         return self.RF_frequency - self.intermediate_frequency
+
+
+@quam_dataclass
+class IQChannel(_OutComplexChannel):
+    """QuAM component for an IQ output channel.
+
+    Args:
+        operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
+            channel. The key is the pulse label (e.g. "X90") and value is a Pulse.
+        id (str, int): The id of the channel, used to generate the name.
+            Can be a string, or an integer in which case it will add
+            `Channel._default_label`.
+        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
+            a tuple of (controller_name, port).
+        opx_output_offset_I float: The offset of the I channel. Default is 0.
+        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
+        intermediate_frequency (float): Intermediate frequency of the mixer.
+            Default is 0.0
+        LO_frequency (float): Local oscillator frequency. Default is the LO frequency
+            of the frequency converter up component.
+        RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
+            is inferred by adding the LO frequency and the intermediate frequency.
+        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+            for the IQ output.
+    """
+
+    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
+    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
+
+    opx_output_offset_I: float = None
+    opx_output_offset_Q: float = None
+
+    frequency_converter_up: BaseFrequencyConverter
+
+    LO_frequency: float = "#./frequency_converter_up/LO_frequency"
+    RF_frequency: float = "#./inferred_RF_frequency"
+
+    _default_label: ClassVar[str] = "IQ"
 
     @property
     def local_oscillator(self) -> Optional[LocalOscillator]:
@@ -1571,7 +1579,7 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
 
 
 @quam_dataclass
-class MWChannel(Channel):
+class MWChannel(_OutComplexChannel):
     """QuAM component for a MW FEM output channel
 
     Args:
@@ -1592,13 +1600,16 @@ class MWChannel(Channel):
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
+    LO_frequency: float = "#./opx_output/upconverter_frequency"
+    RF_frequency: float = "#./inferred_RF_frequency"
+
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
 
         element_config = config["elements"][self.name]
         element_config["MWInput"] = {
             "port": self.opx_output.port_tuple,
-            "upconverter": self.upconverter
+            "upconverter": self.upconverter,
         }
 
 
@@ -1626,9 +1637,7 @@ class InMWChannel(_InComplexChannel):
         super().apply_to_config(config)
 
         element_config = config["elements"][self.name]
-        element_config["MWOutput"] = {
-            "port": self.opx_input.port_tuple
-        }
+        element_config["MWOutput"] = {"port": self.opx_input.port_tuple}
         element_config["smearing"] = self.smearing
         element_config["time_of_flight"] = self.time_of_flight
 

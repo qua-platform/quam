@@ -1,8 +1,24 @@
 ## [Unreleased]
+### Fixed
+- Change location of port feedforward and feedback filters in config
+
+
+## [0.3.7]
+### Added
+- Added `WaveformPulse` to allow for pre-defined waveforms.
+
+
+## [0.3.6]
+### Changed
+- Modified `MWChannel` to also have `RF_frequency` and `LO_frequency` to match the signature of `IQChannel`.
+  This is done by letting both inherit from a new base class `_OutComplexChannel`.
+
+## [0.3.5]
 ### Added
 - Added `DragCosinePulse`.
 - Added support for sticky channels through the `StickyChannelAddon` (see documentation)
 - Added `Channel.thread`, which defaults to None
+- QUAM can now be installed through PyPi
 
 ### Changed
 - Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
