@@ -28,6 +28,16 @@ class Qubit(QuamComponent):
     def name(self):
         return self.id if isinstance(self.id, str) else f"q{self.id}"
 
+    @property
+    def channels(self):
+        return {
+            key: val
+            for key, val in self.get_attrs(
+                follow_references=True, include_defaults=True
+            ).items()
+            if isinstance(val, Channel)
+        }
+
     def __matmul__(self, other):
         """Allows access to qubit pairs using the '@' operator, e.g. (q1 @ q2)"""
         if not isinstance(other, Qubit):
