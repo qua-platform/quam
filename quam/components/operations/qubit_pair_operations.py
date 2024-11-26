@@ -1,21 +1,21 @@
-from abc import ABC, abstractmethod
-from typing import Dict
-from dataclasses import field
+from abc import ABC
 from copy import copy
 
 from quam.components.pulses import Pulse
-from quam.core import quam_dataclass, QuamComponent
+from quam.components.operations import BaseOperation
+from quam.components.quantum_components.qubit import Qubit
+from quam.core import quam_dataclass
 from quam.utils import string_reference as str_ref
 
 
-__all__ = ["TwoQubitGateImplementation", "CZGateImplementation"]
+__all__ = ["QubitPairOperation", "CZOperation"]
 
 
 @quam_dataclass
-class TwoQubitGateImplementation(QuamComponent, ABC):
+class QubitPairOperation(BaseOperation, ABC):
     @property
-    def qubit_pair(self):
-        from ..qubit_pair import QubitPair
+    def qubit_pair(self):  # TODO Add QubitPair return type
+        from quam.components.quantum_components.qubit_pair import QubitPair
 
         if isinstance(self.parent, QubitPair):
             return self.parent
@@ -29,24 +29,17 @@ class TwoQubitGateImplementation(QuamComponent, ABC):
             )
 
     @property
-    def qubit_control(self):
+    def qubit_control(self) -> Qubit:
         return self.qubit_pair.qubit_control
 
     @property
-    def qubit_target(self):
+    def qubit_target(self) -> Qubit:
         return self.qubit_pair.qubit_target
-
-    def __call__(self):
-        self.execute()
 
 
 @quam_dataclass
-class CZGateImplementation(TwoQubitGateImplementation):
+class CZOperation(QubitPairOperation):
     """CZ Operation for a qubit pair"""
-
-    # Pulses will be added to qubit elements
-    # The reason we don't add "flux_to_q1" directly to q1.z is because it is part of
-    # the CZ operation, i.e. it is only applied as part of a CZ operation
 
     flux_pulse_control: Pulse
 
@@ -69,7 +62,7 @@ class CZGateImplementation(TwoQubitGateImplementation):
 
         return f"{self.gate_label}{str_ref.DELIMITER}{pulse_label}"
 
-    def execute(self, amplitude_scale=None):
+    def execute(self, *, amplitude_scale=None):
         self.qubit_control.z.play(
             self.flux_pulse_control_label,
             validate=False,
@@ -79,27 +72,23 @@ class CZGateImplementation(TwoQubitGateImplementation):
 
         self.qubit_control.xy.frame_rotation(self.phase_shift_control)
         self.qubit_target.xy.frame_rotation(self.phase_shift_target)
-        self.qubit_control.align(self.qubit_target)
+        self.qubit_pair.align()
 
     @property
     def config_settings(self):
         return {"after": [self.qubit_control.z]}
 
     def apply_to_config(self, config: dict) -> None:
-        pulse = copy(self.flux_pulse_control)
-        pulse.id = self.flux_pulse_control_label
-        pulse.parent = None  # Reset parent so it can be attached to new parent
-        pulse.parent = self.qubit_control.z
+        if self.flux_pulse_control.parent is self:
 
-        if self.flux_pulse_control_label in self.qubit_control.z.operations:
-            raise ValueError(
-                "Pulse name already exists in pulse operations. "
-                f"Channel: {self.qubit_control.z.get_reference()}, "
-                f"Pulse: {self.flux_pulse_control.get_reference()}, "
-                f"Pulse name: {self.flux_pulse_control_label}"
-            )
+            pulse = copy(self.flux_pulse_control)
+            pulse.id = self.flux_pulse_control_label
+            pulse.parent = None  # Reset parent so it can be attached to new parent
+            pulse.parent = self.qubit_control.z
 
-        pulse.apply_to_config(config)
+            self.flux_pulse_control.apply_to_config(config)
 
-        element_config = config["elements"][self.qubit_control.z.name]
-        element_config["operations"][self.flux_pulse_control_label] = pulse.pulse_name
+            element_config = config["elements"][self.qubit_control.z.name]
+            element_config["operations"][
+                self.flux_pulse_control_label
+            ] = pulse.pulse_name

@@ -3,7 +3,7 @@ from .hardware import *
 from .octave import *
 from .channels import *
 from . import pulses
-from .qubit import *
+from .quantum_components.qubit import *
 
 __all__ = [
     *basic_quam.__all__,

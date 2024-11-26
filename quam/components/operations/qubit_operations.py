@@ -1,33 +1,28 @@
 from abc import ABC, abstractmethod
+from quam.components.operations.base_operation import BaseOperation
 from quam.components.pulses import Pulse
-from quam.core import quam_dataclass, QuamComponent
+from quam.core import quam_dataclass
+
+
+__all__ = ["QubitOperation", "QubitPulseOperation"]
 
 
 @quam_dataclass
-class SingleQubitGateImplementation(QuamComponent, ABC):
+class QubitOperation(BaseOperation, ABC):
     @property
     def qubit(self):
-        from ..qubit import Qubit
+        from quam.components.quantum_components.qubit import Qubit
 
         if isinstance(self.parent, Qubit):
             return self.parent
         elif hasattr(self.parent, "parent") and isinstance(self.parent.parent, Qubit):
             return self.parent.parent
         else:
-            raise AttributeError(
-                "SingleQubitGate is not attached to a qubit. 1Q_gate: {self}"
-            )
-
-    def __call__(self):
-        self.execute()
-
-    @abstractmethod
-    def execute(self, *args, **kwargs):  # TODO Accomodate differing arguments
-        pass
+            raise AttributeError("QubitOperation is not attached to a qubit: {self}")
 
 
 @quam_dataclass
-class SinglePulseGateImplementation(SingleQubitGateImplementation):
+class QubitPulseOperation(QubitOperation):
     """Single-qubit gate for a qubit consisting of a single pulse
 
     Args:

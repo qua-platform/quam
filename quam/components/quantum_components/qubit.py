@@ -1,19 +1,11 @@
 from typing import Dict, Union
 from dataclasses import field
 
+from qm import qua
+
 from quam.components.channels import Channel
 from quam.core import quam_dataclass, QuamComponent
-from .gate_implementations.single_qubit_gate_implementations import (
-    SingleQubitGateImplementation,
-)
-
-from qm.qua._type_hinting import (
-    AmpValuesType,
-    QuaNumberType,
-    QuaExpressionType,
-    ChirpType,
-    StreamType,
-)
+from quam.components.operations import QubitOperation
 
 
 __all__ = ["Qubit"]
@@ -22,14 +14,16 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuamComponent):
     id: Union[str, int]
-    gates: Dict[str, SingleQubitGateImplementation] = field(default_factory=dict)
+    gates: Dict[str, QubitOperation] = field(default_factory=dict)
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Returns the name of the qubit"""
         return self.id if isinstance(self.id, str) else f"q{self.id}"
 
     @property
-    def channels(self):
+    def channels(self) -> Dict[str, Channel]:
+        """Returns a dictionary of all channels of the qubit"""
         return {
             key: val
             for key, val in self.get_attrs(
@@ -38,7 +32,15 @@ class Qubit(QuamComponent):
             if isinstance(val, Channel)
         }
 
-    def __matmul__(self, other):
+    def align(self, *other_qubits: "Qubit"):
+        """Aligns the execution of all channels of this qubit and all other qubits"""
+        channel_names = [channel.name for channel in self.channels.values()]
+        for qubit in other_qubits:
+            channel_names.extend([channel.name for channel in qubit.channels.values()])
+
+        qua.align(*channel_names)
+
+    def __matmul__(self, other):  # TODO Add QubitPair return type
         """Allows access to qubit pairs using the '@' operator, e.g. (q1 @ q2)"""
         if not isinstance(other, Qubit):
             raise ValueError(
