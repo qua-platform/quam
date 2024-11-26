@@ -17,9 +17,6 @@ class QuantumComponent(QuamComponent, ABC):
     def name(self) -> str:
         pass
 
-    def __call__(self):
-        self.execute()
-
-    @abstractmethod
-    def execute(self, *args, **kwargs) -> Any:
-        pass
+    def apply(self, operation: str, *args, **kwargs) -> Any:
+        operation_obj = self.operations[operation]
+        operation_obj.execute(*args, **kwargs)
