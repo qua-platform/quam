@@ -62,7 +62,7 @@ class CZOperation(QubitPairOperation):
 
         return f"{self.gate_label}{str_ref.DELIMITER}{pulse_label}"
 
-    def execute(self, *, amplitude_scale=None):
+    def apply(self, *, amplitude_scale=None):
         self.qubit_control.z.play(
             self.flux_pulse_control_label,
             validate=False,

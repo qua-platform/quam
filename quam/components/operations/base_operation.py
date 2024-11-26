@@ -10,5 +10,6 @@ class BaseOperation(QuamComponent, ABC):
     id: str
 
     @abstractmethod
-    def execute(self, *args, **kwargs):
+    def apply(self, *args, **kwargs):
+        """Applies the operation"""
         pass

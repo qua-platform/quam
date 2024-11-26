@@ -33,5 +33,5 @@ class QubitPulseOperation(QubitOperation):
 
     pulse: Pulse
 
-    def execute(self, *, amplitude_scale=None, duration=None, **kwargs):
+    def apply(self, *, amplitude_scale=None, duration=None, **kwargs):
         self.pulse.play(amplitude_scale=amplitude_scale, duration=duration, **kwargs)

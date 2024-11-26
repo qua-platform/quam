@@ -19,4 +19,4 @@ class QuantumComponent(QuamComponent, ABC):
 
     def apply(self, operation: str, *args, **kwargs) -> Any:
         operation_obj = self.operations[operation]
-        operation_obj.execute(*args, **kwargs)
+        operation_obj.apply(*args, **kwargs)
