@@ -984,7 +984,7 @@ class InSingleChannel(Channel):
             raise ValueError(f"Invalid time tagging mode: {mode}")
 
         if qua_vars is None:
-            times = declare(fixed, size=size)
+            times = declare(int, size=size)
             counts = declare(int)
         else:
             times, counts = qua_vars
