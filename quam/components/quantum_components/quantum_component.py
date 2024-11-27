@@ -10,7 +10,7 @@ __all__ = ["QuantumComponent"]
 @quam_dataclass
 class QuantumComponent(QuamComponent, ABC):
     id: Union[str, int]
-    operations: Dict[str, BaseImplementation] = field(default_factory=dict)
+    implementations: Dict[str, BaseImplementation] = field(default_factory=dict)
 
     @property
     @abstractmethod
@@ -18,5 +18,5 @@ class QuantumComponent(QuamComponent, ABC):
         pass
 
     def apply(self, operation: str, *args, **kwargs) -> Any:
-        operation_obj = self.operations[operation]
+        operation_obj = self.implementations[operation]
         operation_obj.apply(*args, **kwargs)

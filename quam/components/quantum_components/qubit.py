@@ -14,7 +14,7 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuamComponent):
     id: Union[str, int]
-    gates: Dict[str, QubitImplementation] = field(default_factory=dict)
+    implementations: Dict[str, QubitImplementation] = field(default_factory=dict)
 
     @property
     def name(self) -> str:

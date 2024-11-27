@@ -10,7 +10,7 @@ from quam.components.implementations import QubitPairImplementation
 class QubitPair(QuamComponent):
     qubit_control: Qubit
     qubit_target: Qubit
-    gates: Dict[str, QubitPairImplementation] = field(default_factory=dict)
+    implementations: Dict[str, QubitPairImplementation] = field(default_factory=dict)
 
     def align(self):
         """Aligns the execution of all channels of both qubits"""
