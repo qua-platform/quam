@@ -8,7 +8,7 @@ import numpy as np
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
-from qm.qua._type_hinting import (
+from qm.qua._dsl import (
     AmpValuesType,
     QuaExpressionType,
     ChirpType,
