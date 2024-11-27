@@ -16,6 +16,7 @@ def test_in_single_channel_attr_annotations():
         "time_of_flight",
         "smearing",
         "thread",
+        "time_tagging",
     }
 
 
