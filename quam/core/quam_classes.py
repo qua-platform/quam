@@ -144,7 +144,7 @@ def sort_quam_components(
 def _quam_dataclass(cls=None, **kwargs):
     """Dataclass for QuAM classes.
 
-    This class is used as a patch to maintain compatibility with Python 3.8 and 3.9, as
+    This class is used as a patch to maintain compatibility with Python 3.9, as
     these do not support the dataclass argument `kw_only`. This argument is needed to
     ensure inheritance of parent dataclasses is allowed.
 

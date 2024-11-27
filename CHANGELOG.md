@@ -1,6 +1,10 @@
 ## [Unreleased]
 ### Added
 - Added time tagging to channels
+- Added support for Python 3.12
+
+### Removed
+- Removed support for Python 3.8
 - Added `Pulse.play()` method
 
 ### Fixed

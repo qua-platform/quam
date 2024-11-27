@@ -26,7 +26,7 @@ name = "my-quam"
 version = "0.1.0"
 description = "User QuAM repository"
 authors = [{ name = "Jane Doe", email = "jane.doe@quantum-machines.co" }]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
@@ -102,7 +102,7 @@ child = Child(required_attr=12)  # Note that we now need to explicitly pass keyw
 ```
 
 The keyword `kw_only` was only introduced in Python 3.10, and so the example above would raise an error in Python <3.10.
-However, to ensure QuAM is compatible with Python 3.8 and above, we introduced `@quam_dataclass` which fixes this problem:
+However, to ensure QuAM is compatible with Python 3.9 and above, we introduced `@quam_dataclass` which fixes this problem:
 
 ```python
 @quam_dataclass
