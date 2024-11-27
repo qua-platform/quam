@@ -3,14 +3,14 @@ from dataclasses import field
 
 from quam.core import quam_dataclass, QuamComponent
 from quam.components.quantum_components.qubit import Qubit
-from quam.components.operations import QubitPairOperation
+from quam.components.implementations import QubitPairImplementation
 
 
 @quam_dataclass
 class QubitPair(QuamComponent):
     qubit_control: Qubit
     qubit_target: Qubit
-    gates: Dict[str, QubitPairOperation] = field(default_factory=dict)
+    gates: Dict[str, QubitPairImplementation] = field(default_factory=dict)
 
     def align(self):
         """Aligns the execution of all channels of both qubits"""

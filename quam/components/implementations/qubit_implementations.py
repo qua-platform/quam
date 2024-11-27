@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
-from quam.components.operations.base_operation import BaseOperation
+from quam.components.implementations.base_implementation import BaseImplementation
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
 
 
-__all__ = ["QubitOperation", "QubitPulseOperation"]
+__all__ = ["QubitImplementation", "PulseGateImplementation"]
 
 
 @quam_dataclass
-class QubitOperation(BaseOperation, ABC):
+class QubitImplementation(BaseImplementation, ABC):
     @property
     def qubit(self):
         from quam.components.quantum_components.qubit import Qubit
@@ -22,7 +22,7 @@ class QubitOperation(BaseOperation, ABC):
 
 
 @quam_dataclass
-class QubitPulseOperation(QubitOperation):
+class PulseGateImplementation(QubitImplementation):
     """Single-qubit gate for a qubit consisting of a single pulse
 
     Args:

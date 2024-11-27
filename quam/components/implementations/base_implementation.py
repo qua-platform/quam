@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from quam.core.quam_classes import quam_dataclass, QuamComponent
 
 
-__all__ = ["BaseOperation"]
+__all__ = ["BaseImplementation"]
 
 
 @quam_dataclass
-class BaseOperation(QuamComponent, ABC):
+class BaseImplementation(QuamComponent, ABC):
     id: str
 
     @abstractmethod

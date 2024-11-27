@@ -5,7 +5,7 @@ from qm import qua
 
 from quam.components.channels import Channel
 from quam.core import quam_dataclass, QuamComponent
-from quam.components.operations import QubitOperation
+from quam.components.implementations import QubitImplementation
 
 
 __all__ = ["Qubit"]
@@ -14,7 +14,7 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuamComponent):
     id: Union[str, int]
-    gates: Dict[str, QubitOperation] = field(default_factory=dict)
+    gates: Dict[str, QubitImplementation] = field(default_factory=dict)
 
     @property
     def name(self) -> str:
