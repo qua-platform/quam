@@ -5,6 +5,7 @@
 
 ### Removed
 - Removed support for Python 3.8
+- Added `Pulse.play()` method
 
 ### Fixed
 - Change location of port feedforward and feedback filters in config
