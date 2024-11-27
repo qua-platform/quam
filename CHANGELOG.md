@@ -1,4 +1,7 @@
 ## [Unreleased]
+### Added
+- Added time tagging to channels
+
 ### Fixed
 - Change location of port feedforward and feedback filters in config
 

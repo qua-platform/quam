@@ -25,7 +25,8 @@ def test_in_single_channel_attr_annotations():
         "opx_input_offset",
         "time_of_flight",
         "smearing",
-        "thread"
+        "thread",
+        "time_tagging",
     }
 
 
