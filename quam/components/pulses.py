@@ -8,6 +8,13 @@ import numpy as np
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
+from qm.qua._type_hinting import (
+    AmpValuesType,
+    QuaExpressionType,
+    ChirpType,
+    StreamType,
+    QuaNumberType,
+)
 
 __all__ = [
     "Pulse",
@@ -158,6 +165,82 @@ class Pulse(QuamComponent):
             - a tuple of floats or float lists for an arbitrary IQ waveform
         """
         ...
+
+    def play(
+        self,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        duration: QuaNumberType = None,
+        condition: QuaExpressionType = None,
+        chirp: ChirpType = None,
+        truncate: QuaNumberType = None,
+        timestamp_stream: StreamType = None,
+        continue_chirp: bool = False,
+        target: str = "",
+        validate: bool = True,
+    ) -> None:
+        """Play the pulse on the channel.
+
+        The corresponding channel to play the pulse on is determined from the
+        parent of the pulse.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            duration (int): Duration of the pulse in units of the clock cycle (4ns).
+                If not provided, the default pulse duration will be used. It is possible
+                to dynamically change the duration of both constant and arbitrary
+                pulses. Arbitrary pulses can only be stretched, not compressed.
+            chirp (Union[(list[int], str), (int, str)]): Allows to perform
+                piecewise linear sweep of the element's intermediate
+                frequency in time. Input should be a tuple, with the 1st
+                element being a list of rates and the second should be a
+                string with the units. The units can be either: 'Hz/nsec',
+                'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
+                'KHz/sec', 'Hz/sec', 'mHz/sec'.
+            truncate (Union[int, QUA variable of type int]): Allows playing
+                only part of the pulse, truncating the end. If provided,
+                will play only up to the given time in units of the clock
+                cycle (4ns).
+            condition (A logical expression to evaluate.): Will play analog
+                pulse only if the condition's value is true. Any digital
+                pulses associated with the operation will always play.
+            timestamp_stream (Union[str, _ResultSource]): (Supported from
+                QOP 2.2) Adding a `timestamp_stream` argument will save the
+                time at which the operation occurred to a stream. If the
+                `timestamp_stream` is a string ``label``, then the timestamp
+                handle can be retrieved with
+                `qm._results.JobResults.get` with the same ``label``.
+            validate (bool): If True (default), validate that the pulse is registered
+                in Channel.operations
+
+        Raises:
+            ValueError: If the pulse is not attached to a channel.
+            KeyError: If the pulse is not registered in the channel's operations.
+        """
+        if self.id is not None:
+            name = self.id
+        elif self.parent is not None:
+            name = self.parent.get_attr_name(self)
+        else:
+            raise ValueError(f"Cannot determine name of pulse '{self}'")
+
+        if self.channel is None:
+            raise ValueError(f"Pulse '{name}' is not attached to a channel")
+
+        self.channel.play(
+            pulse_name=name,
+            amplitude_scale=amplitude_scale,
+            duration=duration,
+            condition=condition,
+            chirp=chirp,
+            truncate=truncate,
+            timestamp_stream=timestamp_stream,
+            continue_chirp=continue_chirp,
+            target=target,
+            validate=validate,
+        )
 
     def _config_add_pulse(self, config: Dict[str, Any]):
         """Add the pulse to the config
