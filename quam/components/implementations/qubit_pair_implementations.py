@@ -1,11 +1,8 @@
 from abc import ABC
-from copy import copy
 
-from quam.components.pulses import Pulse
 from quam.components.implementations import BaseImplementation
 from quam.components.quantum_components.qubit import Qubit
 from quam.core import quam_dataclass
-from quam.utils import string_reference as str_ref
 
 
 __all__ = ["QubitPairImplementation"]
