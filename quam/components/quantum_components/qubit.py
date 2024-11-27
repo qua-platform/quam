@@ -1,11 +1,16 @@
-from typing import Dict, Union
+from typing import Dict, Union, TYPE_CHECKING, Any
 from dataclasses import field
 
 from qm import qua
 
 from quam.components.channels import Channel
 from quam.core import quam_dataclass, QuamComponent
-from quam.components.implementations import QubitImplementation
+
+if TYPE_CHECKING:
+    from quam.components.implementations import QubitImplementation
+    ImplementationType = QubitImplementation
+else:
+    ImplementationType = Any
 
 
 __all__ = ["Qubit"]
@@ -14,7 +19,7 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuamComponent):
     id: Union[str, int]
-    implementations: Dict[str, QubitImplementation] = field(default_factory=dict)
+    implementations: Dict[str, ImplementationType] = field(default_factory=dict)
 
     @property
     def name(self) -> str:

@@ -1,8 +1,10 @@
 from abc import ABC
+from typing import TYPE_CHECKING
 
 from quam.components.implementations import BaseImplementation
-from quam.components.quantum_components.qubit import Qubit
 from quam.core import quam_dataclass
+
+from quam.components.quantum_components.qubit import Qubit
 
 
 __all__ = ["QubitPairImplementation"]

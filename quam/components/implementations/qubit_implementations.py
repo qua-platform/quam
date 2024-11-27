@@ -1,11 +1,9 @@
 from abc import ABC
-from typing import TYPE_CHECKING
 from quam.components.implementations.base_implementation import BaseImplementation
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
 
-if TYPE_CHECKING:
-    from qm.qua import QuaVariableType
+from qm.qua import QuaVariableType
 
 
 __all__ = ["QubitImplementation", "PulseGateImplementation"]

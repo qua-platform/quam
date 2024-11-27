@@ -10,8 +10,9 @@ class OperationsRegistry(UserDict):
         """
         Register a function as an operation.
 
-        This method stores the function in the operations dictionary and returns a wrapped version of the function
-        that maintains the original function's signature and docstring.
+        This method stores the function in the operations dictionary and returns a
+        wrapped version of the function that maintains the original function's
+        signature and docstring.
 
         Args:
             func (callable): The function to register as an operation.
