@@ -214,6 +214,7 @@ This can be done by directly using the base [pulses.Pulse][quam.components.pulse
 channel.operations["digital"] = pulses.Pulse(length=100, digital_marker=[(1, 20, 0, 10)])
 ```
 
+
 ## Sticky channels
 A channel can be set to be sticky, meaning that the voltage after a pulse will remain at the last value of the pulse.
 Details can be found in the [Sticky channel QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#sticky-element).
@@ -223,3 +224,42 @@ from quam.components.channels import StickyChannelAddon
 
 channel.sticky = StickyChannelAddon(duration=...)
 ```
+
+
+## Time Tagging
+Time tagging is a feature that allows for the measurement of the time of arrival of a signal.
+It is implemented as the [TimeTaggingAddon][quam.components.channels.TimeTaggingAddon] to the [InSingleChannel][quam.components.channels.InSingleChannel].
+
+To use the time tagging feature, the [TimeTaggingAddon][quam.components.channels.TimeTaggingAddon] must be added to the [InSingleChannel][quam.components.channels.InSingleChannel]:
+```python
+from quam.components.channels import InSingleChannel, TimeTaggingAddon
+
+channel = InSingleChannel(
+    id="channel",
+    opx_input=("con1", 1),
+    time_tagging=TimeTaggingAddon(
+        signal_threshold=0.195,  # in units of V
+        signal_polarity="below",
+        derivative_threshold=0.073,  # in units of V/ns
+        derivative_polarity="below",
+    )
+)
+```
+All parameters are optional, and are by default set to the values shown above.
+
+Once the time tagging addon is added, the [InSingleChannel.measure_time_tagging()][quam.components.channels.InSingleChannel.measure_time_tagging] method can be used within a QUA program to measure the time of arrival of the signal:
+```python
+times, counts = channel.measure_time_tagging(size=1000, max_duration=3000)
+```
+
+- The `size` parameter specifies the maximum number of samples to collect.
+- The `max_duration` parameter specifies the maximum duration to collect samples for.
+
+
+Two QUA variables are returned: 
+
+- `times` is a QUA array containing the times of arrival of the signal.
+  It will contain at most `size` entries, though it may contain fewer if the maximum duration is reached first.
+- `counts` is a QUA integer containing the number of measured events, being at most equal to `size`.
+
+Additional information on time tagging can be found in the [Time Tagging QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging).
