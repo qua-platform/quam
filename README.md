@@ -13,7 +13,7 @@ Explore detailed documentation and get started with QuAM here: [QuAM Documentati
 - **State Management**: Features robust tools for saving and loading your quantum states, promoting reproducibility and consistency.
 
 ## Installation
-To install QuAM, first ensure you have 3.8 ≤ Python ≤ 3.11 installed on your system.  
+To install QuAM, first ensure you have 3.9 ≤ Python ≤ 3.12 installed on your system.  
 Then run the following command: 
 
 ```bash
