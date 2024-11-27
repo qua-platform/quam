@@ -1,9 +1,10 @@
 ## [Unreleased]
 ### Added
 - Added time tagging to channels
+- Added support for Python 3.12
 
-### Changed
-- Updated minimum Python version to 3.9, maximum to 3.12
+### Removed
+- Removed support for Python 3.8
 
 ### Fixed
 - Change location of port feedforward and feedback filters in config
