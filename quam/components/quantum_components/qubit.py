@@ -4,10 +4,12 @@ from dataclasses import field
 from qm import qua
 
 from quam.components.channels import Channel
+from quam.components.pulses import Pulse
 from quam.core import quam_dataclass, QuamComponent
 
 if TYPE_CHECKING:
     from quam.components.implementations import QubitImplementation
+
     ImplementationType = QubitImplementation
 else:
     ImplementationType = Any
@@ -36,6 +38,27 @@ class Qubit(QuamComponent):
             ).items()
             if isinstance(val, Channel)
         }
+
+    def get_pulse(self, pulse_name: str) -> Pulse:
+        """Returns the pulse with the given name
+
+        Goes through all channels and returns the unique pulse with the given name.
+
+        Raises a ValueError if the pulse is not found or if there are multiple pulses
+        with the same name.
+        """
+        pulses = [
+            pulse
+            for channel in self.qubit.channels.values()
+            for key, pulse in channel.operations.items()
+            if key == pulse_name
+        ]
+        if len(pulses) == 0:
+            raise ValueError(f"Pulse {pulse_name} not found")
+        elif len(pulses) > 1:
+            raise ValueError(f"Pulse {pulse_name} is not unique")
+        else:
+            return pulses[0]
 
     def align(self, *other_qubits: "Qubit"):
         """Aligns the execution of all channels of this qubit and all other qubits"""

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 from quam.core.quam_classes import quam_dataclass, QuamComponent
 from quam.utils import string_reference as str_ref
 
@@ -23,6 +24,6 @@ class BaseImplementation(QuamComponent, ABC):
             )
 
     @abstractmethod
-    def apply(self, *args, **kwargs):
+    def apply(self, *args, **kwargs) -> Any:
         """Applies the operation"""
         pass

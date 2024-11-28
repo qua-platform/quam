@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Union
 from quam.components.implementations.base_implementation import BaseImplementation
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
@@ -30,18 +31,20 @@ class PulseGateImplementation(QubitImplementation):
     Args:
         pulse: Name of pulse to be played on qubit. Should be a key in
             `channel.operations` for one of the qubit's channels
-
     """
 
-    pulse: Pulse
+    pulse: Union[Pulse, str]
 
     def apply(self, *, amplitude_scale=None, duration=None, **kwargs):
-        self.pulse.play(amplitude_scale=amplitude_scale, duration=duration, **kwargs)
+        if isinstance(self.pulse, Pulse):
+            pulse = self.pulse
+        else:
+            pulse = self.qubit.get_pulse(self.pulse)
+        pulse.play(amplitude_scale=amplitude_scale, duration=duration, **kwargs)
 
 
 @quam_dataclass
 class MeasureImplementation(QubitImplementation):
-
     def apply(self, **kwargs) -> QuaVariableType:
         return self.qubit.measure(**kwargs)
 
