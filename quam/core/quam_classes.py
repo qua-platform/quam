@@ -342,6 +342,17 @@ class QuamBase(ReferenceClass):
             return isinstance(val, (list, QuamList))
         return type(val) == required_type
 
+    def get_metadata(self, attr=None):
+        if isinstance(self, QuamRoot):
+            return self._metadata.setdefault("#/", {})
+
+        reference = self.get_reference(attr=attr)
+        if reference is None:
+            raise AttributeError(
+                "Unable to extract reference path. Parent must be defined for {self}"
+            )
+        return self._root._metadata.setdefault(reference, {})
+
     def get_reference(self, attr=None) -> Optional[str]:
         """Get the reference path of this object.
 
@@ -571,6 +582,7 @@ class QuamRoot(QuamBase):
 
     def __post_init__(self):
         QuamBase._root = self
+        self._metadata: Dict[str, Dict[str, Any]] = {}
         super().__post_init__()
 
     def __setattr__(self, name, value):
