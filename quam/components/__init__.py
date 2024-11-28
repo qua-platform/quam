@@ -4,7 +4,7 @@ from .octave import *
 from .channels import *
 from . import pulses
 from .quantum_components import *
-from . import implementations
+from . import macro
 
 __all__ = [
     *basic_quam.__all__,
@@ -13,5 +13,5 @@ __all__ = [
     *octave.__all__,
     *quantum_components.__all__,
     "pulses",
-    "implementations",
+    "macro",
 ]

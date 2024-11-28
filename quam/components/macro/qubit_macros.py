@@ -1,17 +1,17 @@
 from abc import ABC
 from typing import Union
-from quam.components.implementations.base_implementation import BaseImplementation
+from quam.components.macro.quam_macro import QuamMacro
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
 
 from qm.qua import QuaVariableType
 
 
-__all__ = ["QubitImplementation", "PulseGateImplementation"]
+__all__ = ["QubitMacro", "PulseMacro"]
 
 
 @quam_dataclass
-class QubitImplementation(BaseImplementation, ABC):
+class QubitMacro(QuamMacro, ABC):
     @property
     def qubit(self):
         from quam.components.quantum_components.qubit import Qubit
@@ -25,7 +25,7 @@ class QubitImplementation(BaseImplementation, ABC):
 
 
 @quam_dataclass
-class PulseGateImplementation(QubitImplementation):
+class PulseMacro(QubitMacro):
     """Single-qubit gate for a qubit consisting of a single pulse
 
     Args:
@@ -34,6 +34,7 @@ class PulseGateImplementation(QubitImplementation):
     """
 
     pulse: Union[Pulse, str]
+    unitary: Optional[List[List[float]]] = None
 
     def apply(self, *, amplitude_scale=None, duration=None, **kwargs):
         if isinstance(self.pulse, Pulse):
@@ -41,21 +42,3 @@ class PulseGateImplementation(QubitImplementation):
         else:
             pulse = self.qubit.get_pulse(self.pulse)
         pulse.play(amplitude_scale=amplitude_scale, duration=duration, **kwargs)
-
-
-@quam_dataclass
-class MeasureImplementation(QubitImplementation):
-    def apply(self, **kwargs) -> QuaVariableType:
-        return self.qubit.measure(**kwargs)
-
-
-@quam_dataclass
-class AlignImplementation(QubitImplementation):
-    def apply(self, *other_qubits, **kwargs):
-        self.qubit.align(*other_qubits, **kwargs)
-
-
-@quam_dataclass
-class ResetImplementation(QubitImplementation):
-    def apply(self, **kwargs):
-        self.qubit.reset(**kwargs)

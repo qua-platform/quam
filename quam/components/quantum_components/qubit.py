@@ -5,23 +5,24 @@ from qm import qua
 
 from quam.components.channels import Channel
 from quam.components.pulses import Pulse
-from quam.core import quam_dataclass, QuamComponent
+from quam.components.quantum_components import QuantumComponent
+from quam.core import quam_dataclass
 
 if TYPE_CHECKING:
-    from quam.components.implementations import QubitImplementation
+    from quam.components.macro import QubitMacro
 
-    ImplementationType = QubitImplementation
+    MacroType = QubitMacro
 else:
-    ImplementationType = Any
+    MacroType = Any
 
 
 __all__ = ["Qubit"]
 
 
 @quam_dataclass
-class Qubit(QuamComponent):
+class Qubit(QuantumComponent):
     id: Union[str, int]
-    implementations: Dict[str, ImplementationType] = field(default_factory=dict)
+    macros: Dict[str, MacroType] = field(default_factory=dict)
 
     @property
     def name(self) -> str:

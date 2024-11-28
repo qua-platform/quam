@@ -1,22 +1,22 @@
 from typing import Dict, TYPE_CHECKING, Any
 from dataclasses import field
 
-from quam.core import quam_dataclass, QuamComponent
-from quam.components.quantum_components.qubit import Qubit
+from quam.core import quam_dataclass
+from quam.components.quantum_components import QuantumComponent, Qubit
 
 if TYPE_CHECKING:
-    from quam.components.implementations import QubitPairImplementation
+    from quam.components.macro import QubitPairMacro
 
-    ImplementationType = QubitPairImplementation
+    MacroType = QubitPairMacro
 else:
-    ImplementationType = Any
+    MacroType = Any
 
 
 @quam_dataclass
-class QubitPair(QuamComponent):
+class QubitPair(QuantumComponent):
     qubit_control: Qubit
     qubit_target: Qubit
-    implementations: Dict[str, ImplementationType] = field(default_factory=dict)
+    macros: Dict[str, MacroType] = field(default_factory=dict)
 
     def align(self):
         """Aligns the execution of all channels of both qubits"""

@@ -4,11 +4,11 @@ from quam.core.quam_classes import quam_dataclass, QuamComponent
 from quam.utils import string_reference as str_ref
 
 
-__all__ = ["BaseImplementation"]
+__all__ = ["QuamMacro"]
 
 
 @quam_dataclass
-class BaseImplementation(QuamComponent, ABC):
+class QuamMacro(QuamComponent, ABC):
     id: str = "#./inferred_id"
 
     @property

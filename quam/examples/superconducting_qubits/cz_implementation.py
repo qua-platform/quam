@@ -1,10 +1,10 @@
 from quam.core import quam_dataclass
 from quam.components.pulses import Pulse
-from quam.components.implementations import QubitPairImplementation
+from quam.components.macro import QubitPairMacro
 
 
 @quam_dataclass
-class CZImplementation(QubitPairImplementation):
+class CZImplementation(QubitPairMacro):
     """CZ Operation for a qubit pair"""
 
     flux_pulse: Pulse
