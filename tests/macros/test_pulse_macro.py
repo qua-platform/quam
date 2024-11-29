@@ -30,7 +30,10 @@ def test_qubit():
 
 
 def test_pulse_macro_no_pulse(test_qubit):
-    pulse_macro = PulseMacro()
+    with pytest.raises(
+        TypeError, match="missing 1 required keyword-only argument: 'pulse'"
+    ):
+        PulseMacro()
 
 
 def test_pulse_macro_pulse_string(test_qubit, mocker):
