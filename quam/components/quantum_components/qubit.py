@@ -2,6 +2,7 @@ from typing import Dict, Union, TYPE_CHECKING, Any
 from dataclasses import field
 
 from qm import qua
+from qm.qua import align
 
 from quam.components.channels import Channel
 from quam.components.pulses import Pulse
@@ -68,7 +69,7 @@ class Qubit(QuantumComponent):
         for qubit in other_qubits:
             channel_names.extend([channel.name for channel in qubit.channels.values()])
 
-        qua.align(*channel_names)
+        align(*channel_names)
 
     def __matmul__(self, other):  # TODO Add QubitPair return type
         """Allows access to qubit pairs using the '@' operator, e.g. (q1 @ q2)"""

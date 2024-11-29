@@ -26,13 +26,11 @@ def test_qubit():
     return TestQubit(
         id=0,
         xy=IQChannel(
-            id="xy",
             opx_output_I=("con1", 1),
             opx_output_Q=("con1", 2),
             frequency_converter_up=None,
         ),
         resonator=IQChannel(
-            id="resonator",
             opx_output_I=("con1", 3),
             opx_output_Q=("con1", 4),
             frequency_converter_up=None,
@@ -49,7 +47,6 @@ def test_qubit_referenced():
     return TestQubit(
         id=0,
         xy=IQChannel(
-            id="xy",
             opx_output_I=("con1", 1),
             opx_output_Q=("con1", 2),
             frequency_converter_up=None,
@@ -85,3 +82,12 @@ def test_qubit_get_pulse_unique(test_qubit):
     test_qubit.xy.operations["test_pulse"] = pulse
 
     assert test_qubit.get_pulse("test_pulse") == pulse
+
+
+def test_qubit_align(test_qubit, mocker):
+    mocker.patch("quam.components.quantum_components.qubit.align")
+    test_qubit.align(test_qubit)
+
+    from quam.components.quantum_components.qubit import align
+
+    align.assert_called_once_with("q0.xy", "q0.resonator")
