@@ -1,4 +1,8 @@
 ## [Unreleased]
+### Fixed
+- Convert port crosstalk to dict in config, fixing deepcopy issues
+
+## [0.3.9]
 ### Added
 - Added time tagging to channels
 - Added support for Python 3.12
