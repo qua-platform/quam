@@ -9,6 +9,7 @@
 
 ### Fixed
 - Change location of port feedforward and feedback filters in config
+- Convert port crosstalk to dict in config, fixing deepcopy issues
 
 
 ## [0.3.7]
