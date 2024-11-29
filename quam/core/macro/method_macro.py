@@ -16,12 +16,23 @@ class MethodMacro(BaseMacro):
     def __init__(self, func: T) -> None:
         functools.wraps(func)(self)
         self.func = func
+        self.instance = None
+
+    def __get__(self, instance, owner):
+        # Store the instance to which this method is bound
+        self.instance = instance
+        return self
 
     def apply(self, *args, **kwargs) -> Any:
         """Implements BaseMacro.apply by calling the wrapped function"""
+        if self.instance is not None:
+            # Call the function with the instance as the first argument
+            return self.func(self.instance, *args, **kwargs)
         return self.func(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
+        if args and args[0] is self.instance:
+            args = args[1:]
         return self.apply(*args, **kwargs)
 
     @staticmethod

@@ -39,7 +39,10 @@ def test_qubit():
 
 
 def test_qubit_channels(test_qubit):
-    assert test_qubit.channels == {"xy": test_qubit.xy}
+    assert test_qubit.channels == {
+        "xy": test_qubit.xy,
+        "resonator": test_qubit.resonator,
+    }
 
 
 @pytest.fixture
@@ -87,6 +90,20 @@ def test_qubit_get_pulse_unique(test_qubit):
 def test_qubit_align(test_qubit, mocker):
     mocker.patch("quam.components.quantum_components.qubit.align")
     test_qubit.align(test_qubit)
+
+    from quam.components.quantum_components.qubit import align
+
+    align.assert_called_once_with("q0.xy", "q0.resonator")
+
+
+def test_qubit_get_macros(test_qubit):
+    assert test_qubit.macros == {}
+    assert test_qubit.get_macros() == {"align": test_qubit.align}
+
+
+def test_qubit_apply_align(test_qubit, mocker):
+    mocker.patch("quam.components.quantum_components.qubit.align")
+    test_qubit.apply("align")
 
     from quam.components.quantum_components.qubit import align
 

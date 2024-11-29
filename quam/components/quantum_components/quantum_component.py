@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from dataclasses import field
-import functools
 import inspect
 from typing import Any, Callable, Dict, Union, TypeVar, cast
 from quam.core.quam_classes import quam_dataclass, QuamComponent
@@ -23,7 +22,7 @@ class QuantumComponent(QuamComponent, ABC):
         pass
 
     def apply(self, operation: str, *args, **kwargs) -> Any:
-        operation_obj = self.macros[operation]
+        operation_obj = self.get_macros()[operation]
         operation_obj.apply(*args, **kwargs)
 
     @staticmethod
@@ -33,9 +32,7 @@ class QuantumComponent(QuamComponent, ABC):
 
     def _get_method_macros(self) -> Dict[str, MethodMacro]:
         return dict(
-            inspect.getmembers(
-                self, predicate=functools.partial(isinstance, MethodMacro)
-            )
+            inspect.getmembers(self, predicate=lambda x: isinstance(x, MethodMacro))
         )
 
     def get_macros(self) -> Dict[str, BaseMacro]:
