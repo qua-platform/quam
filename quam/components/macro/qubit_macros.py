@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Optional, Union, List
-from quam.core.macro.quam_macro import QuamMacro
+from quam.core.macro import QuamMacro
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
 

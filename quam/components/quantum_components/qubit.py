@@ -50,7 +50,7 @@ class Qubit(QuantumComponent):
         """
         pulses = [
             pulse
-            for channel in self.qubit.channels.values()
+            for channel in self.channels.values()
             for key, pulse in channel.operations.items()
             if key == pulse_name
         ]

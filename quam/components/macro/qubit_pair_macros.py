@@ -1,7 +1,6 @@
 from abc import ABC
-from typing import TYPE_CHECKING
 
-from quam.components.macro import QuamMacro
+from quam.core.macro import QuamMacro
 from quam.core import quam_dataclass
 
 from quam.components.quantum_components.qubit import Qubit
