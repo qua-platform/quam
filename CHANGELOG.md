@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.3.8]
 ### Added
 - Added time tagging to channels
 - Added support for Python 3.12
