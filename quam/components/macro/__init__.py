@@ -1,4 +1,4 @@
-from .quam_macro import *
+from ...core.macro.quam_macro import *
 from .qubit_macros import *
 from .qubit_pair_macros import *
 

@@ -1,14 +1,14 @@
-from abc import ABC, abstractmethod
-from typing import Any
+from abc import ABC
 from quam.core.quam_classes import quam_dataclass, QuamComponent
 from quam.utils import string_reference as str_ref
+from quam.core.macro.base_macro import BaseMacro
 
 
 __all__ = ["QuamMacro"]
 
 
 @quam_dataclass
-class QuamMacro(QuamComponent, ABC):
+class QuamMacro(QuamComponent, BaseMacro, ABC):
     id: str = "#./inferred_id"
 
     @property
@@ -22,8 +22,3 @@ class QuamMacro(QuamComponent, ABC):
             raise AttributeError(
                 f"Cannot infer id of {self} because it is not attached to a parent"
             )
-
-    @abstractmethod
-    def apply(self, *args, **kwargs) -> Any:
-        """Applies the operation"""
-        pass

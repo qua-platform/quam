@@ -1,10 +1,8 @@
 from abc import ABC
-from typing import Union
-from quam.components.macro.quam_macro import QuamMacro
+from typing import Optional, Union, List
+from quam.core.macro.quam_macro import QuamMacro
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
-
-from qm.qua import QuaVariableType
 
 
 __all__ = ["QubitMacro", "PulseMacro"]
@@ -33,7 +31,7 @@ class PulseMacro(QubitMacro):
             `channel.operations` for one of the qubit's channels
     """
 
-    pulse: Union[Pulse, str]
+    pulse: Union[Pulse, str]  # type: ignore
     unitary: Optional[List[List[float]]] = None
 
     def apply(self, *, amplitude_scale=None, duration=None, **kwargs):
@@ -41,4 +39,6 @@ class PulseMacro(QubitMacro):
             pulse = self.pulse
         else:
             pulse = self.qubit.get_pulse(self.pulse)
-        pulse.play(amplitude_scale=amplitude_scale, duration=duration, **kwargs)
+        pulse.play(
+            amplitude_scale=amplitude_scale, duration=duration, **kwargs  # type: ignore
+        )
