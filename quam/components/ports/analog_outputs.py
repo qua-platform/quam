@@ -31,7 +31,7 @@ class LFAnalogOutputPort(BasePort, ABC):
             "shareable": self.shareable,
         }
         if self.crosstalk is not None:
-            port_properties["crosstalk"] = self.crosstalk
+            port_properties["crosstalk"] = dict(self.crosstalk)
         if self.feedforward_filter is not None:
             port_properties.setdefault("filter", {})["feedforward"] = list(
                 self.feedforward_filter
