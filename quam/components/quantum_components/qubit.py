@@ -8,6 +8,7 @@ from quam.components.channels import Channel
 from quam.components.pulses import Pulse
 from quam.components.quantum_components import QuantumComponent
 from quam.core import quam_dataclass
+from quam.utils import string_reference as str_ref
 
 if TYPE_CHECKING:
     from quam.components.macro import QubitMacro
@@ -22,8 +23,20 @@ __all__ = ["Qubit"]
 
 @quam_dataclass
 class Qubit(QuantumComponent):
-    id: Union[str, int]
+    id: Union[str, int] = "#./inferred_id"
     macros: Dict[str, MacroType] = field(default_factory=dict)
+
+    @property
+    def inferred_id(self) -> Union[str, int]:
+        if not str_ref.is_reference(self.get_unreferenced_value("id")):
+            return self.id
+        elif self.parent is not None:
+            name = self.parent.get_attr_name(self)
+            return name
+        else:
+            raise AttributeError(
+                f"Cannot infer id of {self} because it is not attached to a parent"
+            )
 
     @property
     def name(self) -> str:

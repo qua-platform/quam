@@ -7,18 +7,18 @@ from quam.components.macro import PulseMacro
 
 
 @quam_dataclass
-class TestQubit(Qubit):
+class MockQubit(Qubit):
     xy: IQChannel
 
 
 @quam_dataclass
 class QUAM(QuamRoot):
-    qubit: TestQubit
+    qubit: MockQubit
 
 
 @pytest.fixture
 def test_qubit():
-    return TestQubit(
+    return MockQubit(
         id=0,
         xy=IQChannel(
             opx_output_I=("con1", 1),
