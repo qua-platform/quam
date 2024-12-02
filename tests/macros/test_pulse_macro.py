@@ -40,7 +40,12 @@ def test_pulse_macro_pulse_string(test_qubit, mocker):
     pulse_macro = PulseMacro(pulse="test_pulse")
     assert pulse_macro.pulse == "test_pulse"
 
+    with pytest.raises(AttributeError):
+        pulse_macro.qubit
+
     test_qubit.macros["test_pulse"] = pulse_macro
+
+    assert pulse_macro.qubit is test_qubit
 
     assert test_qubit.get_macros() == {
         "test_pulse": pulse_macro,
