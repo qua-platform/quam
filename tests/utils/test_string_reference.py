@@ -150,28 +150,50 @@ def test_delimiter():
 
 
 def test_get_parent_reference_absolute():
-    assert get_parent_reference("#/a/b") == "#/a"
-    assert get_parent_reference("#/a/b/c") == "#/a/b"
-    assert get_parent_reference("#/a") == "#/"
+    parent, attr = split_reference("#/a/b")
+    assert parent == "#/a"
+    assert attr == "b"
+
+    parent, attr = split_reference("#/a/b/c")
+    assert parent == "#/a/b"
+    assert attr == "c"
+
+    parent, attr = split_reference("#/a")
+    assert parent == "#/"
+    assert attr == "a"
+
     with pytest.raises(ValueError):
-        get_parent_reference("#/")
+        split_reference("#/")
 
 
 def test_get_parent_reference_relative():
-    assert get_parent_reference("#./a/b") == "#./a"
-    assert get_parent_reference("#../a/b") == "#../a"
+    parent, attr = split_reference("#./a/b")
+    assert parent == "#./a"
+    assert attr == "b"
 
-    assert get_parent_reference("#./a") == "#./"
-    assert get_parent_reference("#../a") == "#../"
+    parent, attr = split_reference("#../a/b")
+    assert parent == "#../a"
+    assert attr == "b"
 
-    with pytest.raises(ValueError):
-        get_parent_reference("#./")
-    with pytest.raises(ValueError):
-        get_parent_reference("#../")
+    parent, attr = split_reference("#./a")
+    assert parent == "#./"
+    assert attr == "a"
+
+    parent, attr = split_reference("#../a")
+    assert parent == "#../"
+    assert attr == "a"
+
+    parent, attr = split_reference("#./")
+    assert parent == "#../"
+    assert attr == ""
+
+    parent, attr = split_reference("#../")
+    assert parent == "#../../"
+    assert attr == ""
 
 
 def test_get_parent_reference_invalid():
     with pytest.raises(ValueError):
-        get_parent_reference("a")
+        split_reference("a")
     with pytest.raises(ValueError):
-        get_parent_reference("#")
+        split_reference("#")

@@ -120,18 +120,34 @@ def get_referenced_value(obj, string: str, root=None) -> Any:
         raise ValueError(f"String {string} is not a valid reference, Error: {e}") from e
 
 
-def get_parent_reference(string: str) -> str:
-    """Get the parent reference of a string reference
+def split_reference(string: str) -> Tuple[str, str]:
+    """Split a string reference into its parent reference and attribute
 
     Args:
         string: The reference string
+
+    Returns:
+        A tuple containing the parent reference string and the attribute
+
+    Raises:
+        ValueError: If the string is not a valid reference
+        ValueError: If the string equals "#/"
+
+    Examples:
+        split_reference("#/a/b/c") == ("#/a/b", "c")
+        split_reference("#/a/b") == ("#/a", "b")
+        split_reference("#/a") == ("#/", "a")
     """
     if not is_reference(string):
         raise ValueError(f"String {string} is not a reference")
-    if string in ("#/", "#./", "#../"):
+    if string == "#/":
         raise ValueError(f"String {string} has no parent")
+    if string == "#./":
+        return "#../", ""
+    if string == "#../":
+        return "#../../", ""
 
-    parent_reference = string.rsplit("/", 1)[0]
+    parent_reference, attr = string.rsplit("/", 1)
     if parent_reference in ("#", "#.", "#.."):
         parent_reference += "/"
-    return parent_reference
+    return parent_reference, attr
