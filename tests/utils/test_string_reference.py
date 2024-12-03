@@ -147,3 +147,31 @@ def test_delimiter():
         assert transmon.xy.name == "q1$xy"
     finally:
         quam.utils.string_reference.DELIMITER = "."
+
+
+def test_get_parent_reference_absolute():
+    assert get_parent_reference("#/a/b") == "#/a"
+    assert get_parent_reference("#/a/b/c") == "#/a/b"
+    assert get_parent_reference("#/a") == "#/"
+    with pytest.raises(ValueError):
+        get_parent_reference("#/")
+
+
+def test_get_parent_reference_relative():
+    assert get_parent_reference("#./a/b") == "#./a"
+    assert get_parent_reference("#../a/b") == "#../a"
+
+    assert get_parent_reference("#./a") == "#./"
+    assert get_parent_reference("#../a") == "#../"
+
+    with pytest.raises(ValueError):
+        get_parent_reference("#./")
+    with pytest.raises(ValueError):
+        get_parent_reference("#../")
+
+
+def test_get_parent_reference_invalid():
+    with pytest.raises(ValueError):
+        get_parent_reference("a")
+    with pytest.raises(ValueError):
+        get_parent_reference("#")

@@ -1,3 +1,7 @@
+## [Unreleased]
+### Added
+- Added `string_reference.get_parent_reference` to get the parent reference of a string reference
+
 ## [0.3.8]
 ### Added
 - Added time tagging to channels

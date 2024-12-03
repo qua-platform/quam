@@ -118,3 +118,20 @@ def get_referenced_value(obj, string: str, root=None) -> Any:
         return get_relative_reference_value(obj, string)
     except (AttributeError, KeyError) as e:
         raise ValueError(f"String {string} is not a valid reference, Error: {e}") from e
+
+
+def get_parent_reference(string: str) -> str:
+    """Get the parent reference of a string reference
+
+    Args:
+        string: The reference string
+    """
+    if not is_reference(string):
+        raise ValueError(f"String {string} is not a reference")
+    if string in ("#/", "#./", "#../"):
+        raise ValueError(f"String {string} has no parent")
+
+    parent_reference = string.rsplit("/", 1)[0]
+    if parent_reference in ("#", "#.", "#.."):
+        parent_reference += "/"
+    return parent_reference

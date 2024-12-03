@@ -542,6 +542,8 @@ class QuamBase(ReferenceClass):
             else:
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
+    # def set_at_reference(self, attr: str, value: Any):
+
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
 QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
