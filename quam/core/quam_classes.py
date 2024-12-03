@@ -548,6 +548,11 @@ class QuamBase(ReferenceClass):
         Args:
             attr: The attribute to set the value at the reference of.
             value: The value to set.
+
+        Raises:
+            ValueError: If the attribute is not a reference.
+            ValueError: If the reference is invalid, e.g. "#./" since it has no
+                attribute.
         """
         raw_value = self.get_unreferenced_value(attr)
         if not string_reference.is_reference(raw_value):
@@ -557,6 +562,12 @@ class QuamBase(ReferenceClass):
             )
 
         parent_reference, ref_attr = string_reference.split_reference(raw_value)
+        if not ref_attr:
+            raise ValueError(
+                f"Unsuccessful attempt to set the value at reference {raw_value} for "
+                f"attribute {attr} because the reference is invalid as it has no "
+                "attribute"
+            )
 
         parent_obj = self._get_referenced_value(parent_reference)
         setattr(parent_obj, ref_attr, value)
