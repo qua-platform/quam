@@ -460,17 +460,21 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             integration weights in radians.
     """
 
-    integration_weights: Union[List[float], List[Tuple[float, int]]] = None
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = (
+        "#./default_integration_weights"
+    )
     integration_weights_angle: float = 0
+
+    @property
+    def default_integration_weights(self) -> List[Tuple[float, int]]:
+        return [(1, self.length)]
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
         from qualang_tools.config import convert_integration_weights
 
         phase = np.exp(1j * self.integration_weights_angle)
 
-        if self.integration_weights is None or not len(self.integration_weights):
-            integration_weights = [(1, self.length)]
-        elif isinstance(self.integration_weights[0], float):
+        if isinstance(self.integration_weights[0], float):
             integration_weights = convert_integration_weights(self.integration_weights)
         else:
             integration_weights = self.integration_weights

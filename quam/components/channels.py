@@ -160,7 +160,7 @@ class StickyChannelAddon(QuamComponent):
     """Addon to make channels sticky.
 
     Args:
-        duration (int): The ramp to zero duration, in ns.
+        duration (int): The w to zero duration, in ns.
         enabled (bool, optional): If False, the sticky parameters are not applied.
             Default is True.
         analog (bool, optional): If False, the sticky parameters are not applied to
