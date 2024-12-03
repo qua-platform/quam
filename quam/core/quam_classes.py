@@ -543,6 +543,12 @@ class QuamBase(ReferenceClass):
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
     def set_at_reference(self, attr: str, value: Any):
+        """Follow the reference of an attribute and set the value at the reference
+
+        Args:
+            attr: The attribute to set the value at the reference of.
+            value: The value to set.
+        """
         raw_value = self.get_unreferenced_value(attr)
         if not string_reference.is_reference(raw_value):
             raise ValueError(
@@ -554,8 +560,6 @@ class QuamBase(ReferenceClass):
 
         parent_obj = self._get_referenced_value(parent_reference)
         setattr(parent_obj, ref_attr, value)
-
-        return raw_value
 
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
@@ -697,8 +701,8 @@ class QuamRoot(QuamBase):
 
         return qua_config
 
-    def get_unreferenced_value(self, attr: str):
-        return getattr(self, attr)
+    # def get_unreferenced_value(self, attr: str):
+    #     return getattr(self, attr)
 
 
 class QuamComponent(QuamBase):
