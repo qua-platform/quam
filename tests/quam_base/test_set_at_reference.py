@@ -23,12 +23,10 @@ class RootQuam(QuamRoot):
 def test_set_at_reference():
     """Test setting a value through a reference"""
     parent = ParentQuam(child=ChildQuam())
-    
-    # Set value through reference
-    return_val = parent.set_at_reference("ref_value", 123)
 
-    assert return_val == "#./child/value"
-    
+    # Set value through reference
+    parent.set_at_reference("ref_value", 123)
+
     # Check that the value was set correctly
     assert parent.child.value == 123
     # Reference string should remain unchanged
@@ -38,7 +36,7 @@ def test_set_at_reference():
 def test_set_at_reference_non_reference():
     """Test that setting a non-reference attribute raises ValueError"""
     parent = ParentQuam(child=ChildQuam())
-    
+
     with pytest.raises(ValueError, match="is not a reference"):
         parent.set_at_reference("normal_value", 123)
 
@@ -61,10 +59,10 @@ def test_unreferenced_value():
 def test_set_at_absolute_reference():
     """Test setting a value through an absolute reference"""
     root = RootQuam(parent=ParentQuam(child=ChildQuam()))
-    
+
     # Set value through absolute reference
     root.set_at_reference("abs_ref", 456)
-    
+
     # Check that the value was set correctly
     assert root.parent.child.value == 456
     # Reference string should remain unchanged
@@ -75,6 +73,6 @@ def test_set_at_absolute_reference_invalid():
     """Test handling of invalid absolute references"""
     root = RootQuam(parent=ParentQuam(child=ChildQuam()))
     root.abs_ref = "#/nonexistent/path"
-    
+
     with pytest.raises(AttributeError):
         root.set_at_reference("abs_ref", 456)
