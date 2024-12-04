@@ -1,3 +1,8 @@
+## [Unreleased]
+### Added
+- Added `QuamBase.set_at_reference` to set a value at a reference
+- Added `string_reference.get_parent_reference` to get the parent reference of a string reference
+
 ## [0.3.8]
 ### Added
 - Added time tagging to channels
