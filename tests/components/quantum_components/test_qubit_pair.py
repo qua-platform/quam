@@ -19,7 +19,7 @@ class MockQubitPair(QubitPair):
 @quam_dataclass
 class QUAM(QuamRoot):
     qubits: Dict[str, MockQubit]
-    qubit_pairs: str[str, MockQubitPair]
+    qubit_pairs: Dict[str, MockQubitPair]
 
 
 @pytest.fixture
@@ -51,9 +51,7 @@ def test_qubit_target():
 @pytest.fixture
 def test_qubit_pair(test_qubit_control, test_qubit_target):
     return MockQubitPair(
-        id="pair_1",
-        qubit_control=test_qubit_control,
-        qubit_target=test_qubit_target
+        id="pair_1", qubit_control=test_qubit_control, qubit_target=test_qubit_target
     )
 
 
@@ -65,7 +63,9 @@ def test_quam(test_qubit_control, test_qubit_target, test_qubit_pair):
     )
 
 
-def test_qubit_pair_initialization(test_qubit_pair, test_qubit_control, test_qubit_target):
+def test_qubit_pair_initialization(
+    test_qubit_pair, test_qubit_control, test_qubit_target
+):
     """Test that QubitPair is initialized correctly"""
     assert test_qubit_pair.qubit_control == test_qubit_control
     assert test_qubit_pair.qubit_target == test_qubit_target
@@ -76,10 +76,10 @@ def test_qubit_pair_initialization(test_qubit_pair, test_qubit_control, test_qub
 
 def test_qubit_pair_align(test_qubit_pair, mocker):
     """Test that align method calls the control qubit's align method with correct args"""
-    mock_align = mocker.patch.object(test_qubit_pair.qubit_control, 'align')
-    
+    mock_align = mocker.patch.object(test_qubit_pair.qubit_control, "align")
+
     test_qubit_pair.align()
-    
+
     mock_align.assert_called_once_with(test_qubit_pair.qubit_target)
 
 
@@ -87,9 +87,9 @@ def test_qubit_pair_via_matmul(test_quam):
     """Test that qubit pair can be accessed via @ operator"""
     control = test_quam.qubits["control"]
     target = test_quam.qubits["target"]
-    
+
     qubit_pair = control @ target
-    
+
     assert isinstance(qubit_pair, QubitPair)
     assert qubit_pair.qubit_control == control
     assert qubit_pair.qubit_target == target
@@ -98,11 +98,13 @@ def test_qubit_pair_via_matmul(test_quam):
 def test_matmul_with_invalid_qubit(test_quam):
     """Test that @ operator raises error for invalid qubit pairs"""
     control = test_quam.qubits["control"]
-    
+
     with pytest.raises(ValueError, match="Cannot create a qubit pair with same qubit"):
         _ = control @ control
-    
-    with pytest.raises(ValueError, match="Cannot create a qubit pair .* with a non-qubit object"):
+
+    with pytest.raises(
+        ValueError, match="Cannot create a qubit pair .* with a non-qubit object"
+    ):
         _ = control @ "not_a_qubit"
 
 
@@ -110,7 +112,7 @@ def test_matmul_with_nonexistent_pair(test_quam):
     """Test that @ operator raises error for non-existent qubit pairs"""
     target = test_quam.qubits["target"]
     control = test_quam.qubits["control"]
-    
+
     # Try to access pair in reverse order (target @ control) when only (control @ target) exists
     with pytest.raises(ValueError, match="Qubit pair not found"):
         _ = target @ control
