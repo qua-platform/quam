@@ -15,6 +15,15 @@ class TestMacro(QubitMacro):
         return (self.qubit, args, kwargs)
 
 
+@quam_dataclass
+class TestMacro2(QubitMacro):
+    """Test macro class that requires a positional argument"""
+
+    def apply(self, required_arg, **kwargs):
+        # Return inputs to verify they were passed correctly
+        return (self.qubit, (required_arg,), kwargs)
+
+
 @pytest.fixture
 def test_qubit():
     """Fixture providing a qubit with common test macros"""
@@ -92,3 +101,41 @@ def test_operation_call_no_args():
         ValueError, match="Operation test_op requires at least one argument"
     ):
         op()
+
+
+def test_operation_with_unitary():
+    def test_op(qubit: Qubit):
+        pass
+
+    test_unitary = [[1, 0], [0, 1]]  # Example unitary matrix
+    op = Operation(test_op, unitary=test_unitary)
+    assert op.unitary == test_unitary
+
+
+def test_operation_call_multiple_args(test_qubit):
+    def test_op(qubit: Qubit, arg1: float, arg2: str):
+        pass
+
+    op = Operation(test_op)
+    result = op(test_qubit, 1.0, "test")
+
+    assert result[0] == test_qubit
+    assert result[1] == (1.0, "test")
+    assert result[2] == {}  # No keyword args
+
+
+def test_operation_call_out_of_order_kwargs(test_qubit):
+    def test_op(qubit: Qubit, arg1: float, arg2: str = "default"):
+        pass
+
+    # Use TestMacro2 which requires a positional argument
+    macro = TestMacro2()
+    test_qubit.macros["test_op"] = macro
+
+    op = Operation(test_op)
+    # Pass arg2 before arg1, making arg1 (a positional arg) into a kwarg
+    result = op(test_qubit, arg2="test", required_arg=1.0)
+
+    assert result[0] == test_qubit
+    assert result[1] == (1.0,)  # arg1 as positional arg
+    assert result[2] == {"arg2": "test"}  # arg2 as kwarg
