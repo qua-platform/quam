@@ -6,36 +6,6 @@ from quam.components.macro import QubitMacro
 from quam.core import quam_dataclass
 
 
-@quam_dataclass
-class TestMacro(QubitMacro):
-    """Simple macro class for testing purposes"""
-
-    def apply(self, *args, **kwargs):
-        # Return inputs to verify they were passed correctly
-        return (self.qubit, args, kwargs)
-
-
-@quam_dataclass
-class TestMacro2(QubitMacro):
-    """Test macro class that requires a positional argument"""
-
-    def apply(self, required_arg, **kwargs):
-        # Return inputs to verify they were passed correctly
-        return (self.qubit, (required_arg,), kwargs)
-
-
-@pytest.fixture
-def test_qubit():
-    """Fixture providing a qubit with common test macros"""
-    qubit = Qubit(id="test_qubit")
-
-    # Add some common macros
-    qubit.macros["x_gate"] = TestMacro()
-    qubit.macros["test_op"] = TestMacro()
-
-    return qubit
-
-
 def test_operation_initialization():
     def sample_op(qubit: Qubit):
         pass
@@ -122,6 +92,15 @@ def test_operation_call_multiple_args(test_qubit):
     assert result[0] == test_qubit
     assert result[1] == (1.0, "test")
     assert result[2] == {}  # No keyword args
+
+
+@quam_dataclass
+class TestMacro2(QubitMacro):
+    """Test macro class that requires a positional argument"""
+
+    def apply(self, required_arg, **kwargs):
+        # Return inputs to verify they were passed correctly
+        return (self.qubit, (required_arg,), kwargs)
 
 
 def test_operation_call_out_of_order_kwargs(test_qubit):
