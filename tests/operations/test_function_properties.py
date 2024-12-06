@@ -1,8 +1,10 @@
 import pytest
 from quam.core.operation.function_properties import FunctionProperties
+from quam.core.quam_classes import quam_dataclass
 from quam.components import QuantumComponent
 
 
+@quam_dataclass
 class DummyQuantumComponent(QuantumComponent):
     """Dummy component for testing."""
 
@@ -85,7 +87,8 @@ def test_from_function_with_no_args():
 
 
 def test_from_function_invalid_first_arg():
-    """Test from_function with a function that doesn't have QuantumComponent as first arg."""
+    """Test from_function with a function that doesn't have QuantumComponent as
+    first arg."""
 
     def invalid_operation(x: int, component: DummyQuantumComponent):
         pass
@@ -172,14 +175,18 @@ def test_function_properties_invalid_argument_name():
 
 def test_function_properties_python_keyword_argument():
     """Test that Python keywords are rejected as argument names."""
-    with pytest.raises(ValueError, match="Argument name cannot be a Python keyword: 'class'"):
+    with pytest.raises(
+        ValueError, match="Argument name cannot be a Python keyword: 'class'"
+    ):
         FunctionProperties(
             quantum_component_name="comp",
             quantum_component_type=DummyQuantumComponent,
             required_args=["class"],
         )
 
-    with pytest.raises(ValueError, match="Argument name cannot be a Python keyword: 'return'"):
+    with pytest.raises(
+        ValueError, match="Argument name cannot be a Python keyword: 'return'"
+    ):
         FunctionProperties(
             quantum_component_name="comp",
             quantum_component_type=DummyQuantumComponent,
@@ -194,7 +201,7 @@ def test_from_function_with_complex_type_hints():
     def operation(
         component: DummyQuantumComponent,
         arg1: Union[int, str],
-        arg2: Optional[float] = None
+        arg2: Optional[float] = None,
     ):
         pass
 
@@ -205,6 +212,7 @@ def test_from_function_with_complex_type_hints():
 
 def test_from_function_without_annotations():
     """Test that function works with parameters that have no type annotations."""
+
     def operation(component, arg1, arg2=None):
         pass
 
@@ -214,7 +222,8 @@ def test_from_function_without_annotations():
 
 def test_from_function_with_non_type_annotation():
     """Test handling of invalid type annotations."""
-    def operation(component: "not a real type", arg1: int):
+
+    def operation(component: "not a real type", arg1: int):  # type: ignore
         pass
 
     with pytest.raises(ValueError, match="missing type annotation"):
