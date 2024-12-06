@@ -1,7 +1,8 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Type, get_origin, get_args, TypeVar
 import inspect
 from typing import get_type_hints
 from dataclasses import dataclass, field
+import keyword
 
 from quam.components import QuantumComponent
 
@@ -9,47 +10,132 @@ from quam.components import QuantumComponent
 __all__ = ["FunctionProperties"]
 
 
+QC = TypeVar("QC", bound=QuantumComponent)
+
+
 @dataclass
 class FunctionProperties:
+    """
+    Properties of a quantum operation function.
+    
+    This class extracts and stores metadata about functions that operate on
+    quantum components, including argument information and type requirements.
+    
+    Attributes:
+        quantum_component_name: Name of the parameter accepting the quantum component
+        quantum_component_type: Type of quantum component the function operates on
+        name: Name of the function
+        required_args: List of required argument names after the quantum component
+        optional_args: Dictionary of optional arguments and their default values
+    """
     quantum_component_name: str
-    quantum_component_type: type[QuantumComponent]
+    quantum_component_type: Type[QC]
     name: str = ""
     required_args: list[str] = field(default_factory=list)
     optional_args: dict[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self):
+        # Make a new list/dict to avoid sharing between instances
+        self.required_args = list(self.required_args)
+        self.optional_args = dict(self.optional_args)
+        
+        # Validate argument names
+        all_args = self.required_args + list(self.optional_args)
+        for arg in all_args:
+            if not arg.isidentifier():
+                raise ValueError(f"Invalid argument name: {arg!r}")
+            if keyword.iskeyword(arg):
+                raise ValueError(f"Argument name cannot be a Python keyword: {arg!r}")
+
+    @staticmethod
+    def _resolve_type(type_hint: Any) -> Optional[Type]:
+        """
+        Resolve type hints, including string forward references and complex types.
+        
+        Args:
+            type_hint: Any type annotation
+            
+        Returns:
+            The resolved base type, or None if unresolvable
+        """
+        if type_hint is None:
+            return None
+        # Handle string forward references
+        if isinstance(type_hint, str):
+            return None
+        # Handle Optional, Union, etc
+        if get_origin(type_hint) is not None:
+            args = get_args(type_hint)
+            return args[0] if args else None
+        # Handle regular types
+        if isinstance(type_hint, type):
+            return type_hint
+        return None
+
+    @staticmethod
+    def _is_quantum_component_type(type_hint: Optional[Type]) -> bool:
+        """Check if type is or inherits from QuantumComponent."""
+        try:
+            return (
+                type_hint is not None
+                and isinstance(type_hint, type)
+                and issubclass(type_hint, QuantumComponent)
+            )
+        except TypeError:
+            return False
+
     @classmethod
     def from_function(cls, func: Callable) -> "FunctionProperties":
+        if not callable(func):
+            raise ValueError(f"Input {func!r} must be a callable")
+
         signature = inspect.signature(func)
         parameters = signature.parameters
 
-        if not len(parameters):
+        if not parameters:
             raise ValueError(
-                f"Operation {func.__name__} must accept a QuantumComponent"
+                f"Operation {func.__name__!r} must accept at least one argument "
+                "(a QuantumComponent)"
             )
+
+        # Try to get type hints, gracefully handle missing annotations
+        try:
+            type_hints = get_type_hints(func)
+        except Exception:
+            type_hints = {}
 
         parameters_iterator = iter(parameters)
-
-        # Get first parameter and check if it is a QuantumComponent
         first_param_name = next(parameters_iterator)
-        first_param_type = get_type_hints(func).get(first_param_name, None)
-        # First parameter must be a QuantumComponent
-        if first_param_type and issubclass(first_param_type, QuantumComponent):
-            function_properties = FunctionProperties(
-                quantum_component_name=first_param_name,
-                quantum_component_type=first_param_type,
-                name=func.__name__,
-            )
-        else:
-            raise ValueError(
-                f"Operation {func.__name__} must accept a QuantumComponent as its"
-                " first argument"
-            )
-
-        for param in parameters_iterator:
-            param = parameters[param]
-            if param.default == inspect.Parameter.empty:
-                function_properties.required_args.append(param.name)
+        
+        # Get and resolve the type of the first parameter
+        first_param_type = cls._resolve_type(type_hints.get(first_param_name))
+        
+        if not cls._is_quantum_component_type(first_param_type):
+            if first_param_type is None:
+                msg = (
+                    f"Operation {func.__name__!r} is missing type annotation for "
+                    f"first parameter {first_param_name!r}"
+                )
             else:
-                function_properties.optional_args[param.name] = param.default
+                msg = (
+                    f"Operation {func.__name__!r} must accept a QuantumComponent "
+                    f"as its first argument, got {first_param_type!r}"
+                )
+            raise ValueError(msg)
+
+        function_properties = cls(
+            quantum_component_name=first_param_name,
+            quantum_component_type=first_param_type,  # type: ignore
+            name=func.__name__,
+        )
+
+        # Process remaining parameters
+        for param_name in parameters_iterator:
+            param = parameters[param_name]
+            if param.default == inspect.Parameter.empty:
+                function_properties.required_args.append(param_name)
+            else:
+                # Store the default value directly
+                function_properties.optional_args[param_name] = param.default
 
         return function_properties
