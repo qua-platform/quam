@@ -1,3 +1,5 @@
+from collections import UserDict
+from dataclasses import field
 from typing import Dict, List
 import pytest
 from quam.components import Qubit, QubitPair
@@ -19,7 +21,7 @@ class MockQubitPair(QubitPair):
 @quam_dataclass
 class QUAM(QuamRoot):
     qubits: Dict[str, MockQubit]
-    qubit_pairs: Dict[str, MockQubitPair]
+    qubit_pairs: Dict[str, MockQubitPair] = field(default_factory=dict)
 
 
 @pytest.fixture
@@ -49,18 +51,22 @@ def test_qubit_target():
 
 
 @pytest.fixture
-def test_qubit_pair(test_qubit_control, test_qubit_target):
-    return MockQubitPair(
-        id="pair_1", qubit_control=test_qubit_control, qubit_target=test_qubit_target
+def test_quam(test_qubit_control, test_qubit_target):
+    machine = QUAM(
+        qubits={"control": test_qubit_control, "target": test_qubit_target},
     )
+
+    machine.qubit_pairs["pair_1"] = MockQubitPair(
+        id="pair_1",
+        qubit_control=test_qubit_control.get_reference(),
+        qubit_target=test_qubit_target.get_reference(),
+    )
+    return machine
 
 
 @pytest.fixture
-def test_quam(test_qubit_control, test_qubit_target, test_qubit_pair):
-    return QUAM(
-        qubits={"control": test_qubit_control, "target": test_qubit_target},
-        qubit_pairs=[test_qubit_pair],
-    )
+def test_qubit_pair(test_quam):
+    return test_quam.qubit_pairs["pair_1"]
 
 
 def test_qubit_pair_initialization(
@@ -70,7 +76,7 @@ def test_qubit_pair_initialization(
     assert test_qubit_pair.qubit_control == test_qubit_control
     assert test_qubit_pair.qubit_target == test_qubit_target
     assert test_qubit_pair.name == "pair_1"
-    assert isinstance(test_qubit_pair.macros, dict)
+    assert isinstance(test_qubit_pair.macros, UserDict)
     assert len(test_qubit_pair.macros) == 0
 
 

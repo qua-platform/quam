@@ -1,3 +1,4 @@
+from collections import UserDict
 from typing import Dict, Union, TYPE_CHECKING, Any
 from dataclasses import field
 
@@ -103,7 +104,12 @@ class Qubit(QuantumComponent):
                 "Please add a 'qubit_pairs' attribute to the root component."
             )
 
-        for qubit_pair in self._root.qubit_pairs:
+        if isinstance(self._root.qubit_pairs, UserDict):
+            qubit_pairs = self._root.qubit_pairs.values()
+        else:
+            qubit_pairs = self._root.qubit_pairs
+
+        for qubit_pair in qubit_pairs:
             if qubit_pair.qubit_control is self and qubit_pair.qubit_target is other:
                 return qubit_pair
         else:
