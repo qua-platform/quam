@@ -27,8 +27,11 @@ class ReferenceClass:
         """
         raise NotImplementedError
 
-    def get_unreferenced_value(self, attr: str) -> bool:
-        """Check if an attribute is a reference"""
+    def get_unreferenced_value(self, attr: str) -> str:
+        """Get the value of an attribute without following references.
+
+        If the value is a reference, the reference string is returned
+        """
         return super().__getattribute__(attr)
 
     def __getattribute__(self, attr: str) -> Any:
