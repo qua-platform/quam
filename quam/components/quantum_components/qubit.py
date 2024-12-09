@@ -78,8 +78,10 @@ class Qubit(QuantumComponent):
             return pulses[0]
 
     @QuantumComponent.register_macro
-    def align(self, other_qubits: Iterable["Qubit"]):
+    def align(self, other_qubits: Union["Qubit", Iterable["Qubit"]]):
         """Aligns the execution of all channels of this qubit and all other qubits"""
+        if isinstance(other_qubits, Qubit):
+            other_qubits = [other_qubits]
         channel_names = [channel.name for channel in self.channels.values()]
         for qubit in other_qubits:
             channel_names.extend([channel.name for channel in qubit.channels.values()])
