@@ -32,7 +32,6 @@ class PulseMacro(QubitMacro):
     """
 
     pulse: Union[Pulse, str]  # type: ignore
-    unitary: Optional[List[List[float]]] = None
 
     def apply(self, *, amplitude_scale=None, duration=None, **kwargs):
         if isinstance(self.pulse, Pulse):

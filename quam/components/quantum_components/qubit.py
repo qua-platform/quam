@@ -1,4 +1,5 @@
 from collections import UserDict
+from collections.abc import Iterable
 from typing import Dict, Union, TYPE_CHECKING, Any
 from dataclasses import field
 
@@ -77,7 +78,7 @@ class Qubit(QuantumComponent):
             return pulses[0]
 
     @QuantumComponent.register_macro
-    def align(self, *other_qubits: "Qubit"):
+    def align(self, other_qubits: Iterable["Qubit"]):
         """Aligns the execution of all channels of this qubit and all other qubits"""
         channel_names = [channel.name for channel in self.channels.values()]
         for qubit in other_qubits:
