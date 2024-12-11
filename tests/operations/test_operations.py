@@ -12,7 +12,6 @@ def test_operation_initialization():
 
     op = Operation(sample_op)
     assert op.func == sample_op
-    assert op.unitary is None
     assert isinstance(op.properties, FunctionProperties)
     assert op.properties.name == "sample_op"
     assert op.properties.quantum_component_type == Qubit
@@ -71,15 +70,6 @@ def test_operation_call_no_args():
         ValueError, match="Operation test_op requires at least one argument"
     ):
         op()
-
-
-def test_operation_with_unitary():
-    def test_op(qubit: Qubit):
-        pass
-
-    test_unitary = [[1, 0], [0, 1]]  # Example unitary matrix
-    op = Operation(test_op, unitary=test_unitary)
-    assert op.unitary == test_unitary
 
 
 def test_operation_call_multiple_args(test_qubit):

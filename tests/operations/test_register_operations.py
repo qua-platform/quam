@@ -25,17 +25,6 @@ def test_register_operation_basic():
     assert wrapped_op.__doc__ == test_op.__doc__
 
 
-def test_register_operation_with_unitary():
-    def test_op(qubit: Qubit):
-        pass
-
-    registry = OperationsRegistry()
-    test_unitary = [[1, 0], [0, 1]]
-    wrapped_op = registry.register_operation(test_op, unitary=test_unitary)
-
-    assert registry["test_op"].unitary == test_unitary
-
-
 def test_register_operation_as_decorator():
     registry = OperationsRegistry()
 
@@ -45,19 +34,6 @@ def test_register_operation_as_decorator():
 
     assert "test_op" in registry
     assert isinstance(registry["test_op"], Operation)
-
-
-def test_register_operation_as_decorator_with_unitary():
-    registry = OperationsRegistry()
-    test_unitary = [[1, 0], [0, 1]]
-
-    @registry.register_operation(unitary=test_unitary)
-    def test_op(qubit: Qubit):
-        pass
-
-    assert "test_op" in registry
-    assert isinstance(registry["test_op"], Operation)
-    assert registry["test_op"].unitary == test_unitary
 
 
 def test_register_multiple_operations():

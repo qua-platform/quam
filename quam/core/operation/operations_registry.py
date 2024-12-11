@@ -13,7 +13,7 @@ T = TypeVar("T", bound=Callable[..., Any])
 class OperationsRegistry(UserDict):
     """A registry to store and manage operations."""
 
-    def register_operation(self, func: Optional[T] = None, unitary=None) -> T:
+    def register_operation(self, func: Optional[T]) -> T:
         """
         Register a function as an operation.
 
@@ -27,10 +27,11 @@ class OperationsRegistry(UserDict):
         Returns:
             callable: The wrapped function.
         """
-        if func is None:
-            return functools.partial(self.register_operation, unitary=unitary)
+        # Optionally add this later such that we can pass parameters to the decorator
+        # if func is None:
+        #     return functools.partial(self.register_operation)
 
-        operation = Operation(func, unitary=unitary)
+        operation = Operation(func)
         operation = functools.update_wrapper(operation, func)
 
         self[func.__name__] = operation

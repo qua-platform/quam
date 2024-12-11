@@ -17,10 +17,8 @@ def y(qubit: Qubit, **kwargs):
     pass
 
 
-@operations_registry.register_operation(
-    unitary=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]]
-)
-def U(qubit: Qubit, **kwargs):
+@operations_registry.register_operation
+def Rx(qubit: Qubit, angle: float, **kwargs):
     pass
 
 

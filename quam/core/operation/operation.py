@@ -8,7 +8,7 @@ __all__ = ["Operation"]
 
 
 class Operation:
-    def __init__(self, func: Callable, unitary: Optional[Any] = None):
+    def __init__(self, func: Callable):
         """
         Initialize a quantum operation.
 
@@ -16,10 +16,8 @@ class Operation:
 
         Args:
             func: The function implementing the operation
-            unitary: Optional unitary matrix representing the operation
         """
         self.func = func
-        self.unitary = unitary
         self.properties = FunctionProperties.from_function(func)
 
     def get_macro(self, quantum_component: QuantumComponent):
