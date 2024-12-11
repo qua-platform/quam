@@ -570,7 +570,13 @@ class QuamBase(ReferenceClass):
             )
 
         parent_obj = self._get_referenced_value(parent_reference)
-        setattr(parent_obj, ref_attr, value)
+        raw_referenced_value = parent_obj.get_unreferenced_value(ref_attr)
+        if string_reference.is_reference(raw_referenced_value) and isinstance(
+            parent_obj, QuamBase
+        ):
+            parent_obj.set_at_reference(ref_attr, value)
+        else:
+            setattr(parent_obj, ref_attr, value)
 
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
