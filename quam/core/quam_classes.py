@@ -682,9 +682,6 @@ class QuamRoot(QuamBase):
 
         return qua_config
 
-    def get_unreferenced_value(self, attr: str):
-        return getattr(self, attr)
-
 
 class QuamComponent(QuamBase):
     """Base class for any QuAM component class.

@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- Fixed issues with parameters being references in a QuamRoot object
+
 ## [0.3.8]
 ### Added
 - Added time tagging to channels
