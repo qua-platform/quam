@@ -6,6 +6,9 @@
 ### Changed
 - `Pulse.integration_weights` now defaults to `#./default_integration_weights`, which returns [(1, pulse.length)]
 
+### Fixed
+- Fixed issues with parameters being references in a QuamRoot object
+
 
 ## [0.3.8]
 ### Added
