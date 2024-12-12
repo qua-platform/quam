@@ -108,3 +108,15 @@ def test_operation_call_out_of_order_kwargs(test_qubit):
     assert result[0] == test_qubit
     assert result[1] == (1.0,)  # arg1 as positional arg
     assert result[2] == {"arg2": "test"}  # arg2 as kwarg
+
+
+def test_measure_operation(test_qubit):
+    from qm.qua._expressions import QuaBoolType
+
+    def measure(qubit: Qubit, **kwargs) -> QuaBoolType:
+        pass
+
+    op = Operation(measure)
+
+    assert op.properties.return_type == QuaBoolType
+    assert op.func == measure

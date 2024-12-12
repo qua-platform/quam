@@ -220,11 +220,43 @@ def test_from_function_without_annotations():
         FunctionProperties.from_function(operation)
 
 
-def test_from_function_with_non_type_annotation():
-    """Test handling of invalid type annotations."""
+def test_from_function_with_return_type():
+    """Test that return type is correctly captured."""
 
-    def operation(component: "not a real type", arg1: int):  # type: ignore
+    def operation(component: DummyQuantumComponent) -> int:
+        return 42
+
+    props = FunctionProperties.from_function(operation)
+    assert props.return_type == int
+
+
+def test_from_function_with_optional_return_type():
+    """Test handling of Optional return type."""
+    from typing import Optional
+
+    def operation(component: DummyQuantumComponent) -> Optional[int]:
+        return None
+
+    props = FunctionProperties.from_function(operation)
+    assert props.return_type == Optional[int]
+
+
+def test_from_function_with_qua_return_type():
+    """Test handling of QUA variable return types."""
+    from qm.qua._expressions import QuaBoolType
+
+    def operation(component: DummyQuantumComponent) -> QuaBoolType:
         pass
 
-    with pytest.raises(ValueError, match="missing type annotation"):
-        FunctionProperties.from_function(operation)
+    props = FunctionProperties.from_function(operation)
+    assert props.return_type == QuaBoolType
+
+
+def test_from_function_without_return_type():
+    """Test handling of functions without return type annotation."""
+
+    def operation(component: DummyQuantumComponent):
+        pass
+
+    props = FunctionProperties.from_function(operation)
+    assert props.return_type is None
