@@ -63,7 +63,7 @@ def test_qubit_align(mock_qubit_with_resonator, mock_qubit, mocker):
 
     from quam.components.quantum_components.qubit import align
 
-    align.assert_called_once_with("q1.xy", "q1.resonator", "q0.xy")
+    align.assert_called_once_with(*{"q1.xy", "q1.resonator", "q0.xy"})
 
 
 def test_qubit_get_macros(mock_qubit):
@@ -77,7 +77,7 @@ def test_qubit_apply_align(mock_qubit_with_resonator, mocker):
 
     from quam.components.quantum_components.qubit import align
 
-    align.assert_called_once_with("q1.xy", "q1.resonator")
+    align.assert_called_once_with(*{"q1.xy", "q1.resonator"})
 
 
 def test_qubit_inferred_id_direct():

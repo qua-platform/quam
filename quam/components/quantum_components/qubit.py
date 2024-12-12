@@ -1,6 +1,6 @@
 from collections import UserDict
 from collections.abc import Iterable
-from typing import Dict, Union, TYPE_CHECKING, Any
+from typing import Dict, List, Optional, Union, TYPE_CHECKING, Any
 from dataclasses import field
 
 from qm import qua
@@ -77,11 +77,29 @@ class Qubit(QuantumComponent):
         else:
             return pulses[0]
 
-    def align(self, *other_qubits: "Qubit"):
+    @QuantumComponent.register_macro
+    def align(
+        self,
+        other_qubits: Optional[Union["Qubit", Iterable["Qubit"]]] = None,
+        *args: "Qubit",
+    ):
         """Aligns the execution of all channels of this qubit and all other qubits"""
-        channel_names = [channel.name for channel in self.channels.values()]
-        for qubit in other_qubits:
-            channel_names.extend([channel.name for channel in qubit.channels.values()])
+        quantum_components = [self]
+
+        if isinstance(other_qubits, Qubit):
+            quantum_components.append(other_qubits)
+        elif isinstance(other_qubits, Iterable):
+            quantum_components.extend(other_qubits)
+        elif other_qubits is not None:
+            raise ValueError(f"Invalid type for other_qubits: {type(other_qubits)}")
+
+        if args:
+            assert all(isinstance(arg, Qubit) for arg in args)
+            quantum_components.extend(args)
+
+        channel_names = {
+            ch.name for qubit in quantum_components for ch in qubit.channels.values()
+        }
 
         align(*channel_names)
 
