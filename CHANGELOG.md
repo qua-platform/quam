@@ -1,6 +1,14 @@
 ## [Unreleased]
+### Added
+- Added `QuamBase.set_at_reference` to set a value at a reference
+- Added `string_reference.get_parent_reference` to get the parent reference of a string reference
+
+### Changed
+- `Pulse.integration_weights` now defaults to `#./default_integration_weights`, which returns [(1, pulse.length)]
+
 ### Fixed
 - Fixed issues with parameters being references in a QuamRoot object
+
 
 ## [0.3.8]
 ### Added
