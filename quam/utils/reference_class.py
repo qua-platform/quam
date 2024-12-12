@@ -27,7 +27,7 @@ class ReferenceClass:
         """
         raise NotImplementedError
 
-    def get_unreferenced_value(self, attr: str) -> str:
+    def get_unreferenced_value(self, attr: str) -> Any:
         """Get the value of an attribute without following references.
 
         If the value is a reference, the reference string is returned
