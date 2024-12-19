@@ -8,6 +8,7 @@
 
 ### Fixed
 - Fixed issues with parameters being references in a QuamRoot object
+- Fixed `MWFEMAnalogOutputPort.upconverters` not having the correct type
 
 
 ## [0.3.8]
