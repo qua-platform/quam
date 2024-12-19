@@ -52,12 +52,16 @@ nav:
     - "components/channels.md"
     - "components/pulses.md"
     - "components/octave.md"
+    - "components/qubits-and-qubit-pairs.md"
     - "components/custom-components.md"
   - "QuAM Features":
     - "features/index.md"
     - "features/quam-references.md"
   - migrating-to-quam.md
-
+  - "Gate Operations":
+    - "gate-operations/index.md"
+    - "gate-operations/macros.md"
+    - "gate-operations/operations.md"
   - "API References":
     - "API_references/index.md"
     - "QuAM Components":
