@@ -140,6 +140,10 @@ class FrequencyConverter(BaseFrequencyConverter):
     def LO_frequency(self):
         return self.local_oscillator.frequency
 
+    @LO_frequency.setter
+    def LO_frequency(self, value):
+        self.local_oscillator.frequency = value
+
     def configure(self):
         if self.local_oscillator is not None:
             self.local_oscillator.configure()
