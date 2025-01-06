@@ -142,7 +142,15 @@ class FrequencyConverter(BaseFrequencyConverter):
 
     @LO_frequency.setter
     def LO_frequency(self, value):
-        self.local_oscillator.frequency = value
+        """Sets the frequency of the local oscillator object"""
+        if self.local_oscillator is None:
+            raise AttributeError(
+                f"Unable to set LO frequency for {self} as it has no local oscillator"
+            )
+
+        # Use set_at_reference to ensure the frequency is updated, even if the local
+        # oscillator frequency is a reference
+        self.local_oscillator.set_at_reference("frequency", value)
 
     def configure(self):
         if self.local_oscillator is not None:
