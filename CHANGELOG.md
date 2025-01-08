@@ -2,6 +2,7 @@
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference
 - Added `string_reference.get_parent_reference` to get the parent reference of a string reference
+- Added `FrequencyConverter.LO_frequency` setter which updates the local oscillator frequency
 
 ### Changed
 - `Pulse.integration_weights` now defaults to `#./default_integration_weights`, which returns [(1, pulse.length)]
