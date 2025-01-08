@@ -150,7 +150,9 @@ class FrequencyConverter(BaseFrequencyConverter):
 
         # Use set_at_reference to ensure the frequency is updated, even if the local
         # oscillator frequency is a reference
-        self.local_oscillator.set_at_reference("frequency", value)
+        self.local_oscillator.set_at_reference(
+            "frequency", value, allow_non_reference=True
+        )
 
     def configure(self):
         if self.local_oscillator is not None:

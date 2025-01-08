@@ -84,6 +84,7 @@ class DoubleChildQuam(ChildQuam):
     value: int = 0
     child: Optional[ChildQuam] = None
 
+
 def test_set_double_reference():
     """Test setting a value through a double reference"""
     double_child = DoubleChildQuam(child=ChildQuam(value=42), value="#./child/value")
@@ -108,7 +109,9 @@ def test_set_double_reference():
 
 def test_set_nonexistent_double_reference():
     """Test setting a value where the double reference does not exist"""
-    double_child = DoubleChildQuam(child=ChildQuam(value=42), value="#./child/nonexistent")
+    double_child = DoubleChildQuam(
+        child=ChildQuam(value=42), value="#./child/nonexistent"
+    )
     parent = ParentQuam(child=double_child, ref_value="#./child/nonexistent")
 
     with pytest.raises(AttributeError):
@@ -117,7 +120,9 @@ def test_set_nonexistent_double_reference():
 
 def test_set_double_reference_to_nonexistent_item():
     """Test setting a value through a double reference to a nonexistent item"""
-    double_child = DoubleChildQuam(child=ChildQuam(value=42), value="#./nonexistent/value")
+    double_child = DoubleChildQuam(
+        child=ChildQuam(value=42), value="#./nonexistent/value"
+    )
     parent = ParentQuam(child=double_child, ref_value="#./nonexistent/value")
 
     with pytest.raises(AttributeError):
@@ -132,9 +137,13 @@ def test_set_double_reference_with_invalid_reference():
     with pytest.raises(AttributeError):
         parent.set_at_reference("ref_value", 789)
 
+
 def test_set_triple_reference():
     """Test setting a value through a triple reference"""
-    triple_child = DoubleChildQuam(child=DoubleChildQuam(child=ChildQuam(value=42), value="#./child/value"), value="#./child/value")
+    triple_child = DoubleChildQuam(
+        child=DoubleChildQuam(child=ChildQuam(value=42), value="#./child/value"),
+        value="#./child/value",
+    )
     parent = ParentQuam(child=triple_child, ref_value="#./child/value")
 
     assert parent.ref_value == 42
@@ -155,3 +164,15 @@ def test_set_triple_reference():
     assert parent.get_unreferenced_value("ref_value") == "#./child/value"
     assert triple_child.get_unreferenced_value("value") == "#./child/value"
     assert triple_child.child.get_unreferenced_value("value") == "#./child/value"
+
+
+def test_set_at_reference_allow_non_reference():
+    """Test setting a value through a reference with allow_non_reference=True"""
+    parent = ParentQuam(child=ChildQuam(value=42), ref_value="#./child/value")
+    parent.set_at_reference("ref_value", 789, allow_non_reference=True)
+    assert parent.ref_value == 789
+
+    with pytest.raises(ValueError):
+        parent.child.set_at_reference("value", 43)
+
+    assert parent.child.value == 789
