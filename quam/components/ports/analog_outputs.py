@@ -73,7 +73,7 @@ class MWFEMAnalogOutputPort(FEMPort):
 
     band: int
     upconverter_frequency: Optional[float] = None
-    upconverters: Optional[Dict[int, float]] = None
+    upconverters: Optional[Dict[int, Dict[str, float]]] = None
     delay: int = 0
     shareable: bool = False
     sampling_rate: float = 1e9  # Either 1e9 or 2e9

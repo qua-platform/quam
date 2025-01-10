@@ -542,24 +542,33 @@ class QuamBase(ReferenceClass):
             else:
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
-    def set_at_reference(self, attr: str, value: Any):
+    def set_at_reference(
+        self, attr: str, value: Any, allow_non_reference: bool = False
+    ):
         """Follow the reference of an attribute and set the value at the reference
 
         Args:
             attr: The attribute to set the value at the reference of.
             value: The value to set.
+            allow_non_reference: Whether to allow the attribute to be a non-reference.
+                If False, the attribute must be a reference or an error is raised.
 
         Raises:
-            ValueError: If the attribute is not a reference.
+            ValueError: If the attribute is not a reference and `allow_non_reference` is
+                False.
             ValueError: If the reference is invalid, e.g. "#./" since it has no
                 attribute.
         """
         raw_value = self.get_unreferenced_value(attr)
         if not string_reference.is_reference(raw_value):
-            raise ValueError(
-                f"Cannot set at reference because attr '{attr}' is not a reference. "
-                f"'{attr}' = {raw_value}"
-            )
+            if not allow_non_reference:
+                raise ValueError(
+                    f"Cannot set at reference because attr '{attr}' is not a reference. "
+                    f"'{attr}' = {raw_value}"
+                )
+            else:
+                setattr(self, attr, value)
+                return
 
         parent_reference, ref_attr = string_reference.split_reference(raw_value)
         if not ref_attr:

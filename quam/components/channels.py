@@ -60,6 +60,7 @@ __all__ = [
     "Channel",
     "DigitalOutputChannel",
     "StickyChannelAddon",
+    "TimeTaggingAddon",
     "SingleChannel",
     "InSingleChannel",
     "IQChannel",
@@ -68,6 +69,9 @@ __all__ = [
     "InOutIQChannel",
     "InSingleOutIQChannel",
     "InIQOutSingleChannel",
+    "MWChannel",
+    "InMWChannel",
+    "InOutMWChannel",
 ]
 
 
