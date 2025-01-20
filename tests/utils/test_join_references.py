@@ -38,3 +38,10 @@ def test_join_references_valid(base, relative, expected):
 def test_join_references_invalid(base, relative):
     with pytest.raises(ValueError):
         join_references(base, relative)
+
+
+def test_join_reference_from_root():
+    assert join_references("#/", "#./") == "#/"
+    assert join_references("#/", "#./a") == "#/a"
+    with pytest.raises(ValueError):
+        join_references("#/", "#../")

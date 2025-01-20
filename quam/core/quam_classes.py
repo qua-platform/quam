@@ -377,6 +377,8 @@ class QuamBase(ReferenceClass):
 
         try:
             base_reference = self.parent.get_reference()
+            if base_reference == "#/":
+                base_reference = "#"
         except AttributeError:
             raise AttributeError(
                 f"Unable to extract reference path for {self}: Could not get "
@@ -669,8 +671,16 @@ class QuamRoot(QuamBase):
         if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
 
-    def get_reference(self):
-        return "#"
+    def get_reference(
+        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+    ) -> Optional[str]:
+        if attr is not None:
+            return f"#/{attr}"
+
+        reference = "#/"
+        if relative_path is not None:
+            reference = string_reference.join_references(reference, relative_path)
+        return reference
 
     def save(
         self,

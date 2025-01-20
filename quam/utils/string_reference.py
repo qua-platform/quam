@@ -174,16 +174,16 @@ def join_references(base, relative):
     if relative.startswith("#/"):
         raise ValueError("Cannot join an absolute path with another absolute path")
 
-    # 2) Split the base and relative references (dropping the '#' prefix)
-    base_segments = base[1:].split("/")
-    relative_segments = relative[1:].split("/")
+    # Determine if base is absolute (#/...)
+    is_absolute = base.startswith("#/")
 
-    # Determine if base is absolute (#/...) => first segment == ""
-    is_absolute = base_segments and base_segments[0] == ""
+    # 2) Split the base and relative references (dropping the '#' prefix)
+    base_segments = [""] if base == "#/" else base[1:].split("/")
+    relative_segments = relative[1:].split("/")
 
     # 3) Process each segment from the relative path
     for seg in relative_segments:
-        if seg == ".":
+        if seg in [".", ""]:
             # "current directory": do nothing
             continue
         elif seg == "..":
@@ -192,14 +192,14 @@ def join_references(base, relative):
             # Normal segment: just append
             base_segments.append(seg)
 
-    # 4) If base is absolute, remove trailing empty segments (i.e. trailing slash),
-    #    but leave the single empty segment if it's truly the root '#/'.
-    if is_absolute:
-        while len(base_segments) > 1 and base_segments[-1] == "":
-            base_segments.pop()
+    # Remove empty segments
+    base_segments = [seg for seg in base_segments if seg != ""]
 
-    # 5) Reassemble and return
-    return "#" + "/".join(base_segments)
+    # Reassemble and return
+    if is_absolute:
+        return "#/" + "/".join(base_segments)
+    else:
+        return "#" + "/".join(base_segments)
 
 
 def _handle_go_up(base_segments, is_absolute):
