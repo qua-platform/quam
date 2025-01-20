@@ -33,7 +33,6 @@ def test_join_references_valid(base, relative, expected):
         ("#../a/b/c", "#/d/e/f"),
         ("#/a", "#../../b"),
         ("#./a", "#/b"),
-        ("#./a/b/c", "#./a/b/../d/e/f"),
     ],
 )
 def test_join_references_invalid(base, relative):

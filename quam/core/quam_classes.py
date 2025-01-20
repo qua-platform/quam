@@ -342,24 +342,68 @@ class QuamBase(ReferenceClass):
             return isinstance(val, (list, QuamList))
         return type(val) == required_type
 
-    def get_reference(self, attr=None) -> Optional[str]:
+    def get_reference(
+        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+    ) -> Optional[str]:
         """Get the reference path of this object.
 
         Args:
-            attr: The attribute to get the reference path for. If None, the reference
-                path of the object itself is returned.
+            attr: The optional attribute to get the reference path for.
+                If None, the reference path of the object itself is returned.
+            relative_path: The optional relative path to join with the reference path.
 
         Returns:
             The reference path of this object.
+
+        Examples:
+            We assume a QuamRoot object with a component "elem".
+            - elem.get_reference() == "#/elem"
+            - elem.get_reference(attr="child") == "#/elem/child"
+            - elem.get_reference(relative_path="#./child") == "#/elem/child"
+            - elem.get_reference(relative_path="#../child") == "#/child"
+            - elem.get_reference(relative_path="#./child/grandchild") == "#/elem/child/grandchild"
         """
+
+        if attr is not None and relative_path is not None:
+            raise ValueError(
+                "Cannot specify both attr and relative_path. "
+                "Please specify only one of them."
+            )
 
         if self.parent is None:
             raise AttributeError(
-                "Unable to extract reference path. Parent must be defined for {self}"
+                "Unable to extract reference path for {self}: No parent defined"
             )
-        reference = f"{self.parent.get_reference()}/{self.parent.get_attr_name(self)}"
-        if attr is not None:
+
+        try:
+            base_reference = self.parent.get_reference()
+        except AttributeError:
+            raise AttributeError(
+                f"Unable to extract reference path for {self}: Could not get "
+                f"reference path for parent {self.parent}"
+            )
+
+        try:
+            attr_name = self.parent.get_attr_name(self)
+        except AttributeError:
+            raise AttributeError(
+                f"Unable to extract reference path for {self}: Could not get "
+                f"attribute name from parent {self.parent}"
+            )
+
+        reference = f"{base_reference}/{attr_name}"
+
+        if relative_path is not None:
+            if not string_reference.is_reference(relative_path):
+                raise ValueError(
+                    f"Unable to extract reference path for {self}: "
+                    f"relative_path {relative_path} is not a reference"
+                )
+
+            reference = string_reference.join_references(reference, relative_path)
+        elif attr is not None:
             reference = f"{reference}/{attr}"
+
         return reference
 
     def get_attrs(
