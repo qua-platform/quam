@@ -151,3 +151,85 @@ def split_reference(string: str) -> Tuple[str, str]:
     if parent_reference in ("#", "#.", "#.."):
         parent_reference += "/"
     return parent_reference, attr
+
+
+def join_references(base, relative):
+    """Joins a base reference with another relative reference
+
+    Args:
+        base: The base reference, either absolute ("#/") or relative ("#./" or "#../")
+        relative: The relative reference ("#./" or "#../")
+
+    Returns:
+        The joined reference
+
+    Disallows:
+      - Joining an absolute relative path ('#/...') with any base
+        (raises ValueError).
+      - Navigating above the root of an absolute base (#/...)
+        (raises ValueError).
+
+    Examples:
+        join_references("#/a/b/c", "#./d/e/f") == "#/a/b/c/d/e/f"
+        join_references("#/a/b/c", "#../d/e/f") == "#/a/b/d/e/f"
+    """
+    # Disallow if 'relative' starts with "#/" (i.e., an absolute path)
+    if relative.startswith("#/"):
+        raise ValueError(
+            "Cannot join an absolute reference path with another absolute path"
+            f"base reference: {base}, relative reference: {relative}"
+        )
+
+    # Split the base and relative references into segments (dropping the '#' prefix)
+    base_segments = base[1:].split("/")
+    relative_segments = relative[1:].split("/")
+
+    # Check if the base is absolute: '#/...' => first segment == ""
+    is_absolute = base_segments and base_segments[0] == ""
+
+    # Process each segment from the relative path
+    for seg in relative_segments:
+        if seg == ".":
+            # "current directory": do nothing
+            continue
+        elif seg == "..":
+            _handle_go_up(base_segments, is_absolute)
+        else:
+            # Normal segment: just append
+            base_segments.append(seg)
+
+    # Reassemble and return
+    return "#" + "/".join(base_segments)
+
+
+def _handle_go_up(base_segments, is_absolute):
+    """Handles a ".." (parent directory) segment, modifying base_segments in place.
+
+    - If base is absolute, never allow popping the empty root segment [""].
+    - If base is relative, allow accumulating ".." if there's nowhere left to pop.
+    - Special rule: if the last segment is ".", replace it with ".." (to handle
+      cases like #./a + #../../b => #../b).
+    """
+    if is_absolute:
+        # For an absolute base (e.g. ["", "a", "b"]), we don't let it go above #/
+        # The first segment is always "", so we only pop if len > 1
+        if len(base_segments) > 1:
+            base_segments.pop()
+        else:
+            raise ValueError("Cannot navigate above the root")
+    else:
+        # For a relative base, we can accumulate ".."
+        if not base_segments:
+            # Nothing to pop, just accumulate an additional ".."
+            base_segments.append("..")
+        else:
+            last = base_segments[-1]
+            if last == ".":
+                # Replace '.' with '..'
+                base_segments[-1] = ".."
+            elif last == "..":
+                # Already '..', add one more level
+                base_segments.append("..")
+            else:
+                # Normal directory name, pop it
+                base_segments.pop()
