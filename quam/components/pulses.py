@@ -112,6 +112,23 @@ class Pulse(QuamComponent):
     def digital_marker_name(self):
         return f"{self.name}{str_ref.DELIMITER}dm"
 
+    def _get_sampling_rate(self) -> float:
+        """Get the sampling rate of the port that the pulse is attached to.
+
+        Returns:
+            The sampling rate of the pulse in Hz, either 1e9 or 2e9.
+
+        If the pulse is not attached to a channel, a warning is raised and the default
+        sampling rate of 1 GHz is returned.
+        """
+        if self.channel is None:
+            warnings.warn(
+                "Pulse is not attached to a channel, cannot determine sampling rate. "
+                "Using default sampling rate of 1 GHz."
+            )
+            return 1e9
+        return self.channel.sampling_rate
+
     def calculate_waveform(self) -> Union[float, complex, List[float], List[complex]]:
         """Calculate the waveform of the pulse.
 

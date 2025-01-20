@@ -47,6 +47,7 @@ class LFAnalogOutputPort(BasePort, ABC):
 
 @quam_dataclass
 class OPXPlusAnalogOutputPort(LFAnalogOutputPort, OPXPlusPort):
+    sampling_rate: ClassVar[float] = 1e9
     pass
 
 
