@@ -26,6 +26,8 @@ def quam_version_validator(
 
 
 def validate_state_path(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+    if value is not None:
+        return value
     config_path = ctx.params.get("config_path")
     missing = click.MissingParameter(
         f"Missing parameter: {param.name}", ctx=ctx, param=param
@@ -34,6 +36,6 @@ def validate_state_path(ctx: click.Context, param: click.Parameter, value: Any) 
         raise missing
     content, _ = get_config_file_content(config_path)
     state_path = content.get(QUAM_CONFIG_KEY, {}).get("state_path")
-    if state_path is None and value is None:
+    if state_path is None:
         raise missing
-    return state_path or value
+    return state_path
