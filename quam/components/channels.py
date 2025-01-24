@@ -75,6 +75,21 @@ __all__ = [
 ]
 
 
+LF_output_port_types = Union[
+    LFFEMAnalogOutputPort,
+    OPXPlusAnalogOutputPort,
+    Tuple[str, int],
+    Tuple[str, int, int],
+]
+
+LF_input_port_types = Union[
+    LFFEMAnalogInputPort,
+    OPXPlusAnalogInputPort,
+    Tuple[str, int],
+    Tuple[str, int, int],
+]
+
+
 @quam_dataclass
 class DigitalOutputChannel(QuamComponent):
     """QuAM component for a digital output channel (signal going out of the OPX)
@@ -83,8 +98,8 @@ class DigitalOutputChannel(QuamComponent):
     respective element in the QUA config.
 
     Args:
-        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
-            E.g. ("con1", 1)
+        opx_output (DigitalOutputPort): Channel output port from the OPX perspective,
+            E.g. FEMDigitalOutputPort("con1", 1, 2)
         delay (int, optional): Delay in nanoseconds. An intrinsic negative delay of
             136 ns exists by default.
         buffer (int, optional): Digital pulses played to this element will be convolved
@@ -590,8 +605,8 @@ class SingleChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
-            a tuple of (controller_name, port).
+        opx_output (LF_output_port_types): Channel output port from the OPX perspective,
+            E.g. LFFEMAnalogOutputPort("con1", 1, 2)
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
         opx_output_offset (float): DC offset for the output port.
@@ -599,7 +614,7 @@ class SingleChannel(Channel):
             is None.
     """
 
-    opx_output: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
+    opx_output: LF_output_port_types
     filter_fir_taps: List[float] = None
     filter_iir_taps: List[float] = None
 
@@ -675,8 +690,8 @@ class InSingleChannel(Channel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_input (Tuple[str, int]): Channel input port from OPX perspective,
-            a tuple of (controller_name, port).
+        opx_input (LF_input_port_types): Channel input port from OPX perspective,
+            E.g. LFFEMAnalogInputPort("con1", 1, 2)
         opx_input_offset (float): DC offset for the input port.
         intermediate_frequency (float): Intermediate frequency of OPX input,
             default is None.
@@ -685,7 +700,7 @@ class InSingleChannel(Channel):
             Used to account for signal smearing.
     """
 
-    opx_input: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
+    opx_input: LF_input_port_types
     opx_input_offset: float = None
 
     time_of_flight: int = 24
@@ -1086,12 +1101,12 @@ class IQChannel(_OutComplexChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_offset_I float: The offset of the I channel. Default is 0.
-        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
+        opx_output_I (LF_output_port_types): Channel I output port from the OPX
+            perspective, E.g. LFFEMAnalogOutputPort("con1", 1, 1)
+        opx_output_Q (LF_output_port_types): Channel Q output port from the OPX
+            perspective, E.g. LFFEMAnalogOutputPort("con1", 1, 2)
+        opx_output_offset_I (float): The offset of the I channel. Default is 0.
+        opx_output_offset_Q (float): The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1102,8 +1117,8 @@ class IQChannel(_OutComplexChannel):
             for the IQ output.
     """
 
-    opx_output_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
-    opx_output_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogOutputPort]
+    opx_output_I: LF_output_port_types
+    opx_output_Q: LF_output_port_types
 
     opx_output_offset_I: float = None
     opx_output_offset_Q: float = None
@@ -1474,10 +1489,10 @@ class InIQChannel(_InComplexChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
-            a tuple of (controller_name, port).
+        opx_input_I (LF_input_port_types): Channel I input port from the OPX
+            perspective, e.g. LFFEMAnalogInputPort("con1", 1, 1)
+        opx_input_Q (LF_input_port_types): Channel Q input port from the OPX
+            perspective, e.g. LFFEMAnalogInputPort("con1", 1, 2)
         opx_input_offset_I float: The offset of the I channel. Default is 0.
         opx_input_offset_Q float: The offset of the Q channel. Default is 0.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
@@ -1488,8 +1503,8 @@ class InIQChannel(_InComplexChannel):
         input_gain (float): The gain of the input channel. Default is None.
     """
 
-    opx_input_I: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
-    opx_input_Q: Union[Tuple[str, int], Tuple[str, int, int], LFAnalogInputPort]
+    opx_input_I: LF_input_port_types
+    opx_input_Q: LF_input_port_types
 
     time_of_flight: int = 24
     smearing: int = 0
@@ -1569,11 +1584,11 @@ class InOutSingleChannel(SingleChannel, InSingleChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
-            a tuple of (controller_name, port).
+        opx_output (LF_output_port_types): Channel output port from the OPX
+            perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 2)
         opx_output_offset (float): DC offset for the output port.
-        opx_input (Tuple[str, int]): Channel input port from OPX perspective,
-            a tuple of (controller_name, port).
+        opx_input (LF_input_port_types): Channel input port from OPX perspective,
+            e.g. LFFEMAnalogInputPort("con1", 1, 2)
         opx_input_offset (float): DC offset for the input port.
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
@@ -1601,18 +1616,18 @@ class InOutIQChannel(IQChannel, InIQChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_offset_I float: The offset of the I channel. Default is 0.
-        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
-        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_input_offset_I float: The offset of the I channel. Default is 0.
-        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
+        opx_output_I (LF_output_port_types): Channel I output port from the OPX
+            perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 1)
+        opx_output_Q (LF_output_port_types): Channel Q output port from the OPX
+            perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 2)
+        opx_output_offset_I (float): The offset of the I channel. Default is 0.
+        opx_output_offset_Q (float): The offset of the Q channel. Default is 0.
+        opx_input_I (LF_input_port_types): Channel I input port from the OPX
+            perspective, e.g. LFFEMAnalogInputPort("con1", 1, 1)
+        opx_input_Q (LF_input_port_types): Channel Q input port from the OPX
+            perspective, e.g. LFFEMAnalogInputPort("con1", 1, 2)
+        opx_input_offset_I (float): The offset of the I channel. Default is 0.
+        opx_input_offset_Q (float): The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1642,14 +1657,14 @@ class InSingleOutIQChannel(IQChannel, InSingleChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output_I (Tuple[str, int]): Channel I output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_Q (Tuple[str, int]): Channel Q output port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_output_offset_I float: The offset of the I channel. Default is 0.
-        opx_output_offset_Q float: The offset of the Q channel. Default is 0.
-        opx_input (Tuple[str, int]): Channel input port from OPX perspective,
-            a tuple of (controller_name, port).
+        opx_output_I (LF_output_port_types): Channel I output port from the OPX
+            perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 1)
+        opx_output_Q (LF_output_port_types): Channel Q output port from the OPX
+            perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 2)
+        opx_output_offset_I (float): The offset of the I channel. Default is 0.
+        opx_output_offset_Q (float): The offset of the Q channel. Default is 0.
+        opx_input (LF_input_port_types): Channel input port from OPX perspective,
+            e.g. LFFEMAnalogInputPort("con1", 1, 1)
         opx_input_offset (float): DC offset for the input port.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
@@ -1678,15 +1693,15 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (Tuple[str, int]): Channel output port from the OPX perspective,
-            a tuple of (controller_name, port).
+        opx_output (LF_output_port_types): Channel output port from the OPX
+            perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 1)
         opx_output_offset (float): DC offset for the output port.
-        opx_input_I (Tuple[str, int]): Channel I input port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_input_Q (Tuple[str, int]): Channel Q input port from the OPX perspective,
-            a tuple of (controller_name, port).
-        opx_input_offset_I float: The offset of the I channel. Default is 0.
-        opx_input_offset_Q float: The offset of the Q channel. Default is 0.
+        opx_input_I (LF_input_port_types): Channel I input port from the OPX
+            perspective, e.g. LFFEMAnalogInputPort("con1", 1, 1)
+        opx_input_Q (LF_input_port_types): Channel Q input port from the OPX
+            perspective, e.g. LFFEMAnalogInputPort("con1", 1, 2)
+        opx_input_offset_I (float): The offset of the I channel. Default is 0.
+        opx_input_offset_Q (float): The offset of the Q channel. Default is 0.
         filter_fir_taps (List[float]): FIR filter taps for the output port.
         filter_iir_taps (List[float]): IIR filter taps for the output port.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
@@ -1744,7 +1759,8 @@ class InMWChannel(_InComplexChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_input (MWFEMAnalogInputPort)): Channel input port from the OPX perspective.
+        opx_input (MWFEMAnalogInputPort): Channel input port from the OPX
+            perspective, e.g. MWFEMAnalogInputPort("con1", 1, 1)
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
     """
@@ -1773,8 +1789,10 @@ class InOutMWChannel(MWChannel, InMWChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX perspective.
-        opx_input (MWFEMAnalogInputPort)): Channel input port from the OPX perspective.
+        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX
+            perspective, e.g. MWFEMAnalogOutputPort("con1", 1, 1)
+        opx_input (MWFEMAnalogInputPort): Channel input port from the OPX
+            perspective, e.g. MWFEMAnalogInputPort("con1", 1, 1)
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
         upconverter (int): The upconverter to use. Default is 1.
