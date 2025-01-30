@@ -450,7 +450,7 @@ class OctaveOld(QuamComponent):
             octave=self.octave_config,
             connection_headers=self.connection_headers,
         )
-        qm = qmm.open_qm(self._root.generate_config())
+        qm = qmm.open_qm(self.get_root().generate_config())
         return qm
 
     def get_portmap(self):
@@ -459,7 +459,7 @@ class OctaveOld(QuamComponent):
         if self._channel_to_qe is None:
             self._channel_to_qe = {}
 
-        for elem in self._root.iterate_components():
+        for elem in self._get_root().iterate_components():
             if not isinstance(elem, OctaveOldFrequencyConverter):
                 continue
 
@@ -479,7 +479,7 @@ class OctaveOld(QuamComponent):
         for qe in self._channel_to_qe.values():
             self.octave.set_rf_output_mode(qe, RFOutputMode.on)
 
-        for elem in self._root.iterate_components():
+        for elem in self.get_root().iterate_components():
             if not isinstance(elem, InOutIQChannel):
                 continue
             if getattr(elem.frequency_converter_down, "octave", None) is not self:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections.abc import Iterable
 import sys
 import warnings
@@ -225,8 +226,6 @@ class QuamBase(ReferenceClass):
     args:
         parent: The parent of this object. This is automatically set when adding
             this object to another QuamBase object.
-        _root: The QuamRoot object. This is automatically set when instantiating
-            a QuamRoot object.
         config_settings: A dictionary of configuration settings for this object.
             This is used by [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]
             to determine the order in which to add the components to the QUA config.
@@ -238,8 +237,6 @@ class QuamBase(ReferenceClass):
     """
 
     parent: ClassVar["QuamBase"] = ParentDescriptor()
-    _root: ClassVar["QuamRoot"] = None
-
     config_settings: ClassVar[Dict[str, Any]] = None
 
     def __init__(self):
@@ -268,6 +265,17 @@ class QuamBase(ReferenceClass):
         """
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
+
+    def get_root(self) -> Optional[QuamRoot]:
+        """Get the QuamRoot object of this object.
+
+        Returns:
+            The root of this object, or None if no root is found.
+        """
+        if self.parent is None:
+            return None
+
+        return self.parent.get_root()
 
     def get_attr_name(self, attr_val: Any) -> str:
         """Get the name of an attribute that matches the value.
@@ -539,7 +547,10 @@ class QuamBase(ReferenceClass):
         if not string_reference.is_reference(reference):
             return reference
 
-        if string_reference.is_absolute_reference(reference) and self._root is None:
+        if (
+            string_reference.is_absolute_reference(reference)
+            and self.get_root() is None
+        ):
             warnings.warn(
                 f"No QuamRoot initialized, cannot retrieve reference {reference}"
                 f" from {self.__class__.__name__}"
@@ -548,7 +559,7 @@ class QuamBase(ReferenceClass):
 
         try:
             return string_reference.get_referenced_value(
-                self, reference, root=self._root
+                self, reference, root=self.get_root()
             )
         except ValueError as e:
             try:
@@ -564,7 +575,7 @@ class QuamBase(ReferenceClass):
         Args:
             indent: The number of spaces to indent the summary.
         """
-        if self._root is self:
+        if self.get_root() is self:
             full_name = "QuAM:"
         elif self.parent is None:
             full_name = f"{self.__class__.__name__} (parent unknown):"
@@ -651,18 +662,9 @@ class QuamRoot(QuamBase):
         This class should not be used directly, but should generally be subclassed and
         made a dataclass. The dataclass fields should correspond to the QuAM root
         structure.
-
-    Note:
-        Upon instantiating a `QuamRoot` object, it sets the class attribute
-        `QuamBase._root` to itself. This is used such that any references with an
-        absolute path are resolved from the root.
     """
 
     serialiser: AbstractSerialiser = JSONSerialiser
-
-    def __post_init__(self):
-        QuamBase._root = self
-        super().__post_init__()
 
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
@@ -681,6 +683,9 @@ class QuamRoot(QuamBase):
         if relative_path is not None:
             reference = string_reference.join_references(reference, relative_path)
         return reference
+
+    def get_root(self: QuamRootType) -> QuamRootType:
+        return self
 
     def save(
         self,
@@ -1052,6 +1057,8 @@ class QuamList(UserList, QuamBase):
     def __getitem__(self, i):
         elem = super().__getitem__(i)
         if isinstance(i, slice):
+            if isinstance(elem, QuamList):
+                elem.parent = self.parent
             # This automatically gets the referenced values
             return list(elem)
 

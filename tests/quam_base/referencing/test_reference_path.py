@@ -7,7 +7,7 @@ from quam.core import *
 
 def test_root_reference(BareQuamRoot):
     root = BareQuamRoot()
-    assert root._root is root
+    assert root.get_root() is root
 
     assert root.get_reference() == "#/"
 
