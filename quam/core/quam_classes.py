@@ -1,7 +1,6 @@
 from collections.abc import Iterable
 import sys
 import warnings
-import logging
 from pathlib import Path
 from copy import deepcopy
 from typing import (
@@ -44,8 +43,6 @@ __all__ = [
     "QuamList",
     "quam_dataclass",
 ]
-
-logger = logging.getLogger(__name__)
 
 
 def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
@@ -665,7 +662,7 @@ class QuamRoot(QuamBase):
 
     def __post_init__(self):
         if QuamBase._root is not None:
-            logger.warning(
+            warnings.warn(
                 "A new QuamRoot instance has been created while a previous one exists. "
                 "The previous instance should no longer be used."
             )
