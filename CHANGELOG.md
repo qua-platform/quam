@@ -13,7 +13,7 @@
 ### Fixed
 - Fixed issues with parameters being references in a QuamRoot object
 - Fixed `MWFEMAnalogOutputPort.upconverters` not having the correct type
-
+- A warning is raised if a new `QuamRoot` instance is created while a previous one exists.
 
 ## [0.3.8]
 ### Added

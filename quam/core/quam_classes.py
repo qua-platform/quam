@@ -270,6 +270,10 @@ class QuamBase(ReferenceClass):
     def get_root(self) -> Optional[QuamRoot]:
         """Get the QuamRoot object of this object.
 
+        This function recursively searches the parent chain for a QuamRoot object.
+        If no QuamRoot object is found, it will return the last instantiated QuamRoot
+        if it exists, else None.
+
         Returns:
             The root of this object, or None if no root is found.
         """
@@ -704,6 +708,14 @@ class QuamRoot(QuamBase):
         return reference
 
     def get_root(self: QuamRootType) -> QuamRootType:
+        """Get the QuamRoot object of this object, i.e. the object itself.
+
+        This QuamRoot function overrides the QuamBase function to return the object
+        itself, rather than following the parent chain.
+
+        Returns:
+            The current QuamRoot object (self).
+        """
         return self
 
     def save(
