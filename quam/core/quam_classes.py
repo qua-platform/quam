@@ -675,6 +675,13 @@ class QuamRoot(QuamBase):
     serialiser: AbstractSerialiser = JSONSerialiser
 
     def __post_init__(self):
+        if QuamBase._last_instantiated_root is not None:
+            warnings.warn(
+                "Multiple QuamRoot objects were instantiated. Any QuAM component will be "
+                "attached to its specific QuamRoot object. Mixing QuAM components belonging "
+                "to different QuamRoot objects is not recommended as it may lead to "
+                "unexpected results."
+            )
         QuamBase._last_instantiated_root = self
         super().__post_init__()
 
