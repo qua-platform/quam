@@ -5,6 +5,7 @@
 - Added `FrequencyConverter.LO_frequency` setter which updates the local oscillator frequency
 - Added optional `relative_path` to method `QuamBase.get_reference()`
 - Added support for multiple QuamRoot objects
+- Added `QuamBase.get_root()` to get the QuamRoot object of a component
 
 ### Changed
 - `Pulse.integration_weights` now defaults to `#./default_integration_weights`, which returns [(1, pulse.length)]
