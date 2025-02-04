@@ -237,6 +237,7 @@ class QuamBase(ReferenceClass):
     """
 
     parent: ClassVar["QuamBase"] = ParentDescriptor()
+    _last_instantiated_root: ClassVar[Optional["QuamRoot"]] = None
     config_settings: ClassVar[Dict[str, Any]] = None
 
     def __init__(self):
@@ -272,10 +273,17 @@ class QuamBase(ReferenceClass):
         Returns:
             The root of this object, or None if no root is found.
         """
-        if self.parent is None:
-            return None
+        if self.parent is not None:
+            return self.parent.get_root()
 
-        return self.parent.get_root()
+        if self._last_instantiated_root is not None:
+            warnings.warn(
+                f"This component is not part of any QuamRoot, using last "
+                f"instantiated QuamRoot. This is not recommended as it may lead to "
+                f"unexpected behaviour. Component: {self.__class__.__name__}"
+            )
+            return self._last_instantiated_root
+        return None
 
     def get_attr_name(self, attr_val: Any) -> str:
         """Get the name of an attribute that matches the value.
@@ -665,6 +673,10 @@ class QuamRoot(QuamBase):
     """
 
     serialiser: AbstractSerialiser = JSONSerialiser
+
+    def __post_init__(self):
+        QuamBase._last_instantiated_root = self
+        super().__post_init__()
 
     def __setattr__(self, name, value):
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
