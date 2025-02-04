@@ -1,7 +1,13 @@
-from copy import deepcopy
-
+from typing import Dict
+from dataclasses import field
 import pytest
-from quam.components.channels import IQChannel, InOutIQChannel, InOutSingleChannel
+
+from quam.components.channels import (
+    Channel,
+    IQChannel,
+    InOutIQChannel,
+    InOutSingleChannel,
+)
 
 from quam.components.octave import Octave, OctaveUpConverter, OctaveDownConverter
 from quam.core.quam_classes import QuamRoot, quam_dataclass
@@ -10,6 +16,7 @@ from quam.core.quam_classes import QuamRoot, quam_dataclass
 @quam_dataclass
 class OctaveQuAM(QuamRoot):
     octave: Octave
+    channels: Dict[str, Channel] = field(default_factory=dict)
 
 
 @pytest.fixture
@@ -266,7 +273,7 @@ def test_instantiate_octave_default_connectivity(octave):
 
 
 def test_channel_add_RF_outputs(octave, qua_config):
-    OctaveQuAM(octave=octave)
+    machine = OctaveQuAM(octave=octave)
     octave.RF_outputs[2] = OctaveUpConverter(id=2, LO_frequency=2e9)
 
     channel = IQChannel(
@@ -275,7 +282,7 @@ def test_channel_add_RF_outputs(octave, qua_config):
         opx_output_Q=("con1", 2),
         frequency_converter_up="#/octave/RF_outputs/2",
     )
-
+    machine.channels["ch"] = channel
     channel.apply_to_config(qua_config)
 
     expected_cfg_elements = {
@@ -289,7 +296,7 @@ def test_channel_add_RF_outputs(octave, qua_config):
 
 
 def test_channel_add_RF_inputs(octave, qua_config):
-    OctaveQuAM(octave=octave)
+    machine = OctaveQuAM(octave=octave)
     octave.RF_outputs[3] = OctaveUpConverter(id=3, LO_frequency=2e9)
     octave.RF_inputs[4] = OctaveDownConverter(id=4, LO_frequency=2e9)
 
@@ -302,7 +309,7 @@ def test_channel_add_RF_inputs(octave, qua_config):
         frequency_converter_up="#/octave/RF_outputs/3",
         frequency_converter_down="#/octave/RF_inputs/4",
     )
-
+    machine.channels["ch"] = channel
     channel.apply_to_config(qua_config)
 
     expected_cfg_elements = {
