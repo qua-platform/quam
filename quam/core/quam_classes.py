@@ -661,6 +661,11 @@ class QuamRoot(QuamBase):
     serialiser: AbstractSerialiser = JSONSerialiser
 
     def __post_init__(self):
+        if QuamBase._root is not None:
+            warnings.warn(
+                "A new QuamRoot instance has been created while a previous one exists. "
+                "The previous instance should no longer be used."
+            )
         QuamBase._root = self
         super().__post_init__()
 
