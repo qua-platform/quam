@@ -1,3 +1,8 @@
+## [Unreleased]
+### Fixed
+- `MWChannel.upconverter_frequency` and `MWChannel.LO_frequency` now correctly return the upconverter frequency from the `opx_output` port, supporting both `upconverter_frequency` and `upconverters` specifications.
+
+
 ## [0.3.9]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference

@@ -1736,7 +1736,7 @@ class MWChannel(_OutComplexChannel):
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
-    LO_frequency: float = "#./opx_output/upconverter_frequency"
+    LO_frequency: float = "#./upconverter_frequency"
     RF_frequency: float = "#./inferred_RF_frequency"
 
     def apply_to_config(self, config: Dict) -> None:
@@ -1747,6 +1747,27 @@ class MWChannel(_OutComplexChannel):
             "port": self.opx_output.port_tuple,
             "upconverter": self.upconverter,
         }
+
+    @property
+    def upconverter_frequency(self) -> float:
+        """Determine the upconverter frequency from the opx_output.
+
+        If the upconverter frequency is not set, the upconverter frequency is inferred
+        from the upconverters dictionary.
+
+        Returns:
+            The upconverter frequency.
+
+        Raises:
+            ValueError: If the upconverter frequency is not set and cannot be inferred.
+        """
+        if self.opx_output.upconverter_frequency is not None:
+            return self.opx_output.upconverter_frequency
+        if self.opx_output.upconverters is not None:
+            return self.opx_output.upconverters[self.upconverter]
+        raise ValueError(
+            "MWChannel: Either upconverter_frequency or upconverters must be provided"
+        )
 
 
 @quam_dataclass
