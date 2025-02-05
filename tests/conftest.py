@@ -24,7 +24,7 @@ def BareQuamComponent():
 def remove_quam_root():
     from quam.core import QuamBase
 
-    QuamBase._root = None
+    QuamBase._last_instantiated_root = None
 
 
 @pytest.fixture

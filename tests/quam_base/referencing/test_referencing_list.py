@@ -1,3 +1,4 @@
+from typing import Optional
 from quam.core import *
 from quam.utils.string_reference import *
 
@@ -5,6 +6,7 @@ from quam.utils.string_reference import *
 @quam_dataclass
 class BareQuamRoot(QuamRoot):
     a: int = 4
+    quam_list: Optional[QuamList] = None
 
 
 def test_referencing_from_list():
