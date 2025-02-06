@@ -37,6 +37,7 @@ dependencies = [
     "qm-qua >=1.1.0",
     "qualang-tools >= 0.15.0",
     "typeguard >= 4.1.0",
+    "pydantic >= 2.10.5"
 ]
 
 [project.urls]
