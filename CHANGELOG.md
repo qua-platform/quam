@@ -1,4 +1,3 @@
-
 ## [Unreleased]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference
@@ -17,6 +16,7 @@
 - A warning is raised if a new `QuamRoot` instance is created while a previous one exists.
 - Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
 - Fixed: Improve error message when instantiating: list or dict expected but a different type is provided
+- `MWChannel.upconverter_frequency` and `MWChannel.LO_frequency` now correctly return the upconverter frequency from the `opx_output` port, supporting both `upconverter_frequency` and `upconverters` specifications.
 
 ## [0.3.8]
 ### Added
