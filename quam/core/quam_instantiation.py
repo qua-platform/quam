@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import UserDict, UserList
 import sys
 import types
 import typing
@@ -57,6 +58,12 @@ def instantiate_attrs_from_dict(
     else:
         required_subtype = None
 
+    if not isinstance(attr_dict, (dict, UserDict)):
+        raise TypeError(
+            f"Failed instantiating QUAM attribute '{str_repr}'. "
+            f"Expected dict or UserDict, got {type(attr_dict)}: {attr_dict}"
+        )
+
     instantiated_attr_dict = {}
     for attr_name, attr_val in attr_dict.items():
         instantiated_attr_dict[attr_name] = instantiate_attr(
@@ -102,6 +109,12 @@ def instantiate_attrs_from_list(
         required_subtype = typing.get_args(required_type)[0]
     else:
         required_subtype = None
+
+    if not isinstance(attr_list, (list, UserList)):
+        raise TypeError(
+            f"Failed instantiating QUAM attribute '{str_repr}'. "
+            f"Expected list or UserList, got {type(attr_list)}: {attr_list}"
+        )
 
     instantiated_attr_list = []
     for k, attr_val in enumerate(attr_list):

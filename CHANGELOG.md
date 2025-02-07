@@ -1,9 +1,4 @@
 ## [Unreleased]
-### Fixed
-- `MWChannel.upconverter_frequency` and `MWChannel.LO_frequency` now correctly return the upconverter frequency from the `opx_output` port, supporting both `upconverter_frequency` and `upconverters` specifications.
-
-
-## [0.3.9]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference
 - Added `string_reference.get_parent_reference` to get the parent reference of a string reference
@@ -19,6 +14,9 @@
 - Fixed issues with parameters being references in a QuamRoot object
 - Fixed `MWFEMAnalogOutputPort.upconverters` not having the correct type
 - A warning is raised if a new `QuamRoot` instance is created while a previous one exists.
+- Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
+- Fixed: Improve error message when instantiating: list or dict expected but a different type is provided
+- `MWChannel.upconverter_frequency` and `MWChannel.LO_frequency` now correctly return the upconverter frequency from the `opx_output` port, supporting both `upconverter_frequency` and `upconverters` specifications.
 
 ## [0.3.8]
 ### Added
@@ -52,7 +50,7 @@
 - QUAM can now be installed through PyPi
 
 ### Changed
-- Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+- Aded ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
 - `Channel` is now an abstract base class.
 - Moved `intermediate_frequency` to `Channel` from `SingleChannel/IQChannel`.
   The default is `None`. A consequence of this is that `SingleChannel` no longer adds
