@@ -1,3 +1,9 @@
+## [Unreleased]
+### Fixed
+- Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
+
+
+
 ## [0.3.9]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference
