@@ -48,9 +48,9 @@ from qm.qua import (
 from qm.qua._dsl import (
     _PulseAmp,
     AmpValuesType,
-    QuaNumberType,
-    QuaVariableType,
-    QuaExpressionType,
+    Scalar,
+    QuaScalar,
+    QuaVariable,
     ChirpType,
     StreamType,
 )
@@ -342,10 +342,10 @@ class Channel(QuamComponent, ABC):
         self,
         pulse_name: str,
         amplitude_scale: Union[float, AmpValuesType] = None,
-        duration: QuaNumberType = None,
-        condition: QuaExpressionType = None,
+        duration: Scalar[int] = None,
+        condition: Scalar[bool] = None,
         chirp: ChirpType = None,
-        truncate: QuaNumberType = None,
+        truncate: Scalar[int] = None,
         timestamp_stream: StreamType = None,
         continue_chirp: bool = False,
         target: str = "",
@@ -358,10 +358,10 @@ class Channel(QuamComponent, ABC):
                 `self.operations`.
             amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
                 Can be either a float, or qua.amp(float).
-            duration (int): Duration of the pulse in units of the clock cycle (4ns).
-                If not provided, the default pulse duration will be used. It is possible
-                to dynamically change the duration of both constant and arbitrary
-                pulses. Arbitrary pulses can only be stretched, not compressed.
+            duration (int, QuaScalar[int]): Duration of the pulse in units of the clock
+                cycle (4ns). If not provided, the default pulse duration will be used.
+                It is possible to dynamically change the duration of both constant and
+                arbitrary pulses. Arbitrary pulses can only be stretched, not compressed
             chirp (Union[(list[int], str), (int, str)]): Allows to perform
                 piecewise linear sweep of the element's intermediate
                 frequency in time. Input should be a tuple, with the 1st
@@ -369,7 +369,7 @@ class Channel(QuamComponent, ABC):
                 string with the units. The units can be either: 'Hz/nsec',
                 'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
                 'KHz/sec', 'Hz/sec', 'mHz/sec'.
-            truncate (Union[int, QUA variable of type int]): Allows playing
+            truncate (Union[int, QuaScalar[int]]): Allows playing
                 only part of the pulse, truncating the end. If provided,
                 will play only up to the given time in units of the clock
                 cycle (4ns).
@@ -417,13 +417,13 @@ class Channel(QuamComponent, ABC):
             target=target,
         )
 
-    def wait(self, duration: QuaNumberType, *other_elements: Union[str, "Channel"]):
+    def wait(self, duration: Scalar[int], *other_elements: Union[str, "Channel"]):
         """Wait for the given duration on all provided elements without outputting anything.
 
         Duration is in units of the clock cycle (4ns)
 
         Args:
-            duration (Union[int,QUA variable of type int]): time to wait in
+            duration (Union[int, QuaScalar[int]]): time to wait in
                 units of the clock cycle (4ns). Range: [4, $2^{31}-1$]
                 in steps of 1.
             *other_elements (Union[str,sequence of str]): elements to wait on,
@@ -460,7 +460,7 @@ class Channel(QuamComponent, ABC):
 
     def update_frequency(
         self,
-        new_frequency: QuaNumberType,
+        new_frequency: Scalar[float],
         units: str = "Hz",
         keep_phase: bool = False,
     ):
@@ -496,7 +496,7 @@ class Channel(QuamComponent, ABC):
         """
         update_frequency(self.name, new_frequency, units, keep_phase)
 
-    def frame_rotation(self, angle: QuaNumberType):
+    def frame_rotation(self, angle: Scalar[float]):
         r"""Shift the phase of the channel element's oscillator by the given angle.
 
         This is typically used for virtual z-rotations.
@@ -514,7 +514,7 @@ class Channel(QuamComponent, ABC):
             error, it is recommended to use `reset_frame(el)` from time to time.
 
         Args:
-            angle (Union[float, QUA variable of type fixed]): The angle to
+            angle (Union[float, QuaScalar[float]]): The angle to
                 add to the current phase (in radians)
             *elements (str): a single element whose oscillator's phase will
                 be shifted. multiple elements can be given, in which case
@@ -523,7 +523,7 @@ class Channel(QuamComponent, ABC):
         """
         frame_rotation(angle, self.name)
 
-    def frame_rotation_2pi(self, angle: QuaNumberType):
+    def frame_rotation_2pi(self, angle: Scalar[float]):
         r"""Shift the phase of the oscillator associated with an element by the given
         angle in units of 2pi radians.
 
@@ -540,7 +540,7 @@ class Channel(QuamComponent, ABC):
             recommended to use `reset_frame(el)` from time to time.
 
         Args:
-            angle (Union[float,QUA variable of type real]): The angle to add
+            angle (Union[float, QuaScalar[float]]): The angle to add
                 to the current phase (in $2\pi$ radians)
         """
         frame_rotation_2pi(angle, self.name)
@@ -620,15 +620,14 @@ class SingleChannel(Channel):
 
     opx_output_offset: float = None
 
-    def set_dc_offset(self, offset: QuaNumberType):
+    def set_dc_offset(self, offset: Scalar[float]):
         """Set the DC offset of an element's input to the given value.
         This value will remain the DC offset until changed or until the Quantum Machine
         is closed.
 
         Args:
-            offset (QuaNumberType): The DC offset to set the input to.
+            offset (Union[float, QuaScalar[float]]): The DC offset to set the input to.
                 This is limited by the OPX output voltage range.
-                The number can be a QUA variable
         """
         set_dc_offset(element=self.name, element_input="single", offset=offset)
 
@@ -741,9 +740,9 @@ class InSingleChannel(Channel):
         self,
         pulse_name: str,
         amplitude_scale: Union[float, AmpValuesType] = None,
-        qua_vars: Tuple[QuaVariableType, ...] = None,
+        qua_vars: Tuple[QuaVariable[Any], ...] = None,
         stream=None,
-    ) -> Tuple[QuaVariableType, QuaVariableType]:
+    ) -> Tuple[QuaVariable[Any], QuaVariable[Any]]:
         """Perform a full demodulation measurement on this channel.
 
         Args:
@@ -751,7 +750,7 @@ class InSingleChannel(Channel):
                 `self.operations`.
             amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
                 Can be either a float, or qua.amp(float).
-            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+            qua_vars (Tuple[QuaVariable[Any], ...], optional): Two QUA
                 variables to store the I, Q measurement results.
                 If not provided, new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
@@ -799,9 +798,9 @@ class InSingleChannel(Channel):
         amplitude_scale: Union[float, AmpValuesType] = None,
         num_segments: int = None,
         segment_length: int = None,
-        qua_vars: Tuple[QuaVariableType, ...] = None,
+        qua_vars: Tuple[QuaVariable[Any], ...] = None,
         stream=None,
-    ) -> Tuple[QuaVariableType, QuaVariableType]:
+    ) -> Tuple[QuaVariable[Any], QuaVariable[Any]]:
         """Perform an accumulated demodulation measurement on this channel.
 
         Args:
@@ -813,7 +812,7 @@ class InSingleChannel(Channel):
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate.
                 Should either specify this or `num_segments`.
-            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+            qua_vars (Tuple[QuaVariable[Any], ...], optional): Two QUA
                 variables to store the I, Q measurement results.
                 If not provided, new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
@@ -881,9 +880,9 @@ class InSingleChannel(Channel):
         amplitude_scale: Union[float, AmpValuesType] = None,
         num_segments: int = None,
         segment_length: int = None,
-        qua_vars: Tuple[QuaVariableType, ...] = None,
+        qua_vars: Tuple[QuaVariable[Any], ...] = None,
         stream=None,
-    ) -> Tuple[QuaVariableType, QuaVariableType]:
+    ) -> Tuple[QuaVariable[Any], QuaVariable[Any]]:
         """Perform an accumulated demodulation measurement on this channel.
 
         Args:
@@ -895,7 +894,7 @@ class InSingleChannel(Channel):
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate.
                 Should either specify this or `num_segments`.
-            qua_vars (Tuple[QuaVariableType, ...], optional): Two QUA
+            qua_vars (Tuple[QuaVariable[Any], ...], optional): Two QUA
                 variables to store the I, Q measurement results.
                 If not provided, new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
@@ -961,11 +960,11 @@ class InSingleChannel(Channel):
         self,
         pulse_name: str,
         size: int,
-        max_time: QuaNumberType,
-        qua_vars: Optional[Tuple[QuaVariableType, QuaNumberType]] = None,
+        max_time: int,
+        qua_vars: Optional[Tuple[QuaVariable[Any], QuaScalar[int]]] = None,
         stream: Optional[StreamType] = None,
         mode: Literal["analog", "high_res", "digital"] = "analog",
-    ) -> Tuple[QuaVariableType, QuaNumberType]:
+    ) -> Tuple[QuaVariable[Any], QuaScalar[int]]:
         """Perform a time tagging measurement on this channel.
 
         For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
@@ -975,8 +974,8 @@ class InSingleChannel(Channel):
                 `self.operations`.
             size (int): The size of the QUA array to store the times of the detected
                 pulses. Ignored if `qua_vars` is provided.
-            max_time (QuaNumberType): The maximum time to search for pulses.
-            qua_vars (Tuple[QuaVariableType, QuaNumberType], optional): QUA variables
+            max_time (int): The maximum time to search for pulses.
+            qua_vars (Tuple[QuaVariable[Any], QuaScalar[int]], optional): QUA variables
                 to store the times and counts of the detected pulses. If not provided,
                 new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
@@ -984,9 +983,9 @@ class InSingleChannel(Channel):
             mode (Literal["analog", "high_res", "digital"]): The time tagging mode.
 
         Returns:
-            times (QuaVariableType): The QUA variable to store the times of the detected
+            times (QuaVariable[Any]): The QUA variable to store the times of the detected
                 pulses.
-            counts (QuaNumberType): The number of detected pulses.
+            counts (QuaScalar[int]): The number of detected pulses.
 
         Example:
             ```python
@@ -1145,15 +1144,14 @@ class IQChannel(_OutComplexChannel):
         )
         return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
-    def set_dc_offset(self, offset: QuaNumberType, element_input: Literal["I", "Q"]):
+    def set_dc_offset(self, offset: Scalar[float], element_input: Literal["I", "Q"]):
         """Set the DC offset of an element's input to the given value.
         This value will remain the DC offset until changed or until the Quantum Machine
         is closed.
 
         Args:
-            offset (QuaNumberType): The DC offset to set the input to.
+            offset (Union[float, QuaScalar[float]]): The DC offset to set the input to.
                 This is limited by the OPX output voltage range.
-                The number can be a QUA variable
             element_input (Literal["I", "Q"]): The element input to set the offset for.
 
         Raises:
@@ -1246,9 +1244,9 @@ class _InComplexChannel(Channel, ABC):
         self,
         pulse_name: str,
         amplitude_scale: Union[float, AmpValuesType] = None,
-        qua_vars: Tuple[QuaVariableType, QuaVariableType] = None,
+        qua_vars: Tuple[QuaVariable[Any], QuaVariable[Any]] = None,
         stream=None,
-    ) -> Tuple[QuaVariableType, QuaVariableType]:
+    ) -> Tuple[QuaVariable[Any], QuaVariable[Any]]:
         """Perform a full dual demodulation measurement on this channel.
 
         Args:
@@ -1256,7 +1254,7 @@ class _InComplexChannel(Channel, ABC):
                 `self.operations`.
             amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
                 Can be either a float, or qua.amp(float).
-            qua_vars (Tuple[QuaVariableType, QuaVariableType], optional): Two QUA
+            qua_vars (Tuple[QuaVariable[Any], QuaVariable[Any]], optional): Two QUA
                 variables to store the I and Q measurement results. If not provided,
                 new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
@@ -1311,9 +1309,9 @@ class _InComplexChannel(Channel, ABC):
         amplitude_scale: Optional[Union[float, AmpValuesType]] = None,
         num_segments: Optional[int] = None,
         segment_length: Optional[int] = None,
-        qua_vars: Optional[Tuple[QuaVariableType, ...]] = None,
+        qua_vars: Optional[Tuple[QuaVariable[Any], ...]] = None,
         stream=None,
-    ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
+    ) -> Tuple[QuaVariable[Any], QuaVariable[Any], QuaVariable[Any], QuaVariable[Any]]:
         """Perform an accumulated dual demodulation measurement on this channel.
 
         Instead of two QUA variables (I and Q), this method returns four variables
@@ -1329,7 +1327,7 @@ class _InComplexChannel(Channel, ABC):
             segment_length (int): The length of the segment to accumulate the
                 measurement.
                 Should either specify this or `num_segments`.
-            qua_vars (Tuple[QuaVariableType, ...], optional): Four QUA
+            qua_vars (Tuple[QuaVariable[Any], ...], optional): Four QUA
                 variables to store the II, IQ, QI, QQ measurement results.
                 If not provided, new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
@@ -1397,9 +1395,9 @@ class _InComplexChannel(Channel, ABC):
         amplitude_scale: Optional[Union[float, AmpValuesType]] = None,
         num_segments: Optional[int] = None,
         segment_length: Optional[int] = None,
-        qua_vars: Optional[Tuple[QuaVariableType, ...]] = None,
+        qua_vars: Optional[Tuple[QuaVariable[Any], ...]] = None,
         stream=None,
-    ) -> Tuple[QuaVariableType, QuaVariableType, QuaVariableType, QuaVariableType]:
+    ) -> Tuple[QuaVariable[Any], QuaVariable[Any], QuaVariable[Any], QuaVariable[Any]]:
         """Perform a sliced dual demodulation measurement on this channel.
 
         Instead of two QUA variables (I and Q), this method returns four variables
@@ -1415,7 +1413,7 @@ class _InComplexChannel(Channel, ABC):
             segment_length (int): The length of the segment to accumulate the
                 measurement.
                 Should either specify this or `num_segments`.
-            qua_vars (Tuple[QuaVariableType, ...], optional): Four QUA
+            qua_vars (Tuple[QuaVariable[Any], ...], optional): Four QUA
                 variables to store the II, IQ, QI, QQ measurement results.
                 If not provided, new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
