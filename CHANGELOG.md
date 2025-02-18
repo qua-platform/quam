@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- Deprecated `thread` argument in favor of `core` in `Channel` when qm >= 1.2.2
+
 ## [0.3.9]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference
