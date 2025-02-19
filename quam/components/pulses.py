@@ -10,10 +10,9 @@ from quam.utils import string_reference as str_ref
 
 from qm.qua._dsl import (
     AmpValuesType,
-    QuaExpressionType,
+    Scalar,
     ChirpType,
     StreamType,
-    QuaNumberType,
 )
 
 __all__ = [
@@ -169,10 +168,10 @@ class Pulse(QuamComponent):
     def play(
         self,
         amplitude_scale: Union[float, AmpValuesType] = None,
-        duration: QuaNumberType = None,
-        condition: QuaExpressionType = None,
+        duration: Scalar[int] = None,
+        condition: Scalar[bool] = None,
         chirp: ChirpType = None,
-        truncate: QuaNumberType = None,
+        truncate: Scalar[int] = None,
         timestamp_stream: StreamType = None,
         continue_chirp: bool = False,
         target: str = "",
