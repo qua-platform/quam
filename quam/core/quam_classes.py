@@ -35,6 +35,8 @@ from quam.utils import (
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
 
+from qm.type_hinting import DictQuaConfig
+
 
 __all__ = [
     "QuamBase",
@@ -795,7 +797,7 @@ class QuamRoot(QuamBase):
             validate_type=validate_type,
         )
 
-    def generate_config(self) -> Dict[str, Any]:
+    def generate_config(self) -> DictQuaConfig:
         """Generate the QUA configuration from the QuAM object.
 
         Returns:
