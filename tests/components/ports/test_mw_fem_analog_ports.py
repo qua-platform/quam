@@ -132,7 +132,11 @@ def test_mw_fem_analog_input_ports():
 
 def test_mw_fem_upconverter_config_generation():
     port = MWFEMAnalogOutputPort(
-        "con1", 1, 2, band=1, upconverters={1: 4.5e9, 2: 5.5e9}
+        "con1",
+        1,
+        2,
+        band=1,
+        upconverters={1: {"frequency": 4.5e9}, 2: {"frequency": 5.5e9}},
     )
     cfg = {"controllers": {}}
     port.apply_to_config(cfg)
@@ -143,6 +147,9 @@ def test_mw_fem_upconverter_config_generation():
         "shareable": False,
         "sampling_rate": 1000000000.0,
         "full_scale_power_dbm": -11,
-        "upconverters": {1: 4500000000.0, 2: 5500000000.0},
+        "upconverters": {
+            1: {"frequency": 4500000000.0},
+            2: {"frequency": 5500000000.0},
+        },
     }
     json.dumps(cfg, indent=4)

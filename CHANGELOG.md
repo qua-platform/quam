@@ -1,6 +1,8 @@
 ## [Unreleased]
 ### Fixed
 - Deprecated `thread` argument in favor of `core` in `Channel` when qm >= 1.2.2
+- Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
+
 
 ## [0.3.9]
 ### Added
