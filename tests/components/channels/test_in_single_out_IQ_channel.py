@@ -26,6 +26,7 @@ def test_in_single_channel_attr_annotations():
         "time_of_flight",
         "smearing",
         "thread",
+        "core",
         "time_tagging",
     }
 
@@ -87,7 +88,7 @@ def test_generate_config(qua_config):
             "analog_inputs": {
                 1: {"gain_db": 0, "shareable": False},
             },
-            "analog_outputs": {     
+            "analog_outputs": {
                 1: {"delay": 0, "shareable": False},
                 2: {"delay": 0, "shareable": False},
             },
