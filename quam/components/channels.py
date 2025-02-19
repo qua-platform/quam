@@ -617,11 +617,12 @@ class Channel(QuamComponent, ABC):
                 "Using 'core' instead."
             )
             core = self.core
-        elif self.thread is not None and not qua_below_1_2_2:
-            warnings.warn(
-                "The 'thread' element argument is deprecated from qm.qua >= 1.2.2. "
-                "Use 'core' instead."
-            )
+        elif self.thread is not None:
+            if not qua_below_1_2_2:
+                warnings.warn(
+                    "The 'thread' element argument is deprecated from qm.qua >= 1.2.2. "
+                    "Use 'core' instead."
+                )
             core = self.thread
         else:
             core = self.core
