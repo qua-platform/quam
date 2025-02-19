@@ -1,3 +1,7 @@
+## [Unreleased]
+### Fixed
+- Fixed `QuamBase.iterate_components()` arg `skip_elems` having the wrongtype
+
 ## [0.3.9]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference

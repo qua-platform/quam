@@ -498,7 +498,7 @@ class QuamBase(ReferenceClass):
         return quam_dict
 
     def iterate_components(
-        self, skip_elems: bool = None
+        self, skip_elems: Optional[Sequence["QuamBase"]] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
