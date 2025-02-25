@@ -3,7 +3,7 @@
 ### Changed
 - `QuamBase.generate_config()` now returns a `DictQuaConfig` instead of a `Dict[str, Any]`
   This provides type hints for the generated config.
-
+- Add `MWFEMAnalogInputPort.gain_db` to allow for setting the gain of the analog input port
 ### Fixed
 - Fixed `QuamBase.iterate_components()` arg `skip_elems` having the wrongtype
 - Deprecated `thread` argument in favor of `core` in `Channel` when qm >= 1.2.2
