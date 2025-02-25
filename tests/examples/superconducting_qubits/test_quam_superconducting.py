@@ -8,12 +8,9 @@ def test_create_quam_superconducting_referenced_generate_config():
     quam = create_quam_superconducting_referenced(num_qubits=2)
     assert isinstance(quam.wiring, QuamDict)
 
-    assert hasattr(quam.wiring.qubits[0], "port_I")
+    assert hasattr(quam.wiring.qubits["q1"], "port_I")
 
     quam.generate_config()
-    # print(quam.qubits[0].xy.mixer.port_I)
-    # assert quam.qubits[0].xy.mixer.port_I == 1
-    # assert quam.qubits[0].xy.mixer.port_Q == 2
 
 
 def test_quam_superconducting_referenced(tmp_path):
@@ -21,7 +18,7 @@ def test_quam_superconducting_referenced(tmp_path):
     folder.mkdir(exist_ok=True)
     quam = create_quam_superconducting_referenced(num_qubits=3)
 
-    quam.qubits[0].to_dict()
+    quam.qubits["q0"].to_dict()
     quam.save(folder / "quam")
 
 
@@ -33,29 +30,26 @@ def test_quam_referenced_full(tmp_path):
     quam.save(folder / "quam", content_mapping={"wiring.json": "wiring"})
 
     loaded_quam = json.load((folder / "quam" / "state.json").open("r"))
-    assert set(loaded_quam.keys()) == set([
-        "qubits",
-        "resonators",
-        "mixers",
-        "local_oscillators",
-        "__class__",
-    ])
+    assert set(loaded_quam.keys()) == set(
+        [
+            "qubits",
+            "__class__",
+        ]
+    )
     assert (
         loaded_quam["__class__"]
         == "quam.examples.superconducting_qubits.components.QuAM"
     )
     assert len(loaded_quam["qubits"]) == 3
-    assert len(loaded_quam["mixers"]) == 6
-    assert len(loaded_quam["local_oscillators"]) == 6
-    assert loaded_quam["mixers"][0] == "#/qubits/0/xy/mixer"
-    assert loaded_quam["local_oscillators"][0] == "#/qubits/0/xy/local_oscillator"
-    assert loaded_quam["qubits"][0]["xy"]["opx_output_I"] == "#/wiring/qubits/0/port_I"
-    assert loaded_quam["qubits"][0]["xy"]["intermediate_frequency"] == 100e6
+    assert (
+        loaded_quam["qubits"]["q0"]["xy"]["opx_output_I"] == "#/wiring/qubits/q0/port_I"
+    )
+    assert loaded_quam["qubits"]["q0"]["xy"]["intermediate_frequency"] == 100e6
 
     loaded_quam = json.load((folder / "quam" / "wiring.json").open("r"))
     assert set(loaded_quam.keys()) == set(["wiring"])
     assert len(loaded_quam["wiring"]["qubits"]) == 3
-    assert loaded_quam["wiring"]["qubits"][0]["port_I"] == [
+    assert loaded_quam["wiring"]["qubits"]["q0"]["port_I"] == [
         "con1",
         3,
     ]  # transformed to tuple

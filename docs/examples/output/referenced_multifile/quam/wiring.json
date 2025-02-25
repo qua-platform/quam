@@ -1,36 +1,36 @@
 {
     "wiring": {
-        "qubits": [
-            {
-                "opx_output_I": [
+        "qubits": {
+            "q0": {
+                "port_I": [
                     "con1",
                     3
                 ],
-                "opx_output_Q": [
+                "port_Q": [
                     "con1",
                     4
                 ],
-                "opx_output_Z": [
+                "port_Z": [
                     "con1",
                     5
                 ]
             },
-            {
-                "opx_output_I": [
+            "q1": {
+                "port_I": [
                     "con1",
                     6
                 ],
-                "opx_output_Q": [
+                "port_Q": [
                     "con1",
                     7
                 ],
-                "opx_output_Z": [
+                "port_Z": [
                     "con1",
                     8
                 ]
             }
-        ],
-        "resonator": {
+        },
+        "feedline": {
             "opx_output_I": [
                 "con1",
                 1

@@ -7,7 +7,7 @@ import mkdocs_gen_files
 for path in sorted(Path("quam").rglob("*.py")):  #
     module_path = path.relative_to("quam").with_suffix("")  #
     doc_path = path.relative_to("quam").with_suffix(".md")  #
-    full_doc_path = Path("reference", doc_path)  #
+    full_doc_path = Path("API_references", doc_path)  #
 
     parts = list(module_path.parts)
     parts = ["quam"] + parts

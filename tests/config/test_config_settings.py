@@ -1,5 +1,4 @@
 from quam.core import QuamComponent, QuamRoot, quam_dataclass
-from quam.core.qua_config_template import qua_config_template
 
 
 @quam_dataclass
@@ -7,12 +6,11 @@ class EmptyRoot(QuamRoot):
     pass
 
 
-def test_empty_root():
+def test_empty_root(qua_config):
     root = EmptyRoot()
     cfg = root.generate_config()
 
-    expected_cfg = qua_config_template
-    assert cfg == expected_cfg
+    assert cfg == qua_config
 
 
 @quam_dataclass
@@ -74,7 +72,7 @@ def test_generate_after_property():
 
         @property
         def config_settings(self):
-            return {"after": [self._root.second_component]}
+            return {"after": [self.get_root().second_component]}
 
     root = Root(
         first_component=ComponentProperty(name="first"),

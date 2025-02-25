@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections.abc import Iterable
 import sys
 import warnings
@@ -33,6 +34,8 @@ from quam.utils import (
 )
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
+
+from qm.type_hinting import DictQuaConfig
 
 
 __all__ = [
@@ -144,7 +147,7 @@ def sort_quam_components(
 def _quam_dataclass(cls=None, **kwargs):
     """Dataclass for QuAM classes.
 
-    This class is used as a patch to maintain compatibility with Python 3.8 and 3.9, as
+    This class is used as a patch to maintain compatibility with Python 3.9, as
     these do not support the dataclass argument `kw_only`. This argument is needed to
     ensure inheritance of parent dataclasses is allowed.
 
@@ -225,8 +228,6 @@ class QuamBase(ReferenceClass):
     args:
         parent: The parent of this object. This is automatically set when adding
             this object to another QuamBase object.
-        _root: The QuamRoot object. This is automatically set when instantiating
-            a QuamRoot object.
         config_settings: A dictionary of configuration settings for this object.
             This is used by [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]
             to determine the order in which to add the components to the QUA config.
@@ -238,8 +239,7 @@ class QuamBase(ReferenceClass):
     """
 
     parent: ClassVar["QuamBase"] = ParentDescriptor()
-    _root: ClassVar["QuamRoot"] = None
-
+    _last_instantiated_root: ClassVar[Optional["QuamRoot"]] = None
     config_settings: ClassVar[Dict[str, Any]] = None
 
     def __init__(self):
@@ -268,6 +268,28 @@ class QuamBase(ReferenceClass):
         """
         assert is_dataclass(self)
         return [data_field.name for data_field in fields(self)]
+
+    def get_root(self) -> Optional[QuamRoot]:
+        """Get the QuamRoot object of this object.
+
+        This function recursively searches the parent chain for a QuamRoot object.
+        If no QuamRoot object is found, it will return the last instantiated QuamRoot
+        if it exists, else None.
+
+        Returns:
+            The root of this object, or None if no root is found.
+        """
+        if self.parent is not None:
+            return self.parent.get_root()
+
+        if self._last_instantiated_root is not None:
+            warnings.warn(
+                f"This component is not part of any QuamRoot, using last "
+                f"instantiated QuamRoot. This is not recommended as it may lead to "
+                f"unexpected behaviour. Component: {self.__class__.__name__}"
+            )
+            return self._last_instantiated_root
+        return None
 
     def get_attr_name(self, attr_val: Any) -> str:
         """Get the name of an attribute that matches the value.
@@ -342,18 +364,71 @@ class QuamBase(ReferenceClass):
             return isinstance(val, (list, QuamList))
         return type(val) == required_type
 
-    def get_reference(self) -> Optional[str]:
+    def get_reference(
+        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+    ) -> Optional[str]:
         """Get the reference path of this object.
+
+        Args:
+            attr: The optional attribute to get the reference path for.
+                If None, the reference path of the object itself is returned.
+            relative_path: The optional relative path to join with the reference path.
 
         Returns:
             The reference path of this object.
+
+        Examples:
+            We assume a QuamRoot object with a component "elem".
+            - elem.get_reference() == "#/elem"
+            - elem.get_reference(attr="child") == "#/elem/child"
+            - elem.get_reference(relative_path="#./child") == "#/elem/child"
+            - elem.get_reference(relative_path="#../child") == "#/child"
+            - elem.get_reference(relative_path="#./child/grandchild") == "#/elem/child/grandchild"
         """
+
+        if attr is not None and relative_path is not None:
+            raise ValueError(
+                "Cannot specify both attr and relative_path. "
+                "Please specify only one of them."
+            )
 
         if self.parent is None:
             raise AttributeError(
-                "Unable to extract reference path. Parent must be defined for {self}"
+                "Unable to extract reference path for {self}: No parent defined"
             )
-        return f"{self.parent.get_reference()}/{self.parent.get_attr_name(self)}"
+
+        try:
+            base_reference = self.parent.get_reference()
+            if base_reference == "#/":
+                base_reference = "#"
+        except AttributeError:
+            raise AttributeError(
+                f"Unable to extract reference path for {self}: Could not get "
+                f"reference path for parent {self.parent}"
+            )
+
+        try:
+            attr_name = self.parent.get_attr_name(self)
+        except AttributeError:
+            raise AttributeError(
+                f"Unable to extract reference path for {self}: Could not get "
+                f"attribute name from parent {self.parent}"
+            )
+
+        reference = f"{base_reference}/{attr_name}"
+
+        if relative_path is not None:
+            if not string_reference.is_reference(relative_path):
+                raise ValueError(
+                    f"Unable to extract reference path for {self}: "
+                    f"relative_path {relative_path} is not a reference"
+                )
+
+            reference = string_reference.join_references(reference, relative_path)
+        elif attr is not None:
+            reference = f"{reference}/{attr}"
+
+        return reference
 
     def get_attrs(
         self, follow_references: bool = False, include_defaults: bool = True
@@ -425,7 +500,7 @@ class QuamBase(ReferenceClass):
         return quam_dict
 
     def iterate_components(
-        self, skip_elems: bool = None
+        self, skip_elems: Optional[Sequence["QuamBase"]] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
@@ -486,7 +561,10 @@ class QuamBase(ReferenceClass):
         if not string_reference.is_reference(reference):
             return reference
 
-        if string_reference.is_absolute_reference(reference) and self._root is None:
+        if (
+            string_reference.is_absolute_reference(reference)
+            and self.get_root() is None
+        ):
             warnings.warn(
                 f"No QuamRoot initialized, cannot retrieve reference {reference}"
                 f" from {self.__class__.__name__}"
@@ -495,7 +573,7 @@ class QuamBase(ReferenceClass):
 
         try:
             return string_reference.get_referenced_value(
-                self, reference, root=self._root
+                self, reference, root=self.get_root()
             )
         except ValueError as e:
             try:
@@ -511,7 +589,7 @@ class QuamBase(ReferenceClass):
         Args:
             indent: The number of spaces to indent the summary.
         """
-        if self._root is self:
+        if self.get_root() is self:
             full_name = "QuAM:"
         elif self.parent is None:
             full_name = f"{self.__class__.__name__} (parent unknown):"
@@ -535,6 +613,51 @@ class QuamBase(ReferenceClass):
             else:
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
+    def set_at_reference(
+        self, attr: str, value: Any, allow_non_reference: bool = False
+    ):
+        """Follow the reference of an attribute and set the value at the reference
+
+        Args:
+            attr: The attribute to set the value at the reference of.
+            value: The value to set.
+            allow_non_reference: Whether to allow the attribute to be a non-reference.
+                If False, the attribute must be a reference or an error is raised.
+
+        Raises:
+            ValueError: If the attribute is not a reference and `allow_non_reference` is
+                False.
+            ValueError: If the reference is invalid, e.g. "#./" since it has no
+                attribute.
+        """
+        raw_value = self.get_unreferenced_value(attr)
+        if not string_reference.is_reference(raw_value):
+            if not allow_non_reference:
+                raise ValueError(
+                    f"Cannot set at reference because attr '{attr}' is not a reference. "
+                    f"'{attr}' = {raw_value}"
+                )
+            else:
+                setattr(self, attr, value)
+                return
+
+        parent_reference, ref_attr = string_reference.split_reference(raw_value)
+        if not ref_attr:
+            raise ValueError(
+                f"Unsuccessful attempt to set the value at reference {raw_value} for "
+                f"attribute {attr} because the reference is invalid as it has no "
+                "attribute"
+            )
+
+        parent_obj = self._get_referenced_value(parent_reference)
+        raw_referenced_value = parent_obj.get_unreferenced_value(ref_attr)
+        if string_reference.is_reference(raw_referenced_value) and isinstance(
+            parent_obj, QuamBase
+        ):
+            parent_obj.set_at_reference(ref_attr, value)
+        else:
+            setattr(parent_obj, ref_attr, value)
+
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
 QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
@@ -553,17 +676,19 @@ class QuamRoot(QuamBase):
         This class should not be used directly, but should generally be subclassed and
         made a dataclass. The dataclass fields should correspond to the QuAM root
         structure.
-
-    Note:
-        Upon instantiating a `QuamRoot` object, it sets the class attribute
-        `QuamBase._root` to itself. This is used such that any references with an
-        absolute path are resolved from the root.
     """
 
     serialiser: AbstractSerialiser = JSONSerialiser
 
     def __post_init__(self):
-        QuamBase._root = self
+        if QuamBase._last_instantiated_root is not None:
+            warnings.warn(
+                "Multiple QuamRoot objects were instantiated. Any QuAM component will be "
+                "attached to its specific QuamRoot object. Mixing QuAM components belonging "
+                "to different QuamRoot objects is not recommended as it may lead to "
+                "unexpected results."
+            )
+        QuamBase._last_instantiated_root = self
         super().__post_init__()
 
     def __setattr__(self, name, value):
@@ -573,8 +698,27 @@ class QuamRoot(QuamBase):
         if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
 
-    def get_reference(self):
-        return "#"
+    def get_reference(
+        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+    ) -> Optional[str]:
+        if attr is not None:
+            return f"#/{attr}"
+
+        reference = "#/"
+        if relative_path is not None:
+            reference = string_reference.join_references(reference, relative_path)
+        return reference
+
+    def get_root(self: QuamRootType) -> QuamRootType:
+        """Get the QuamRoot object of this object, i.e. the object itself.
+
+        This QuamRoot function overrides the QuamBase function to return the object
+        itself, rather than following the parent chain.
+
+        Returns:
+            The current QuamRoot object (self).
+        """
+        return self
 
     def save(
         self,
@@ -653,7 +797,7 @@ class QuamRoot(QuamBase):
             validate_type=validate_type,
         )
 
-    def generate_config(self) -> Dict[str, Any]:
+    def generate_config(self) -> DictQuaConfig:
         """Generate the QUA configuration from the QuAM object.
 
         Returns:
@@ -674,9 +818,6 @@ class QuamRoot(QuamBase):
         generate_config_final_actions(qua_config)
 
         return qua_config
-
-    def get_unreferenced_value(self, attr: str):
-        return getattr(self, attr)
 
 
 class QuamComponent(QuamBase):
@@ -790,7 +931,13 @@ class QuamDict(UserDict, QuamBase):
         return super().__eq__(other)
 
     def __repr__(self) -> str:
-        return super().__repr__()
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="^Could not get reference*",
+                category=UserWarning,
+            )
+            return super().__repr__()
 
     # QuAM methods
     def _get_attr_names(self):
@@ -932,11 +1079,19 @@ class QuamList(UserList, QuamBase):
         return super().__eq__(value)
 
     def __repr__(self) -> str:
-        return super().__repr__()
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="^Could not get reference*",
+                category=UserWarning,
+            )
+            return super().__repr__()
 
     def __getitem__(self, i):
         elem = super().__getitem__(i)
         if isinstance(i, slice):
+            if isinstance(elem, QuamList):
+                elem.parent = self.parent
             # This automatically gets the referenced values
             return list(elem)
 

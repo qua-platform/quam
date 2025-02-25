@@ -1,22 +1,23 @@
-# Custom components
+# Custom QuAM Components
 
 To create custom QuAM components, their classes should be defined in a Python module that can be accessed from Python.
 The reason for this is that otherwise QuAM cannot load QuAM from a JSON file as it cannot determine where the classes are defined.
 If you already have a Python module that you use for your own QUA code, it is recommended to add QuAM components to that module.
 If you don't already have such a module, please follow the guide below.
 
-## Creating a custom Python module
+## Creating a Custom Python Module
 Here we describe how to create a minimal Python module that can be used for your custom QuAM components.
 In this example, we will give the top-level folder the name `my-quam` and the Python module will be called `my_quam` (note the underscore instead of dash).
 First create the following folder structure
 ```
 my-quam
 ├── my_quam
+│   └── __init__.py
 │   └── components
 │       └── __init__.py
 └── pyproject.toml
 ```
-The file `__init__.py` should be empty, and `pyproject.toml` should have the following contents:
+The `__init__.py` files should be empty, and `pyproject.toml` should have the following contents:
 
 /// details | pyproject.toml
 ```toml
@@ -25,7 +26,7 @@ name = "my-quam"
 version = "0.1.0"
 description = "User QuAM repository"
 authors = [{ name = "Jane Doe", email = "jane.doe@quantum-machines.co" }]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
@@ -49,7 +50,7 @@ from my_quam.components import *
 ```
 All the custom QuAM components should be placed as Python files in `my-quam/my_quam/components`.
 
-## Creating a custom QuAM component
+## Creating a Custom QuAM Component
 Once a designated Python module has been chosen / created, it can be populated with a custom component.
 We will assume that the newly-created Python module `my_quam` is used.
 In this example, we will make a basic QuAM component representing a DC gate, with two properties: `name` and `dc_voltage`:
@@ -71,7 +72,7 @@ dc_gate = DcGate(id="plunger_gate", dc_voltage=0.43)
 
 A few notes about the above:
 
-- Each QuamComponent inherits from [quam.core.quam_classes.QuamComponent][].
+- Each QuamComponent inherits from [QuamComponent][quam.core.quam_classes.QuamComponent].
 - QuAM components are decorated with `@quam_dataclass`, which is a variant of the Python [@dataclass](https://docs.python.org/3/library/dataclasses.html).
 
 /// details | Reason for `@quam_dataclass` instead of `@dataclass`
@@ -101,7 +102,7 @@ child = Child(required_attr=12)  # Note that we now need to explicitly pass keyw
 ```
 
 The keyword `kw_only` was only introduced in Python 3.10, and so the example above would raise an error in Python <3.10.
-However, to ensure QuAM is compatible with Python 3.8 and above, we introduced `@quam_dataclass` which fixes this problem:
+However, to ensure QuAM is compatible with Python 3.9 and above, we introduced `@quam_dataclass` which fixes this problem:
 
 ```python
 @quam_dataclass
@@ -113,10 +114,10 @@ An additional benefit is that `kw_only=True` is automatically passed along.
 From Python 3.10 onwards, `@quam_dataclass` is equivalent to `@dataclass(kw_only=True, eq=False)`
 ///
 
-## QuAM component subclassing
+## QuAM Component Subclassing
 QuAM components can also be subclassed to add functionalities to the parent class.
 For example, we now want to combine a DC and AC gate together, where the AC part corresponds to an OPX channel.
-To do this, we create a class called `AcDcGate` that inherits from both `DcGate` and [quam.components.channels.SingleChannel][]:
+To do this, we create a class called `AcDcGate` that inherits from both `DcGate` and [SingleChannel][quam.components.channels.SingleChannel]:
 
 ```python
 from quam.components import SingleChannel
@@ -124,6 +125,7 @@ from quam.components import SingleChannel
 
 @quam_dataclass
 class AcDcGate(DcGate, SingleChannel):
+    pass
 ```
 
 It can be instantiated using
@@ -131,4 +133,4 @@ It can be instantiated using
 ac_dc_gate = AcDcGate(id="plunger_gate", dc_voltage=0.43, opx_output=("con1", 1))
 ```
 
-Notice that the keyword argument `opx_output` now also needs to be passed. This is because it's a required argument for [quam.components.channels.SingleChannel][].
+Notice that the keyword argument `opx_output` now also needs to be passed. This is because it's a required argument for [SingleChannel][quam.components.channels.SingleChannel].

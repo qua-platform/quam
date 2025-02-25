@@ -1,0 +1,35 @@
+# This workflow is used for creating draft release on GitHub. Firstly the
+# build workflow (.github/workflows/reusable-build.yaml) is triggered for 
+# creation wheel and sdist package archives. Then the draft GitHub release is
+# created with attached built python package archives.
+
+name: Create GitHub draft release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    uses: qua-platform/quam/.github/workflows/reusable-build.yaml@main
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+          pattern: python-package-*
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release create ${{ github.ref_name }}
+          --generate-notes --verify-tag --latest
+          --draft
+          "dist/quam-${GITHUB_REF_NAME#v}-py3-none-any.whl"
+          "dist/quam-${GITHUB_REF_NAME#v}.tar.gz"

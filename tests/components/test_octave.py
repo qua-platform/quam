@@ -1,16 +1,22 @@
-from copy import deepcopy
-
+from typing import Dict
+from dataclasses import field
 import pytest
-from quam.components.channels import IQChannel, InOutIQChannel, InOutSingleChannel
+
+from quam.components.channels import (
+    Channel,
+    IQChannel,
+    InOutIQChannel,
+    InOutSingleChannel,
+)
 
 from quam.components.octave import Octave, OctaveUpConverter, OctaveDownConverter
-from quam.core.qua_config_template import qua_config_template
 from quam.core.quam_classes import QuamRoot, quam_dataclass
 
 
 @quam_dataclass
 class OctaveQuAM(QuamRoot):
     octave: Octave
+    channels: Dict[str, Channel] = field(default_factory=dict)
 
 
 @pytest.fixture
@@ -27,12 +33,11 @@ def test_instantiate_octave(octave):
     assert octave.loopbacks == []
 
 
-def test_empty_octave_config(octave):
+def test_empty_octave_config(octave, qua_config):
     machine = OctaveQuAM(octave=octave)
     config = machine.generate_config()
 
-    expected_cfg = deepcopy(qua_config_template)
-    expected_cfg["octaves"] = {
+    qua_config["octaves"] = {
         "octave1": {
             "RF_outputs": {},
             "RF_inputs": {},
@@ -41,7 +46,7 @@ def test_empty_octave_config(octave):
         }
     }
 
-    assert config == expected_cfg
+    assert config == qua_config
 
 
 def test_empty_octave_empty_config(octave):
@@ -267,8 +272,8 @@ def test_instantiate_octave_default_connectivity(octave):
         assert RF_input.id == idx
 
 
-def test_channel_add_RF_outputs(octave):
-    OctaveQuAM(octave=octave)
+def test_channel_add_RF_outputs(octave, qua_config):
+    machine = OctaveQuAM(octave=octave)
     octave.RF_outputs[2] = OctaveUpConverter(id=2, LO_frequency=2e9)
 
     channel = IQChannel(
@@ -277,23 +282,21 @@ def test_channel_add_RF_outputs(octave):
         opx_output_Q=("con1", 2),
         frequency_converter_up="#/octave/RF_outputs/2",
     )
-
-    cfg = deepcopy(qua_config_template)
-    channel.apply_to_config(cfg)
+    machine.channels["ch"] = channel
+    channel.apply_to_config(qua_config)
 
     expected_cfg_elements = {
         "ch": {
-            "intermediate_frequency": 0.0,
             "RF_inputs": {"port": ("octave1", 2)},
             "operations": {},
         }
     }
 
-    assert cfg["elements"] == expected_cfg_elements
+    assert qua_config["elements"] == expected_cfg_elements
 
 
-def test_channel_add_RF_inputs(octave):
-    OctaveQuAM(octave=octave)
+def test_channel_add_RF_inputs(octave, qua_config):
+    machine = OctaveQuAM(octave=octave)
     octave.RF_outputs[3] = OctaveUpConverter(id=3, LO_frequency=2e9)
     octave.RF_inputs[4] = OctaveDownConverter(id=4, LO_frequency=2e9)
 
@@ -306,13 +309,11 @@ def test_channel_add_RF_inputs(octave):
         frequency_converter_up="#/octave/RF_outputs/3",
         frequency_converter_down="#/octave/RF_inputs/4",
     )
-
-    cfg = deepcopy(qua_config_template)
-    channel.apply_to_config(cfg)
+    machine.channels["ch"] = channel
+    channel.apply_to_config(qua_config)
 
     expected_cfg_elements = {
         "ch": {
-            "intermediate_frequency": 0.0,
             "RF_inputs": {"port": ("octave1", 3)},
             "RF_outputs": {"port": ("octave1", 4)},
             "operations": {},
@@ -321,7 +322,7 @@ def test_channel_add_RF_inputs(octave):
         }
     }
 
-    assert cfg["elements"] == expected_cfg_elements
+    assert qua_config["elements"] == expected_cfg_elements
 
 
 def test_load_octave(octave):
@@ -333,7 +334,7 @@ def test_load_octave(octave):
     d_expected = {
         "__class__": "test_octave.OctaveQuAM",
         "octave": {
-            "RF_inputs": {1: {"id": 1}, 2: {"id": 2}},
+            "RF_inputs": {1: {"id": 1}, 2: {"id": 2, "LO_source": "external"}},
             "RF_outputs": {
                 1: {"id": 1},
                 2: {"id": 2},

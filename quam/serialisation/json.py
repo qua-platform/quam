@@ -166,7 +166,7 @@ class JSONSerialiser(AbstractSerialiser):
 
             metadata["default_filename"] = path.name
             with open(path, "r") as f:
-                contents = json.load(f)
+                contents = json.load(f, object_hook=convert_int_keys)
         elif path.is_dir():
             metadata["default_foldername"] = str(path)
             for file in path.iterdir():
@@ -174,7 +174,7 @@ class JSONSerialiser(AbstractSerialiser):
                     continue
 
                 with open(file, "r") as f:
-                    file_contents = json.load(f)
+                    file_contents = json.load(f, object_hook=convert_int_keys)
                 contents.update(file_contents)
 
                 if file.name == self.default_filename:
@@ -183,3 +183,17 @@ class JSONSerialiser(AbstractSerialiser):
                     metadata["content_mapping"][file.name] = list(file_contents.keys())
 
         return contents, metadata
+
+
+def convert_int_keys(obj):
+    """Convert dictionary keys to integers if possible."""
+    if not isinstance(obj, dict):
+        return obj
+
+    new_obj = {}
+    for key, value in obj.items():
+        if key.isdigit():
+            key = int(key)
+        new_obj[key] = value
+
+    return new_obj
