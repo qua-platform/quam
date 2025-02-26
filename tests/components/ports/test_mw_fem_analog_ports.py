@@ -129,6 +129,15 @@ def test_mw_fem_analog_input_ports():
         }
     }
 
+    port.gain_db = 10
+    assert port.get_port_properties() == {
+        "band": 1,
+        "downconverter_frequency": 5e9,
+        "sampling_rate": 1e9,
+        "shareable": False,
+        "gain_db": 10,
+    }
+
 
 def test_mw_fem_upconverter_config_generation():
     port = MWFEMAnalogOutputPort(
