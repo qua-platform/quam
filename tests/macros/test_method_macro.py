@@ -1,11 +1,11 @@
-from quam.core.macro.method_macro import MethodMacro
+from quam.core.macro.method_macro import MethodMacro, method_macro
 
 
 class TestClass:
     def __init__(self, value: int):
         self.value = value
 
-    @MethodMacro
+    @method_macro
     def add(self, x: int) -> int:
         return self.value + x
 

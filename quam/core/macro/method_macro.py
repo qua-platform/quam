@@ -4,7 +4,7 @@ import functools
 from quam.core.macro.base_macro import BaseMacro
 
 
-__all__ = ["MethodMacro"]
+__all__ = ["method_macro", "MethodMacro"]
 
 
 T = TypeVar("T", bound=Callable)
@@ -38,3 +38,7 @@ class MethodMacro(BaseMacro):
     @staticmethod
     def is_macro_method(obj: Any) -> bool:
         return isinstance(obj, MethodMacro)
+
+
+# Lower-case alias for MethodMacro for more pythonic decorator
+method_macro = MethodMacro

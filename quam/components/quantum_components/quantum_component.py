@@ -3,7 +3,7 @@ from dataclasses import field
 import inspect
 from typing import Any, Callable, Dict, Union, TypeVar, cast
 from quam.core.quam_classes import quam_dataclass, QuamComponent
-from quam.core.macro import BaseMacro, MethodMacro
+from quam.core.macro import BaseMacro, method_macro
 
 __all__ = ["QuantumComponent"]
 
@@ -28,11 +28,11 @@ class QuantumComponent(QuamComponent, ABC):
     @staticmethod
     def register_macro(func: T) -> T:
         """Decorator to register a method as a macro entry point"""
-        return cast(T, MethodMacro(func))
+        return cast(T, method_macro(func))
 
-    def _get_method_macros(self) -> Dict[str, MethodMacro]:
+    def _get_method_macros(self) -> Dict[str, method_macro]:
         return dict(
-            inspect.getmembers(self, predicate=lambda x: isinstance(x, MethodMacro))
+            inspect.getmembers(self, predicate=lambda x: isinstance(x, method_macro))
         )
 
     def get_macros(self) -> Dict[str, BaseMacro]:
