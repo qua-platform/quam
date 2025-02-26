@@ -116,16 +116,24 @@ class Qubit(QuantumComponent):
                 "Cannot create a qubit pair with same qubit (q1 @ q1), where q1={self}"
             )
 
-        if not hasattr(self._root, "qubit_pairs"):
+        root_quam = self.get_root()
+
+        if root_quam is None:
             raise AttributeError(
                 "Qubit pairs not found in the root component. "
                 "Please add a 'qubit_pairs' attribute to the root component."
             )
 
-        if isinstance(self._root.qubit_pairs, UserDict):
-            qubit_pairs = self._root.qubit_pairs.values()
+        if not hasattr(root_quam, "qubit_pairs"):
+            raise AttributeError(
+                "Qubit pairs not found in the root component. "
+                "Please add a 'qubit_pairs' attribute to the root component."
+            )
+
+        if isinstance(root_quam.qubit_pairs, UserDict):
+            qubit_pairs = root_quam.qubit_pairs.values()
         else:
-            qubit_pairs = self._root.qubit_pairs
+            qubit_pairs = root_quam.qubit_pairs
 
         for qubit_pair in qubit_pairs:
             if qubit_pair.qubit_control is self and qubit_pair.qubit_target is other:
