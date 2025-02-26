@@ -1,0 +1,123 @@
+{
+    "qubits": {
+        "q0": {
+            "id": 0,
+            "xy": {
+                "opx_output_I": "#/wiring/qubits/q0/port_I",
+                "opx_output_Q": "#/wiring/qubits/q0/port_Q",
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {},
+                    "__class__": "quam.components.hardware.FrequencyConverter"
+                },
+                "intermediate_frequency": 100000000.0
+            },
+            "z": {
+                "opx_output": "#/wiring/qubits/q0/port_Z"
+            },
+            "resonator": {
+                "id": 0,
+                "opx_output_I": "#/wiring/feedline/opx_output_I",
+                "opx_output_Q": "#/wiring/feedline/opx_output_Q",
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {},
+                    "__class__": "quam.components.hardware.FrequencyConverter"
+                },
+                "opx_input_I": "#/wiring/feedline/opx_input_I",
+                "opx_input_Q": "#/wiring/feedline/opx_input_Q"
+            }
+        },
+        "q1": {
+            "id": 1,
+            "xy": {
+                "opx_output_I": "#/wiring/qubits/q1/port_I",
+                "opx_output_Q": "#/wiring/qubits/q1/port_Q",
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {},
+                    "__class__": "quam.components.hardware.FrequencyConverter"
+                },
+                "intermediate_frequency": 100000000.0
+            },
+            "z": {
+                "opx_output": "#/wiring/qubits/q1/port_Z"
+            },
+            "resonator": {
+                "id": 1,
+                "opx_output_I": "#/wiring/feedline/opx_output_I",
+                "opx_output_Q": "#/wiring/feedline/opx_output_Q",
+                "frequency_converter_up": {
+                    "local_oscillator": {
+                        "frequency": 6000000000.0,
+                        "power": 10
+                    },
+                    "mixer": {},
+                    "__class__": "quam.components.hardware.FrequencyConverter"
+                },
+                "opx_input_I": "#/wiring/feedline/opx_input_I",
+                "opx_input_Q": "#/wiring/feedline/opx_input_Q"
+            }
+        }
+    },
+    "wiring": {
+        "qubits": {
+            "q0": {
+                "port_I": [
+                    "con1",
+                    3
+                ],
+                "port_Q": [
+                    "con1",
+                    4
+                ],
+                "port_Z": [
+                    "con1",
+                    5
+                ]
+            },
+            "q1": {
+                "port_I": [
+                    "con1",
+                    6
+                ],
+                "port_Q": [
+                    "con1",
+                    7
+                ],
+                "port_Z": [
+                    "con1",
+                    8
+                ]
+            }
+        },
+        "feedline": {
+            "opx_output_I": [
+                "con1",
+                1
+            ],
+            "opx_output_Q": [
+                "con1",
+                2
+            ],
+            "opx_input_I": [
+                "con1",
+                1
+            ],
+            "opx_input_Q": [
+                "con1",
+                2
+            ]
+        }
+    },
+    "__class__": "quam.examples.superconducting_qubits.components.QuAM"
+}
