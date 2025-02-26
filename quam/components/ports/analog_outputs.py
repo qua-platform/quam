@@ -98,5 +98,7 @@ class MWFEMAnalogOutputPort(FEMPort):
         if self.upconverter_frequency is not None:
             port_cfg["upconverter_frequency"] = self.upconverter_frequency
         if self.upconverters is not None:
-            port_cfg["upconverters"] = self.upconverters
+            port_cfg["upconverters"] = {
+                key: dict(val) for key, val in self.upconverters.items()
+            }
         return port_cfg

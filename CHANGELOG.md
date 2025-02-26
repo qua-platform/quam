@@ -1,8 +1,23 @@
 ## [Unreleased]
+
+### Changed
+- `QuamBase.generate_config()` now returns a `DictQuaConfig` instead of a `Dict[str, Any]`
+  This provides type hints for the generated config.
+
+### Fixed
+- Fixed `QuamBase.iterate_components()` arg `skip_elems` having the wrongtype
+- Deprecated `thread` argument in favor of `core` in `Channel` when qm >= 1.2.2
+- Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
+
+
+## [0.3.9]
 ### Added
 - Added `QuamBase.set_at_reference` to set a value at a reference
 - Added `string_reference.get_parent_reference` to get the parent reference of a string reference
 - Added `FrequencyConverter.LO_frequency` setter which updates the local oscillator frequency
+- Added optional `relative_path` to method `QuamBase.get_reference()`
+- Added support for multiple QuamRoot objects
+- Added `QuamBase.get_root()` to get the QuamRoot object of a component
 
 ### Changed
 - `Pulse.integration_weights` now defaults to `#./default_integration_weights`, which returns [(1, pulse.length)]
@@ -10,7 +25,10 @@
 ### Fixed
 - Fixed issues with parameters being references in a QuamRoot object
 - Fixed `MWFEMAnalogOutputPort.upconverters` not having the correct type
-
+- A warning is raised if a new `QuamRoot` instance is created while a previous one exists.
+- Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
+- Fixed: Improve error message when instantiating: list or dict expected but a different type is provided
+- `MWChannel.upconverter_frequency` and `MWChannel.LO_frequency` now correctly return the upconverter frequency from the `opx_output` port, supporting both `upconverter_frequency` and `upconverters` specifications.
 
 ## [0.3.8]
 ### Added
@@ -44,7 +62,7 @@
 - QUAM can now be installed through PyPi
 
 ### Changed
-- Added ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
+- Aded ports for different hardware. As a consequence we now also support the LF-FEM and MW-FEM
 - `Channel` is now an abstract base class.
 - Moved `intermediate_frequency` to `Channel` from `SingleChannel/IQChannel`.
   The default is `None`. A consequence of this is that `SingleChannel` no longer adds
