@@ -22,7 +22,7 @@ try:
 
 except ImportError:
     from qm.qua._dsl import QuaNumberType, QuaExpressionType
-    
+
     ScalarInt = QuaNumberType
     ScalarBool = QuaExpressionType
 
@@ -210,7 +210,7 @@ class Pulse(QuamComponent):
                 string with the units. The units can be either: 'Hz/nsec',
                 'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
                 'KHz/sec', 'Hz/sec', 'mHz/sec'.
-            truncate (Union[int, QuaScalar[int]]): Allows playing
+            truncate (Scalar[int]): Allows playing
                 only part of the pulse, truncating the end. If provided,
                 will play only up to the given time in units of the clock
                 cycle (4ns).

@@ -377,7 +377,7 @@ class Channel(QuamComponent, ABC):
                 `self.operations`.
             amplitude_scale (Union[float, AmpValuesType]): Amplitude scale of the pulse.
                 Can be either a float, or qua.amp(float).
-            duration (Union[int, Scalar[int]]): Duration of the pulse in units of the
+            duration (Scalar[int]): Duration of the pulse in units of the
                 clock cycle (4ns). If not provided, the default pulse duration will be
                 used. It is possible to dynamically change the duration of both constant
                 and arbitrary pulses. Arbitrary pulses can only be stretched, not
@@ -389,7 +389,7 @@ class Channel(QuamComponent, ABC):
                 string with the units. The units can be either: 'Hz/nsec',
                 'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
                 'KHz/sec', 'Hz/sec', 'mHz/sec'.
-            truncate (Union[int, Scalar[int]]): Allows playing
+            truncate (Scalar[int]): Allows playing
                 only part of the pulse, truncating the end. If provided,
                 will play only up to the given time in units of the clock
                 cycle (4ns).
@@ -449,7 +449,7 @@ class Channel(QuamComponent, ABC):
         Duration is in units of the clock cycle (4ns)
 
         Args:
-            duration (Union[int, Scalar[int]]): time to wait in units of the clock cycle
+            duration (Scalar[int]): time to wait in units of the clock cycle
                 (4ns). Range: [4, $2^{31}-1$] in steps of 1.
             *other_elements (Union[str,sequence of str]): elements to wait on,
                 in addition to this channel
@@ -497,7 +497,7 @@ class Channel(QuamComponent, ABC):
         ``keep_phase`` parameter and is discussed in the documentation.
 
         Args:
-            new_frequency (Union[int, QuaScalar[int]]): The new frequency value to set
+            new_frequency (Scalar[int]): The new frequency value to set
                 in units set by ``units`` parameter. In steps of 1.
             units (str): units of new frequency. Useful when sub-Hz
                 precision is required. Allowed units are "Hz", "mHz", "uHz",
@@ -539,7 +539,7 @@ class Channel(QuamComponent, ABC):
             error, it is recommended to use `reset_frame(el)` from time to time.
 
         Args:
-            angle (Union[float, QuaScalar[float]]): The angle to add to the current
+            angle (Scalar[float]): The angle to add to the current
                 phase (in radians)
             *elements (str): a single element whose oscillator's phase will
                 be shifted. multiple elements can be given, in which case
@@ -565,7 +565,7 @@ class Channel(QuamComponent, ABC):
             recommended to use `reset_frame(el)` from time to time.
 
         Args:
-            angle (Union[float, QuaScalar[float]]): The angle to add to the current
+            angle (Scalar[float]): The angle to add to the current
                 phase (in $2\pi$ radians)
         """
         frame_rotation_2pi(angle, self.name)
@@ -651,7 +651,7 @@ class SingleChannel(Channel):
         is closed.
 
         Args:
-            offset (Union[float, QuaScalar[float]]): The DC offset to set the input to.
+            offset (Scalar[float]): The DC offset to set the input to.
                 This is limited by the OPX output voltage range.
         """
         set_dc_offset(element=self.name, element_input="single", offset=offset)
@@ -1175,7 +1175,7 @@ class IQChannel(_OutComplexChannel):
         is closed.
 
         Args:
-            offset (Union[float, QuaScalar[float]]): The DC offset to set the input to.
+            offset (Scalar[float]): The DC offset to set the input to.
                 This is limited by the OPX output voltage range.
             element_input (Literal["I", "Q"]): The element input to set the offset for.
 
