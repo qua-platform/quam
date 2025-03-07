@@ -22,6 +22,7 @@ try:
 
 except ImportError:
     from qm.qua._dsl import QuaNumberType, QuaExpressionType
+    
     ScalarInt = QuaNumberType
     ScalarBool = QuaExpressionType
 
