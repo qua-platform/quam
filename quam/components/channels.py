@@ -48,9 +48,6 @@ from qm.qua import (
 from qm.qua._dsl import (
     _PulseAmp,
     AmpValuesType,
-    # Scalar,
-    # QuaScalar,
-    # QuaVariable,
     ChirpType,
     StreamType,
 )
@@ -63,6 +60,7 @@ try:
     QuaScalarInt = QuaScalar[int]
     QuaScalarFloat = QuaScalar[float]
     QuaVariableFloat = QuaVariable[float]
+    QuaVariableInt = QuaVariable[int]
 except ImportError:
     from qm.qua._dsl import QuaNumberType, QuaVariableType, QuaExpressionType
 
@@ -70,6 +68,7 @@ except ImportError:
     ScalarFloat = QuaNumberType
     ScalarBool = QuaExpressionType
     QuaVariableFloat = QuaVariableType
+    QuaVariableInt = QuaVariableType
     # ScalarBool = QuaExpressionType
 
 
@@ -978,10 +977,10 @@ class InSingleChannel(Channel):
         pulse_name: str,
         size: int,
         max_time: int,
-        qua_vars: Optional[Tuple[QuaVariableFloat, QuaScalarInt]] = None,
+        qua_vars: Optional[Tuple[QuaVariableInt, QuaScalarInt]] = None,
         stream: Optional[StreamType] = None,
         mode: Literal["analog", "high_res", "digital"] = "analog",
-    ) -> Tuple[QuaVariableFloat, QuaScalarInt]:
+    ) -> Tuple[QuaVariableInt, QuaScalarInt]:
         """Perform a time tagging measurement on this channel.
 
         For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
@@ -992,7 +991,7 @@ class InSingleChannel(Channel):
             size (int): The size of the QUA array to store the times of the detected
                 pulses. Ignored if `qua_vars` is provided.
             max_time (int): The maximum time to search for pulses.
-            qua_vars (Tuple[QuaVariable[Any], QuaScalar[int]], optional): QUA variables
+            qua_vars (Tuple[QuaVariableInt, QuaScalarInt], optional): QUA variables
                 to store the times and counts of the detected pulses. If not provided,
                 new variables will be declared and returned.
             stream (Optional[StreamType]): The stream to save the measurement result to.
