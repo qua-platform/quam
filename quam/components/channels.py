@@ -60,16 +60,18 @@ try:
     ScalarBool = Scalar[bool]
     QuaScalarInt = QuaScalar[int]
     QuaScalarFloat = QuaScalar[float]
-    QuaVariableFloat = QuaVariable[float]
     QuaVariableInt = QuaVariable[int]
+    QuaVariableFloat = QuaVariable[float]
 except ImportError:
     from qm.qua._dsl import QuaNumberType, QuaVariableType, QuaExpressionType
 
     ScalarInt = QuaNumberType
     ScalarFloat = QuaNumberType
     ScalarBool = QuaExpressionType
-    QuaVariableFloat = QuaVariableType
+    QuaScalarInt = QuaNumberType
+    QuaScalarFloat = QuaNumberType
     QuaVariableInt = QuaVariableType
+    QuaVariableFloat = QuaVariableType
     # ScalarBool = QuaExpressionType
 
 
