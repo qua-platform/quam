@@ -14,17 +14,7 @@ from qm.qua._dsl import (
     StreamType,
 )
 
-try:
-    from qm.qua._expressions import Scalar
-
-    ScalarInt = Scalar[int]
-    ScalarBool = Scalar[bool]
-
-except ImportError:
-    from qm.qua._dsl import QuaNumberType, QuaExpressionType
-
-    ScalarInt = QuaNumberType
-    ScalarBool = QuaExpressionType
+from quam.utils.qua_types import ScalarInt, ScalarBool
 
 
 __all__ = [

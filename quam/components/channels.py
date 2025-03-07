@@ -27,7 +27,18 @@ from quam.components.ports.digital_outputs import (
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
-
+from quam.utils.qua_types import (
+    _PulseAmp,
+    AmpValuesType,
+    ChirpType,
+    StreamType,
+    ScalarInt,
+    ScalarFloat,
+    ScalarBool,
+    QuaScalarInt,
+    QuaVariableInt,
+    QuaVariableFloat,
+)
 
 from qm.qua import (
     align,
@@ -45,34 +56,8 @@ from qm.qua import (
     frame_rotation_2pi,
     time_tagging,
 )
-from qm.qua._dsl import (
-    _PulseAmp,
-    AmpValuesType,
-    ChirpType,
-    StreamType,
-)
 
-try:
-    from qm.qua._expressions import Scalar, QuaScalar, QuaVariable
 
-    ScalarInt = Scalar[int]
-    ScalarFloat = Scalar[float]
-    ScalarBool = Scalar[bool]
-    QuaScalarInt = QuaScalar[int]
-    QuaScalarFloat = QuaScalar[float]
-    QuaVariableInt = QuaVariable[int]
-    QuaVariableFloat = QuaVariable[float]
-except ImportError:
-    from qm.qua._dsl import QuaNumberType, QuaVariableType, QuaExpressionType
-
-    ScalarInt = QuaNumberType
-    ScalarFloat = QuaNumberType
-    ScalarBool = QuaExpressionType
-    QuaScalarInt = QuaNumberType
-    QuaScalarFloat = QuaNumberType
-    QuaVariableInt = QuaVariableType
-    QuaVariableFloat = QuaVariableType
-    # ScalarBool = QuaExpressionType
 
 
 __all__ = [
