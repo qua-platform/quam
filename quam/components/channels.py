@@ -56,6 +56,7 @@ try:
     from qm.qua._expressions import Scalar, QuaScalar, QuaVariable
 
     ScalarInt = Scalar[int]
+    ScalarFloat = Scalar[float]
     ScalarBool = Scalar[bool]
     QuaScalarInt = QuaScalar[int]
     QuaScalarFloat = QuaScalar[float]
