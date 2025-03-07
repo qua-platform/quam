@@ -58,7 +58,6 @@ from qm.qua._dsl import (
     StreamType,
 )
 
-
 __all__ = [
     "Channel",
     "DigitalOutputChannel",
@@ -694,9 +693,20 @@ class SingleChannel(Channel):
 
         filter_fir_taps = self.filter_fir_taps
         if filter_fir_taps is not None:
+            warnings.warn(
+                "SingleChannel.filter_fir_taps have moved to the analog output port "
+                "property 'feedforward_filter'. Please update your QUAM state.",
+                DeprecationWarning,
+            )
             filter_fir_taps = list(filter_fir_taps)
         filter_iir_taps = self.filter_iir_taps
         if filter_iir_taps is not None:
+            warnings.warn(
+                "SingleChannel.filter_iir_taps have moved to the analog output port "
+                "property 'feedback_filter' (OPX+), or 'exponential_filter' and "
+                "'high_pass_filter' (LF-FEM). Please update your QUAM state.",
+                DeprecationWarning,
+            )
             filter_iir_taps = list(filter_iir_taps)
 
         if isinstance(self.opx_output, LFAnalogOutputPort):
