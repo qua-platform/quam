@@ -10,10 +10,21 @@ from quam.utils import string_reference as str_ref
 
 from qm.qua._dsl import (
     AmpValuesType,
-    Scalar,
     ChirpType,
     StreamType,
 )
+
+try:
+    from qm.qua._expressions import Scalar
+
+    ScalarInt = Scalar[int]
+    ScalarBool = Scalar[bool]
+
+except ImportError:
+    from qm.qua._dsl import QuaNumberType, QuaExpressionType
+    ScalarInt = QuaNumberType
+    ScalarBool = QuaExpressionType
+
 
 __all__ = [
     "Pulse",
@@ -168,10 +179,10 @@ class Pulse(QuamComponent):
     def play(
         self,
         amplitude_scale: Union[float, AmpValuesType] = None,
-        duration: Scalar[int] = None,
-        condition: Scalar[bool] = None,
+        duration: ScalarInt = None,
+        condition: ScalarBool = None,
         chirp: ChirpType = None,
-        truncate: Scalar[int] = None,
+        truncate: ScalarInt = None,
         timestamp_stream: StreamType = None,
         continue_chirp: bool = False,
         target: str = "",
@@ -198,11 +209,11 @@ class Pulse(QuamComponent):
                 string with the units. The units can be either: 'Hz/nsec',
                 'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
                 'KHz/sec', 'Hz/sec', 'mHz/sec'.
-            truncate (Union[int, QUA variable of type int]): Allows playing
+            truncate (Union[int, QuaScalar[int]]): Allows playing
                 only part of the pulse, truncating the end. If provided,
                 will play only up to the given time in units of the clock
                 cycle (4ns).
-            condition (A logical expression to evaluate.): Will play analog
+            condition (Scalar[bool]): Will play analog
                 pulse only if the condition's value is true. Any digital
                 pulses associated with the operation will always play.
             timestamp_stream (Union[str, _ResultSource]): (Supported from
