@@ -360,7 +360,7 @@ class Channel(QuamComponent, ABC):
     def play(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
+        amplitude_scale: Union[float, List[float], AmpValuesType] = None,
         duration: ScalarInt = None,
         condition: ScalarBool = None,
         chirp: ChirpType = None,
@@ -416,7 +416,13 @@ class Channel(QuamComponent, ABC):
             )
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if isinstance(amplitude_scale, _PulseAmp):
+                warnings.warn(
+                    "Setting amplitude_scale=amp(...) is deprecated, please "
+                    "pass a float or list of floats instead",
+                    DeprecationWarning,
+                )
+            else:
                 amplitude_scale = amp(amplitude_scale)
             pulse = pulse_name * amplitude_scale
         else:
