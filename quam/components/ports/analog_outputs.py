@@ -61,11 +61,14 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
         if self.exponential_filter is not None:
-            port_properties["exponential_filter"] = list(self.exponential_filter)
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["exponential"] = list(self.exponential_filter)
+            if "feedback" in filter_properties:
+                raise ValueError(
+                    "LFFEMAnalogOutputPort: Please only specify 'exponential_filter' "
+                    "if QOP >=3.3.0, or 'feedback_filter' if QOP < 3.3.0, not both"
+                )
 
-        # High-pass filter not yet supported
-        # if self.high_pass_filter is not None:
-        #     port_properties["high_pass_filter"] = self.high_pass_filter
         port_properties["sampling_rate"] = self.sampling_rate
         if self.sampling_rate == 1e9:
             port_properties["upsampling_mode"] = self.upsampling_mode
