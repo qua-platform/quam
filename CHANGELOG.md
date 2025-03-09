@@ -7,7 +7,7 @@
 - Add `MWFEMAnalogInputPort.gain_db` to allow for setting the gain of the analog input port
 - Removed warning when multiple QuamRoot objects are instantiated
 - Added `SingleChannel.exponential_filter` and `SingleChannel.high_pass_filter` in compliance with QOP 3.3.
-- Deprecated `SingleChannel.filter_fir_taps` and `SingleChannel.filter_iir_taps` in favor of `SingleChannel.feedforward_filter` and `SingleChannel.feedback_filter` (OPX+), or `SingleChannel.exponential_filter` and `SingleChannel.high_pass_filter` (LF-FEM)
+- Deprecated `SingleChannel.filter_iir_taps` in favor of `SingleChannel.exponential_filter` for the LF-FEM
 
 ### Fixed
 

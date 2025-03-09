@@ -55,15 +55,17 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     upsampling_mode: Literal["mw", "pulse"] = "mw"
     exponential_filter: Optional[List[Tuple[float, float]]] = None
-    high_pass_filter: Optional[List[Tuple[float, float]]] = None
+    # high_pass_filter: Optional[float] = None  # Not yet supported
     output_mode: Literal["direct", "amplified"] = "direct"
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
         if self.exponential_filter is not None:
             port_properties["exponential_filter"] = list(self.exponential_filter)
-        if self.high_pass_filter is not None:
-            port_properties["high_pass_filter"] = list(self.high_pass_filter)
+
+        # High-pass filter not yet supported
+        # if self.high_pass_filter is not None:
+        #     port_properties["high_pass_filter"] = self.high_pass_filter
         port_properties["sampling_rate"] = self.sampling_rate
         if self.sampling_rate == 1e9:
             port_properties["upsampling_mode"] = self.upsampling_mode
