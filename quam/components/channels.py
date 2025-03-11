@@ -407,7 +407,7 @@ class Channel(QuamComponent, ABC):
                     "pass a float or list of floats instead",
                     DeprecationWarning,
                 )
-            else:
+            elif isinstance(amplitude_scale, ScalarFloat):
                 amplitude_scale = amp(amplitude_scale)
             pulse = pulse_name * amplitude_scale
         else:
