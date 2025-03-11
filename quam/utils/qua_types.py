@@ -6,6 +6,7 @@ __all__ = [
     "QuaScalarFloat",
     "QuaVariableInt",
     "QuaVariableFloat",
+    "QuaVariable",
     "AmpValuesType",
     "ChirpType",
     "StreamType",
@@ -20,6 +21,7 @@ try:
     ScalarBool = Scalar[bool]
     QuaScalarInt = QuaScalar[int]
     QuaScalarFloat = QuaScalar[float]
+    QuaVariable = QuaVariable
     QuaVariableInt = QuaVariable[int]
     QuaVariableFloat = QuaVariable[float]
 except ImportError:
@@ -30,6 +32,7 @@ except ImportError:
     ScalarBool = QuaExpressionType
     QuaScalarInt = QuaNumberType
     QuaScalarFloat = QuaNumberType
+    QuaVariable = QuaVariableType
     QuaVariableInt = QuaVariableType
     QuaVariableFloat = QuaVariableType
 
