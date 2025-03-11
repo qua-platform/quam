@@ -601,6 +601,35 @@ class Channel(QuamComponent, ABC):
 
         if self.thread is not None:
             element_config["thread"] = self.thread
+        try:
+            qua_below_1_2_2 = Version(qm.__version__) <= Version("1.2.1")
+        except ImportError:
+            warnings.warn(
+                "Unable to to determine qm package version, assuming < 1.2.2. "
+            )
+            qua_below_1_2_2 = True
+
+        if self.core is not None and self.thread is not None:
+            warnings.warn(
+                "The 'thread' and 'core' arguments are mutually exclusive. "
+                "Using 'core' instead."
+            )
+            core = self.core
+        elif self.thread is not None:
+            if not qua_below_1_2_2:
+                warnings.warn(
+                    "The 'thread' element argument is deprecated from qm.qua >= 1.2.2. "
+                    "Use 'core' instead."
+                )
+            core = self.thread
+        else:
+            core = self.core
+
+        if core is not None:
+            if qua_below_1_2_2:
+                element_config["thread"] = core
+            else:
+                element_config["core"] = core
 
         self._config_add_digital_outputs(config)
 
