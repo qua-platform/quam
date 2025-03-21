@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 try:
-    from qm.qua._expressions import Scalar, QuaScalar, QuaVariable
+    from qm.qua.type_hints import Scalar, QuaScalar, QuaVariable
 
     ScalarInt = Scalar[int]
     ScalarFloat = Scalar[float]
