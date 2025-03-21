@@ -2,6 +2,9 @@ from abc import ABC
 from dataclasses import field
 from typing import ClassVar, Dict, List, Optional, Sequence, Literal, Tuple, Union, Any
 import warnings
+from packaging.version import Version
+
+import qm
 
 from quam.components.hardware import BaseFrequencyConverter, Mixer, LocalOscillator
 from quam.components.ports.digital_outputs import (
@@ -293,6 +296,15 @@ class Channel(QuamComponent, ABC):
         sticky (Sticky): Optional sticky parameters for the channel, i.e. defining
             whether successive pulses are applied w.r.t the previous pulse or w.r.t 0 V.
             If not specified, this channel is not sticky.
+        digital_outputs (Dict[str, DigitalOutputChannel]): A dictionary of digital
+            output channels to be used on this channel. The key is the label of the
+            digital output channel (e.g. "DO1") and the value is a DigitalOutputChannel.
+        intermediate_frequency (float, optional): The intermediate frequency of the
+            channel in Hz. If not specified, the intermediate frequency is zero.
+        core (str, optional): The core to use for the channel, useful when sharing a
+            core between channels. If not specified, the core is assigned automatically.
+        thread (str, optional): The channel core, duplicate of 'core' argument, and
+            deprecated from qm.qua >= 1.2.2.
     """
 
     operations: Dict[str, Pulse] = field(default_factory=dict)
@@ -303,7 +315,9 @@ class Channel(QuamComponent, ABC):
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
     sticky: Optional[StickyChannelAddon] = None
     intermediate_frequency: Optional[float] = None
+
     thread: Optional[str] = None
+    core: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -601,8 +615,6 @@ class Channel(QuamComponent, ABC):
         if self.intermediate_frequency is not None:
             element_config["intermediate_frequency"] = self.intermediate_frequency
 
-        if self.thread is not None:
-            element_config["thread"] = self.thread
         try:
             qua_below_1_2_2 = Version(qm.__version__) <= Version("1.2.1")
         except ImportError:

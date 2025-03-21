@@ -35,6 +35,8 @@ from quam.utils import (
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
 
+from qm.type_hinting import DictQuaConfig
+
 
 __all__ = [
     "QuamBase",
@@ -498,7 +500,7 @@ class QuamBase(ReferenceClass):
         return quam_dict
 
     def iterate_components(
-        self, skip_elems: bool = None
+        self, skip_elems: Optional[Sequence["QuamBase"]] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
@@ -679,13 +681,6 @@ class QuamRoot(QuamBase):
     serialiser: AbstractSerialiser = JSONSerialiser
 
     def __post_init__(self):
-        if QuamBase._last_instantiated_root is not None:
-            warnings.warn(
-                "Multiple QuamRoot objects were instantiated. Any QuAM component will be "
-                "attached to its specific QuamRoot object. Mixing QuAM components belonging "
-                "to different QuamRoot objects is not recommended as it may lead to "
-                "unexpected results."
-            )
         QuamBase._last_instantiated_root = self
         super().__post_init__()
 
@@ -795,7 +790,7 @@ class QuamRoot(QuamBase):
             validate_type=validate_type,
         )
 
-    def generate_config(self) -> Dict[str, Any]:
+    def generate_config(self) -> DictQuaConfig:
         """Generate the QUA configuration from the QuAM object.
 
         Returns:
