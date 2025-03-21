@@ -36,7 +36,6 @@ from quam.utils.qua_types import (
     ScalarFloat,
     ScalarBool,
     QuaScalarInt,
-    QuaVariable,
     QuaVariableInt,
     QuaVariableFloat,
 )
@@ -408,7 +407,9 @@ class Channel(QuamComponent, ABC):
                     "pass a float or list of floats instead",
                     DeprecationWarning,
                 )
-            elif isinstance(amplitude_scale, Union[float, QuaVariable]):
+            elif isinstance(amplitude_scale, Sequence):
+                amplitude_scale = amp(*amplitude_scale)
+            else:
                 amplitude_scale = amp(amplitude_scale)
             pulse = pulse_name * amplitude_scale
         else:
