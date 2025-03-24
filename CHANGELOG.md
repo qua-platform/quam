@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.3.10]
 
 ### Changed
 
@@ -14,6 +14,7 @@
 - Fixed `QuamBase.iterate_components()` arg `skip_elems` having the wrongtype
 - Deprecated `thread` argument in favor of `core` in `Channel` when qm >= 1.2.2
 - Fixed `MWFEMAnalogOutputPort.upconverters` not being converted to a dict in the config
+- Fixed QUA type import errors due to qm-qua 1.2.2 changing type locations
 
 ## [0.3.9]
 
