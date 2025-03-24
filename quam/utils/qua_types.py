@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 try:
-    from qm.qua.type_hints import Scalar, QuaScalar, QuaVariable
+    from qm.qua.type_hints import Scalar, QuaScalar, QuaVariable, ChirpType, StreamType
 
     ScalarInt = Scalar[int]
     ScalarFloat = Scalar[float]
@@ -24,8 +24,15 @@ try:
     QuaVariable = QuaVariable
     QuaVariableInt = QuaVariable[int]
     QuaVariableFloat = QuaVariable[float]
+
 except ImportError:
-    from qm.qua._dsl import QuaNumberType, QuaVariableType, QuaExpressionType
+    from qm.qua._dsl import (
+        QuaNumberType,
+        QuaVariableType,
+        QuaExpressionType,
+        ChirpType,
+        StreamType,
+    )
 
     ScalarInt = QuaNumberType
     ScalarFloat = QuaNumberType
@@ -37,9 +44,4 @@ except ImportError:
     QuaVariableFloat = QuaVariableType
 
 
-from qm.qua._dsl import (
-    _PulseAmp,
-    AmpValuesType,
-    ChirpType,
-    StreamType,
-)
+from qm.qua._dsl import _PulseAmp

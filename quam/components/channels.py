@@ -32,7 +32,6 @@ from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
 from quam.utils.qua_types import (
     _PulseAmp,
-    AmpValuesType,
     ChirpType,
     StreamType,
     ScalarInt,
@@ -59,9 +58,6 @@ from qm.qua import (
     frame_rotation_2pi,
     time_tagging,
 )
-
-
-
 
 __all__ = [
     "Channel",
@@ -359,7 +355,7 @@ class Channel(QuamComponent, ABC):
     def play(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, List[float], AmpValuesType] = None,
+        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
         duration: ScalarInt = None,
         condition: ScalarBool = None,
         chirp: ChirpType = None,
@@ -374,8 +370,9 @@ class Channel(QuamComponent, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[float, AmpValuesType]): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude scale
+                of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             duration (Scalar[int]): Duration of the pulse in units of the
                 clock cycle (4ns). If not provided, the default pulse duration will be
                 used. It is possible to dynamically change the duration of both constant
@@ -792,7 +789,7 @@ class InSingleChannel(Channel):
     def measure(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
+        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
         qua_vars: Tuple[QuaVariableFloat, ...] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
@@ -801,8 +798,9 @@ class InSingleChannel(Channel):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
+                scale of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             qua_vars (Tuple[QuaVariable[float], ...], optional): Two QUA
                 variables to store the I, Q measurement results.
                 If not provided, new variables will be declared and returned.
@@ -848,7 +846,7 @@ class InSingleChannel(Channel):
     def measure_accumulated(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
+        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
         num_segments: int = None,
         segment_length: int = None,
         qua_vars: Tuple[QuaVariableFloat, ...] = None,
@@ -859,8 +857,9 @@ class InSingleChannel(Channel):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
+                scale of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate.
@@ -930,7 +929,7 @@ class InSingleChannel(Channel):
     def measure_sliced(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
+        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
         num_segments: int = None,
         segment_length: int = None,
         qua_vars: Tuple[QuaVariableFloat, ...] = None,
@@ -941,8 +940,9 @@ class InSingleChannel(Channel):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
+                scale of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate.
@@ -1296,7 +1296,7 @@ class _InComplexChannel(Channel, ABC):
     def measure(
         self,
         pulse_name: str,
-        amplitude_scale: Union[float, AmpValuesType] = None,
+        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
         qua_vars: Tuple[QuaVariableFloat, QuaVariableFloat] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
@@ -1305,8 +1305,9 @@ class _InComplexChannel(Channel, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
+                scale of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             qua_vars (Tuple[QuaVariable[float], QuaVariable[float]], optional): Two QUA
                 variables to store the I and Q measurement results. If not provided,
                 new variables will be declared and returned.
@@ -1359,7 +1360,7 @@ class _InComplexChannel(Channel, ABC):
     def measure_accumulated(
         self,
         pulse_name: str,
-        amplitude_scale: Optional[Union[float, AmpValuesType]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         num_segments: Optional[int] = None,
         segment_length: Optional[int] = None,
         qua_vars: Optional[Tuple[QuaVariableFloat, ...]] = None,
@@ -1373,8 +1374,9 @@ class _InComplexChannel(Channel, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
+                scale of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate the
@@ -1445,7 +1447,7 @@ class _InComplexChannel(Channel, ABC):
     def measure_sliced(
         self,
         pulse_name: str,
-        amplitude_scale: Optional[Union[float, AmpValuesType]] = None,
+        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
         num_segments: Optional[int] = None,
         segment_length: Optional[int] = None,
         qua_vars: Optional[Tuple[QuaVariableFloat, ...]] = None,
@@ -1459,8 +1461,9 @@ class _InComplexChannel(Channel, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
+                scale of the pulse. Can be either a float, qua.amp(float), or a list of
+                floats.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate the
