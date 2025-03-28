@@ -111,12 +111,12 @@ def test_operation_call_out_of_order_kwargs(test_qubit):
 
 
 def test_measure_operation(test_qubit):
-    from qm.qua._expressions import QuaBoolType
+    from quam.utils.qua_types import QuaVariableBool
 
-    def measure(qubit: Qubit, **kwargs) -> QuaBoolType:
+    def measure(qubit: Qubit, **kwargs) -> QuaVariableBool:
         pass
 
     op = Operation(measure)
 
-    assert op.properties.return_type == QuaBoolType
+    assert op.properties.return_type == QuaVariableBool
     assert op.func == measure

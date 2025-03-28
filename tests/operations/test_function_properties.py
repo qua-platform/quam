@@ -243,13 +243,13 @@ def test_from_function_with_optional_return_type():
 
 def test_from_function_with_qua_return_type():
     """Test handling of QUA variable return types."""
-    from qm.qua._expressions import QuaBoolType
+    from quam.utils.qua_types import QuaVariableBool
 
-    def operation(component: DummyQuantumComponent) -> QuaBoolType:
+    def operation(component: DummyQuantumComponent) -> QuaVariableBool:
         pass
 
     props = FunctionProperties.from_function(operation)
-    assert props.return_type == QuaBoolType
+    assert props.return_type == QuaVariableBool
 
 
 def test_from_function_without_return_type():
