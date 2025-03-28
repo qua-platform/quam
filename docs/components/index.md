@@ -20,4 +20,4 @@ The Octave component in QuAM handles the upconversion and downconversion of freq
 ## Custom QuAM Components
 For users looking to expand beyond the standard QuAM toolkit, custom components provide a way to introduce novel functionalities tailored to specific quantum computing needs or experimental setups.
 
-- **[Custom QuAM Components](/components/custom-components)**: Get guidance on how to develop and integrate your own custom components into the QuAM framework.
+- **[Custom QuAM Components](custom-components.md)**: Get guidance on how to develop and integrate your own custom components into the QuAM framework.

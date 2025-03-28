@@ -23,7 +23,7 @@ class QuamComponentTest(QuamComponent):
 
 def test_quam_component_reference_after_initialization(BareQuamRoot):
     quam_elem = QuamComponentTest(int_val=42)
-    assert quam_elem._root is None
+    assert quam_elem.get_root() is None
     quam_elem.int_val = "#/test"
     assert quam_elem.int_val == "#/test"
 

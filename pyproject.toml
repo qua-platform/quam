@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quam"
-version = "0.3.8"
+version = "0.3.10"
 #dynamic = ["version"]
 description = "Quantum Abstract Machine (QuAM) facilitates development of abstraction layers in experiments."
 authors = [
     { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
 ]
 license = { text = "BSD-3-Clause" }
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.13"
 readme = "README.md"
 
 classifiers = [
@@ -70,7 +70,6 @@ max-line-length = 88
 [tool.setuptools]
 packages = ["quam"]
 
-# ASK: Verify that we should use scm
 [tool.setuptools_scm]
 version_scheme = "only-version"
 local_scheme = "no-local-version"
