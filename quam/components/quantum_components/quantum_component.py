@@ -23,7 +23,7 @@ class QuantumComponent(QuamComponent, ABC):
 
     def apply(self, operation: str, *args, **kwargs) -> Any:
         operation_obj = self.get_macros()[operation]
-        operation_obj.apply(*args, **kwargs)
+        return operation_obj.apply(*args, **kwargs)
 
     @staticmethod
     def register_macro(func: T) -> T:
