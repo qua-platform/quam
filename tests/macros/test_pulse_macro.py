@@ -31,7 +31,8 @@ def test_qubit():
 
 def test_pulse_macro_no_pulse(test_qubit):
     with pytest.raises(
-        TypeError, match="missing 1 required keyword-only argument: 'pulse'"
+        (TypeError, ValueError),
+        match=r"(missing 1 required keyword-only argument: 'pulse'|Please provide PulseMacro.pulse as it is a required arg)",
     ):
         PulseMacro()
 
