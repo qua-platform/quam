@@ -1,9 +1,8 @@
 from abc import ABC
-from typing import Any, ClassVar, Dict, List, Literal, Optional
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple
 
 from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
 from quam.core import quam_dataclass
-
 
 __all__ = [
     "LFAnalogOutputPort",
@@ -55,10 +54,21 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     fem_type: ClassVar[str] = "LF"
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     upsampling_mode: Literal["mw", "pulse"] = "mw"
+    exponential_filter: Optional[List[Tuple[float, float]]] = None
+    # high_pass_filter: Optional[float] = None  # Not yet supported
     output_mode: Literal["direct", "amplified"] = "direct"
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
+        if self.exponential_filter is not None:
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["exponential"] = list(self.exponential_filter)
+            if "feedback" in filter_properties:
+                raise ValueError(
+                    "LFFEMAnalogOutputPort: Please only specify 'exponential_filter' "
+                    "if QOP >=3.3.0, or 'feedback_filter' if QOP < 3.3.0, not both"
+                )
+
         port_properties["sampling_rate"] = self.sampling_rate
         if self.sampling_rate == 1e9:
             port_properties["upsampling_mode"] = self.upsampling_mode
