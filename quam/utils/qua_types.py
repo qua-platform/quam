@@ -20,8 +20,10 @@ try:
     ScalarFloat = Scalar[float]
     ScalarBool = Scalar[bool]
     QuaScalarInt = QuaScalar[int]
+
     QuaScalarFloat = QuaScalar[float]
     QuaVariable = QuaVariable
+    QuaVariableBool = QuaVariable[bool]
     QuaVariableInt = QuaVariable[int]
     QuaVariableFloat = QuaVariable[float]
 
@@ -40,6 +42,7 @@ except ImportError:
     QuaScalarInt = QuaNumberType
     QuaScalarFloat = QuaNumberType
     QuaVariable = QuaVariableType
+    QuaVariableBool = QuaVariableType
     QuaVariableInt = QuaVariableType
     QuaVariableFloat = QuaVariableType
 
