@@ -1,17 +1,22 @@
 # Qubits and Qubit Pairs
 
 ## Overview
-Qubits and qubit pairs are essential components in quantum processing units (QPUs), implemented as subclasses of `QuantumComponent`. 
+
+Qubits and qubit pairs are essential components in quantum processing units (QPUs), implemented as subclasses of `QuantumComponent`.
 
 ## Quantum Components
+
 The `QuantumComponent` class is the base class for qubits and qubit pairs, providing:
+
 - A unique identifier via the `id` property
 - A collection of macros defining operations
 - An abstract `name` property that derived classes must implement
 - A standardized method to apply operations through the `apply()` method
 
 ## Qubits
+
 The `Qubit` class models a physical qubit on the QPU, encapsulating:
+
 - Qubit-specific attributes (e.g., frequency)
 - Quantum control channels (drive, flux, readout)
 - Single-qubit gate operations
@@ -41,6 +46,7 @@ q1 = machine.qubits["q1"] = Transmon(
 ```
 
 ### Key Features
+
 ```python
 # Accessing channels
 channels = q1.channels  # Returns a dictionary of all channels
@@ -54,10 +60,12 @@ q1.align(q2)  # Synchronizes all channels of q1 and q2
 ```
 
 ## Qubit Pairs
+
 The `QubitPair` class models the interaction between two qubits, managing:
+
 - Two-qubit gate operations
 - Coupling elements (e.g., tunable couplers)
-    - These can be addd by creating a subclass of `QubitPair` and adding the coupling elements as properties
+  - These can be addd by creating a subclass of `QubitPair` and adding the coupling elements as properties
 - Interaction-specific properties and calibrations
 - Hardware topology constraints
 
@@ -73,6 +81,7 @@ machine.qubit_pairs["q1@q2"] = QubitPair(
 The `get_reference()` method ensures each QuAM component has a single parent, which for qubits is the `machine.qubits` dictionary.
 
 ### Key Features
+
 Once the qubit pair is added to the root-level [QuamRoot.qubit_pairs][quam.core.quam_classes.QuamRoot.qubit_pairs] dictionary, it can be accessed using the `@` operator:
 
 ```python
@@ -88,7 +97,9 @@ pair.apply("cz_gate")  # Applies the CZ gate macro
 ```
 
 ## Macros and Operations
+
 Both qubits and qubit pairs can contain macros, which serve as high-level interfaces to quantum operations. These macros:
+
 - Define the implementation of quantum gates
 - Can be registered in two ways:
   - As instances of a `QuamMacro` subclass, added to `QuantumComponent.macros`
@@ -96,6 +107,4 @@ Both qubits and qubit pairs can contain macros, which serve as high-level interf
 - Are accessible through the `apply()` method or directly as methods
 - Provide a bridge between pulse-level operations and gate-level operations
 
-For detailed information about macros and gate-level operations, see:
-- [Macros Documentation](./macros.md)
-- [Gate-Level Operations Documentation](./operations.md)
+For detailed information about macros and gate-level operations, see [Gate-Level Operations Documentation](../features/gate-level-operations.md)
