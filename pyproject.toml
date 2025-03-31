@@ -37,7 +37,7 @@ dependencies = [
     "qm-qua >=1.1.0",
     "qualang-tools >= 0.15.0",
     "typeguard >= 4.1.0",
-    "qualibrate-config >= 0.1.1",
+    "qualibrate-config >= 0.1.3",
 ]
 
 [project.urls]
