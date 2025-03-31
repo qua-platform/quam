@@ -9,6 +9,7 @@ additional
 build
 site
 calibration_db.json
+*.egg-info
 
 dependency_links.txt
 PKG-INFO
