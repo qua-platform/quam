@@ -1,5 +1,5 @@
 site_name: The Quantum Abstract Machine - QuAM Documentation
-# site_url: 
+# site_url:
 site_author: QM. Technologies Ltd.
 # site_description:
 
@@ -21,22 +21,22 @@ theme:
       toggle:
         icon: material/brightness-6
         name: Switch to dark mode
-    - scheme: entropy-dark 
+    - scheme: entropy-dark
       toggle:
         icon: material/brightness-5
         name: Switch to light mode
 
   features:
-  # - navigation.tabs  # Add tabs to the top of the page
-  # - navigation.sections  # Expand sections in the navigation
-  - navigation.top # Add "back to top" button when scrolling back up
-  - toc.integrate  # Invlude TOC in left sidebar instead of separate right
-  - search.suggest
-  - search.highlight
-  - content.tabs.link
-  - content.code.annotations
-  - content.code.copy
-  - content.code.annotate  # Add annotations to code blocks
+    # - navigation.tabs  # Add tabs to the top of the page
+    # - navigation.sections  # Expand sections in the navigation
+    - navigation.top # Add "back to top" button when scrolling back up
+    - toc.integrate # Invlude TOC in left sidebar instead of separate right
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotations
+    - content.code.copy
+    - content.code.annotate # Add annotations to code blocks
   language: en
 
 extra_css:
@@ -47,52 +47,49 @@ nav:
   - installation.md
   - demonstration.md
   - "QuAM Components":
-    - "components/index.md"
-    - "components/quam-root.md"
-    - "components/channels.md"
-    - "components/pulses.md"
-    - "components/octave.md"
-    - "components/qubits-and-qubit-pairs.md"
-    - "components/custom-components.md"
+      - "components/index.md"
+      - "components/quam-root.md"
+      - "components/channels.md"
+      - "components/pulses.md"
+      - "components/octave.md"
+      - "components/qubits-and-qubit-pairs.md"
+      - "components/custom-components.md"
   - "QuAM Features":
-    - "features/index.md"
-    - "features/quam-references.md"
+      - "features/index.md"
+      - "features/gate-level-operations.md"
+      - "features/quam-references.md"
   - migrating-to-quam.md
-  - "Gate Operations":
-    - "gate-operations/index.md"
-    - "gate-operations/macros.md"
-    - "gate-operations/operations.md"
   - "API References":
-    - "API_references/index.md"
-    - "QuAM Components":
-      - "QuAM Channels API": "API_references/components/channels_API.md"
-      - "QuAM Pulses API": "API_references/components/pulses_API.md"
-      - "QuAM Hardware API": "API_references/components/hardware_API.md"
-      - "QuAM Octave API": "API_references/components/octave_API.md"
-      - "BasicQuAM API": "API_references/components/basic_quam_API.md"
-    - "QuAM Core Classes API": "API_references/core/quam_classes_API.md"
+      - "API_references/index.md"
+      - "QuAM Components":
+          - "QuAM Channels API": "API_references/components/channels_API.md"
+          - "QuAM Pulses API": "API_references/components/pulses_API.md"
+          - "QuAM Hardware API": "API_references/components/hardware_API.md"
+          - "QuAM Octave API": "API_references/components/octave_API.md"
+          - "BasicQuAM API": "API_references/components/basic_quam_API.md"
+      - "QuAM Core Classes API": "API_references/core/quam_classes_API.md"
 plugins:
-# - mkdocs-jupyter:
-#     include:
-#       - "*.ipynb"
-- search
-- autorefs  # Automatically link across pages
-- gen-files:  # Autogenerate code reference using mkdocstrings
-    scripts:
-    - docs/gen_ref_pages.py
-- mkdocstrings:
-    default_handler: python
-    handlers:
-      python:
-        paths: [quam]
+  # - mkdocs-jupyter:
+  #     include:
+  #       - "*.ipynb"
+  - search
+  - autorefs # Automatically link across pages
+  - gen-files: # Autogenerate code reference using mkdocstrings
+      scripts:
+        - docs/gen_ref_pages.py
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [quam]
 
 markdown_extensions:
-  - md_in_html  # Add markdown within html <div> tags
-  - pymdownx.blocks.tab:  # Add tabs to markdown using: === "title"
-      alternate_style: true  # Somehow this is required for tabs to work
-  - pymdownx.blocks.details  # Enable collapsible elements, e.g.: ??? tip "title"
-  - pymdownx.superfences  # Enable multiline code in tabs
-  - attr_list  # allows to add HTML attributes and CSS classes to almost every Markdown inline- and block-level element with a special syntax.
+  - md_in_html # Add markdown within html <div> tags
+  - pymdownx.blocks.tab: # Add tabs to markdown using: === "title"
+      alternate_style: true # Somehow this is required for tabs to work
+  - pymdownx.blocks.details # Enable collapsible elements, e.g.: ??? tip "title"
+  - pymdownx.superfences # Enable multiline code in tabs
+  - attr_list # allows to add HTML attributes and CSS classes to almost every Markdown inline- and block-level element with a special syntax.
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg

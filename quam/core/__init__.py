@@ -1,4 +1,5 @@
 from .quam_classes import *
+from .operation.operations_registry import OperationsRegistry
 
 
 # Exec statement needed to trick Pycharm type checker into recognizing it as a dataclass
