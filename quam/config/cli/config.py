@@ -60,14 +60,12 @@ __all__ = ["config_command"]
     # required=True,
     help="The path to the directory where the state path should be stored to.",
 )
-@click.option("--check-generator", is_flag=True, hidden=True)
 @click.pass_context
 def config_command(
     ctx: click.Context,
     config_path: Path,
     auto_accept: bool,
     state_path: Path,
-    check_generator: bool,
 ) -> None:
     common_config, config_file = get_config_file_content(config_path)
     old_config = deepcopy(common_config)
@@ -93,7 +91,6 @@ def config_command(
             QUAM_CONFIG_KEY,
             quam_before_write_cb,
             confirm=not auto_accept,
-            check_generator=check_generator,
         )
     except Exit:
         if old_config:
