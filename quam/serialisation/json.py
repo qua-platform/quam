@@ -67,43 +67,6 @@ class JSONSerialiser(AbstractSerialiser):
         with open(path, "w") as f:
             json.dump(contents, fp=f, indent=4)
 
-    def _parse_path(
-        self,
-        path: Union[Path, str, None],
-        content_mapping: Optional[Dict[str, Sequence[str]]] = None,
-    ) -> Tuple[Path, str]:
-        """Parse the path to determine the folder and filename to save to.
-
-        See JSONSerialiser.save for details on allowed path types.
-
-        Args:
-            path: The path to parse.
-            content_mapping: The content mapping to use.
-        """
-        if isinstance(path, str):
-            path = Path(path)
-
-        if path is None:
-            default_filename = self.default_filename
-            if not content_mapping:
-                folder = Path(".")
-            elif not all(isinstance(elem, Path) for elem in content_mapping):
-                folder = Path(".")
-            elif not all(elem.is_absolute() for elem in content_mapping):
-                folder = Path(".")
-            else:
-                folder = self.default_foldername
-        elif path.suffix == ".json":
-            default_filename = path.name
-            folder = path.parent
-        elif not path.suffix:
-            default_filename = self.default_filename
-            folder = path
-        else:
-            raise ValueError(f"Path {path} is not a valid JSON path or folder.")
-
-        return Path(folder), default_filename
-
     def save(
         self,
         quam_obj: QuamRoot,
