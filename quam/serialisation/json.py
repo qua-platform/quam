@@ -1,12 +1,19 @@
 from __future__ import annotations
-from typing import Union, Dict, Any, TYPE_CHECKING, Sequence
+from typing import Union, Dict, Any, TYPE_CHECKING, Sequence, Optional, List, Tuple
 from pathlib import Path
+import os
 import json
+import warnings
 
 from quam.serialisation.base import AbstractSerialiser
 
 if TYPE_CHECKING:
     from quam.core import QuamRoot
+
+
+CONTENT_MAPPING_ALL_TYPES = Union[
+    Dict[str, Sequence[str]], List[Dict[str, Sequence[str]]]
+]
 
 
 class JSONSerialiser(AbstractSerialiser):
@@ -26,23 +33,45 @@ class JSONSerialiser(AbstractSerialiser):
 
     default_filename = "state.json"
     default_foldername = "quam"
-    content_mapping = {}
+    content_mapping: CONTENT_MAPPING_ALL_TYPES = {}
 
-    def _save_dict_to_json(self, contents: Dict[str, Any], path: Path):
+    def __init__(
+        self,
+        content_mapping: Optional[CONTENT_MAPPING_ALL_TYPES] = None,
+        include_defaults: bool = False,
+    ):
+        if content_mapping is None:
+            self.content_mapping = self.__class__.content_mapping
+        else:
+            self.content_mapping = content_mapping
+
+        self.include_defaults = include_defaults
+
+    def _save_dict_to_json(
+        self, contents: Dict[str, Any], path: Path, create_parents: bool = True
+    ):
         """Save a dictionary to a JSON file.
 
         Args:
             contents: The dictionary to save.
             path: The path to save to.
+            create_parents: Whether to create the parent directories if they don't exist
         """
+        if not path.parent.exists() and create_parents:
+            warnings.warn(
+                f"Creating non-existent QUAM state parent folder {path.parent}",
+                UserWarning,
+            )
+            path.parent.mkdir(parents=True, exist_ok=True)
+
         with open(path, "w") as f:
-            json.dump(contents, f, indent=4)
+            json.dump(contents, fp=f, indent=4)
 
     def _parse_path(
         self,
-        path: Union[Path, str],
-        content_mapping: Dict[Union[Path, str], Sequence[str]] = None,
-    ) -> (Path, str):
+        path: Union[Path, str, None],
+        content_mapping: Optional[Dict[str, Sequence[str]]] = None,
+    ) -> Tuple[Path, str]:
         """Parse the path to determine the folder and filename to save to.
 
         See JSONSerialiser.save for details on allowed path types.
@@ -78,10 +107,12 @@ class JSONSerialiser(AbstractSerialiser):
     def save(
         self,
         quam_obj: QuamRoot,
-        path: Union[Path, str] = None,
-        content_mapping: Dict[Union[Path, str], Sequence[str]] = None,
-        include_defaults: bool = False,
-        ignore: Sequence[str] = None,
+        path: Optional[Union[Path, str]] = None,
+        content_mapping: Optional[
+            Union[Dict[str, Sequence[str]], List[Dict[str, Sequence[str]]]]
+        ] = None,
+        include_defaults: Optional[bool] = None,
+        ignore: Optional[Sequence[str]] = None,
     ):
         """Save a QuamRoot object to a JSON file.
 
@@ -100,8 +131,23 @@ class JSONSerialiser(AbstractSerialiser):
             self.default_foldername when content_mapping != None and path is not a
                 folder
         """
-        content_mapping = content_mapping or self.content_mapping
+        if content_mapping is None:
+            content_mapping = self.content_mapping
         content_mapping = content_mapping.copy()
+
+        if isinstance(content_mapping, list):
+            for content_mapping_item in content_mapping:
+                self.save(
+                    quam_obj=quam_obj,
+                    path=path,
+                    content_mapping=content_mapping_item,
+                    include_defaults=include_defaults,
+                    ignore=ignore,
+                )
+            return
+
+        if include_defaults is None:
+            include_defaults = self.include_defaults
 
         contents = quam_obj.to_dict(include_defaults=include_defaults)
 
@@ -109,36 +155,92 @@ class JSONSerialiser(AbstractSerialiser):
         for key in ignore or []:
             contents.pop(key, None)
 
-        folder, default_filename = self._parse_path(path, content_mapping)
+        if path is None:
+            path = self._get_default_state_path()
+        path = Path(path)
 
-        folder.mkdir(exist_ok=True)
+        if path.suffix == ".json":
+            self._save_dict_to_json(contents, path)
+        elif not path.suffix:
+            self._save_dict_to_folder(
+                contents,
+                path,
+                content_mapping=content_mapping,
+                ignore=ignore,
+            )
+        else:
+            raise ValueError(
+                f"Cannot save QUAM, state path {path} is not a JSON path or folder."
+            )
+
+    def _save_dict_to_folder(
+        self,
+        contents: Dict[str, Any],
+        folder: Path,
+        content_mapping: Dict[str, Sequence[str]],
+        default_filename: Optional[str] = None,
+        ignore: Optional[Sequence[str]] = None,
+    ):
+        if not folder.exists():
+            warnings.warn(
+                f"Creating non-existent QUAM state folder {folder}",
+                UserWarning,
+            )
+            folder.mkdir(parents=True, exist_ok=True)
+
+        if default_filename is None:
+            default_filename = self.default_filename
 
         content_mapping = content_mapping.copy()
+
         for component_file, components in content_mapping.items():
+            component_file = Path(component_file)
+
             if isinstance(components, str):
                 components = [components]
-
             if ignore is not None:
                 components = [elem for elem in components if elem not in ignore]
-            if not components:
+
+            partial_contents = {}
+            for component in components:
+                if component not in contents:
+                    warnings.warn(
+                        f"Component {component} not found in QUAM state, skipping.",
+                        UserWarning,
+                    )
+                    continue
+                partial_contents[component] = contents.pop(component)
+
+            if not partial_contents:
+                # There is nothing to save for this component
                 continue
 
-            subcomponents = {}
-            for component in components:
-                subcomponents[component] = contents.pop(component)
-
-            if isinstance(component_file, Path) and component_file.is_absolute():
+            if component_file.is_absolute():
                 component_filepath = component_file
             else:
                 component_filepath = folder / component_file
-            self._save_dict_to_json(subcomponents, component_filepath)
+            self._save_dict_to_json(partial_contents, component_filepath)
 
-        self._save_dict_to_json(contents, folder / default_filename)
+        if contents:
+            self._save_dict_to_json(contents, folder / default_filename)
+
+    def _get_default_state_path(self) -> Path:
+        if "QUAM_STATE_PATH" in os.environ:
+            return Path(os.environ["QUAM_STATE_PATH"])
+
+        from quam.config import get_quam_config
+
+        cfg = get_quam_config()
+
+        if cfg.state_path is not None:
+            return cfg.state_path
+
+        raise ValueError("No default QUAM state path found")
 
     def load(
         self,
-        path: Union[Path, str] = None,
-    ) -> Dict[str, Any]:
+        path: Optional[Union[Path, str]] = None,
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """Load a dictionary representation of a QuamRoot object from a JSON file.
 
         Args:
@@ -149,7 +251,12 @@ class JSONSerialiser(AbstractSerialiser):
         Returns:
             A dictionary representation of the QuamRoot object.
         """
-        path = Path(path)
+
+        if path is None:
+            path = self._get_default_state_path()
+        else:
+            path = Path(path)
+
         contents = {}
         metadata = {
             "content_mapping": {},
@@ -167,7 +274,10 @@ class JSONSerialiser(AbstractSerialiser):
             metadata["default_filename"] = path.name
             with open(path, "r") as f:
                 contents = json.load(f, object_hook=convert_int_keys)
-        elif path.is_dir():
+
+            return contents, metadata
+
+        if path.is_dir():
             metadata["default_foldername"] = str(path)
             for file in path.iterdir():
                 if not file.suffix == ".json":
