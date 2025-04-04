@@ -377,37 +377,6 @@ def test_save_default_path(serialiser, sample_quam_object, monkeypatch, tmp_path
     assert loaded == expected_dict
 
 
-def test_save_list_of_mappings(serialiser, sample_quam_object, tmp_path):
-    """Test saving with a list of content mappings."""
-    target_folder = tmp_path / "multi_save_target"
-
-    # Define mappings - they will all operate on the target_folder
-    mapping_list = [{"wiring.json": ["wiring"]}, {"components.json": ["components"]}]
-
-    serialiser.save(
-        sample_quam_object, path=target_folder, content_mapping=mapping_list
-    )
-
-    assert (target_folder / "wiring.json").exists()
-    assert (target_folder / "components.json").exists()
-    assert (
-        target_folder / serialiser.default_filename
-    ).exists()  # 'other', '__class__', default_val
-
-    with (target_folder / "wiring.json").open("r", encoding="utf-8") as f:
-        assert "wiring" in json.load(f)
-    with (target_folder / "components.json").open("r", encoding="utf-8") as f:
-        assert "components" in json.load(f)
-    with (target_folder / serialiser.default_filename).open("r", encoding="utf-8") as f:
-        loaded_default = json.load(f)
-        assert "other" in loaded_default
-        assert "__class__" in loaded_default
-        assert "wiring" not in loaded_default
-        assert (
-            "components" not in loaded_default
-        )  # Should only contain 'other' and '__class__'
-
-
 def test_save_nested_object(serialiser, sample_quam_object_nested, tmp_path):
     """Test saving an object with properly nested QuamComponents."""
     filepath = tmp_path / "nested_save.json"

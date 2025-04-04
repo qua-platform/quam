@@ -4,7 +4,7 @@ import json
 import os
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Tuple, Union
 
 from quam.config import get_quam_config
 from .base import AbstractSerialiser
@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 # Type alias for content mapping flexibility
 CONTENT_MAPPING_TYPE = Dict[str, Sequence[str]]
-CONTENT_MAPPING_ALL_TYPES = Union[CONTENT_MAPPING_TYPE, List[CONTENT_MAPPING_TYPE]]
 
 
 def convert_int_keys(obj: Any) -> Any:
@@ -53,8 +52,7 @@ class JSONSerialiser(AbstractSerialiser):
         default_foldername (str): Default folder name if splitting content.
         content_mapping (CONTENT_MAPPING_ALL_TYPES): Defines how to split QuAM
             object content into different files. If empty, saves to a single file.
-            Can be a single mapping dictionary or a list of mappings for multiple
-            save configurations.
+            Should be a single mapping dictionary.
         include_defaults (bool): Whether to include default values in the
             serialised output.
         state_path (Optional[Path]): A specific path set during initialisation
@@ -64,11 +62,11 @@ class JSONSerialiser(AbstractSerialiser):
 
     default_filename: str = "state.json"
     default_foldername: str = "quam_state"
-    content_mapping: CONTENT_MAPPING_ALL_TYPES = {}
+    content_mapping: CONTENT_MAPPING_TYPE = {}
 
     def __init__(
         self,
-        content_mapping: Optional[CONTENT_MAPPING_ALL_TYPES] = None,
+        content_mapping: Optional[CONTENT_MAPPING_TYPE] = None,
         include_defaults: bool = False,
         state_path: Optional[Union[str, Path]] = None,  # New argument
     ):
@@ -180,13 +178,14 @@ class JSONSerialiser(AbstractSerialiser):
                 )
 
             if not partial_contents:
-                # Warn instead of skipping file creation if keys were specified but missing/ignored
+                # Warn instead of skipping file creation if keys were specified but
+                # missing/ignored
                 if (
                     keys_in_mapping
                 ):  # Only warn if keys were actually requested for this file
                     warnings.warn(
-                        f"No content found for keys {list(keys_in_mapping)} specified for "
-                        f"{filename}. File will not be created.",
+                        f"No content found for keys {list(keys_in_mapping)} specified "
+                        f"for {filename}. File will not be created.",
                         UserWarning,
                     )
                 continue  # Skip creating empty files
@@ -211,7 +210,7 @@ class JSONSerialiser(AbstractSerialiser):
         self,
         quam_obj: QuamRoot,
         path: Optional[Union[Path, str]] = None,
-        content_mapping: Optional[CONTENT_MAPPING_ALL_TYPES] = None,
+        content_mapping: Optional[CONTENT_MAPPING_TYPE] = None,
         include_defaults: Optional[bool] = None,
         ignore: Optional[Sequence[str]] = None,
     ):
@@ -238,19 +237,6 @@ class JSONSerialiser(AbstractSerialiser):
         current_include_defaults = (
             include_defaults if include_defaults is not None else self.include_defaults
         )
-
-        # Handle list of content mappings by recursive calls
-        if isinstance(current_content_mapping, list):
-            for mapping_item in current_content_mapping:
-                # Recursively call save for each mapping in the list
-                self.save(
-                    quam_obj=quam_obj,
-                    path=path,  # Pass original path arg through
-                    content_mapping=mapping_item,  # Use the specific mapping item
-                    include_defaults=current_include_defaults,
-                    ignore=ignore,
-                )
-            return  # Stop processing after handling the list
 
         if path is None:
             path = self._get_state_path()
@@ -306,7 +292,8 @@ class JSONSerialiser(AbstractSerialiser):
                 return Path(cfg.state_path).resolve()
         except AttributeError:
             warnings.warn(
-                "'get_quam_config' or 'state_path' not available in 'quam.config'. Cannot check config.",
+                "'get_quam_config' or 'state_path' not available in 'quam.config'. "
+                "Cannot check config.",
                 UserWarning,
             )
 
@@ -403,7 +390,8 @@ class JSONSerialiser(AbstractSerialiser):
                 if file.name == self.default_filename:
                     metadata["default_filename"] = file.name
                 else:
-                    # Store which keys came from which file (approximates content_mapping)
+                    # Store which keys came from which file
+                    # This approximates content_mapping
                     metadata["content_mapping"][file.name] = list(file_contents.keys())
 
             except (json.JSONDecodeError, IOError, TypeError) as e:
