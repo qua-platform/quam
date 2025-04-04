@@ -12,9 +12,6 @@ from .base import AbstractSerialiser
 if TYPE_CHECKING:
     from quam.core import QuamRoot  # Assuming quam.core exists
 
-# Type alias for content mapping flexibility
-CONTENT_MAPPING_TYPE = Dict[str, Sequence[str]]
-
 
 def convert_int_keys(obj: Any) -> Any:
     """
@@ -50,7 +47,7 @@ class JSONSerialiser(AbstractSerialiser):
     Attributes:
         default_filename (str): Default filename if saving all content to one file.
         default_foldername (str): Default folder name if splitting content.
-        content_mapping (CONTENT_MAPPING_ALL_TYPES): Defines how to split QuAM
+        content_mapping (Dict[str, Sequence[str]]): Defines how to split QuAM
             object content into different files. If empty, saves to a single file.
             Should be a single mapping dictionary.
         include_defaults (bool): Whether to include default values in the
@@ -62,11 +59,11 @@ class JSONSerialiser(AbstractSerialiser):
 
     default_filename: str = "state.json"
     default_foldername: str = "quam_state"
-    content_mapping: CONTENT_MAPPING_TYPE = {}
+    content_mapping: Dict[str, Sequence[str]] = {}
 
     def __init__(
         self,
-        content_mapping: Optional[CONTENT_MAPPING_TYPE] = None,
+        content_mapping: Optional[Dict[str, Sequence[str]]] = None,
         include_defaults: bool = False,
         state_path: Optional[Union[str, Path]] = None,  # New argument
     ):
@@ -108,7 +105,7 @@ class JSONSerialiser(AbstractSerialiser):
         self,
         full_contents: Dict[str, Any],
         folder: Path,
-        content_mapping: CONTENT_MAPPING_TYPE,
+        content_mapping: Dict[str, Sequence[str]],
         ignore: Optional[Sequence[str]] = None,
     ):
         """
@@ -210,7 +207,7 @@ class JSONSerialiser(AbstractSerialiser):
         self,
         quam_obj: QuamRoot,
         path: Optional[Union[Path, str]] = None,
-        content_mapping: Optional[CONTENT_MAPPING_TYPE] = None,
+        content_mapping: Optional[Dict[str, Sequence[str]]] = None,
         include_defaults: Optional[bool] = None,
         ignore: Optional[Sequence[str]] = None,
     ):
