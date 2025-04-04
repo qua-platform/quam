@@ -6,6 +6,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, Union
 
+from quam.config import get_quam_config
 from .base import AbstractSerialiser
 
 if TYPE_CHECKING:
@@ -300,17 +301,9 @@ class JSONSerialiser(AbstractSerialiser):
 
         # 3. Check configuration file
         try:
-            # Attempt to import and use quam.config dynamically
-            from quam.config import get_quam_config
-
             cfg = get_quam_config()
             if cfg and cfg.state_path is not None:
                 return Path(cfg.state_path).resolve()
-        except ImportError:
-            warnings.warn(
-                "Optional 'quam.config' not found. Cannot check config for state path.",
-                ImportWarning,
-            )
         except AttributeError:
             warnings.warn(
                 "'get_quam_config' or 'state_path' not available in 'quam.config'. Cannot check config.",

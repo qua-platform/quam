@@ -37,7 +37,6 @@ from .qua_config_template import qua_config_template
 
 from qm.type_hinting import DictQuaConfig
 
-
 __all__ = [
     "QuamBase",
     "QuamRoot",
@@ -761,7 +760,7 @@ class QuamRoot(QuamBase):
     @classmethod
     def load(
         cls: QuamRootType,
-        filepath_or_dict: Union[str, Path, dict],
+        filepath_or_dict: Optional[Union[str, Path, dict]] = None,
         validate_type: bool = True,
         fix_attrs: bool = True,
     ) -> QuamRootType:
@@ -770,6 +769,8 @@ class QuamRoot(QuamBase):
         Args:
             filepath_or_dict: The path to the file/folder to load, or a dictionary.
                 The dictionary would be the result from a call to `QuamRoot.save()`
+                Can be omitted, in which case the serialiser will use the default state
+                path, which is typically defined in the quam config file.
             validate_type: Whether to validate the type of all attributes while loading.
             fix_attrs: Whether attributes can be added to QuamBase objects that are not
                 defined as dataclass fields.
