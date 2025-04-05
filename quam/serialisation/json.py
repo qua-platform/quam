@@ -4,7 +4,7 @@ import json
 import os
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Tuple, Union, List
 
 from quam.config import get_quam_config
 from .base import AbstractSerialiser
@@ -47,9 +47,10 @@ class JSONSerialiser(AbstractSerialiser):
     Attributes:
         default_filename (str): Default filename if saving all content to one file.
         default_foldername (str): Default folder name if splitting content.
-        content_mapping (Dict[str, Sequence[str]]): Defines how to split QuAM
-            object content into different files. If empty, saves to a single file.
-            Should be a single mapping dictionary.
+        content_mapping (Dict[str, str]): Defines how to split QuAM
+            object content into different files. Keys are component names (top-level keys
+            in the QuAM object's dictionary representation), and values are the
+            relative filenames they should be saved to. If empty, saves to a single file.
         include_defaults (bool): Whether to include default values in the
             serialised output.
         state_path (Optional[Path]): A specific path set during initialisation
@@ -59,31 +60,148 @@ class JSONSerialiser(AbstractSerialiser):
 
     default_filename: str = "state.json"
     default_foldername: str = "quam_state"
-    content_mapping: Dict[str, Sequence[str]] = {}
+    content_mapping: Dict[str, str] = {}  # Expected final format: component -> filename
+
+    @staticmethod
+    def _validate_and_convert_content_mapping(
+        mapping: Optional[Dict],
+    ) -> Dict[str, str]:
+        """
+        Validates the content_mapping format and converts the old format
+        (filename -> components) to the new format (component -> filename)
+        if necessary, issuing a warning.
+
+        Args:
+            mapping: The content mapping dictionary to validate/convert.
+
+        Returns:
+            The validated content mapping in the new format (component -> filename).
+
+        Raises:
+            TypeError: If the mapping format is invalid (e.g., mixed value types).
+        """
+        if mapping is None:
+            return {}
+
+        if not isinstance(mapping, dict):
+            raise TypeError(
+                f"content_mapping must be a dictionary, got {type(mapping)}"
+            )
+
+        if not mapping:
+            return {}
+
+        # Check the type of the first value to infer format
+        first_value = next(iter(mapping.values()))
+        is_old_format = isinstance(first_value, (list, tuple, Sequence))
+        is_new_format = isinstance(first_value, str)
+
+        if is_old_format:
+            # --- Handle Old Format ---
+            new_mapping: Dict[str, str] = {}
+            conflicts: Dict[str, List[str]] = {}
+
+            for filename, components in mapping.items():
+                if not isinstance(filename, str):
+                    raise TypeError(
+                        f"Invalid key in old format content_mapping: Expected string filename, got {type(filename)} ({filename})"
+                    )
+                if not isinstance(components, (list, tuple, Sequence)):
+                    # Check for mixed formats within the old format assumption
+                    raise TypeError(
+                        f"Mixed value types detected in content_mapping. Assumed old format (filename -> components) based on first value, but found non-sequence value '{components}' for key '{filename}'."
+                    )
+
+                for component in components:
+                    if not isinstance(component, str):
+                        raise TypeError(
+                            f"Invalid component name in old format content_mapping: Expected string, got {type(component)} ({component}) in list for file '{filename}'"
+                        )
+                    if component in new_mapping:
+                        conflicts.setdefault(
+                            component, [new_mapping[component]]
+                        ).append(filename)
+                    new_mapping[component] = filename
+
+            # Issue warnings for conflicts
+            if conflicts:
+                conflict_details = "; ".join(
+                    [
+                        f"'{comp}': [{', '.join(map(repr, files))}]"
+                        for comp, files in conflicts.items()
+                    ]
+                )
+                warnings.warn(
+                    f"Component conflicts detected in old format content_mapping. "
+                    f"Components assigned to multiple files: {conflict_details}. "
+                    f"Using the last assignment found.",
+                    UserWarning,
+                )
+
+            # Issue the main conversion warning
+            old_repr = repr(mapping)
+            new_repr = repr(new_mapping)
+            warnings.warn(
+                "Detected deprecated content_mapping format (filename -> components list).\n"
+                "Automatically converted to the new format (component -> filename).\n"
+                f"Old mapping: {old_repr}\n"
+                f"Converted to: {new_repr}\n"
+                "Please update your code to use the new format for future compatibility.",
+                DeprecationWarning,
+                stacklevel=3,  # Point warning towards the caller of __init__ or save
+            )
+            return new_mapping
+
+        elif is_new_format:
+            # --- Handle New Format ---
+            # Validate that all values are strings
+            for key, value in mapping.items():
+                if not isinstance(key, str):
+                    raise TypeError(
+                        f"Invalid key in new format content_mapping: Expected string component name, got {type(key)} ({key})"
+                    )
+                if not isinstance(value, str):
+                    # Check for mixed formats within the new format assumption
+                    raise TypeError(
+                        f"Mixed value types detected in content_mapping. Assumed new format (component -> filename) based on first value, but found non-string value '{value}' for key '{key}'."
+                    )
+            return mapping  # Already in the correct format
+        else:
+            # --- Handle Invalid Format ---
+            raise TypeError(
+                f"Invalid format for content_mapping. Values must be either all strings (component -> filename) or all sequences (filename -> components), but found type {type(first_value)} for the first value."
+            )
 
     def __init__(
         self,
-        content_mapping: Optional[Dict[str, Sequence[str]]] = None,
+        content_mapping: Optional[Dict] = None,  # Accept Dict initially for validation
         include_defaults: bool = False,
-        state_path: Optional[Union[str, Path]] = None,  # New argument
+        state_path: Optional[Union[str, Path]] = None,
     ):
         """
         Initialises the JSONSerialiser.
 
         Args:
-            content_mapping: A specific content mapping to use. If None, uses
-                the class default. See class docstring for details.
+            content_mapping: A specific content mapping to use. Can be in the old
+                (filename->components) or new (component->filename) format. If old
+                format is detected, a warning is issued and it's converted.
+                If None, uses the class default.
             include_defaults: Whether to include fields set to their default
                 values in the output. Defaults to False.
             state_path: An optional default path for saving/loading state. If provided,
                 this path takes precedence over environment variables or configuration
                 files when determining the default save/load location.
         """
-        self.content_mapping = (
+        initial_mapping = (
             content_mapping
             if content_mapping is not None
             else self.__class__.content_mapping
         )
+        # Validate and potentially convert the mapping
+        self.content_mapping = self._validate_and_convert_content_mapping(
+            initial_mapping
+        )
+
         self.include_defaults = include_defaults
         # Store the state_path, resolving it if provided
         self.state_path: Optional[Path] = (
@@ -98,6 +216,8 @@ class JSONSerialiser(AbstractSerialiser):
             contents: The dictionary to save.
             filepath: The exact path to the JSON file.
         """
+        # Ensure parent directory exists just before writing
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         with filepath.open("w", encoding="utf-8") as f:
             json.dump(contents, fp=f, indent=4, ensure_ascii=False)
 
@@ -105,109 +225,75 @@ class JSONSerialiser(AbstractSerialiser):
         self,
         full_contents: Dict[str, Any],
         folder: Path,
-        content_mapping: Dict[str, Sequence[str]],
+        content_mapping: Dict[str, str],  # Expects new format here
         ignore: Optional[Sequence[str]] = None,
     ):
         """
         Saves dictionary content split across multiple files in a folder
-        based on the content_mapping.
+        based on the content_mapping (component -> filename format).
 
         Args:
             full_contents: The complete dictionary of the QuAM object.
             folder: The target directory to save files into.
-            content_mapping: Dictionary mapping filenames to lists of keys
-                from full_contents.
+            content_mapping: Dictionary mapping component names (keys) to
+                relative filenames (values). Old format (filename -> components)
+                is not supported in this method.
             ignore: Optional list of top-level keys to ignore during saving.
         """
         remaining_contents = full_contents.copy()
         ignore_set = set(ignore or [])
-
-        if not folder.exists():
-            warnings.warn(
-                f"QUAM state folder {folder} does not exist, creating it now.",
-                UserWarning,
-            )
-            folder.mkdir(parents=True, exist_ok=True)
+        files_to_save: Dict[Path, Dict[str, Any]] = (
+            {}
+        )  # Stores filepath -> content dict
 
         # Remove ignored keys from the start
         for key in ignore_set:
             remaining_contents.pop(key, None)
 
-        # Process each specified component file
-        for filename, keys_to_save in content_mapping.items():
-
-            # Ensure filename is relative and within the target folder
-            component_file = Path(filename)
-            if component_file.is_absolute():
-                warnings.warn(
-                    f"Absolute path '{filename}' in content_mapping is ignored. Using "
-                    f"filename part only.",
-                    UserWarning,
-                )
-                component_filepath = folder / component_file.name
-            else:
-                component_filepath = folder / component_file
-
-            # Create subdirectories if specified in filename path
-            if (
-                component_filepath.parent != folder
-                and not component_filepath.parent.exists()
-            ):
-                component_filepath.parent.mkdir(parents=True, exist_ok=True)
-
-            partial_contents = {}
-            keys_in_mapping = set(keys_to_save)
-
-            # Collect specified keys, removing them from remaining_contents
-            processed_keys = set()
-            for key in list(remaining_contents.keys()):  # Iterate over copy of keys
-                if key in keys_in_mapping:
-                    partial_contents[key] = remaining_contents.pop(key)
-                    processed_keys.add(key)
-
-            # Warn if some requested keys were not found in the original object
-            missing_keys = keys_in_mapping - processed_keys
-            if missing_keys:
-                warnings.warn(
-                    f"Keys {list(missing_keys)} specified in content_mapping for "
-                    f"{filename} not found in QuAM object or already ignored.",
-                    UserWarning,
-                )
-
-            if not partial_contents:
-                # Warn instead of skipping file creation if keys were specified but
-                # missing/ignored
-                if (
-                    keys_in_mapping
-                ):  # Only warn if keys were actually requested for this file
+        # Iterate through components and assign them to files based on mapping
+        mapped_keys = set()
+        for component_key, filename in content_mapping.items():
+            if component_key in remaining_contents:
+                # Resolve the filepath
+                component_file = Path(filename)
+                if component_file.is_absolute():
                     warnings.warn(
-                        f"No content found for keys {list(keys_in_mapping)} specified "
-                        f"for {filename}. File will not be created.",
+                        f"Absolute path '{filename}' in content_mapping is ignored. "
+                        f"Using filename part only relative to '{folder}'.",
                         UserWarning,
                     )
-                continue  # Skip creating empty files
+                    component_filepath = folder / component_file.name
+                else:
+                    component_filepath = folder / component_file
 
-            self._save_dict_to_json(partial_contents, component_filepath)
+                # Add component to the dictionary for this file
+                if component_filepath not in files_to_save:
+                    files_to_save[component_filepath] = {}
+                files_to_save[component_filepath][component_key] = (
+                    remaining_contents.pop(component_key)
+                )
+                mapped_keys.add(component_key)
+            elif component_key not in ignore_set:
+                warnings.warn(
+                    f"Key '{component_key}' specified in content_mapping was not found "
+                    f"in the QuAM object's data or was ignored.",
+                    UserWarning,
+                )
+
+        # Save the collected components to their respective files
+        for filepath, file_contents in files_to_save.items():
+            self._save_dict_to_json(file_contents, filepath)
 
         # Save any remaining contents to the default file
         if remaining_contents:
             default_filepath = folder / self.default_filename
             self._save_dict_to_json(remaining_contents, default_filepath)
-        elif not content_mapping and not ignore_set and not full_contents:
-            # Only create empty default file if there was truly no content to begin with
-            # and no splitting/ignoring happened. Avoids creating empty default file
-            # when splitting consumes all content.
-            default_filepath = folder / self.default_filename
-            self._save_dict_to_json({}, default_filepath)
-            warnings.warn(
-                f"Saved empty default file to {default_filepath}", UserWarning
-            )
 
     def save(
         self,
         quam_obj: QuamRoot,
         path: Optional[Union[Path, str]] = None,
-        content_mapping: Optional[Dict[str, Sequence[str]]] = None,
+        content_mapping: Optional[Dict] = None,  # Accept Dict initially
         include_defaults: Optional[bool] = None,
         ignore: Optional[Sequence[str]] = None,
     ):
@@ -223,14 +309,21 @@ class JSONSerialiser(AbstractSerialiser):
             path: The target file or folder path. If None, uses default path logic
                   (checking instance `state_path`, env var, config).
             content_mapping: Overrides the instance's content_mapping for this save.
+                Can be in old or new format. If old format is provided, a warning is
+                issued and it's converted internally.
             include_defaults: Overrides the instance's include_defaults for this save.
             ignore: A sequence of top-level keys in the QuAM object to exclude
                     from the saved output.
         """
-        # Use provided args or fall back to instance defaults
-        current_content_mapping = (
-            content_mapping if content_mapping is not None else self.content_mapping
-        )
+        # Validate and convert the provided content_mapping, or use the instance's
+        # (already validated) one
+        if content_mapping is not None:
+            current_content_mapping = self._validate_and_convert_content_mapping(
+                content_mapping
+            )
+        else:
+            current_content_mapping = self.content_mapping  # Already validated in init
+
         current_include_defaults = (
             include_defaults if include_defaults is not None else self.include_defaults
         )
@@ -242,23 +335,33 @@ class JSONSerialiser(AbstractSerialiser):
         # Get the dictionary representation of the object
         contents_dict = quam_obj.to_dict(include_defaults=current_include_defaults)
 
+        # Apply ignore filter directly to the source dictionary before saving
+        # This modification is temporary for the save operation.
+        effective_contents = contents_dict.copy()
         if ignore:
-            contents_dict = {k: v for k, v in contents_dict.items() if k not in ignore}
+            for key in ignore:
+                effective_contents.pop(key, None)  # Modify the copy
 
         if path.suffix == ".json":
             # Target is a json file, save content to it
-            self._save_dict_to_json(contents_dict, path)
+            # Use the potentially ignored dictionary
+            self._save_dict_to_json(effective_contents, path)
         elif not path.suffix:
+            # Target is a directory, use split logic
+            # Pass the *original* contents_dict and ignore list separately
+            # to _save_split_content
             self._save_split_content(
-                full_contents=contents_dict,
+                full_contents=contents_dict,  # Pass the original full content
                 folder=path,
-                content_mapping=current_content_mapping,
-                ignore=ignore,
+                content_mapping=current_content_mapping,  # Pass validated mapping
+                ignore=ignore,  # Pass ignore separately
             )
         else:
-            raise ValueError(f"Cannot save QUAM: Unsupported {path.suffix=}")
+            raise ValueError(
+                f"Cannot save QUAM: Unsupported path suffix '{path.suffix}'"
+            )
 
-    def _get_state_path(self) -> Path:  # Renamed from _get_default_state_path
+    def _get_state_path(self) -> Path:
         """
         Determines the default path for saving/loading state.
 
@@ -266,39 +369,52 @@ class JSONSerialiser(AbstractSerialiser):
         1. `self.state_path` (if set during `__init__`).
         2. `QUAM_STATE_PATH` environment variable.
         3. `state_path` from QuAM configuration (via `get_quam_config`).
+        4. Fallback to `default_foldername` or `default_filename` in the current directory.
 
         Returns:
             The default Path object, resolved to an absolute path.
-
-        Raises:
-            ValueError: If no path can be found via instance, environment, or config.
         """
         # 1. Check instance path first
         if self.state_path is not None:
-            # Ensure it's resolved (already done in init, but safe to repeat)
             return self.state_path.resolve()
 
         # 2. Check environment variable
-        if "QUAM_STATE_PATH" in os.environ:
-            return Path(os.environ["QUAM_STATE_PATH"]).resolve()
+        env_path = os.environ.get("QUAM_STATE_PATH")
+        if env_path:
+            return Path(env_path).resolve()
 
         # 3. Check configuration file
         try:
             cfg = get_quam_config()
             if cfg and cfg.state_path is not None:
                 return Path(cfg.state_path).resolve()
-        except AttributeError:
+
+        except (AttributeError, FileNotFoundError):  # Catch potential errors
             warnings.warn(
-                "'get_quam_config' or 'state_path' not available in 'quam.config'. "
-                "Cannot check config.",
+                "Could not determine state path from QuAM configuration. "
+                "Falling back to environment or default.",
                 UserWarning,
             )
 
-        # 4. No path found
-        raise ValueError(
-            "No state path found. Set state_path during init, set QUAM_STATE_PATH "
-            "environment variable, or configure state_path in quam config."
-        )
+        # 4. No path found - Fallback to saving in current directory
+        # Decide whether to use the folder or single file default based on content_mapping
+        # Use the mapping already validated/converted in __init__
+        if self.content_mapping:
+            default_path = Path(self.default_foldername)
+            warnings.warn(
+                f"No state path found via init, environment, or config. Defaulting "
+                f"to folder '{default_path}' in the current directory because "
+                f"content_mapping is defined.",
+                UserWarning,
+            )
+        else:
+            default_path = Path(self.default_filename)
+            warnings.warn(
+                f"No state path found via init, environment, or config. Defaulting "
+                f"to file '{default_path}' in the current directory.",
+                UserWarning,
+            )
+        return default_path.resolve()
 
     def _load_from_file(self, filepath: Path) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
@@ -310,8 +426,9 @@ class JSONSerialiser(AbstractSerialiser):
         Returns:
             A tuple containing:
             1. The loaded dictionary content.
-            2. Metadata dictionary including inferred 'content_mapping',
-               'default_filename', and 'default_foldername'.
+            2. Metadata dictionary including inferred 'content_mapping
+               (component -> filename), 'default_filename', and
+               'default_foldername'.
 
         Raises:
             TypeError: If the filepath does not have a .json suffix.
@@ -324,77 +441,115 @@ class JSONSerialiser(AbstractSerialiser):
         try:
             with filepath.open("r", encoding="utf-8") as f:
                 contents = json.load(f, object_hook=convert_int_keys)
+            if not isinstance(contents, dict):
+                raise TypeError(
+                    f"File {filepath} does not contain a valid JSON dictionary.",
+                )
 
-            # Basic metadata for single file load
+            # Infer mapping: component -> filename
+            inferred_mapping = {key: filepath.name for key in contents.keys()}
             metadata = {
-                "content_mapping": {},  # No mapping inferred from single file
+                "content_mapping": inferred_mapping,
                 "default_filename": filepath.name,
-                "default_foldername": None,  # Not loaded from a folder
+                "default_foldername": None,
             }
             return contents, metadata
         except json.JSONDecodeError as e:
-            # Raise with more context
             raise json.JSONDecodeError(
                 f"Error decoding JSON from {filepath}: {e.msg}", e.doc, e.pos
             ) from e
         except IOError as e:
             raise IOError(f"Error reading file {filepath}: {e}") from e
+        except Exception as e:  # Catch unexpected errors during loading
+            raise RuntimeError(
+                f"An unexpected error occurred while loading {filepath}: {e}"
+            ) from e
 
     def _load_from_directory(
         self, dirpath: Path
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
-        Loads and merges content from all .json files in a directory.
+        Loads and merges content from all .json files in a directory and its
+        subdirectories. Infers the content mapping (component -> filename).
 
         Args:
             dirpath: The path to the directory to load from.
 
         Returns:
             A tuple containing:
-            1. The merged dictionary content from all JSON files.
+            1. The merged dictionary content.
             2. Metadata dictionary including inferred 'content_mapping',
                'default_filename', and 'default_foldername'.
         """
         contents: Dict[str, Any] = {}
+        inferred_mapping: Dict[str, str] = {}  # component -> relative_filename
         metadata: Dict[str, Any] = {
-            "content_mapping": {},
+            "content_mapping": inferred_mapping,
             "default_filename": None,
-            "default_foldername": str(dirpath),  # Store the dir path loaded from
+            "default_foldername": str(dirpath.resolve()),
         }
 
-        found_files = list(dirpath.glob("*.json"))
+        found_files = list(dirpath.rglob("*.json"))
 
         if not found_files:
             warnings.warn(f"No JSON files found in directory {dirpath}", UserWarning)
-            return contents, metadata  # Return empty content and basic metadata
+            return contents, metadata
 
+        processed_files_count = 0
         for file in found_files:
             try:
-                # Use the _load_from_file helper for individual file loading
-                file_contents, _ = self._load_from_file(file)
+                file_contents, _ = self._load_from_file(
+                    file
+                )  # Metadata from single file load is not needed here
+                if not file_contents:  # Skip empty files
+                    warnings.warn(
+                        f"Skipping empty or invalid JSON file: {file}", UserWarning
+                    )
+                    continue
 
-                # Check for key conflicts before updating
+                relative_filepath = file.relative_to(dirpath).as_posix()
+                processed_files_count += 1
+
+                # Check for key conflicts before updating contents
                 conflicts = contents.keys() & file_contents.keys()
                 if conflicts:
+                    conflict_details = {
+                        key: inferred_mapping[key]
+                        for key in conflicts
+                        if key in inferred_mapping
+                    }
                     warnings.warn(
-                        f"Keys {list(conflicts)} from {file.name} overwrite "
-                        f"existing keys while loading from directory {dirpath}.",
+                        f"Key conflicts detected: Components {list(conflicts)} found in '{relative_filepath}' "
+                        f"overwrite existing definitions from files {conflict_details}. "
+                        f"Using definition from '{relative_filepath}'.",
                         UserWarning,
                     )
                 contents.update(file_contents)
 
-                # Update metadata based on filenames
-                if file.name == self.default_filename:
+                # Update inferred mapping: component -> relative_filepath
+                for key in file_contents.keys():
+                    # Overwrite mapping on conflict
+                    inferred_mapping[key] = relative_filepath
+
+                # Check if this file is the default file at the root level
+                if file.name == self.default_filename and file.parent == dirpath:
                     metadata["default_filename"] = file.name
-                else:
-                    # Store which keys came from which file
-                    # This approximates content_mapping
-                    metadata["content_mapping"][file.name] = list(file_contents.keys())
 
-            except (json.JSONDecodeError, IOError, TypeError) as e:
-                # Catch errors from _load_from_file and warn
-                warnings.warn(f"Skipping file {file}: {e}", UserWarning)
+            except (
+                json.JSONDecodeError,
+                IOError,
+                TypeError,
+                RuntimeError,
+            ) as e:
+                warnings.warn(f"Skipping file {file} due to error: {e}", UserWarning)
 
+        if processed_files_count == 0 and found_files:
+            warnings.warn(
+                f"Found {len(found_files)} JSON files in {dirpath}, but none contained valid data.",
+                UserWarning,
+            )
+
+        metadata["content_mapping"] = inferred_mapping
         return contents, metadata
 
     def load(
@@ -405,11 +560,8 @@ class JSONSerialiser(AbstractSerialiser):
         Loads a QuamRoot object's dictionary representation from JSON file(s).
 
         Determines the load path using the provided `path` argument or falls back
-        to default logic (instance `state_path`, env var, config).
-
-        If the resolved path points to a single JSON file, it loads that file.
-        If the resolved path points to a directory, it loads and merges content
-        from all `.json` files within that directory using `_load_from_directory`.
+        to default logic (instance `state_path`, env var, config). Loads from a
+        single file or merges from a directory (recursively).
 
         Args:
             path: The path to load from (file or directory). If None, uses the
@@ -418,17 +570,16 @@ class JSONSerialiser(AbstractSerialiser):
         Returns:
             A tuple containing:
             1. Dictionary representation of the loaded QuAM object.
-            2. Metadata dictionary containing inferred loading details like
-               'content_mapping', 'default_filename', 'default_foldername'.
+            2. Metadata dictionary including inferred 'content_mapping' (component -> filename),
+               'default_filename', 'default_foldername'.
 
         Raises:
             FileNotFoundError: If the resolved path does not exist.
-            ValueError: If the resolved path is neither a file nor a directory
-                        (should not typically occur after existence check).
+            ValueError: If the resolved path is neither a file nor a directory.
         """
         load_path: Path
         if path is None:
-            load_path = self._get_state_path()  # Use updated logic
+            load_path = self._get_state_path()
         else:
             load_path = Path(path).resolve()
 
@@ -439,13 +590,16 @@ class JSONSerialiser(AbstractSerialiser):
         metadata: Dict[str, Any]
 
         if load_path.is_file():
-            # Load from a single file
             contents, metadata = self._load_from_file(load_path)
         elif load_path.is_dir():
-            # Load from a directory, merging contents
             contents, metadata = self._load_from_directory(load_path)
         else:
-            # Path exists but is not a file or directory (e.g., broken symlink?)
             raise ValueError(f"Path {load_path} is neither a valid file nor directory.")
+
+        # Update the instance's content_mapping *only if* it wasn't explicitly set
+        # during initialization or via the save method argument override.
+        is_default_mapping = self.content_mapping == self.__class__.content_mapping
+        if is_default_mapping and "content_mapping" in metadata:
+            self.content_mapping = metadata["content_mapping"]
 
         return contents, metadata
