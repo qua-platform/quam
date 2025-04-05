@@ -30,7 +30,7 @@ except ImportError:
     EXPECTED_CONFIG_VERSION = 1
 
 
-# --- Mock QuAM Components ---
+# Mock QuAM Components
 
 
 @quam_dataclass
@@ -59,9 +59,6 @@ class MockQuamRoot(QuamRoot):
     wiring: Dict[str, Any] = field(default_factory=dict)
     other: str = "default_other"
     default_val: int = 10  # Example default
-
-
-# --- Fixtures ---
 
 
 # Fixture to prevent loading user's default config

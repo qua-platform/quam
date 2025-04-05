@@ -97,7 +97,7 @@ class JSONSerialiser(AbstractSerialiser):
         is_new_format = isinstance(first_value, str)
 
         if is_old_format:
-            # --- Handle Old Format ---
+            # Handle Old Format
             new_mapping: Dict[str, str] = {}
             conflicts: Dict[str, List[str]] = {}
 
@@ -159,7 +159,7 @@ class JSONSerialiser(AbstractSerialiser):
             return new_mapping
 
         elif is_new_format:
-            # --- Handle New Format ---
+            # Handle New Format
             # Validate that all values are strings
             for key, value in mapping.items():
                 if not isinstance(key, str):
@@ -176,7 +176,7 @@ class JSONSerialiser(AbstractSerialiser):
                     )
             return mapping  # Already in the correct format
         else:
-            # --- Handle Invalid Format ---
+            # Handle Invalid Format
             raise TypeError(
                 "Invalid format for content_mapping. Values must be either all strings"
                 " (component -> filename) or all sequences (filename -> components),"
