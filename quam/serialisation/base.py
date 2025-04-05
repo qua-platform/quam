@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Dict, TYPE_CHECKING
+from typing import Union, Dict, TYPE_CHECKING, Optional
 from pathlib import Path
 
 if TYPE_CHECKING:
@@ -11,14 +11,15 @@ class AbstractSerialiser:
 
     def save(
         self,
-        path: Union[Path, str],
+        path: Optional[Union[Path, str]],
         quam_obj: Union[QuamRoot, QuamComponent],
-        content_mapping: Dict[str, str] = None,
+        content_mapping: Optional[Dict[str, str]] = None,
+        **kwargs,
     ):
         raise NotImplementedError
 
     def load(
         self,
-        path: Union[Path, str] = None,
+        path: Optional[Union[Path, str]] = None,
     ):
         raise NotImplementedError
