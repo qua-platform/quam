@@ -37,7 +37,6 @@ from .qua_config_template import qua_config_template
 
 from qm.type_hinting import DictQuaConfig
 
-
 __all__ = [
     "QuamBase",
     "QuamRoot",
@@ -668,20 +667,15 @@ class QuamRoot(QuamBase):
 
     This class should be subclassed and made a dataclass.
 
-    Args:
-        serialiser: The serialiser class to use for saving and loading.
-            The default is to use the `JSONSerialiser`, but this can be changed.
-
     Note:
         This class should not be used directly, but should generally be subclassed and
         made a dataclass. The dataclass fields should correspond to the QuAM root
         structure.
     """
 
-    serialiser: AbstractSerialiser = JSONSerialiser
-
     def __post_init__(self):
         QuamBase._last_instantiated_root = self
+        self.serialiser = self.get_serialiser()
         super().__post_init__()
 
     def __setattr__(self, name, value):
@@ -690,6 +684,14 @@ class QuamRoot(QuamBase):
 
         if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
+
+    @classmethod
+    def get_serialiser(cls) -> AbstractSerialiser:
+        """Get the serialiser for the QuamRoot class, which is the JSONSerialiser.
+
+        This method can be overridden by subclasses to provide a custom serialiser.
+        """
+        return JSONSerialiser()
 
     def get_reference(
         self, attr: Optional[str] = None, relative_path: Optional[str] = None
@@ -715,25 +717,25 @@ class QuamRoot(QuamBase):
 
     def save(
         self,
-        path: Union[Path, str] = None,
-        content_mapping: Dict[str, str] = None,
+        path: Optional[Union[Path, str]] = None,
+        content_mapping: Optional[Dict[str, str]] = None,
         include_defaults: bool = False,
-        ignore: Sequence[str] = None,
+        ignore: Optional[Sequence[str]] = None,
     ):
         """Save the entire QuamRoot object to a file. This includes nested objects.
 
         Args:
-            path: The path to save the file to. If None, the path will be saved to
-                `state.json`.
-            content_mapping: A dictionary of paths to save to and a list of attributes
-                to save to that path. This can be used to save different parts of the
-                QuamRoot object to different files.
+            path: The path to save the file to. If None, the path will be extracted from
+                the `state_path` attribute of the serialiser, which could be set by the
+                quam config file or environment variable.
+            content_mapping: Optional mapping of component names to filenames. This can
+                be used to save different parts of the QuamRoot object to different
+                files.
             include_defaults: Whether to include attributes that have the default
                 value.
-            ignore: A list of attributes to ignore.
+            ignore: A list of components to ignore.
         """
-        serialiser = self.serialiser()
-        serialiser.save(
+        self.serialiser.save(
             quam_obj=self,
             path=path,
             content_mapping=content_mapping,
@@ -761,7 +763,7 @@ class QuamRoot(QuamBase):
     @classmethod
     def load(
         cls: QuamRootType,
-        filepath_or_dict: Union[str, Path, dict],
+        filepath_or_dict: Optional[Union[str, Path, dict]] = None,
         validate_type: bool = True,
         fix_attrs: bool = True,
     ) -> QuamRootType:
@@ -770,6 +772,8 @@ class QuamRoot(QuamBase):
         Args:
             filepath_or_dict: The path to the file/folder to load, or a dictionary.
                 The dictionary would be the result from a call to `QuamRoot.save()`
+                Can be omitted, in which case the serialiser will use the default state
+                path, which is typically defined in the quam config file.
             validate_type: Whether to validate the type of all attributes while loading.
             fix_attrs: Whether attributes can be added to QuamBase objects that are not
                 defined as dataclass fields.
@@ -780,7 +784,7 @@ class QuamRoot(QuamBase):
         if isinstance(filepath_or_dict, dict):
             contents = filepath_or_dict
         else:
-            serialiser = cls.serialiser()
+            serialiser = cls.get_serialiser()
             contents, _ = serialiser.load(filepath_or_dict)
 
         return instantiate_quam_class(
