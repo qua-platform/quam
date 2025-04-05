@@ -1,6 +1,4 @@
-import pytest
 import json
-import sys
 from pathlib import Path
 from quam.serialisation.json import JSONSerialiser, convert_int_keys
 

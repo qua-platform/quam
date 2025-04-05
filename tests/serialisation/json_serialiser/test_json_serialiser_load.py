@@ -1,14 +1,10 @@
 import pytest
 import json
-from pathlib import Path
-import warnings
-from typing import Dict, Any, Union
-import os
 
 # Mock components and fixtures are now imported from conftest.py
 # Import the mock classes to check against after loading
-from conftest import MockQuamRoot, MockMainComponent, MockChildComponent
-from quam.serialisation.json import JSONSerialiser, convert_int_keys
+from conftest import MockQuamRoot, MockMainComponent
+from quam.serialisation.json import JSONSerialiser
 
 
 def test_load_from_file_basic(serialiser, setup_single_file, sample_dict_basic):

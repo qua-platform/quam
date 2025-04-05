@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Dict, Optional
 import pytest
 
 from quam.serialisation import JSONSerialiser
@@ -10,7 +10,7 @@ from quam.core import QuamRoot, QuamComponent, quam_dataclass
 class QuAM(QuamRoot):
     a: int
     b: list
-    c: int = None
+    c: Optional[int] = None
 
 
 def test_serialise_random_object(tmp_path):
@@ -28,9 +28,10 @@ def test_serialise_random_object(tmp_path):
         "__class__": "test_json_serialisation.QuAM",
     }
 
-    class RandomObject: ...
+    class RandomObject:
+        pass
 
-    quam_root.b = RandomObject()
+    quam_root.b = RandomObject()  # type: ignore
 
     with pytest.raises(TypeError):
         serialiser.save(quam_root, path)
