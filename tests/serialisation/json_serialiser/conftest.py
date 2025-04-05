@@ -276,12 +276,22 @@ def mock_config(monkeypatch):
 
         return mock_cfg  # Return the object
 
+    # Attempt to mock, handling potential ImportError
+    try:
+        import quam.config  # noqa: F401
+
         # Mock the get_quam_config function where it's used
         monkeypatch.setattr(
             "quam.serialisation.json.get_quam_config",
             mock_get_config_replacement,
             raising=False,
         )
+    except ImportError:
+        # Simulate the ImportError scenario for _get_state_path
+        monkeypatch.setattr(
+            "quam.serialisation.json.get_quam_config", None, raising=False
+        )
+        # Also handle the direct import within _get_state_path if it fails
         monkeypatch.setitem(sys.modules, "quam.config", None)
 
     yield mock_config_data  # Tests can modify mock_config_data.state_path etc.
