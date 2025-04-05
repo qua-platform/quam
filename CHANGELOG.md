@@ -1,3 +1,17 @@
+## [Unreleased]
+
+### Added
+
+- Add the QUAM config, which can be called from the terminal command `quam config`.
+  This enables adding a default QUAM state path
+- Add the following properties to the `JSONSerialiser`: `content_mapping`, `include_defaults`, and `state_path`.
+
+### Changed
+
+- `JSONSerialiser.content_mapping` structure has been changed from dict `{filename.json: [list of components]}` to `{component: filname.json}`. The previous format is still supported although this raises a warning
+- Remove implicit support for content mapping structure `{filename.json: component} (note the lack of a list). This used to be supported even though it was never mentioned.
+- The default state path for a `QuamRoot` is now retrieved from the environment variable `QUAM_STATE_PATH`, and if this doesn't exist, from the quam config.
+
 ## [0.3.10]
 
 ### Changed
