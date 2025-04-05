@@ -48,9 +48,9 @@ class JSONSerialiser(AbstractSerialiser):
         default_filename (str): Default filename if saving all content to one file.
         default_foldername (str): Default folder name if splitting content.
         content_mapping (Dict[str, str]): Defines how to split QuAM
-            object content into different files. Keys are component names (top-level keys
-            in the QuAM object's dictionary representation), and values are the
-            relative filenames they should be saved to. If empty, saves to a single file.
+            object content into different files. Keys are component names (top-level
+            keys in the QuAM object's dictionary representation), and values are the
+            relative filenames they should be saved to. If empty, saves to a single file
         include_defaults (bool): Whether to include default values in the
             serialised output.
         state_path (Optional[Path]): A specific path set during initialisation
@@ -104,18 +104,24 @@ class JSONSerialiser(AbstractSerialiser):
             for filename, components in mapping.items():
                 if not isinstance(filename, str):
                     raise TypeError(
-                        f"Invalid key in old format content_mapping: Expected string filename, got {type(filename)} ({filename})"
+                        "Invalid key in old format content_mapping: Expected string "
+                        f"filename, got {type(filename)} ({filename})"
                     )
                 if not isinstance(components, (list, tuple, Sequence)):
                     # Check for mixed formats within the old format assumption
                     raise TypeError(
-                        f"Mixed value types detected in content_mapping. Assumed old format (filename -> components) based on first value, but found non-sequence value '{components}' for key '{filename}'."
+                        "Mixed value types detected in content_mapping. Assumed old"
+                        " format (filename -> components) based on first value, but"
+                        f" found non-sequence value '{components}' for key"
+                        f" '{filename}'."
                     )
 
                 for component in components:
                     if not isinstance(component, str):
                         raise TypeError(
-                            f"Invalid component name in old format content_mapping: Expected string, got {type(component)} ({component}) in list for file '{filename}'"
+                            "Invalid component name in old format content_mapping:"
+                            f" Expected string, got {type(component)} ({component}) in"
+                            f" list for file '{filename}'"
                         )
                     if component in new_mapping:
                         conflicts.setdefault(
@@ -132,9 +138,9 @@ class JSONSerialiser(AbstractSerialiser):
                     ]
                 )
                 warnings.warn(
-                    f"Component conflicts detected in old format content_mapping. "
+                    "Component conflicts detected in old format content_mapping. "
                     f"Components assigned to multiple files: {conflict_details}. "
-                    f"Using the last assignment found.",
+                    "Using the last assignment found.",
                     UserWarning,
                 )
 
@@ -142,11 +148,11 @@ class JSONSerialiser(AbstractSerialiser):
             old_repr = repr(mapping)
             new_repr = repr(new_mapping)
             warnings.warn(
-                "Detected deprecated content_mapping format (filename -> components list).\n"
-                "Automatically converted to the new format (component -> filename).\n"
-                f"Old mapping: {old_repr}\n"
-                f"Converted to: {new_repr}\n"
-                "Please update your code to use the new format for future compatibility.",
+                "Detected deprecated content_mapping format (filename -> components"
+                " list).\nAutomatically converted to the new format (component ->"
+                f" filename).\nOld mapping: {old_repr}\nConverted to:"
+                f" {new_repr}\nPlease update your code to use the new format for future"
+                " compatibility.",
                 DeprecationWarning,
                 stacklevel=3,  # Point warning towards the caller of __init__ or save
             )
@@ -158,18 +164,23 @@ class JSONSerialiser(AbstractSerialiser):
             for key, value in mapping.items():
                 if not isinstance(key, str):
                     raise TypeError(
-                        f"Invalid key in new format content_mapping: Expected string component name, got {type(key)} ({key})"
+                        "Invalid key in new format content_mapping: Expected string"
+                        f" component name, got {type(key)} ({key})"
                     )
                 if not isinstance(value, str):
                     # Check for mixed formats within the new format assumption
                     raise TypeError(
-                        f"Mixed value types detected in content_mapping. Assumed new format (component -> filename) based on first value, but found non-string value '{value}' for key '{key}'."
+                        "Mixed value types detected in content_mapping. Assumed new"
+                        " format (component -> filename) based on first value, but"
+                        f" found non-string value '{value}' for key '{key}'."
                     )
             return mapping  # Already in the correct format
         else:
             # --- Handle Invalid Format ---
             raise TypeError(
-                f"Invalid format for content_mapping. Values must be either all strings (component -> filename) or all sequences (filename -> components), but found type {type(first_value)} for the first value."
+                "Invalid format for content_mapping. Values must be either all strings"
+                " (component -> filename) or all sequences (filename -> components),"
+                f" but found type {type(first_value)} for the first value."
             )
 
     def __init__(
@@ -269,7 +280,7 @@ class JSONSerialiser(AbstractSerialiser):
             else:
                 warnings.warn(
                     f"Key '{component_key}' specified in content_mapping was not found "
-                    f"in the QuAM object's data",
+                    "in the QuAM object's data",
                     UserWarning,
                 )
 
@@ -360,7 +371,8 @@ class JSONSerialiser(AbstractSerialiser):
         1. `self.state_path` (if set during `__init__`).
         2. `QUAM_STATE_PATH` environment variable.
         3. `state_path` from QuAM configuration (via `get_quam_config`).
-        4. Fallback to `default_foldername` or `default_filename` in the current directory.
+        4. Fallback to `default_foldername` or `default_filename` in the current
+           directory.
 
         Returns:
             The default Path object, resolved to an absolute path.
@@ -388,20 +400,20 @@ class JSONSerialiser(AbstractSerialiser):
             )
 
         # 4. No path found - Fallback to saving in current directory
-        # Decide whether to use the folder or single file default based on content_mapping
+        # Decide on using the folder or single file default based on content_mapping
         # Use the mapping already validated/converted in __init__
         if self.content_mapping:
             default_path = Path(self.default_foldername)
             warnings.warn(
-                f"No state path found via init, environment, or config. Defaulting "
+                "No state path found via init, environment, or config. Defaulting "
                 f"to folder '{default_path}' in the current directory because "
-                f"content_mapping is defined.",
+                "content_mapping is defined.",
                 UserWarning,
             )
         else:
             default_path = Path(self.default_filename)
             warnings.warn(
-                f"No state path found via init, environment, or config. Defaulting "
+                "No state path found via init, environment, or config. Defaulting "
                 f"to file '{default_path}' in the current directory.",
                 UserWarning,
             )
@@ -508,9 +520,10 @@ class JSONSerialiser(AbstractSerialiser):
                         if key in inferred_mapping
                     }
                     warnings.warn(
-                        f"Key conflicts detected: Components {list(conflicts)} found in '{relative_filepath}' "
-                        f"overwrite existing definitions from files {conflict_details}. "
-                        f"Using definition from '{relative_filepath}'.",
+                        f"Key conflicts detected: Components {list(conflicts)} found in"
+                        f" '{relative_filepath}' overwrite existing definitions from"
+                        f" files {conflict_details}. Using definition from"
+                        f" '{relative_filepath}'.",
                         UserWarning,
                     )
                 contents.update(file_contents)
@@ -534,7 +547,8 @@ class JSONSerialiser(AbstractSerialiser):
 
         if processed_files_count == 0 and found_files:
             warnings.warn(
-                f"Found {len(found_files)} JSON files in {dirpath}, but none contained valid data.",
+                f"Found {len(found_files)} JSON files in {dirpath}, but none contained"
+                " valid data.",
                 UserWarning,
             )
 
@@ -566,8 +580,8 @@ class JSONSerialiser(AbstractSerialiser):
         Returns:
             A tuple containing:
             1. Dictionary representation of the loaded QuAM object.
-            2. Metadata dictionary including inferred 'content_mapping' (component -> filename),
-               'default_filename', 'default_foldername'.
+            2. Metadata dictionary including inferred 'content_mapping' (component ->
+               filename), 'default_filename', 'default_foldername'.
 
         Raises:
             FileNotFoundError: If the resolved path does not exist.
