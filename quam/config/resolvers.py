@@ -29,7 +29,7 @@ def get_quam_config_path() -> Path:
 
 
 def get_quam_config(
-    config_path: Path,
+    config_path: Optional[Path] = None,
     config: Optional[RawConfigType] = None,
     auto_migrate: bool = True,
 ) -> QuamConfig:
@@ -37,6 +37,7 @@ def get_quam_config(
 
     Args:
         config_path: Path to the configuration file.
+            If not provided, the default path will be used.
         config: Optional pre-loaded configuration data. If not provided, it
             will load and resolve references from the config file.
         auto_migrate: is it needed to automatically apply migrations to config
@@ -48,6 +49,9 @@ def get_quam_config(
         RuntimeError: If the configuration file cannot be read or if the
             configuration state is invalid.
     """
+    if config_path is None:
+        config_path = get_quam_config_path()
+
     get_config_model_part = partial(
         get_config_model,
         config_path,

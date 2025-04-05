@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Dict, Optional
 import pytest
 
 from quam.serialisation import JSONSerialiser
@@ -10,7 +10,7 @@ from quam.core import QuamRoot, QuamComponent, quam_dataclass
 class QuAM(QuamRoot):
     a: int
     b: list
-    c: int = None
+    c: Optional[int] = None
 
 
 def test_serialise_random_object(tmp_path):
@@ -28,9 +28,10 @@ def test_serialise_random_object(tmp_path):
         "__class__": "test_json_serialisation.QuAM",
     }
 
-    class RandomObject: ...
+    class RandomObject:
+        pass
 
-    quam_root.b = RandomObject()
+    quam_root.b = RandomObject()  # type: ignore
 
     with pytest.raises(TypeError):
         serialiser.save(quam_root, path)
@@ -72,11 +73,11 @@ class Component(QuamComponent):
     a: int
 
 
-def test_component_mamping(tmp_path):
+def test_component_mapping(tmp_path):
     quam_root = QuAM(a=1, b=Component(a=3), c=Component(a=4))
 
     serialiser = JSONSerialiser()
-    path = tmp_path / "quam_root.json"
+    path = tmp_path
     serialiser.save(quam_root, path, content_mapping={"b.json": ["b"]})
 
     d = json.loads((tmp_path / "b.json").read_text())
@@ -88,18 +89,19 @@ def test_component_mamping(tmp_path):
     }
 
 
-def test_component_mamping_ignore(tmp_path):
+def test_component_mapping_ignore(tmp_path):
     assert not (tmp_path / "b.json").exists()
 
     quam_root = QuAM(a=1, b=Component(a=3), c=Component(a=4))
 
     serialiser = JSONSerialiser()
-    path = tmp_path / "quam_root.json"
-    serialiser.save(quam_root, path, ignore=["b"], content_mapping={"b.json": ["b"]})
+    serialiser.save(
+        quam_root, tmp_path, ignore=["b"], content_mapping={"b.json": ["b"]}
+    )
     assert not (tmp_path / "b.json").exists()
 
     serialiser.save(
-        quam_root, path, ignore=["b"], content_mapping={"b.json": ["b", "c"]}
+        quam_root, tmp_path, ignore=["b"], content_mapping={"b.json": ["b", "c"]}
     )
     d = json.loads((tmp_path / "b.json").read_text())
     assert d == {

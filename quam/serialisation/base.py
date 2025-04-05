@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 class AbstractSerialiser:
     """Base class for serialisers."""
+
     def save(
         self,
         path: Union[Path, str],
