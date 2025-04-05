@@ -25,6 +25,7 @@ def test_lf_fem_analog_output_port():
     assert port.upsampling_mode == "mw"
 
     assert port.to_dict() == {
+        "__class__": "quam.components.ports.analog_outputs.LFFEMAnalogOutputPort",
         "controller_id": "con1",
         "fem_id": 1,
         "port_id": 2,
@@ -146,6 +147,7 @@ def test_lf_fem_analog_input_port():
     assert port.sampling_rate == 1e9
 
     assert port.to_dict() == {
+        "__class__": "quam.components.ports.analog_inputs.LFFEMAnalogInputPort",
         "controller_id": "con1",
         "fem_id": 1,
         "port_id": 2,

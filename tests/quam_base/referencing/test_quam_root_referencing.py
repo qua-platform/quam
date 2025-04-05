@@ -27,6 +27,6 @@ def test_quam_root_reference_to_dict():
         d = root.to_dict()
         assert d == {
             "a": "#/b",
-            "b": {},
+            "b": {"__class__": "test_quam_root_referencing.Component"},
             "__class__": "test_quam_root_referencing.Root",
         }

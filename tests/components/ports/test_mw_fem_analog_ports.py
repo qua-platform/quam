@@ -30,6 +30,7 @@ def test_mw_fem_analog_output_port():
     assert port.full_scale_power_dbm == -11
 
     assert port.to_dict() == {
+        "__class__": "quam.components.ports.analog_outputs.MWFEMAnalogOutputPort",
         "controller_id": "con1",
         "fem_id": 1,
         "port_id": 2,
@@ -92,6 +93,7 @@ def test_mw_fem_analog_input_ports():
     assert port.shareable == False
 
     assert port.to_dict() == {
+        "__class__": "quam.components.ports.analog_inputs.MWFEMAnalogInputPort",
         "controller_id": "con1",
         "fem_id": 1,
         "port_id": 2,

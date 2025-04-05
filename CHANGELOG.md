@@ -11,6 +11,8 @@
 - `JSONSerialiser.content_mapping` structure has been changed from dict `{filename.json: [list of components]}` to `{component: filname.json}`. The previous format is still supported although this raises a warning
 - Remove implicit support for content mapping structure `{filename.json: component} (note the lack of a list). This used to be supported even though it was never mentioned.
 - The default state path for a `QuamRoot` is now retrieved from the environment variable `QUAM_STATE_PATH`, and if this doesn't exist, from the quam config.
+- Add `__class__` to serialisation (`to_dict` method), even if the target class matches the expected type
+- If a specific class can't be imported during instantiation, a warning will be raised and it will load the default class (specified by the type hint) instead
 
 ## [0.3.10]
 

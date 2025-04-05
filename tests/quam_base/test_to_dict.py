@@ -53,7 +53,11 @@ class QuamBasicComponent(QuamComponent):
 def test_quam_component_to_dict_basic():
     elem = QuamBasicComponent(a=42, b="foo")
 
-    assert elem.to_dict() == {"a": 42, "b": "foo"}
+    assert elem.to_dict() == {
+        "a": 42,
+        "b": "foo",
+        "__class__": "test_to_dict.QuamBasicComponent",
+    }
 
 
 def test_quam_component_to_dict_nested():
@@ -70,6 +74,9 @@ def test_quam_component_to_dict_nested():
         "a": 42,
         "b": "foo",
         "c": {"a": 42, "b": "foo", "__class__": "test_to_dict.QuamBasicComponent"},
+        "__class__": (
+            "test_to_dict.test_quam_component_to_dict_nested.<locals>.QuamNestedComponent"
+        ),
     }
 
 
@@ -81,36 +88,55 @@ def test_to_dict_nondefault():
         optional_list: List[int] = field(default_factory=list)
 
     quam_component = QuamBasicComponent(required_val=42)
-    assert quam_component.to_dict() == {"required_val": 42}
+    assert quam_component.to_dict() == {
+        "required_val": 42,
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
+    }
     assert quam_component.to_dict(include_defaults=True) == {
         "required_val": 42,
         "optional_val": 42,
         "optional_list": [],
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
     }
 
     quam_component = QuamBasicComponent(required_val=42, optional_val=43)
-    assert quam_component.to_dict() == {"required_val": 42, "optional_val": 43}
+    assert quam_component.to_dict() == {
+        "required_val": 42,
+        "optional_val": 43,
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
+    }
     assert quam_component.to_dict(include_defaults=True) == {
         "required_val": 42,
         "optional_val": 43,
         "optional_list": [],
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
     }
 
     quam_component = QuamBasicComponent(required_val=42, optional_list=["test"])
-    assert quam_component.to_dict() == {"required_val": 42, "optional_list": ["test"]}
+    assert quam_component.to_dict() == {
+        "required_val": 42,
+        "optional_list": ["test"],
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
+    }
     assert quam_component.to_dict(include_defaults=True) == {
         "required_val": 42,
         "optional_val": 42,
         "optional_list": ["test"],
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
     }
 
     quam_component = QuamBasicComponent(required_val=42)
     quam_component.optional_list.append("test")
-    assert quam_component.to_dict() == {"required_val": 42, "optional_list": ["test"]}
+    assert quam_component.to_dict() == {
+        "required_val": 42,
+        "optional_list": ["test"],
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
+    }
     assert quam_component.to_dict(include_defaults=True) == {
         "required_val": 42,
         "optional_val": 42,
         "optional_list": ["test"],
+        "__class__": "test_to_dict.test_to_dict_nondefault.<locals>.QuamBasicComponent",
     }
 
 
@@ -120,7 +146,11 @@ def test_omit_default_dict_field():
         d: dict = field(default_factory=dict)
 
     quam_component = QuamBasicComponent()
-    assert quam_component.to_dict() == {}
+    assert quam_component.to_dict() == {
+        "__class__": (
+            "test_to_dict.test_omit_default_dict_field.<locals>.QuamBasicComponent"
+        ),
+    }
 
 
 def test_omit_default_list_field():
@@ -129,7 +159,11 @@ def test_omit_default_list_field():
         l: list = field(default_factory=list)
 
     quam_component = QuamBasicComponent()
-    assert quam_component.to_dict() == {}
+    assert quam_component.to_dict() == {
+        "__class__": (
+            "test_to_dict.test_omit_default_list_field.<locals>.QuamBasicComponent"
+        ),
+    }
 
 
 def test_optional_list_to_dict():
@@ -138,10 +172,19 @@ def test_optional_list_to_dict():
         l: Optional[List[int]] = None
 
     quam_component = QuamBasicComponent()
-    assert quam_component.to_dict() == {}
+    assert quam_component.to_dict() == {
+        "__class__": (
+            "test_to_dict.test_optional_list_to_dict.<locals>.QuamBasicComponent"
+        ),
+    }
 
     quam_component = QuamBasicComponent(l=[1, 2, 3])
-    assert quam_component.to_dict() == {"l": [1, 2, 3]}
+    assert quam_component.to_dict() == {
+        "l": [1, 2, 3],
+        "__class__": (
+            "test_to_dict.test_optional_list_to_dict.<locals>.QuamBasicComponent"
+        ),
+    }
 
 
 def test_list_to_dict_nondefault():
@@ -150,4 +193,9 @@ def test_list_to_dict_nondefault():
         l: int = 42
 
     quam_component = QuamBasicComponent(l=[1, 2, 3])
-    assert quam_component.to_dict() == {"l": [1, 2, 3]}
+    assert quam_component.to_dict() == {
+        "l": [1, 2, 3],
+        "__class__": (
+            "test_to_dict.test_list_to_dict_nondefault.<locals>.QuamBasicComponent"
+        ),
+    }

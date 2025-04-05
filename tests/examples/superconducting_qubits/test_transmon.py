@@ -165,15 +165,20 @@ def test_transmon_add_pulse():
 
     quam_dict = transmon.to_dict()
     expected_quam_dict = {
+        "__class__": "quam.examples.superconducting_qubits.components.Transmon",
         "id": 1,
         "xy": {
+            "__class__": "quam.components.channels.IQChannel",
             "intermediate_frequency": 100000000.0,
             "opx_output_I": ("con1", 1),
             "opx_output_Q": ("con1", 2),
             "frequency_converter_up": {
                 "__class__": "quam.components.hardware.FrequencyConverter",
-                "mixer": {},
-                "local_oscillator": {"frequency": 5000000000.0},
+                "mixer": {"__class__": "quam.components.hardware.Mixer"},
+                "local_oscillator": {
+                    "frequency": 5000000000.0,
+                    "__class__": "quam.components.hardware.LocalOscillator",
+                },
             },
             "operations": {
                 "X180": {

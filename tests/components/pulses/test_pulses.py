@@ -61,7 +61,9 @@ def test_channel():
     channel = Channel()
     d = channel.to_dict()
 
-    assert d == {}
+    assert d == {
+        "__class__": "quam.components.channels.Channel",
+    }
 
 
 def test_IQ_channel():
@@ -75,13 +77,16 @@ def test_IQ_channel():
     )
     d = IQ_channel.to_dict()
     assert d == {
+        "__class__": "quam.components.channels.IQChannel",
         "opx_output_I": 0,
         "opx_output_Q": 1,
         "intermediate_frequency": 100e6,
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
     }
 
