@@ -226,7 +226,6 @@ class JSONSerialiser(AbstractSerialiser):
         full_contents: Dict[str, Any],
         folder: Path,
         content_mapping: Dict[str, str],  # Expects new format here
-        ignore: Optional[Sequence[str]] = None,
     ):
         """
         Saves dictionary content split across multiple files in a folder
@@ -238,17 +237,11 @@ class JSONSerialiser(AbstractSerialiser):
             content_mapping: Dictionary mapping component names (keys) to
                 relative filenames (values). Old format (filename -> components)
                 is not supported in this method.
-            ignore: Optional list of top-level keys to ignore during saving.
         """
         remaining_contents = full_contents.copy()
-        ignore_set = set(ignore or [])
         files_to_save: Dict[Path, Dict[str, Any]] = (
             {}
         )  # Stores filepath -> content dict
-
-        # Remove ignored keys from the start
-        for key in ignore_set:
-            remaining_contents.pop(key, None)
 
         # Iterate through components and assign them to files based on mapping
         mapped_keys = set()
@@ -273,10 +266,10 @@ class JSONSerialiser(AbstractSerialiser):
                     remaining_contents.pop(component_key)
                 )
                 mapped_keys.add(component_key)
-            elif component_key not in ignore_set:
+            else:
                 warnings.warn(
                     f"Key '{component_key}' specified in content_mapping was not found "
-                    f"in the QuAM object's data or was ignored.",
+                    f"in the QuAM object's data",
                     UserWarning,
                 )
 
@@ -339,22 +332,20 @@ class JSONSerialiser(AbstractSerialiser):
         # This modification is temporary for the save operation.
         effective_contents = contents_dict.copy()
         if ignore:
+            current_content_mapping = current_content_mapping.copy()
             for key in ignore:
                 effective_contents.pop(key, None)  # Modify the copy
+                current_content_mapping.pop(key, None)
 
         if path.suffix == ".json":
             # Target is a json file, save content to it
-            # Use the potentially ignored dictionary
             self._save_dict_to_json(effective_contents, path)
         elif not path.suffix:
             # Target is a directory, use split logic
-            # Pass the *original* contents_dict and ignore list separately
-            # to _save_split_content
             self._save_split_content(
-                full_contents=contents_dict,  # Pass the original full content
+                full_contents=effective_contents,
                 folder=path,
                 content_mapping=current_content_mapping,  # Pass validated mapping
-                ignore=ignore,  # Pass ignore separately
             )
         else:
             raise ValueError(

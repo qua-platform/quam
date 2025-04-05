@@ -138,8 +138,8 @@ def test_get_state_path_precedence(mock_env, mock_config, tmp_path):
     assert serialiser_cfg._get_state_path() == config_path.resolve()
 
 
-def test_get_state_path_not_found(serialiser, mock_env, mock_config):
+def test_get_state_path_default(serialiser, mock_env, mock_config):
     """Test _get_state_path when no path can be found."""
     # Ensure no paths are set via mocks provided by fixtures
-    with pytest.raises(ValueError, match="No state path found"):
-        serialiser._get_state_path()
+    assert not serialiser.content_mapping
+    assert serialiser._get_state_path() == Path(serialiser.default_filename).resolve()

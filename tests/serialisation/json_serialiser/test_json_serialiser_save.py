@@ -19,7 +19,7 @@ def test_save_split_content_basic(serialiser, sample_quam_object, tmp_path):
     #  'wiring': {'w1': 'p1', 'w2': 'p2'},
     #  'other': 'specific_value'}
 
-    mapping = {"wiring.json": ["wiring"], "components.json": ["components"]}
+    mapping = {"wiring": "wiring.json", "components": "components.json"}
 
     serialiser._save_split_content(full_contents, folder, mapping)
 
@@ -49,43 +49,15 @@ def test_save_split_content_basic(serialiser, sample_quam_object, tmp_path):
         }  # default_val is default
 
 
-def test_save_split_content_ignore(serialiser, sample_quam_object, tmp_path):
-    """Test splitting content while ignoring specific keys."""
-    folder = tmp_path / "split_ignore"
-    full_contents = sample_quam_object.to_dict(include_defaults=False)
-    mapping = {"components.json": ["components"]}
-    ignore = ["wiring"]  # Ignore the 'wiring' key
-
-    serialiser._save_split_content(full_contents, folder, mapping, ignore=ignore)
-
-    components_path = folder / "components.json"
-    default_path = folder / serialiser.default_filename
-
-    assert components_path.exists()
-    assert default_path.exists()  # 'other' remains
-    assert not (folder / "wiring.json").exists()  # Should not be created
-
-    with components_path.open("r", encoding="utf-8") as f:
-        expected_components = {
-            "components": {"comp1": {"id": "c1"}, "comp2": {"id": "c2", "value": 5}}
-        }
-        assert json.load(f) == expected_components
-    with default_path.open("r", encoding="utf-8") as f:
-        assert json.load(f) == {
-            "other": "specific_value",
-            "__class__": "conftest.MockQuamRoot",
-        }  # Wiring was ignored
-
-
 def test_save_split_content_missing_keys_warning(
     serialiser, sample_quam_object, tmp_path
 ):
     """Test warning when specified keys are missing."""
     folder = tmp_path / "split_missing"
     full_contents = sample_quam_object.to_dict(include_defaults=False)
-    mapping = {"missing.json": ["nonexistent_key", "wiring"]}
+    mapping = {"nonexistent_key": "missing.json", "wiring": "missing.json"}
 
-    with pytest.warns(UserWarning, match="Keys .*nonexistent_key.* not found"):
+    with pytest.warns(UserWarning, match="specified in content_mapping was not found"):
         serialiser._save_split_content(full_contents, folder, mapping)
 
     missing_path = folder / "missing.json"
@@ -104,44 +76,15 @@ def test_save_split_content_missing_keys_warning(
         assert "other" in loaded_default
 
 
-def test_save_split_content_empty_file_warning(
-    serialiser, sample_quam_object, tmp_path
-):
-    """Test warning when a file mapping results in no content."""
-    folder = tmp_path / "split_empty_file"
-    full_contents = sample_quam_object.to_dict(include_defaults=False)
-    mapping = {"comp.json": ["components"], "ignored_wiring.json": ["wiring"]}
-    ignore = ["wiring"]
-
-    with pytest.warns(
-        UserWarning,
-        match="No content found for keys .*wiring.* specified for ignored_wiring.json",
-    ):
-        serialiser._save_split_content(full_contents, folder, mapping, ignore=ignore)
-
-    comp_path = folder / "comp.json"
-    ignored_wiring_path = folder / "ignored_wiring.json"
-    default_path = folder / serialiser.default_filename
-
-    assert comp_path.exists()
-    assert not ignored_wiring_path.exists()  # File should NOT be created
-    assert default_path.exists()  # 'other' remains
-
-    with comp_path.open("r", encoding="utf-8") as f:
-        assert "components" in json.load(f)
-    with default_path.open("r", encoding="utf-8") as f:
-        assert "other" in json.load(f)
-
-
 def test_save_split_content_no_remaining(serialiser, sample_quam_object, tmp_path):
     """Test when splitting consumes all content, no default file needed."""
     folder = tmp_path / "split_no_remaining"
     full_contents = sample_quam_object.to_dict(include_defaults=False)
     # Map all keys present when not including defaults
     mapping = {
-        "comps.json": ["components"],
-        "wires.json": ["wiring"],
-        "misc.json": ["other"],  # default_val is not included
+        "components": "comps.json",
+        "wiring": "wires.json",
+        "other": "misc.json",
     }
 
     serialiser._save_split_content(full_contents, folder, mapping)
@@ -166,10 +109,9 @@ def test_save_split_content_create_folder(serialiser, sample_quam_object, tmp_pa
     folder = tmp_path / "new_dir_split"
     assert not folder.exists()
     full_contents = sample_quam_object.to_dict()
-    mapping = {"wiring.json": ["wiring"]}
+    mapping = {"wiring": "wiring.json"}
 
-    with pytest.warns(UserWarning, match="QUAM state folder .* does not exist"):
-        serialiser._save_split_content(full_contents, folder, mapping)
+    serialiser._save_split_content(full_contents, folder, mapping)
 
     assert folder.exists()
     assert (folder / "wiring.json").exists()
@@ -182,8 +124,8 @@ def test_save_split_content_create_subfolder(serialiser, sample_quam_object, tmp
     full_contents = sample_quam_object.to_dict()
     subfolder_name = "sub"
     mapping = {
-        f"{subfolder_name}/wiring.json": ["wiring"],
-        "components.json": ["components"],
+        "wiring": f"{subfolder_name}/wiring.json",
+        "components": "components.json",
     }
 
     serialiser._save_split_content(full_contents, folder, mapping)
@@ -219,7 +161,7 @@ def test_save_split_content_absolute_path_warning(
     folder = tmp_path / "split_abs_warn"
     abs_path_str = str((tmp_path / "ignored_abs_path" / "wiring.json").absolute())
     full_contents = sample_quam_object.to_dict()
-    mapping = {abs_path_str: ["wiring"]}
+    mapping = {"wiring": abs_path_str}
 
     with pytest.warns(
         UserWarning, match="Absolute path .* in content_mapping is ignored"
@@ -234,18 +176,14 @@ def test_save_split_content_absolute_path_warning(
 
 
 def test_save_split_content_empty_input_no_mapping(serialiser, tmp_path):
-    """Test saving completely empty content with no mapping generates empty default file."""
+    """Test saving completely empty content with no mapping does not save anything."""
     folder = tmp_path / "split_empty_input"
     full_contents = {}
     mapping = {}
 
-    with pytest.warns(UserWarning, match="Saved empty default file"):
-        serialiser._save_split_content(full_contents, folder, mapping)
+    serialiser._save_split_content(full_contents, folder, mapping)
 
-    default_path = folder / serialiser.default_filename
-    assert default_path.exists()
-    with default_path.open("r", encoding="utf-8") as f:
-        assert json.load(f) == {}
+    assert not folder.exists()
 
 
 def test_save_single_file(serialiser, sample_quam_object, tmp_path):
@@ -352,7 +290,7 @@ def test_save_split_with_ignore(serialiser, sample_quam_object, tmp_path):
 def test_save_unsupported_path_suffix(serialiser, sample_quam_object, tmp_path):
     """Test ValueError for unsupported file extensions."""
     filepath = tmp_path / "unsupported.txt"
-    with pytest.raises(ValueError, match="Unsupported .*suffix="):
+    with pytest.raises(ValueError, match="Unsupported path suffix"):
         serialiser.save(sample_quam_object, filepath)
 
 
