@@ -57,6 +57,7 @@ from qm.qua import (
     frame_rotation,
     frame_rotation_2pi,
     time_tagging,
+    reset_if_phase
 )
 
 __all__ = [
@@ -518,6 +519,21 @@ class Channel(QuamComponent, ABC):
             ```
         """
         update_frequency(self.name, new_frequency, units, keep_phase)
+
+    def reset_if_phase(self):
+        r"""
+        Resets the intermediate frequency phase of the oscillator, setting the phase of
+        the next pulse to absolute zero.
+        This sets the phase of the currently playing intermediate frequency
+        to the value it had at the beginning of the program (t=0).
+
+        Note:
+        - The phase will only be set to zero when the next play or align command is
+          executed on the element.
+        - Reset phase will only reset the phase of the intermediate frequency
+          (:math:`\\omega_{IF}`) currently in use.
+        """
+        reset_if_phase(self.name)
 
     def frame_rotation(self, angle: ScalarFloat):
         r"""Shift the phase of the channel element's oscillator by the given angle.
