@@ -73,7 +73,8 @@ def prevent_default_config_loading():
     """
     if qualibrate_config is None:
         print(
-            "\nSkipping prevent_default_config_loading fixture: qualibrate_config.vars not found."
+            "\nSkipping prevent_default_config_loading fixture: qualibrate_config.vars"
+            " not found."
         )
         yield
         return
@@ -160,7 +161,9 @@ def setup_directory_basic(tmp_path, sample_dict_basic):
 
 @pytest.fixture
 def setup_directory_split(tmp_path):
-    """Creates a directory with split JSON files based on sample_quam_object structure."""
+    """
+    Creates a directory with split JSON files based on sample_quam_object structure.
+    """
     dirpath = tmp_path / "load_dir_split"
     dirpath.mkdir()
     # Content based on sample_quam_object (excluding defaults)
@@ -184,7 +187,8 @@ def setup_directory_split(tmp_path):
     with (dirpath / JSONSerialiser.default_filename).open("w", encoding="utf-8") as f:
         json.dump(default_content_root_class, f)
 
-    # Also save __class__ for components if needed by loader (though QuamRoot.load handles this)
+    # Also save __class__ for components if needed by loader (though QuamRoot.load
+    # handles this)
     components_content_class = components_content.copy()
     comp_class_path = f"{MockMainComponent.__module__}.{MockMainComponent.__name__}"
     for comp_data in components_content_class["components"].values():
@@ -272,22 +276,12 @@ def mock_config(monkeypatch):
 
         return mock_cfg  # Return the object
 
-    # Attempt to mock, handling potential ImportError
-    try:
-        import quam.config
-
         # Mock the get_quam_config function where it's used
         monkeypatch.setattr(
             "quam.serialisation.json.get_quam_config",
             mock_get_config_replacement,
             raising=False,
         )
-    except ImportError:
-        # Simulate the ImportError scenario for _get_state_path
-        monkeypatch.setattr(
-            "quam.serialisation.json.get_quam_config", None, raising=False
-        )
-        # Also handle the direct import within _get_state_path if it fails
         monkeypatch.setitem(sys.modules, "quam.config", None)
 
     yield mock_config_data  # Tests can modify mock_config_data.state_path etc.

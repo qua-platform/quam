@@ -190,8 +190,8 @@ def test_save_single_file(serialiser, sample_quam_object, tmp_path):
         loaded = json.load(f)
     # Compare with dict representation (default: exclude defaults)
     expected_dict = sample_quam_object.to_dict(include_defaults=False)
-    expected_dict["__class__"] = (
-        f"{sample_quam_object.__module__}.{sample_quam_object.__class__.__name__}"  # Class added by default for root
+    expected_dict["__class__"] = (  # Class added by default for root
+        f"{sample_quam_object.__module__}.{sample_quam_object.__class__.__name__}"
     )
     assert loaded == expected_dict
 
