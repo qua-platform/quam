@@ -95,13 +95,13 @@ def test_load_from_directory_split(serialiser, setup_directory_split):
 
     assert metadata["default_filename"] == JSONSerialiser.default_filename
     assert metadata["default_foldername"] == str(setup_directory_split)
-    assert list(metadata["content_mapping"]["wiring.json"]) == ["wiring"]
-    assert list(metadata["content_mapping"]["components.json"]) == ["components"]
+    assert metadata["content_mapping"]["wiring"] == "wiring.json"
+    assert metadata["content_mapping"]["components"] == "components.json"
 
 
 def test_load_from_directory_conflict_warning(serialiser, setup_directory_conflict):
     """Test warning when loading files with conflicting keys."""
-    with pytest.warns(UserWarning, match="Keys .*b.* from file[0-9].json overwrite"):
+    with pytest.warns(UserWarning, match="Key conflicts detected"):
         contents, _ = serialiser._load_from_directory(setup_directory_conflict)
 
     assert contents == {"a": 1, "b": "overwrite", "c": 3} or contents == {

@@ -437,10 +437,8 @@ class JSONSerialiser(AbstractSerialiser):
                     f"File {filepath} does not contain a valid JSON dictionary.",
                 )
 
-            # Infer mapping: component -> filename
-            inferred_mapping = {key: filepath.name for key in contents.keys()}
             metadata = {
-                "content_mapping": inferred_mapping,
+                "content_mapping": {},
                 "default_filename": filepath.name,
                 "default_foldername": None,
             }
@@ -539,6 +537,13 @@ class JSONSerialiser(AbstractSerialiser):
                 f"Found {len(found_files)} JSON files in {dirpath}, but none contained valid data.",
                 UserWarning,
             )
+
+        # Filter out inferred_mapping keys that point to the default file
+        inferred_mapping = {
+            key: value
+            for key, value in inferred_mapping.items()
+            if value != self.default_filename
+        }
 
         metadata["content_mapping"] = inferred_mapping
         return contents, metadata
