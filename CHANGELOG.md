@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Added
+
+- Add `Channel.reset_if_phase()` which matches the QUA command `reset_if_phase(element)`
+
 ## [0.3.10]
 
 ### Changed
