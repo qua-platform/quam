@@ -2,6 +2,12 @@
 
 ### Added
 
+- Add support for qubit-level components and gate implementations
+  - Add `QuantumComponent` and subclasses `Qubit` and `QubitPair`.
+    These introduce qubit-level objects to interfacce with circuit-level languages.
+  - Add qubit-level macros (`BaseMacro`, `QuamMacro`, `QubitMacro`, `QubitPairMacro`, `PulseMacro`) that implementations for gate operations.
+  - Add `OperationsRegistry` to register gate-level operations.
+  - See documentation for details.
 - Add `Channel.reset_if_phase()` which matches the QUA command `reset_if_phase(element)`
 
 ## [0.3.10]
