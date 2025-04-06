@@ -2,6 +2,13 @@
 
 ### Added
 
+- Add support for qubit-level components and gate implementations
+  - Add `QuantumComponent` and subclasses `Qubit` and `QubitPair`.
+    These introduce qubit-level objects to interfacce with circuit-level languages.
+  - Add qubit-level macros (`BaseMacro`, `QuamMacro`, `QubitMacro`, `QubitPairMacro`, `PulseMacro`) that implementations for gate operations.
+  - Add `OperationsRegistry` to register gate-level operations.
+  - See documentation for details.
+- Add `Channel.reset_if_phase()` which matches the QUA command `reset_if_phase(element)`
 - Add the QUAM config, which can be called from the terminal command `quam config`.
   This enables adding a default QUAM state path
 - Add the following properties to the `JSONSerialiser`: `content_mapping`, `include_defaults`, and `state_path`.
@@ -13,6 +20,7 @@
 - The default state path for a `QuamRoot` is now retrieved from the environment variable `QUAM_STATE_PATH`, and if this doesn't exist, from the quam config.
 - Add `__class__` to serialisation (`to_dict` method), even if the target class matches the expected type
 - If a specific class can't be imported during instantiation, a warning will be raised and it will load the default class (specified by the type hint) instead
+
 
 ## [0.3.10]
 
