@@ -30,7 +30,7 @@ except ImportError:
     EXPECTED_CONFIG_VERSION = 1
 
 
-# Mock QuAM Components
+# Mock QUAM Components
 
 
 @quam_dataclass

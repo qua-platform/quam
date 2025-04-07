@@ -7,14 +7,14 @@ from quam.core import QuamRoot, QuamComponent, quam_dataclass
 
 
 @quam_dataclass
-class QuAM(QuamRoot):
+class Quam(QuamRoot):
     a: int
     b: list
     c: Optional[int] = None
 
 
 def test_serialise_random_object(tmp_path):
-    quam_root = QuAM(a=1, b=[1, 2, 3])
+    quam_root = Quam(a=1, b=[1, 2, 3])
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
@@ -25,7 +25,7 @@ def test_serialise_random_object(tmp_path):
     assert d == {
         "a": 1,
         "b": [1, 2, 3],
-        "__class__": "test_json_serialisation.QuAM",
+        "__class__": "test_json_serialisation.Quam",
     }
 
     class RandomObject:
@@ -38,7 +38,7 @@ def test_serialise_random_object(tmp_path):
 
 
 def test_serialise_ignore(tmp_path):
-    quam_root = QuAM(a=1, b=[1, 2, 3])
+    quam_root = Quam(a=1, b=[1, 2, 3])
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
@@ -48,12 +48,12 @@ def test_serialise_ignore(tmp_path):
 
     assert d == {
         "a": 1,
-        "__class__": "test_json_serialisation.QuAM",
+        "__class__": "test_json_serialisation.Quam",
     }
 
 
 def test_serialise_ignore_nonexisting(tmp_path):
-    quam_root = QuAM(a=1, b=[1, 2, 3])
+    quam_root = Quam(a=1, b=[1, 2, 3])
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
@@ -64,7 +64,7 @@ def test_serialise_ignore_nonexisting(tmp_path):
     assert d == {
         "a": 1,
         "b": [1, 2, 3],
-        "__class__": "test_json_serialisation.QuAM",
+        "__class__": "test_json_serialisation.Quam",
     }
 
 
@@ -74,7 +74,7 @@ class Component(QuamComponent):
 
 
 def test_component_mapping(tmp_path):
-    quam_root = QuAM(a=1, b=Component(a=3), c=Component(a=4))
+    quam_root = Quam(a=1, b=Component(a=3), c=Component(a=4))
 
     serialiser = JSONSerialiser()
     path = tmp_path
@@ -92,7 +92,7 @@ def test_component_mapping(tmp_path):
 def test_component_mapping_ignore(tmp_path):
     assert not (tmp_path / "b.json").exists()
 
-    quam_root = QuAM(a=1, b=Component(a=3), c=Component(a=4))
+    quam_root = Quam(a=1, b=Component(a=3), c=Component(a=4))
 
     serialiser = JSONSerialiser()
     serialiser.save(
@@ -113,13 +113,13 @@ def test_component_mapping_ignore(tmp_path):
 
 
 @quam_dataclass
-class QuAMWithIntDict(QuamRoot):
+class QuamWithIntDict(QuamRoot):
     a: int
     d: Dict[int, str]
 
 
 def test_serialise_int_dict_keys(tmp_path):
-    quam_root = QuAMWithIntDict(a=1, d={1: "a", 2: "b"})
+    quam_root = QuamWithIntDict(a=1, d={1: "a", 2: "b"})
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
@@ -133,5 +133,5 @@ def test_serialise_int_dict_keys(tmp_path):
             1: "a",
             2: "b",
         },
-        "__class__": "test_json_serialisation.QuAMWithIntDict",
+        "__class__": "test_json_serialisation.QuamWithIntDict",
     }

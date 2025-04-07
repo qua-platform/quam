@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "quam"
 version = "0.3.10"
 #dynamic = ["version"]
-description = "Quantum Abstract Machine (QuAM) facilitates development of abstraction layers in experiments."
+description = "Quantum Abstract Machine (QUAM) facilitates development of abstraction layers in experiments."
 authors = [
     { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
 ]

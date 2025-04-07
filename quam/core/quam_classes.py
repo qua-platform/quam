@@ -144,14 +144,14 @@ def sort_quam_components(
 
 
 def _quam_dataclass(cls=None, **kwargs):
-    """Dataclass for QuAM classes.
+    """Dataclass for QUAM classes.
 
     This class is used as a patch to maintain compatibility with Python 3.9, as
     these do not support the dataclass argument `kw_only`. This argument is needed to
     ensure inheritance of parent dataclasses is allowed.
 
     Args:
-    - cls: The QuAM class to decorate.
+    - cls: The QUAM class to decorate.
     - kwargs: The arguments to pass to the dataclass decorator.
       By default, kw_only=True and eq=False are passed, though they can be overwritten.
     Notes:
@@ -222,7 +222,7 @@ class ParentDescriptor:
 
 
 class QuamBase(ReferenceClass):
-    """Base class for any QuAM component class.
+    """Base class for any QUAM component class.
 
     args:
         parent: The parent of this object. This is automatically set when adding
@@ -590,7 +590,7 @@ class QuamBase(ReferenceClass):
             indent: The number of spaces to indent the summary.
         """
         if self.get_root() is self:
-            full_name = "QuAM:"
+            full_name = "QUAM:"
         elif self.parent is None:
             full_name = f"{self.__class__.__name__} (parent unknown):"
         else:
@@ -664,13 +664,13 @@ QuamRootType = TypeVar("QuamRootType", bound="QuamRoot")
 
 
 class QuamRoot(QuamBase):
-    """Base class for the root of a QuAM object.
+    """Base class for the root of a QUAM object.
 
     This class should be subclassed and made a dataclass.
 
     Note:
         This class should not be used directly, but should generally be subclassed and
-        made a dataclass. The dataclass fields should correspond to the QuAM root
+        made a dataclass. The dataclass fields should correspond to the QUAM root
         structure.
     """
 
@@ -779,7 +779,7 @@ class QuamRoot(QuamBase):
         )
 
     def generate_config(self) -> DictQuaConfig:
-        """Generate the QUA configuration from the QuAM object.
+        """Generate the QUA configuration from the QUAM object.
 
         Returns:
             A dictionary with the QUA configuration.
@@ -802,7 +802,7 @@ class QuamRoot(QuamBase):
 
 
 class QuamComponent(QuamBase):
-    """Base class for any QuAM component class.
+    """Base class for any QUAM component class.
 
     Examples of QuamComponent classes are [`Mixer`][quam.components.hardware.Mixer],
     [`LocalOscillator`][quam.components.hardware.LocalOscillator],
@@ -838,7 +838,7 @@ class QuamComponent(QuamBase):
 
 @quam_dataclass
 class QuamDict(UserDict, QuamBase):
-    """A QuAM dictionary class.
+    """A QUAM dictionary class.
 
     Any dict added to a `QuamBase` object is automatically converted to a `QuamDict`.
     The `QuamDict` adds the following functionalities to a dict:
@@ -920,7 +920,7 @@ class QuamDict(UserDict, QuamBase):
             )
             return super().__repr__()
 
-    # QuAM methods
+    # QUAM methods
     def _get_attr_names(self):
         return list(self.data.keys())
 
@@ -1048,7 +1048,7 @@ class QuamDict(UserDict, QuamBase):
 
 @quam_dataclass
 class QuamList(UserList, QuamBase):
-    """A QuAM list class.
+    """A QUAM list class.
 
     Any list added to a `QuamBase` object is automatically converted to a `QuamList`.
     The `QuamList` adds the following functionalities to a list:

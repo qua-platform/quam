@@ -2,7 +2,7 @@
 
 In the section [Channels](channels.md), we have seen how to create analog channels and attach digital outputs to them. 
 In these examples, the ports are defined by the OPX output tuple `(connector, port)`.
-However, for more advanced use cases it is instead possible to define the ports using dedicated [Port][quam.components.ports.Port] QuAM components.
+However, for more advanced use cases it is instead possible to define the ports using dedicated [Port][quam.components.ports.Port] QUAM components.
 This is primarily useful in two situations:
 
 1. Multiple channels are connected to the same physical port, and the user wants to define the port and its properties only once.

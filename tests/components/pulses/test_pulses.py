@@ -183,14 +183,14 @@ def test_pulse_parent_parent_channel():
 
 
 @quam_dataclass
-class QuAMTestPulseReferenced(QuamRoot):
+class QuamTestPulseReferenced(QuamRoot):
     channel: SingleChannel
 
 
 def test_pulses_referenced():
 
     channel = SingleChannel(id="single", opx_output=("con1", 1))
-    machine = QuAMTestPulseReferenced(channel=channel)
+    machine = QuamTestPulseReferenced(channel=channel)
 
     pulse = pulses.SquarePulse(length=60, amplitude=0)
     channel.operations["pulse"] = pulse
@@ -202,7 +202,7 @@ def test_pulses_referenced():
 
     state = machine.to_dict()
 
-    machine_loaded = QuAMTestPulseReferenced.load(state)
+    machine_loaded = QuamTestPulseReferenced.load(state)
 
     pulse_loaded = machine_loaded.channel.operations["pulse"]
     assert isinstance(pulse_loaded, pulses.SquarePulse)

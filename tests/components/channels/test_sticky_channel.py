@@ -11,7 +11,7 @@ def test_sticky_channel_no_duration_error():
 
 
 @quam_dataclass
-class SingleChannelQuAM(QuamRoot):
+class SingleChannelQuam(QuamRoot):
     channel: IQChannel
 
 
@@ -23,7 +23,7 @@ def test_sticky_channel():
         frequency_converter_up=None,
         sticky=StickyChannelAddon(duration=20),
     )
-    machine = SingleChannelQuAM(channel=channel)
+    machine = SingleChannelQuam(channel=channel)
 
     cfg = machine.generate_config()
 
@@ -44,7 +44,7 @@ def test_sticky_channel_disabled():
         frequency_converter_up=None,
         sticky=StickyChannelAddon(duration=20, enabled=False),
     )
-    machine = SingleChannelQuAM(channel=channel)
+    machine = SingleChannelQuam(channel=channel)
 
     cfg = machine.generate_config()
 

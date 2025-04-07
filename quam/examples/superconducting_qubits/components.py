@@ -5,12 +5,12 @@ from quam import QuamComponent
 from quam.components.channels import IQChannel, SingleChannel, InOutIQChannel
 from quam.core import QuamRoot, quam_dataclass
 
-__all__ = ["Transmon", "QuAM"]
+__all__ = ["Transmon", "Quam"]
 
 
 @quam_dataclass
 class Transmon(QuamComponent):
-    """Example QuAM component for a transmon qubit."""
+    """Example QUAM component for a transmon qubit."""
 
     id: Union[int, str]
 
@@ -25,8 +25,8 @@ class Transmon(QuamComponent):
 
 
 @quam_dataclass
-class QuAM(QuamRoot):
-    """Example QuAM root component."""
+class Quam(QuamRoot):
+    """Example QUAM root component."""
 
     qubits: Dict[str, Transmon] = field(default_factory=dict)
     wiring: dict = field(default_factory=dict)

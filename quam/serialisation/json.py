@@ -41,15 +41,15 @@ def convert_int_keys(obj: Any) -> Any:
 
 class JSONSerialiser(AbstractSerialiser):
     """
-    Serialiser for QuAM objects to JSON files, allowing for splitting
+    Serialiser for QUAM objects to JSON files, allowing for splitting
     content across multiple files.
 
     Attributes:
         default_filename (str): Default filename if saving all content to one file.
         default_foldername (str): Default folder name if splitting content.
-        content_mapping (Dict[str, str]): Defines how to split QuAM
+        content_mapping (Dict[str, str]): Defines how to split QUAM
             object content into different files. Keys are component names (top-level
-            keys in the QuAM object's dictionary representation), and values are the
+            keys in the QUAM object's dictionary representation), and values are the
             relative filenames they should be saved to. If empty, saves to a single file
         include_defaults (bool): Whether to include default values in the
             serialised output.
@@ -247,7 +247,7 @@ class JSONSerialiser(AbstractSerialiser):
         based on the content_mapping (component -> filename format).
 
         Args:
-            full_contents: The complete dictionary of the QuAM object.
+            full_contents: The complete dictionary of the QUAM object.
             folder: The target directory to save files into.
             content_mapping: Dictionary mapping component names (keys) to
                 relative filenames (values). Old format (filename -> components)
@@ -284,7 +284,7 @@ class JSONSerialiser(AbstractSerialiser):
             else:
                 warnings.warn(
                     f"Key '{component_key}' specified in content_mapping was not found "
-                    "in the QuAM object's data",
+                    "in the QUAM object's data",
                     UserWarning,
                 )
 
@@ -320,7 +320,7 @@ class JSONSerialiser(AbstractSerialiser):
                 Can be in old or new format. If old format is provided, a warning is
                 issued and it's converted internally.
             include_defaults: Overrides the instance's include_defaults for this save.
-            ignore: A sequence of top-level keys in the QuAM object to exclude
+            ignore: A sequence of top-level keys in the QUAM object to exclude
                     from the saved output.
         """
         # Validate and convert the provided content_mapping, or use the instance's
@@ -374,7 +374,7 @@ class JSONSerialiser(AbstractSerialiser):
         Resolution order:
         1. `self.state_path` (if set during `__init__`).
         2. `QUAM_STATE_PATH` environment variable.
-        3. `state_path` from QuAM configuration (via `get_quam_config`).
+        3. `state_path` from QUAM configuration (via `get_quam_config`).
         4. Fallback to `default_foldername` or `default_filename` in the current
            directory.
 
@@ -398,7 +398,7 @@ class JSONSerialiser(AbstractSerialiser):
 
         except (AttributeError, FileNotFoundError):  # Catch potential errors
             warnings.warn(
-                "Could not determine state path from QuAM configuration. "
+                "Could not determine state path from QUAM configuration. "
                 "Falling back to environment or default.",
                 UserWarning,
             )
@@ -583,7 +583,7 @@ class JSONSerialiser(AbstractSerialiser):
 
         Returns:
             A tuple containing:
-            1. Dictionary representation of the loaded QuAM object.
+            1. Dictionary representation of the loaded QUAM object.
             2. Metadata dictionary including inferred 'content_mapping' (component ->
                filename), 'default_filename', 'default_foldername'.
 

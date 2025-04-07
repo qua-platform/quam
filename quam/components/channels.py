@@ -96,7 +96,7 @@ LF_input_port_types = Union[
 
 @quam_dataclass
 class DigitalOutputChannel(QuamComponent):
-    """QuAM component for a digital output channel (signal going out of the OPX)
+    """QUAM component for a digital output channel (signal going out of the OPX)
 
     Should be added to `Channel.digital_outputs` so that it's also added to the
     respective element in the QUA config.
@@ -282,7 +282,7 @@ class TimeTaggingAddon(QuamComponent):
 
 @quam_dataclass
 class Channel(QuamComponent, ABC):
-    """Base QuAM component for a channel, can be output, input or both.
+    """Base QUAM component for a channel, can be output, input or both.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -325,7 +325,7 @@ class Channel(QuamComponent, ABC):
                 raise AttributeError(
                     f"{cls_name}.name cannot be determined. "
                     f"Please either set {cls_name}.id to a string or integer, "
-                    f"or {cls_name} should be an attribute of another QuAM component."
+                    f"or {cls_name} should be an attribute of another QUAM component."
                 )
             if isinstance(self.id, str):
                 return self.id
@@ -335,7 +335,7 @@ class Channel(QuamComponent, ABC):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
                 f"Please either set {cls_name}.id to a string or integer, "
-                f"or {cls_name} should be an attribute of another QuAM component with "
+                f"or {cls_name} should be an attribute of another QUAM component with "
                 "a name."
             )
         if isinstance(self.parent, QuamDict):
@@ -344,7 +344,7 @@ class Channel(QuamComponent, ABC):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
                 f"Please either set {cls_name}.id to a string or integer, "
-                f"or {cls_name} should be an attribute of another QuAM component with "
+                f"or {cls_name} should be an attribute of another QUAM component with "
                 "a name."
             )
         return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
@@ -663,7 +663,7 @@ class Channel(QuamComponent, ABC):
 
 @quam_dataclass
 class SingleChannel(Channel):
-    """QuAM component for a single (not IQ) output channel.
+    """QUAM component for a single (not IQ) output channel.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -710,7 +710,7 @@ class SingleChannel(Channel):
             raise AttributeError(
                 f"Channel {self.get_reference()} cannot be added to the config because"
                 " it doesn't have a name. Either set channel.id to a string or"
-                " integer, or channel should be an attribute of another QuAM component"
+                " integer, or channel should be an attribute of another QUAM component"
                 " with a name."
             )
 
@@ -758,7 +758,7 @@ class SingleChannel(Channel):
 
 @quam_dataclass
 class InSingleChannel(Channel):
-    """QuAM component for a single (not IQ) input channel.
+    """QUAM component for a single (not IQ) input channel.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1172,7 +1172,7 @@ class _OutComplexChannel(Channel, ABC):
 
 @quam_dataclass
 class IQChannel(_OutComplexChannel):
-    """QuAM component for an IQ output channel.
+    """QUAM component for an IQ output channel.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1192,7 +1192,7 @@ class IQChannel(_OutComplexChannel):
             of the frequency converter up component.
         RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
             is inferred by adding the LO frequency and the intermediate frequency.
-        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+        frequency_converter_up (FrequencyConverter): Frequency converter QUAM component
             for the IQ output.
     """
 
@@ -1256,7 +1256,7 @@ class IQChannel(_OutComplexChannel):
             raise AttributeError(
                 f"Channel {self.get_reference()} cannot be added to the config because"
                 " it doesn't have a name. Either set channel.id to a string or"
-                " integer, or channel should be an attribute of another QuAM component"
+                " integer, or channel should be an attribute of another QUAM component"
                 " with a name."
             )
 
@@ -1561,7 +1561,7 @@ class _InComplexChannel(Channel, ABC):
 
 @quam_dataclass
 class InIQChannel(_InComplexChannel):
-    """QuAM component for an IQ input channel
+    """QUAM component for an IQ input channel
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1577,7 +1577,7 @@ class InIQChannel(_InComplexChannel):
         opx_input_offset_I float: The offset of the I channel. Default is 0.
         opx_input_offset_Q float: The offset of the Q channel. Default is 0.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
-            QuAM component for the IQ input port. Only needed for the old Octave.
+            QUAM component for the IQ input port. Only needed for the old Octave.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
         smearing (int): Additional window of ADC integration in nanoseconds.
             Used to account for signal smearing.
@@ -1657,7 +1657,7 @@ class InIQChannel(_InComplexChannel):
 
 @quam_dataclass
 class InOutSingleChannel(SingleChannel, InSingleChannel):
-    """QuAM component for a single (not IQ) input + output channel.
+    """QUAM component for a single (not IQ) input + output channel.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1685,7 +1685,7 @@ class InOutSingleChannel(SingleChannel, InSingleChannel):
 
 @quam_dataclass
 class InOutIQChannel(IQChannel, InIQChannel):
-    """QuAM component for an IQ channel with both input and output.
+    """QUAM component for an IQ channel with both input and output.
 
     An example of such a channel is a readout resonator, where you may want to
     apply a readout tone and then measure the response.
@@ -1715,10 +1715,10 @@ class InOutIQChannel(IQChannel, InIQChannel):
             of the frequency converter up component.
         RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
             is inferred by adding the LO frequency and the intermediate frequency.
-        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+        frequency_converter_up (FrequencyConverter): Frequency converter QUAM component
             for the IQ output.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
-            QuAM component for the IQ input port. Only needed for the old Octave.
+            QUAM component for the IQ input port. Only needed for the old Octave.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
         smearing (int): Additional window of ADC integration in nanoseconds.
             Used to account for signal smearing.
@@ -1729,7 +1729,7 @@ class InOutIQChannel(IQChannel, InIQChannel):
 
 @quam_dataclass
 class InSingleOutIQChannel(IQChannel, InSingleChannel):
-    """QuAM component for an IQ output channel with a single input.
+    """QUAM component for an IQ output channel with a single input.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1753,7 +1753,7 @@ class InSingleOutIQChannel(IQChannel, InSingleChannel):
             of the frequency converter up component.
         RF_frequency (float): RF frequency of the mixer. By default, the RF frequency
             is inferred by adding the LO frequency and the intermediate frequency.
-        frequency_converter_up (FrequencyConverter): Frequency converter QuAM component
+        frequency_converter_up (FrequencyConverter): Frequency converter QUAM component
             for the IQ output.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
         smearing (int): Additional window of ADC integration in nanoseconds.
@@ -1765,7 +1765,7 @@ class InSingleOutIQChannel(IQChannel, InSingleChannel):
 
 @quam_dataclass
 class InIQOutSingleChannel(SingleChannel, InIQChannel):
-    """QuAM component for an IQ input channel with a single output.
+    """QUAM component for an IQ input channel with a single output.
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1797,7 +1797,7 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
 
 @quam_dataclass
 class MWChannel(_OutComplexChannel):
-    """QuAM component for a MW FEM output channel
+    """QUAM component for a MW FEM output channel
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1853,7 +1853,7 @@ class MWChannel(_OutComplexChannel):
 
 @quam_dataclass
 class InMWChannel(_InComplexChannel):
-    """QuAM component for a MW FEM input channel
+    """QUAM component for a MW FEM input channel
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this
@@ -1883,7 +1883,7 @@ class InMWChannel(_InComplexChannel):
 
 @quam_dataclass
 class InOutMWChannel(MWChannel, InMWChannel):
-    """QuAM component for a MW FEM input channel
+    """QUAM component for a MW FEM input channel
 
     Args:
         operations (Dict[str, Pulse]): A dictionary of pulses to be played on this

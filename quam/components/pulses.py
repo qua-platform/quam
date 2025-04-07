@@ -35,7 +35,7 @@ __all__ = [
 
 @quam_dataclass
 class Pulse(QuamComponent):
-    """QuAM base component for a pulse.
+    """QUAM base component for a pulse.
 
     Pulses are added to a channel using
     ```
@@ -372,7 +372,7 @@ class Pulse(QuamComponent):
 
 @quam_dataclass
 class BaseReadoutPulse(Pulse, ABC):
-    """QuAM abstract base component for a general  readout pulse.
+    """QUAM abstract base component for a general  readout pulse.
 
     Readout pulse classes should usually inherit from `ReadoutPulse`, the
     exception being when a custom integration weights function is required.
@@ -442,7 +442,7 @@ class BaseReadoutPulse(Pulse, ABC):
 
 @quam_dataclass
 class ReadoutPulse(BaseReadoutPulse, ABC):
-    """QuAM abstract base component for most readout pulses.
+    """QUAM abstract base component for most readout pulses.
 
     This class is a subclass of `ReadoutPulse` and should be used for most readout
     pulses. It provides a default implementation of the `integration_weights_function`
@@ -653,7 +653,7 @@ class DragCosinePulse(Pulse):
 
 @quam_dataclass
 class SquarePulse(Pulse):
-    """Square pulse QuAM component.
+    """Square pulse QUAM component.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -678,7 +678,7 @@ class SquarePulse(Pulse):
 
 @quam_dataclass
 class SquareReadoutPulse(ReadoutPulse, SquarePulse):
-    """QuAM component for a square readout pulse.
+    """QUAM component for a square readout pulse.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -713,7 +713,7 @@ class ConstantReadoutPulse(SquareReadoutPulse):
 
 @quam_dataclass
 class GaussianPulse(Pulse):
-    """Gaussian pulse QuAM component.
+    """Gaussian pulse QUAM component.
 
     Args:
         amplitude (float): The amplitude of the pulse in volts.
@@ -751,7 +751,7 @@ class GaussianPulse(Pulse):
 
 @quam_dataclass
 class FlatTopGaussianPulse(Pulse):
-    """Gaussian pulse with flat top QuAM component.
+    """Gaussian pulse with flat top QUAM component.
 
     Args:
         length (int): The total length of the pulse in samples.
