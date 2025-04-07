@@ -5,6 +5,7 @@ import types
 import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
+import warnings
 
 from quam.utils import (
     string_reference,
@@ -359,7 +360,13 @@ def instantiate_quam_class(
     # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
 
     if "__class__" in contents:
-        quam_class = get_class_from_path(contents["__class__"])
+        try:
+            quam_class = get_class_from_path(contents["__class__"])
+        except ModuleNotFoundError:
+            warnings.warn(
+                f"Could not instantiate {str_repr} with class {contents['__class__']}, "
+                f"falling back to {quam_class.__name__}"
+            )
 
     if not isinstance(contents, dict):
         raise TypeError(

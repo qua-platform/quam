@@ -31,11 +31,19 @@ def test_save_split_content_basic(serialiser, sample_quam_object, tmp_path):
         # Check against the dict representation of the components part
         expected_components = {
             "components": {
-                "comp1": {"id": "c1"},  # value=1 is default
-                "comp2": {"id": "c2", "value": 5},  # value=5 is not default
+                "comp1": {
+                    "id": "c1",
+                    "__class__": "conftest.MockMainComponent",
+                },  # value=1 is default
+                "comp2": {
+                    "id": "c2",
+                    "value": 5,
+                    "__class__": "conftest.MockMainComponent",
+                },  # value=5 is not default
             }
         }
-        assert json.load(f) == expected_components
+        d = json.load(f)
+        assert d == expected_components
     with default_path.open("r", encoding="utf-8") as f:
         assert json.load(f) == {
             "other": "specific_value",

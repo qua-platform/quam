@@ -491,11 +491,12 @@ class QuamBase(ReferenceClass):
                     follow_references=follow_references,
                     include_defaults=include_defaults,
                 )
-                val_is_list = isinstance(val, (list, UserList))
-                if not self._val_matches_attr_annotation(attr, val) and not val_is_list:
-                    quam_dict[attr]["__class__"] = get_full_class_path(val)
             else:
                 quam_dict[attr] = val
+
+        # Add __class__ to specify the class of the object
+        quam_dict["__class__"] = get_full_class_path(self)
+
         return quam_dict
 
     def iterate_components(
@@ -742,23 +743,6 @@ class QuamRoot(QuamBase):
             include_defaults=include_defaults,
             ignore=ignore,
         )
-
-    def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = False
-    ) -> Dict[str, Any]:
-        """Convert this object to a dictionary.
-
-        Args:
-            follow_references: Whether to follow references when getting the value.
-                If False, the reference will be returned as a string.
-            include_defaults: Whether to include attributes that have the default
-                value.
-        """
-        quam_dict = super().to_dict(follow_references, include_defaults)
-        # QuamRoot should always add __class__ because it is generally not
-        # quam.components.quam.QuAM
-        quam_dict["__class__"] = get_full_class_path(self)
-        return quam_dict
 
     @classmethod
     def load(
@@ -1038,6 +1022,29 @@ class QuamDict(UserDict, QuamBase):
             if isinstance(attr_val, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> dict:
+        """Convert this object to a dictionary.
+
+        Ensures all child QUAM objects are also converted to dictionaries.
+
+        Args:
+            follow_references: Whether to follow references when getting the value.
+                If False, the reference will be returned as a string.
+            include_defaults: Whether to include attributes that have the default
+                value.
+
+        Returns:
+            A dictionary representation of the object.
+        """
+        quam_dict = super().to_dict()
+
+        # Remove __class__ from the dictionary as it's the default for a dict
+        quam_dict.pop("__class__", None)
+
+        return quam_dict
+
 
 @quam_dataclass
 class QuamList(UserList, QuamBase):
@@ -1185,8 +1192,6 @@ class QuamList(UserList, QuamBase):
                         include_defaults=include_defaults,
                     )
                 )
-                if not self._val_matches_attr_annotation(val=val, attr=None):
-                    quam_list[-1]["__class__"] = get_full_class_path(val)
             else:
                 quam_list.append(val)
         return quam_list

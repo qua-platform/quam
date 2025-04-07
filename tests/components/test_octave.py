@@ -334,13 +334,21 @@ def test_load_octave(octave):
     d_expected = {
         "__class__": "test_octave.OctaveQuAM",
         "octave": {
-            "RF_inputs": {1: {"id": 1}, 2: {"id": 2, "LO_source": "external"}},
+            "__class__": "quam.components.octave.Octave",
+            "RF_inputs": {
+                1: {"id": 1, "__class__": "quam.components.octave.OctaveDownConverter"},
+                2: {
+                    "id": 2,
+                    "LO_source": "external",
+                    "__class__": "quam.components.octave.OctaveDownConverter",
+                },
+            },
             "RF_outputs": {
-                1: {"id": 1},
-                2: {"id": 2},
-                3: {"id": 3},
-                4: {"id": 4},
-                5: {"id": 5},
+                1: {"id": 1, "__class__": "quam.components.octave.OctaveUpConverter"},
+                2: {"id": 2, "__class__": "quam.components.octave.OctaveUpConverter"},
+                3: {"id": 3, "__class__": "quam.components.octave.OctaveUpConverter"},
+                4: {"id": 4, "__class__": "quam.components.octave.OctaveUpConverter"},
+                5: {"id": 5, "__class__": "quam.components.octave.OctaveUpConverter"},
             },
             "ip": "127.0.0.1",
             "name": "octave1",

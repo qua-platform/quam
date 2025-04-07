@@ -43,8 +43,11 @@ def test_empty_in_out_IQ_channel():
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {"frequency": 5000000000.0},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "frequency": 5000000000.0,
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
@@ -52,6 +55,7 @@ def test_empty_in_out_IQ_channel():
         "opx_input_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "id": 1,
+        "__class__": "quam.components.channels.InOutIQChannel",
     }
 
     bare_cfg = {
@@ -130,8 +134,11 @@ def test_readout_resonator_with_readout():
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {"frequency": 5000000000.0},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "frequency": 5000000000.0,
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
@@ -146,6 +153,7 @@ def test_readout_resonator_with_readout():
                 "length": 1000,
             }
         },
+        "__class__": "quam.components.channels.InOutIQChannel",
     }
 
     cfg = {
@@ -297,8 +305,11 @@ def test_empty_in_out_IQ_channel_ports():
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {"frequency": 5000000000.0},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "frequency": 5000000000.0,
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
         "opx_output_I": {
             "controller_id": "con1",
@@ -322,6 +333,7 @@ def test_empty_in_out_IQ_channel_ports():
         },
         "intermediate_frequency": 100000000.0,
         "id": 1,
+        "__class__": "quam.components.channels.InOutIQChannel",
     }
 
     bare_cfg = {
