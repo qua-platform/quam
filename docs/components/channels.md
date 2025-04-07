@@ -1,6 +1,6 @@
 # Channels
 
-In the QuAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the [quam.components.channels][quam.components.channels] module.
+In the QUAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the [quam.components.channels][quam.components.channels] module.
 
 We distinguish between the following channel types, where the terms "output" and "input" are always from the perspective of the OPX hardware:
 
@@ -20,7 +20,7 @@ We distinguish between the following channel types, where the terms "output" and
 
 Each analog [Channel][quam.components.channels.Channel] corresponds to an element in QUA, whereas the digital channel is part of an analog channel.
 
-These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QuAM release. If you need such channels, please create a [Github issue](https://github.com/qua-platform/quam/issues).
+These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QUAM release. If you need such channels, please create a [Github issue](https://github.com/qua-platform/quam/issues).
 
 
 ## Analog Output Channels
@@ -68,7 +68,7 @@ The offsets can also be QUA variables.
 
 ### Frequency Converters
 The `IQChannel` is usually connected to a mixer to upconvert the signal using a local oscillator.
-This frequency upconversion is represented in QuAM by a [FrequencyConverter][quam.components.hardware.FrequencyConverter]
+This frequency upconversion is represented in QUAM by a [FrequencyConverter][quam.components.hardware.FrequencyConverter]
 
 ```python
 from quam.components.hardware import FrequencyConverter, LocalOscillator, Mixer
@@ -86,11 +86,11 @@ IQ_channel = IQChannel(
 
 Integrated frequency conversion systems such as [QM's Octave](https://docs.quantum-machines.co/1.1.7/qm-qua-sdk/docs/Hardware/octave/) usually have additional features such as auto-calibration.
 For this reason they have a specialized frequency converter such as the [OctaveUpConverter][quam.components.octave.OctaveUpConverter].
-See the [QuAM Octave Documentation][octave] documentation for details.
+See the [QUAM Octave Documentation][octave] documentation for details.
 
 
 ### Analog Pulses
-QuAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
+QUAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
 These pulses can be registered as part of the analog channel via `Channel.operations` such that the channel can output the associated pulse waveforms:
 
 ```python
@@ -110,11 +110,11 @@ with program() as prog:
 ```
 [Channel.play()][quam.components.channels.Channel.play] is a light wrapper around [qm.qua.play()](https://docs.quantum-machines.co/latest/qm-qua-sdk/docs/Introduction/qua_overview/?h=play#play-statement) to attach it to the channel.
 
-Details on pulses in QuAM can be found at the [Pulses Documentation][pulses].
+Details on pulses in QUAM can be found at the [Pulses Documentation][pulses].
 
 ## Analog Output + Input Channels
 Aside from sending signals to the quantum hardware, data is usually also received back, and subsequently read out through the hardware's input ports.
-In QuAM, this is represented using the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel].
+In QUAM, this is represented using the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel].
 These channels don't only have associated output port(s) but also input port(s):
 
 ```python
@@ -156,7 +156,7 @@ Specifically, it contains the attributes `integration_weights_angle` and `integr
 
 
 ## Digital Channels
-QuAM supports digital output channels (output from the OPX perspective) through the component [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel].
+QUAM supports digital output channels (output from the OPX perspective) through the component [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel].
 These can be added to any analog channel through the attribute `Channel.digital_outputs`. As an example:
 
 ```python

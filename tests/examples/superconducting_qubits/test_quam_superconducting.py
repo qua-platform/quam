@@ -1,4 +1,4 @@
-from quam.examples.superconducting_qubits.components import QuAM
+from quam.examples.superconducting_qubits.components import Quam
 from quam.examples.superconducting_qubits.generate_superconducting_quam import *
 from quam.components import *
 from quam.core import *
@@ -38,7 +38,7 @@ def test_quam_referenced_full(tmp_path):
     )
     assert (
         loaded_quam["__class__"]
-        == "quam.examples.superconducting_qubits.components.QuAM"
+        == "quam.examples.superconducting_qubits.components.Quam"
     )
     assert len(loaded_quam["qubits"]) == 3
     assert (
@@ -59,7 +59,7 @@ def test_quam_referenced_full(tmp_path):
     json.dump(qua_config, qua_file.open("w"), indent=4)
     qua_config_str = json.dumps(qua_config, indent=4)
 
-    quam_loaded = QuAM.load(folder / "quam")
+    quam_loaded = Quam.load(folder / "quam")
     assert quam.get_attrs().keys() == quam_loaded.get_attrs().keys()
 
     qua_file = folder / "qua_config2.json"

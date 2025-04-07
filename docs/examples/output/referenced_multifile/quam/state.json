@@ -69,5 +69,5 @@
             }
         }
     },
-    "__class__": "quam.examples.superconducting_qubits.components.QuAM"
+    "__class__": "quam.examples.superconducting_qubits.components.Quam"
 }

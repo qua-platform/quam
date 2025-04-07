@@ -19,7 +19,7 @@ class MockQubitPair(QubitPair):
 
 
 @quam_dataclass
-class QUAM(QuamRoot):
+class Quam(QuamRoot):
     qubits: Dict[str, MockQubit]
     qubit_pairs: Dict[str, MockQubitPair] = field(default_factory=dict)
 
@@ -52,7 +52,7 @@ def test_qubit_target():
 
 @pytest.fixture
 def test_quam(test_qubit_control, test_qubit_target):
-    machine = QUAM(
+    machine = Quam(
         qubits={"control": test_qubit_control, "target": test_qubit_target},
     )
 

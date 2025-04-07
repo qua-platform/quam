@@ -1,4 +1,4 @@
-site_name: The Quantum Abstract Machine - QuAM Documentation
+site_name: The Quantum Abstract Machine - QUAM Documentation
 # site_url:
 site_author: QM. Technologies Ltd.
 # site_description:
@@ -46,7 +46,7 @@ nav:
   - index.md
   - installation.md
   - demonstration.md
-  - "QuAM Components":
+  - "QUAM Components":
       - "components/index.md"
       - "components/quam-root.md"
       - "components/channels.md"
@@ -54,20 +54,20 @@ nav:
       - "components/octave.md"
       - "components/qubits-and-qubit-pairs.md"
       - "components/custom-components.md"
-  - "QuAM Features":
+  - "QUAM Features":
       - "features/index.md"
       - "features/gate-level-operations.md"
       - "features/quam-references.md"
   - migrating-to-quam.md
   - "API References":
       - "API_references/index.md"
-      - "QuAM Components":
-          - "QuAM Channels API": "API_references/components/channels_API.md"
-          - "QuAM Pulses API": "API_references/components/pulses_API.md"
-          - "QuAM Hardware API": "API_references/components/hardware_API.md"
-          - "QuAM Octave API": "API_references/components/octave_API.md"
-          - "BasicQuAM API": "API_references/components/basic_quam_API.md"
-      - "QuAM Core Classes API": "API_references/core/quam_classes_API.md"
+      - "QUAM Components":
+          - "QUAM Channels API": "API_references/components/channels_API.md"
+          - "QUAM Pulses API": "API_references/components/pulses_API.md"
+          - "QUAM Hardware API": "API_references/components/hardware_API.md"
+          - "QUAM Octave API": "API_references/components/octave_API.md"
+          - "BasicQUAM API": "API_references/components/basic_quam_API.md"
+      - "QUAM Core Classes API": "API_references/core/quam_classes_API.md"
 plugins:
   # - mkdocs-jupyter:
   #     include:

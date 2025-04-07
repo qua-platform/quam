@@ -78,7 +78,7 @@ machine.qubit_pairs["q1@q2"] = QubitPair(
 )
 ```
 
-The `get_reference()` method ensures each QuAM component has a single parent, which for qubits is the `machine.qubits` dictionary.
+The `get_reference()` method ensures each QUAM component has a single parent, which for qubits is the `machine.qubits` dictionary.
 
 ### Key Features
 

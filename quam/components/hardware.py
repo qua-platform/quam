@@ -14,7 +14,7 @@ __all__ = [
 
 @quam_dataclass
 class LocalOscillator(QuamComponent):
-    """QuAM component for a local oscillator.
+    """QUAM component for a local oscillator.
 
     Args:
         frequency (float): The frequency of the local oscillator.
@@ -31,7 +31,7 @@ class LocalOscillator(QuamComponent):
 
 @quam_dataclass
 class Mixer(QuamComponent):
-    """QuAM component for a mixer.
+    """QUAM component for a mixer.
 
     All properties are optional, so it can be instantiated as `Mixer()`.
     For the default values, it is assumed that the mixer parent is an `IQChannel`

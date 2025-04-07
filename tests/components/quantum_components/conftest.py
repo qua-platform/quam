@@ -13,7 +13,7 @@ class MockQubit(Qubit):
 
 
 @quam_dataclass
-class TestQUAM(QuamRoot):
+class TestQuam(QuamRoot):
     qubits: Dict[str, MockQubit] = field(default_factory=dict)
     qubit_pairs: Dict[str, QubitPair] = field(default_factory=dict)
 
@@ -52,7 +52,7 @@ def mock_qubit_with_resonator():
 @pytest.fixture
 def test_quam(mock_qubit, mock_qubit_with_resonator):
     """Test QUAM instance with qubits and qubit pairs"""
-    machine = TestQUAM(
+    machine = TestQuam(
         qubits={"q0": mock_qubit, "q1": mock_qubit_with_resonator},
     )
     machine.qubit_pairs["pair_0"] = QubitPair(

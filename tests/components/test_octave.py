@@ -14,7 +14,7 @@ from quam.core.quam_classes import QuamRoot, quam_dataclass
 
 
 @quam_dataclass
-class OctaveQuAM(QuamRoot):
+class OctaveQuam(QuamRoot):
     octave: Octave
     channels: Dict[str, Channel] = field(default_factory=dict)
 
@@ -34,7 +34,7 @@ def test_instantiate_octave(octave):
 
 
 def test_empty_octave_config(octave, qua_config):
-    machine = OctaveQuAM(octave=octave)
+    machine = OctaveQuam(octave=octave)
     config = machine.generate_config()
 
     qua_config["octaves"] = {
@@ -67,7 +67,7 @@ def test_empty_octave_empty_config(octave):
 
 
 def test_octave_config_conflicting_entry(octave):
-    machine = OctaveQuAM(octave=octave)
+    machine = OctaveQuam(octave=octave)
     config = machine.generate_config()
 
     with pytest.raises(KeyError):
@@ -273,7 +273,7 @@ def test_instantiate_octave_default_connectivity(octave):
 
 
 def test_channel_add_RF_outputs(octave, qua_config):
-    machine = OctaveQuAM(octave=octave)
+    machine = OctaveQuam(octave=octave)
     octave.RF_outputs[2] = OctaveUpConverter(id=2, LO_frequency=2e9)
 
     channel = IQChannel(
@@ -296,7 +296,7 @@ def test_channel_add_RF_outputs(octave, qua_config):
 
 
 def test_channel_add_RF_inputs(octave, qua_config):
-    machine = OctaveQuAM(octave=octave)
+    machine = OctaveQuam(octave=octave)
     octave.RF_outputs[3] = OctaveUpConverter(id=3, LO_frequency=2e9)
     octave.RF_inputs[4] = OctaveDownConverter(id=4, LO_frequency=2e9)
 
@@ -326,13 +326,13 @@ def test_channel_add_RF_inputs(octave, qua_config):
 
 
 def test_load_octave(octave):
-    machine = OctaveQuAM(octave=octave)
+    machine = OctaveQuam(octave=octave)
     octave.initialize_frequency_converters()
 
     d = machine.to_dict()
 
     d_expected = {
-        "__class__": "test_octave.OctaveQuAM",
+        "__class__": "test_octave.OctaveQuam",
         "octave": {
             "__class__": "quam.components.octave.Octave",
             "RF_inputs": {
@@ -357,7 +357,7 @@ def test_load_octave(octave):
     }
     assert d == d_expected
 
-    machine2 = OctaveQuAM.load(d)
+    machine2 = OctaveQuam.load(d)
 
     assert d == machine2.to_dict()
 

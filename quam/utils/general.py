@@ -38,7 +38,7 @@ def get_full_class_path(cls_or_obj: Union[type, object]) -> str:
     if module_name == "__main__" or module_name is None:
         warnings.warn(
             f"Could not determine the module of {class_name}, this may cause issues"
-            " when trying to load QuAM from a file. Please ensure that all QuAM"
+            " when trying to load QUAM from a file. Please ensure that all QUAM"
             " classes are defined in a Python module"
         )
         return class_name

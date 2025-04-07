@@ -1,3 +1,3 @@
-# QuAM Hardware API
+# QUAM Hardware API
 
 ::: quam.components.hardware

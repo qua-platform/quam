@@ -31,7 +31,7 @@ __all__ = [
 
 @quam_dataclass
 class Octave(QuamComponent):
-    """QuAM component for the QM Octave.
+    """QUAM component for the QM Octave.
 
     The QM Octave is a device that can be used to upconvert and downconvert signals. It
     has 5 RF outputs and 2 RF inputs. Each RF_output has an associated

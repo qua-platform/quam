@@ -12,7 +12,7 @@ class MockQubit(Qubit):
 
 
 @quam_dataclass
-class QUAM(QuamRoot):
+class Quam(QuamRoot):
     qubit: MockQubit
 
 
@@ -77,7 +77,7 @@ def test_pulse_macro_pulse_object_error(test_qubit):
 
 
 def test_pulse_macro_pulse_reference(test_qubit, mocker):
-    machine = QUAM(qubit=test_qubit)  # Need root to get pulse reference
+    machine = Quam(qubit=test_qubit)  # Need root to get pulse reference
 
     pulse_macro = PulseMacro(
         pulse=test_qubit.xy.operations["test_pulse"].get_reference()

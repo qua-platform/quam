@@ -3,7 +3,7 @@ from quam.core.quam_classes import QuamRoot, quam_dataclass
 
 
 @quam_dataclass
-class SingleChannelQuAM(QuamRoot):
+class SingleChannelQuam(QuamRoot):
     channel: InSingleChannel
 
 
@@ -11,7 +11,7 @@ def test_time_tagging_cfg():
     channel = InSingleChannel(id="channel", opx_input=("con1", 1))
     channel.time_tagging = TimeTaggingAddon()
 
-    machine = SingleChannelQuAM(channel=channel)
+    machine = SingleChannelQuam(channel=channel)
     cfg = machine.generate_config()
 
     assert "outputPulseParameters" in cfg["elements"]["channel"]
@@ -27,7 +27,7 @@ def test_time_tagging_cfg_disabled():
     channel = InSingleChannel(id="channel", opx_input=("con1", 1))
     channel.time_tagging = TimeTaggingAddon(enabled=False)
 
-    machine = SingleChannelQuAM(channel=channel)
+    machine = SingleChannelQuam(channel=channel)
     cfg = machine.generate_config()
     assert "outputPulseParameters" not in cfg["elements"]["channel"]
 
@@ -38,7 +38,7 @@ def test_time_tagging_cfg_custom_thresholds():
         signal_threshold=0.2, derivative_threshold=0.1
     )
 
-    machine = SingleChannelQuAM(channel=channel)
+    machine = SingleChannelQuam(channel=channel)
     cfg = machine.generate_config()
     assert "outputPulseParameters" in cfg["elements"]["channel"]
     assert cfg["elements"]["channel"]["outputPulseParameters"] == {
