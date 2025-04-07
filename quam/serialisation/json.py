@@ -93,7 +93,9 @@ class JSONSerialiser(AbstractSerialiser):
 
         # Check the type of the first value to infer format
         first_value = next(iter(mapping.values()))
-        is_old_format = isinstance(first_value, (list, tuple, Sequence))
+        is_old_format = isinstance(
+            first_value, (list, tuple, set, Sequence)
+        ) and not isinstance(first_value, str)
         is_new_format = isinstance(first_value, str)
 
         if is_old_format:
@@ -107,7 +109,9 @@ class JSONSerialiser(AbstractSerialiser):
                         "Invalid key in old format content_mapping: Expected string "
                         f"filename, got {type(filename)} ({filename})"
                     )
-                if not isinstance(components, (list, tuple, Sequence)):
+                if not isinstance(
+                    components, (list, tuple, set, Sequence)
+                ) or isinstance(components, str):
                     # Check for mixed formats within the old format assumption
                     raise TypeError(
                         "Mixed value types detected in content_mapping. Assumed old"
