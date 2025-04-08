@@ -27,12 +27,21 @@ class ReferenceClass:
         """
         raise NotImplementedError
 
-    def get_unreferenced_value(self, attr: str) -> Any:
+    def get_raw_value(self, attr: str) -> Any:
         """Get the value of an attribute without following references.
 
         If the value is a reference, the reference string is returned
         """
         return super().__getattribute__(attr)
+
+
+    def get_unreferenced_value(self, attr: str) -> Any:
+        """Deprecated method. Use `get_raw_value` instead."""
+        warnings.warn(
+            "get_unreferenced_value is deprecated. Use get_raw_value instead.",
+            DeprecationWarning,
+        )
+        return self.get_raw_value(attr)
 
     def __getattribute__(self, attr: str) -> Any:
         attr_val = super().__getattribute__(attr)
@@ -79,7 +88,7 @@ class ReferenceClass:
             return True
 
         try:
-            original_value = self.get_unreferenced_value(attr)
+            original_value = self.get_raw_value(attr)
         except AttributeError:
             return True
 

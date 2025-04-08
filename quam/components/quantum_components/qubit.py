@@ -30,7 +30,7 @@ class Qubit(QuantumComponent):
 
     @property
     def inferred_id(self) -> Union[str, int]:
-        if not str_ref.is_reference(self.get_unreferenced_value("id")):
+        if not str_ref.is_reference(self.get_raw_value("id")):
             return self.id
         elif self.parent is not None:
             name = self.parent.get_attr_name(self)
