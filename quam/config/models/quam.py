@@ -5,8 +5,9 @@ from qualibrate_config.models.base.config_base import BaseConfig
 
 
 class QuamConfig(BaseConfig):
-    version: int = 1
+    version: int = 2
     state_path: Optional[Path] = None
+    raise_error_missing_reference: bool = False
 
 
 class QuamTopLevelConfig(BaseConfig):
