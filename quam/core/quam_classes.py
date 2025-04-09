@@ -34,7 +34,7 @@ from quam.utils import (
 )
 from quam.core.quam_instantiation import instantiate_quam_class
 from quam.config import get_quam_config
-from quam.utils.reference_class import InvalidReferenceError
+from quam.utils.exceptions import InvalidReferenceError
 
 from .qua_config_template import qua_config_template
 

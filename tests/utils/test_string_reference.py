@@ -1,7 +1,8 @@
 import pytest
 from quam.components.channels import IQChannel
+from quam.utils.exceptions import InvalidReferenceError
 from quam.utils.string_reference import *
-from quam.utils.reference_class import InvalidReferenceError
+from quam.utils.exceptions import InvalidReferenceError
 
 
 def test_is_reference():

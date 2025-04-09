@@ -1,13 +1,9 @@
 from typing import Any, ClassVar
 import warnings
 
+from quam.utils.exceptions import InvalidReferenceError
+
 __all__ = ["ReferenceClass"]
-
-
-class InvalidReferenceError(LookupError):
-    """Exception raised when a reference cannot be resolved."""
-
-    pass
 
 
 class ReferenceClass:

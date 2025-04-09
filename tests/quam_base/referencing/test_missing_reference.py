@@ -4,7 +4,7 @@ from dataclasses import field
 from typing import Any
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
-from quam.utils.reference_class import InvalidReferenceError
+from quam.utils.exceptions import InvalidReferenceError
 
 
 @quam_dataclass

@@ -1,7 +1,7 @@
 from typing import Tuple, Any
 from collections import UserList, UserDict
 
-from quam.utils.reference_class import InvalidReferenceError
+from quam.utils.exceptions import InvalidReferenceError
 
 DELIMITER = "."
 
