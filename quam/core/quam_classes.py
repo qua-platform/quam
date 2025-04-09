@@ -32,8 +32,10 @@ from quam.utils import (
     type_is_optional,
     generate_config_final_actions,
 )
-from quam.config import get_quam_config
 from quam.core.quam_instantiation import instantiate_quam_class
+from quam.config import get_quam_config
+from quam.utils.reference_class import InvalidReferenceError
+
 from .qua_config_template import qua_config_template
 
 from qm.type_hinting import DictQuaConfig
@@ -48,7 +50,7 @@ __all__ = [
 ]
 
 
-def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
+def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> Optional[type]:
     """Get the type annotation for the values in a QuamDict or QuamList.
 
     If the QuamDict is defined as Dict[str, int], this will return int.
@@ -65,9 +67,10 @@ def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
         return None
 
     attr_annotation = annotated_attrs[attr]
-    if get_origin(attr_annotation) == dict:
+    origin = get_origin(attr_annotation)
+    if origin == dict:
         return get_args(attr_annotation)[1]
-    elif get_origin(attr_annotation) == list:
+    elif origin == list:
         return get_args(attr_annotation)[0]
     return None
 
@@ -506,7 +509,7 @@ class QuamBase(ReferenceClass):
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
-            skip_elems: A list of QuamBase objects to skip.
+            skip_elems: A sequence of QuamBase objects to skip.
                 This is used to prevent infinite loops when iterating over nested
                 objects.
 
@@ -562,50 +565,42 @@ class QuamBase(ReferenceClass):
         if not string_reference.is_reference(reference):
             return reference
 
-        if (
-            string_reference.is_absolute_reference(reference)
-            and self.get_root() is None
-        ):
+        root = self.get_root()
+        if string_reference.is_absolute_reference(reference) and root is None:
             warnings.warn(
-                f"No QuamRoot initialized, cannot retrieve reference {reference}"
-                f" from {self.__class__.__name__}"
+                f"No QuamRoot initialized, cannot retrieve absolute reference "
+                f"{reference} from {self.__class__.__name__}"
             )
             return reference
 
         try:
-            return string_reference.get_referenced_value(
-                self, reference, root=self.get_root()
-            )
-        except ValueError as e:
+            return string_reference.get_referenced_value(self, reference, root=root)
+        except InvalidReferenceError as e:
             try:
                 ref = f"{self.__class__.__name__}: {self.get_reference()}"
             except Exception:
                 ref = self.__class__.__name__
 
-            # Clean up the error message to remove redundant parts
-            error_msg = str(e)
-            # Remove any nested "Error:" patterns
-            if ", Error:" in error_msg:
-                error_msg = error_msg.split(", Error:")[0]
-            # Remove starting "Error:" if present
-            if error_msg.startswith("Error:"):
-                error_msg = error_msg[6:].strip()
-
-            error_cls = e.__class__.__name__
+            # Construct message using the chained exception's message
+            base_error_msg = str(e)
+            component_ref_str = f"component {ref}"
             msg = (
-                f"Could not get reference {reference} from QUAM component {ref}. "
-                f"{error_cls}: {error_msg}"
+                f'Could not get reference "{reference}" from {component_ref_str}. '
+                f"Error: {base_error_msg}"
             )
 
             try:
                 cfg = get_quam_config()
                 raise_error_missing_reference = cfg.raise_error_missing_reference
             except FileNotFoundError:
+                # Default behavior if config file not found
                 raise_error_missing_reference = False
+
             if not raise_error_missing_reference:
                 warnings.warn(msg)
             else:
-                raise ValueError(msg) from e
+                # Re-raise with context, keeping the original exception chain
+                raise InvalidReferenceError(msg) from e
             return reference
 
     def print_summary(self, indent: int = 0):
@@ -912,7 +907,7 @@ class QuamDict(UserDict, QuamBase):
         if string_reference.is_reference(elem):
             try:
                 elem = self._get_referenced_value(elem)
-            except ValueError as e:
+            except InvalidReferenceError as e:
                 try:
                     repr = f"{self.__class__.__name__}: {self.get_reference()}"
                 except Exception:
@@ -1030,7 +1025,7 @@ class QuamDict(UserDict, QuamBase):
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
-            skip_elems: A list of QuamBase objects to skip.
+            skip_elems: A sequence of QuamBase objects to skip.
                 This is used to prevent infinite loops when iterating over nested
                 objects.
 

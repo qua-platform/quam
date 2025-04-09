@@ -1,6 +1,7 @@
 import pytest
 from quam.components.channels import IQChannel
 from quam.utils.string_reference import *
+from quam.utils.reference_class import InvalidReferenceError
 
 
 def test_is_reference():
@@ -114,7 +115,7 @@ def test_get_relative_reference_value():
 
 def test_get_referenced_value():
     root = DotDict({"a": 1, "b": 2, "nested": {"a": 3, "b": 4}})
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidReferenceError):
         assert get_referenced_value(root, "#/a")
 
     assert get_referenced_value(root, "#/a", root) == 1
@@ -123,7 +124,7 @@ def test_get_referenced_value():
 
     assert get_referenced_value(root.nested, "#./a", root) == 3
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidReferenceError):
         get_referenced_value(root.nested, "#./f", root)
 
 

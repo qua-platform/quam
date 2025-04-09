@@ -4,6 +4,12 @@ import warnings
 __all__ = ["ReferenceClass"]
 
 
+class InvalidReferenceError(LookupError):
+    """Exception raised when a reference cannot be resolved."""
+
+    pass
+
+
 class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
 
@@ -52,6 +58,8 @@ class ReferenceClass:
             if self._is_reference(attr_val):
                 return self._get_referenced_value(attr_val)
             return attr_val
+        except InvalidReferenceError as e:
+            raise e
         except Exception as e:
             error_msg = str(e)
             if "is not a valid reference" in error_msg:
