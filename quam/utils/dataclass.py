@@ -5,7 +5,6 @@ import sys
 import warnings
 from typing import Dict, Union, ClassVar, get_type_hints
 
-
 __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
 
 
@@ -149,7 +148,12 @@ def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
                         message="^Could not get reference*",
                         category=UserWarning,
                     )
-                    attr_val = getattr(self, f.name, None)
+                    from quam.utils.exceptions import InvalidReferenceError
+
+                    try:
+                        attr_val = getattr(self, f.name, None)
+                    except InvalidReferenceError:
+                        attr_val = None
                 if attr_val is REQUIRED:
                     raise TypeError(
                         f"Please provide {cls.__name__}.{f.name} as it is a"
