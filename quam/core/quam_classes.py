@@ -597,8 +597,12 @@ class QuamBase(ReferenceClass):
                 f"{error_cls}: {error_msg}"
             )
 
-            cfg = get_quam_config()
-            if not cfg.raise_error_missing_reference:
+            try:
+                cfg = get_quam_config()
+                raise_error_missing_reference = cfg.raise_error_missing_reference
+            except FileNotFoundError:
+                raise_error_missing_reference = False
+            if not raise_error_missing_reference:
                 warnings.warn(msg)
             else:
                 raise ValueError(msg) from e
