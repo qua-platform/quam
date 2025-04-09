@@ -49,7 +49,9 @@ def migrate_command(ctx: click.Context, config_path: Path, to_version: int) -> N
     if from_version == to_version:
         click.echo("You have latest config version. Nothing to migrate.")
         return
-    migrated = make_migrations(common_config, from_version, to_version)
+    migrated = make_migrations(
+        common_config, from_version, to_version, "quam.config.cli.migrations"
+    )
     if to_version == QuamConfig.version:
         QuamTopLevelConfig(migrated)
     with config_file.open("wb") as f_out:
