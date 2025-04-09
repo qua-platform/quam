@@ -31,7 +31,7 @@ def test_set_at_reference():
     # Check that the value was set correctly
     assert parent.child.value == 123
     # Reference string should remain unchanged
-    assert parent.get_unreferenced_value("ref_value") == "#./child/value"
+    assert parent.get_raw_value("ref_value") == "#./child/value"
 
 
 def test_set_at_reference_non_reference():
@@ -53,8 +53,8 @@ def test_set_at_reference_invalid_reference():
 
 def test_unreferenced_value():
     root = RootQuam(parent=ParentQuam(child=ChildQuam()))
-    assert root.get_unreferenced_value("abs_ref") == "#/parent/child/value"
-    assert root.parent.get_unreferenced_value("ref_value") == "#./child/value"
+    assert root.get_raw_value("abs_ref") == "#/parent/child/value"
+    assert root.parent.get_raw_value("ref_value") == "#./child/value"
 
 
 def test_set_at_absolute_reference():
@@ -67,7 +67,7 @@ def test_set_at_absolute_reference():
     # Check that the value was set correctly
     assert root.parent.child.value == 456
     # Reference string should remain unchanged
-    assert root.get_unreferenced_value("abs_ref") == "#/parent/child/value"
+    assert root.get_raw_value("abs_ref") == "#/parent/child/value"
 
 
 def test_set_at_absolute_reference_invalid():
@@ -91,8 +91,8 @@ def test_set_double_reference():
     parent = ParentQuam(child=double_child, ref_value="#./child/value")
 
     assert parent.ref_value == 42
-    assert parent.get_unreferenced_value("ref_value") == "#./child/value"
-    assert parent.child.get_unreferenced_value("value") == "#./child/value"
+    assert parent.get_raw_value("ref_value") == "#./child/value"
+    assert parent.child.get_raw_value("value") == "#./child/value"
 
     # Set value through double reference
     parent.set_at_reference("ref_value", 789)
@@ -103,8 +103,8 @@ def test_set_double_reference():
     assert parent.ref_value == 789
 
     # Reference string should remain unchanged
-    assert parent.get_unreferenced_value("ref_value") == "#./child/value"
-    assert double_child.get_unreferenced_value("value") == "#./child/value"
+    assert parent.get_raw_value("ref_value") == "#./child/value"
+    assert double_child.get_raw_value("value") == "#./child/value"
 
 
 def test_set_nonexistent_double_reference():
@@ -147,9 +147,9 @@ def test_set_triple_reference():
     parent = ParentQuam(child=triple_child, ref_value="#./child/value")
 
     assert parent.ref_value == 42
-    assert parent.get_unreferenced_value("ref_value") == "#./child/value"
-    assert parent.child.get_unreferenced_value("value") == "#./child/value"
-    assert parent.child.child.get_unreferenced_value("value") == "#./child/value"
+    assert parent.get_raw_value("ref_value") == "#./child/value"
+    assert parent.child.get_raw_value("value") == "#./child/value"
+    assert parent.child.child.get_raw_value("value") == "#./child/value"
 
     # Set value through triple reference
     parent.set_at_reference("ref_value", 789)
@@ -161,9 +161,9 @@ def test_set_triple_reference():
     assert parent.ref_value == 789
 
     # Reference string should remain unchanged
-    assert parent.get_unreferenced_value("ref_value") == "#./child/value"
-    assert triple_child.get_unreferenced_value("value") == "#./child/value"
-    assert triple_child.child.get_unreferenced_value("value") == "#./child/value"
+    assert parent.get_raw_value("ref_value") == "#./child/value"
+    assert triple_child.get_raw_value("value") == "#./child/value"
+    assert triple_child.child.get_raw_value("value") == "#./child/value"
 
 
 def test_set_at_reference_allow_non_reference():

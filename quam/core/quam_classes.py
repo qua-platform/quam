@@ -450,7 +450,7 @@ class QuamBase(ReferenceClass):
         attr_names = [attr for attr in attr_names if attr not in skip_attrs]
 
         if not follow_references:
-            attrs = {attr: self.get_unreferenced_value(attr) for attr in attr_names}
+            attrs = {attr: self.get_raw_value(attr) for attr in attr_names}
         else:
             attrs = {attr: getattr(self, attr) for attr in attr_names}
 
@@ -630,7 +630,7 @@ class QuamBase(ReferenceClass):
             ValueError: If the reference is invalid, e.g. "#./" since it has no
                 attribute.
         """
-        raw_value = self.get_unreferenced_value(attr)
+        raw_value = self.get_raw_value(attr)
         if not string_reference.is_reference(raw_value):
             if not allow_non_reference:
                 raise ValueError(
@@ -650,7 +650,7 @@ class QuamBase(ReferenceClass):
             )
 
         parent_obj = self._get_referenced_value(parent_reference)
-        raw_referenced_value = parent_obj.get_unreferenced_value(ref_attr)
+        raw_referenced_value = parent_obj.get_raw_value(ref_attr)
         if string_reference.is_reference(raw_referenced_value) and isinstance(
             parent_obj, QuamBase
         ):
@@ -980,8 +980,8 @@ class QuamDict(UserDict, QuamBase):
 
         """
         return False
-
-    def get_unreferenced_value(self, attr: str) -> bool:
+    
+    def get_raw_value(self, attr: str) -> Any:
         """Get the value of an attribute without following references.
 
         Args:
@@ -995,7 +995,7 @@ class QuamDict(UserDict, QuamBase):
             return self.__dict__["data"][attr]
         except KeyError as e:
             raise AttributeError(
-                "Cannot get unreferenced value from attribute {attr} that does not"
+                "Cannot get raw (unreferenced)value from attribute {attr} that does not"
                 " exist in {self}"
             ) from e
 

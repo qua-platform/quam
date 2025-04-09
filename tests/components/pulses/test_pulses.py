@@ -210,7 +210,7 @@ def test_pulses_referenced():
 
     assert machine_loaded.channel.operations["pulse_referenced"] == pulse_loaded
     assert (
-        machine_loaded.channel.operations.get_unreferenced_value("pulse_referenced")
+        machine_loaded.channel.operations.get_raw_value("pulse_referenced")
         == "#./pulse"
     )
 

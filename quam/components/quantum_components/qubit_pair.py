@@ -22,7 +22,7 @@ class QubitPair(QuantumComponent):
 
     @property
     def name(self) -> str:
-        if not str_ref.is_reference(self.get_unreferenced_value("id")):
+        if not str_ref.is_reference(self.get_raw_value("id")):
             return self.id
         else:
             return f"{self.qubit_control.name}@{self.qubit_target.name}"

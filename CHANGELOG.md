@@ -20,6 +20,9 @@
 - The default state path for a `QuamRoot` is now retrieved from the environment variable `QUAM_STATE_PATH`, and if this doesn't exist, from the quam config.
 - Add `__class__` to serialisation (`to_dict` method), even if the target class matches the expected type
 - If a specific class can't be imported during instantiation, a warning will be raised and it will load the default class (specified by the type hint) instead
+- QuAM has been renamed to QUAM
+  - Some root classes have been renamed to CamelCase (e.g. `BasicQuAM` -> `BasicQuam`)
+- Deprecate Quam component method`get_unreferenced_value` in favor of naming `get_raw_value`
 
 
 ## [0.3.10]
