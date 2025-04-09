@@ -12,6 +12,7 @@
 - Add the QUAM config, which can be called from the terminal command `quam config`.
   This enables adding a default QUAM state path
 - Add the following properties to the `JSONSerialiser`: `content_mapping`, `include_defaults`, and `state_path`.
+- Add `quam.__version__`
 
 ### Changed
 
