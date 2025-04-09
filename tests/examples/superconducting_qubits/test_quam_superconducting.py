@@ -27,7 +27,7 @@ def test_quam_referenced_full(tmp_path):
     folder.mkdir(exist_ok=True)
 
     quam = create_quam_superconducting_referenced(num_qubits=3)
-    quam.save(folder / "quam", content_mapping={"wiring.json": ["wiring"]})
+    quam.save(folder / "quam", content_mapping={"wiring": "wiring.json"})
 
     loaded_quam = json.load((folder / "quam" / "state.json").open("r"))
     assert set(loaded_quam.keys()) == set(

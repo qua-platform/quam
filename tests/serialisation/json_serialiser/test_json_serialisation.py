@@ -78,7 +78,7 @@ def test_component_mapping(tmp_path):
 
     serialiser = JSONSerialiser()
     path = tmp_path
-    serialiser.save(quam_root, path, content_mapping={"b.json": ["b"]})
+    serialiser.save(quam_root, path, content_mapping={"b": "b.json"})
 
     d = json.loads((tmp_path / "b.json").read_text())
     assert d == {
@@ -95,13 +95,14 @@ def test_component_mapping_ignore(tmp_path):
     quam_root = Quam(a=1, b=Component(a=3), c=Component(a=4))
 
     serialiser = JSONSerialiser()
-    serialiser.save(
-        quam_root, tmp_path, ignore=["b"], content_mapping={"b.json": ["b"]}
-    )
+    serialiser.save(quam_root, tmp_path, ignore=["b"], content_mapping={"b": "b.json"})
     assert not (tmp_path / "b.json").exists()
 
     serialiser.save(
-        quam_root, tmp_path, ignore=["b"], content_mapping={"b.json": ["b", "c"]}
+        quam_root,
+        tmp_path,
+        ignore=["b"],
+        content_mapping={"b": "b.json", "c": "b.json"},
     )
     d = json.loads((tmp_path / "b.json").read_text())
     assert d == {
