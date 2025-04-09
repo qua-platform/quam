@@ -1,0 +1,2 @@
+class InvalidStringReference(Exception):
+    pass

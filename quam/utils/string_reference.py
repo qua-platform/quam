@@ -1,6 +1,7 @@
 from typing import Tuple, Any
 from collections import UserList, UserDict
 
+from quam.utils.exceptions import InvalidStringReference
 
 DELIMITER = "."
 
@@ -117,7 +118,9 @@ def get_referenced_value(obj, string: str, root=None) -> Any:
     try:
         return get_relative_reference_value(obj, string)
     except (AttributeError, KeyError) as e:
-        raise ValueError(f"String {string} is not a valid reference, Error: {e}") from e
+        raise InvalidStringReference(
+            f"String {string} is not a valid reference, Error: {e}"
+        ) from e
 
 
 def split_reference(string: str) -> Tuple[str, str]:

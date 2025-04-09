@@ -47,6 +47,8 @@ __all__ = [
     "quam_dataclass",
 ]
 
+from ..utils.exceptions import InvalidStringReference
+
 
 def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> type:
     """Get the type annotation for the values in a QuamDict or QuamList.
@@ -593,16 +595,15 @@ class QuamBase(ReferenceClass):
 
             error_cls = e.__class__.__name__
             msg = (
-                f"Could not get reference {reference} from QUAM component {ref}. "
-                f"{error_cls}: {error_msg}"
+                f"Could not get reference {reference} from QUAM component {ref}."
             )
-
             try:
                 cfg = get_quam_config()
                 raise_error_missing_reference = cfg.raise_error_missing_reference
             except FileNotFoundError:
                 raise_error_missing_reference = False
             if not raise_error_missing_reference:
+                msg = f"{msg} {error_cls}: {error_msg}"
                 warnings.warn(msg)
             else:
                 raise ValueError(msg) from e

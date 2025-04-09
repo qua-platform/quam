@@ -3,6 +3,8 @@ import warnings
 
 __all__ = ["ReferenceClass"]
 
+from quam.utils.exceptions import InvalidStringReference
+
 
 class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
@@ -52,10 +54,11 @@ class ReferenceClass:
             if self._is_reference(attr_val):
                 return self._get_referenced_value(attr_val)
             return attr_val
-        except Exception as e:
-            error_msg = str(e)
-            if "is not a valid reference" in error_msg:
-                raise e
+        except ValueError as e:
+            if isinstance(e.__cause__, InvalidStringReference):
+                raise
+            return attr_val
+        except Exception:
             return attr_val
 
     def _is_valid_setattr(
