@@ -45,8 +45,6 @@ class Octave(QuamComponent):
 
     Args:
         name: The name of the Octave. Must be unique
-        ip: The IP address of the Octave. Used in `Octave.get_octave_config()`
-        port: The port number of the Octave. Used in `Octave.get_octave_config()`
         calibration_db_path: The path to the calibration database. If not specified, the
             current working directory is used.
         RF_outputs: A dictionary of `OctaveUpConverter` objects. The keys are the
@@ -58,8 +56,6 @@ class Octave(QuamComponent):
     """
 
     name: str
-    ip: str
-    port: int
     calibration_db_path: str = None
 
     RF_outputs: Dict[int, "OctaveUpConverter"] = field(default_factory=dict)
@@ -111,7 +107,6 @@ class Octave(QuamComponent):
         else:
             octave_config.set_calibration_db(os.getcwd())
 
-        octave_config.add_device_info(self.name, self.ip, self.port)
         return octave_config
 
     def apply_to_config(self, config: Dict) -> None:
