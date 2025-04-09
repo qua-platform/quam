@@ -1,4 +1,5 @@
 from typing import Any, ClassVar
+import warnings
 
 
 __all__ = ["ReferenceClass"]
