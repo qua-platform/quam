@@ -60,12 +60,20 @@ __all__ = ["config_command"]
     # required=True,
     help="The path to the directory where the state path should be stored to.",
 )
+@click.option(
+    "--raise-error-missing-reference",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Flag responsible for raising error if references are missing.",
+)
 @click.pass_context
 def config_command(
     ctx: click.Context,
     config_path: Path,
     auto_accept: bool,
     state_path: Path,
+    raise_error_missing_reference: bool,
 ) -> None:
     common_config, config_file = get_config_file_content(config_path)
     old_config = deepcopy(common_config)
@@ -76,7 +84,10 @@ def config_command(
             migrate_command(["--config-path", config_path], standalone_mode=False)
             common_config, config_file = get_config_file_content(config_path)
     quam_config = common_config.get(QUAM_CONFIG_KEY, {})
-    names_mapping = {"state_path": "state_path"}
+    names_mapping = {
+        "state_path": "state_path",
+        "raise_error_missing_reference": "raise_error_missing_reference",
+    }
     quam_config = get_config_by_args_mapping(
         names_mapping,
         quam_config,
@@ -104,4 +115,6 @@ def quam_before_write_cb(config: QuamConfig) -> None:
 
 
 if __name__ == "__main__":
-    config_command([], standalone_mode=False)
+    config_command(
+        ["--raise-error-on-missing-references", "True"], standalone_mode=False
+    )
