@@ -29,7 +29,7 @@ def test_empty_quam_dict():
     with pytest.raises(KeyError):
         quam_dict["nonexisting_attr"]
     with pytest.raises(AttributeError):
-        quam_dict.get_unreferenced_value("nonexisting_attr")
+        quam_dict.get_raw_value("nonexisting_attr")
 
     for val in [42, True, False, None]:
         assert not quam_dict._attr_val_is_default("nonexisting_attr", val)
@@ -47,7 +47,7 @@ def test_quam_dict_nonempty():
 
     assert quam_dict.val1 == 42
     assert quam_dict["val1"] == 42
-    assert quam_dict.get_unreferenced_value("val1") == 42
+    assert quam_dict.get_raw_value("val1") == 42
 
     for val in [42, True, False, None]:
         assert not quam_dict._attr_val_is_default("val1", val)
@@ -80,7 +80,7 @@ def test_quam_dict_setattr():
     with pytest.raises(KeyError):
         quam_dict["val2"]
     with pytest.raises(AttributeError):
-        quam_dict.get_unreferenced_value("val2")
+        quam_dict.get_raw_value("val2")
 
 
 def test_quam_dict_setitem():
@@ -93,7 +93,7 @@ def test_quam_dict_setitem():
     assert quam_dict.get_attrs() == {"val1": 42}
     assert quam_dict.to_dict() == {"val1": 42}
     assert quam_dict["val1"] == 42
-    assert quam_dict.get_unreferenced_value("val1") == 42
+    assert quam_dict.get_raw_value("val1") == 42
 
 
 def test_inner_quam_dict():
@@ -200,7 +200,7 @@ def test_dict_unreferenced_value():
     d = QuamDict(val1="#./val2", val2=42)
     assert d.val1 == 42
     assert d.val2 == 42
-    assert d.get_unreferenced_value("val1") == "#./val2"
+    assert d.get_raw_value("val1") == "#./val2"
 
 
 def test_quam_dict_int_keys():

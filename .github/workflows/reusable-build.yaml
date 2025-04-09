@@ -1,0 +1,47 @@
+# This workflow is used for building quam python package in dist and wheel 
+# formats. Built archives is attached to workflow run as artifacts. The 
+# workflow should only be automatically triggered by other workflows (manual 
+# build and release).
+
+name: Build python package
+on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: "pip"
+
+      - name: Install python deps
+        run: python -m pip install -e .[build]
+
+      - name: Build python package
+        run: python -m build
+
+      - uses: actions/upload-artifact@v4
+        id: upload-sdist
+        name: Upload sdist
+        with:
+          name: python-package-sdist
+          path: dist/quam-*.tar.gz
+          retention-days: 3
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        id: upload-wheel
+        name: Upload wheel
+        with:
+          name: python-package-wheel
+          path: dist/quam-*.whl
+          retention-days: 3
+          if-no-files-found: error

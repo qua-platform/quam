@@ -14,7 +14,7 @@ __all__ = [
 
 @quam_dataclass
 class LocalOscillator(QuamComponent):
-    """QuAM component for a local oscillator.
+    """QUAM component for a local oscillator.
 
     Args:
         frequency (float): The frequency of the local oscillator.
@@ -31,7 +31,7 @@ class LocalOscillator(QuamComponent):
 
 @quam_dataclass
 class Mixer(QuamComponent):
-    """QuAM component for a mixer.
+    """QUAM component for a mixer.
 
     All properties are optional, so it can be instantiated as `Mixer()`.
     For the default values, it is assumed that the mixer parent is an `IQChannel`
@@ -116,6 +116,22 @@ class BaseFrequencyConverter(QuamComponent):
 
 @quam_dataclass
 class FrequencyConverter(BaseFrequencyConverter):
+    """Frequency up/down converter component.
+
+    This component encapsulates the local oscillator and mixer used to upconvert or
+    downconvert an RF signal.
+
+    The FrequencyConverter component is attached to IQ channels through
+
+    - `IQChannel.frequency_converter_up`
+    - `InOutIQChannel.frequency_converter_down`
+
+    Args:
+        local_oscillator (LocalOscillator): The local oscillator for the frequency converter.
+        mixer (Mixer): The mixer for the frequency converter.
+        gain (float): The gain of the frequency converter.
+    """
+
     local_oscillator: LocalOscillator = None
     mixer: Mixer = None
     gain: float = None
@@ -123,6 +139,20 @@ class FrequencyConverter(BaseFrequencyConverter):
     @property
     def LO_frequency(self):
         return self.local_oscillator.frequency
+
+    @LO_frequency.setter
+    def LO_frequency(self, value):
+        """Sets the frequency of the local oscillator object"""
+        if self.local_oscillator is None:
+            raise AttributeError(
+                f"Unable to set LO frequency for {self} as it has no local oscillator"
+            )
+
+        # Use set_at_reference to ensure the frequency is updated, even if the local
+        # oscillator frequency is a reference
+        self.local_oscillator.set_at_reference(
+            "frequency", value, allow_non_reference=True
+        )
 
     def configure(self):
         if self.local_oscillator is not None:

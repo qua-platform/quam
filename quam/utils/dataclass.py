@@ -3,8 +3,7 @@ from dataclasses import dataclass, fields, is_dataclass
 import functools
 import sys
 import warnings
-from typing import Dict, Union, get_type_hints
-
+from typing import Dict, Union, ClassVar, get_type_hints
 
 __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
 
@@ -16,7 +15,7 @@ class REQUIRED:
 
 
 def get_dataclass_attr_annotations(
-    cls_or_obj: Union[type, object]
+    cls_or_obj: Union[type, object],
 ) -> Dict[str, Dict[str, type]]:
     """Get the attributes and annotations of a dataclass
 
@@ -44,6 +43,8 @@ def get_dataclass_attr_annotations(
 
     attr_annotations = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
+        if getattr(attr_type, "__origin__", None) == ClassVar:
+            continue
         # TODO Try to combine with third elif statement
         if getattr(cls_or_obj, attr, None) is REQUIRED:  # See "patch_dataclass()"
             if attr not in getattr(cls_or_obj, "__dataclass_fields__", {}):
@@ -80,13 +81,6 @@ def dataclass_field_has_default(field: dataclasses.field) -> bool:
     return False
 
 
-def dataclass_has_default_fields(cls) -> bool:
-    """Check if dataclass has any default fields"""
-    fields = dataclasses.fields(cls)
-    fields_default = any(dataclass_field_has_default(field) for field in fields)
-    return fields_default
-
-
 def handle_inherited_required_fields(cls):
     """Adds a default REQUIRED flag for dataclass fields when necessary
 
@@ -95,14 +89,26 @@ def handle_inherited_required_fields(cls):
     if not is_dataclass(cls):
         return
 
-    # Check if dataclass has default fields
-    fields_required = dataclass_has_default_fields(cls)
-    if not fields_required:
+    # Check if dataclass has fields with default value
+    optional_fields = [
+        field.name
+        for field in dataclasses.fields(cls)
+        if dataclass_field_has_default(field)
+    ]
+    if not optional_fields:
+        # All fields of the dataclass are required, we don't have to handle situations
+        # where the parent class has fields with default values and the subclass has
+        # required fields.
         return
 
     # Check if class (not parents) has required fields
-    required_attrs = [attr for attr in cls.__annotations__ if attr not in cls.__dict__]
-    for attr in required_attrs:
+    for attr, attr_type in cls.__annotations__.items():
+        if attr in cls.__dict__:
+            continue
+        if attr in optional_fields:
+            continue
+        if getattr(attr_type, "__origin__", None) is ClassVar:
+            continue
         setattr(cls, attr, REQUIRED)
 
 
@@ -115,7 +121,7 @@ def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
     - the child dataclass has a required arg
 
     From Python 3.10, this was fixed by including the flag @dataclass(kw_only=True).
-    To ensure QuAM remains compatible with Python <3.10, we include a method to patch
+    To ensure QUAM remains compatible with Python <3.10, we include a method to patch
     the dataclass such that it still works in the case described above.
 
     We achieve this by first checking if the above condition is met. If so, all the
@@ -136,7 +142,19 @@ def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
         with warnings.catch_warnings():  # Ignore warnings of failed references
             warnings.filterwarnings("ignore", category=UserWarning)
             for f in fields(self):
-                if getattr(self, f.name, None) is REQUIRED:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore",
+                        message="^Could not get reference*",
+                        category=UserWarning,
+                    )
+                    from quam.utils.exceptions import InvalidReferenceError
+
+                    try:
+                        attr_val = getattr(self, f.name, None)
+                    except InvalidReferenceError:
+                        attr_val = None
+                if attr_val is REQUIRED:
                     raise TypeError(
                         f"Please provide {cls.__name__}.{f.name} as it is a"
                         " required arg"
@@ -170,7 +188,7 @@ def patch_dataclass(module_name):
     - the child dataclass has a required arg
 
     From Python 3.10, this was fixed by including the flag @dataclass(kw_only=True).
-    To ensure QuAM remains compatible with Python <3.10, we include a method to patch
+    To ensure QUAM remains compatible with Python <3.10, we include a method to patch
     the dataclass such that it still works in the case described above.
 
     We achieve this by first checking if the above condition is met. If so, all the
@@ -185,7 +203,7 @@ def patch_dataclass(module_name):
         no longer recognize the dataclass as a dataclass.
     """
     DeprecationWarning(
-        "patch_dataclass is deprecated and will be removed in QuAM v1.0. "
+        "patch_dataclass is deprecated and will be removed in QUAM v1.0. "
         "Please use 'from quam.core import quam_dataclass' as a decorator instead of "
         "the regular Python dataclass."
     )

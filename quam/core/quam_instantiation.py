@@ -1,7 +1,11 @@
 from __future__ import annotations
+from collections import UserDict, UserList
+import sys
+import types
 import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
+import warnings
 
 from quam.utils import (
     string_reference,
@@ -14,6 +18,12 @@ from .deprecations import instantiation_deprecations
 
 if TYPE_CHECKING:
     from quam.core import QuamBase
+
+
+if sys.version_info < (3, 10):
+    union_types = (typing.Union,)
+else:
+    union_types = [typing.Union, types.UnionType]
 
 
 def instantiate_attrs_from_dict(
@@ -49,29 +59,22 @@ def instantiate_attrs_from_dict(
     else:
         required_subtype = None
 
+    if not isinstance(attr_dict, (dict, UserDict)):
+        raise TypeError(
+            f"Failed instantiating QUAM attribute '{str_repr}'. "
+            f"Expected dict or UserDict, got {type(attr_dict)}: {attr_dict}"
+        )
+
     instantiated_attr_dict = {}
     for attr_name, attr_val in attr_dict.items():
-        if not required_subtype:
-            instantiated_attr_dict[attr_name] = attr_val
-            continue
-        if string_reference.is_reference(attr_val):
-            instantiated_attr_dict[attr_name] = attr_val
-            continue
-        if isclass(required_subtype) and issubclass(required_subtype, QuamComponent):
-            instantiated_attr = instantiate_quam_class(
-                required_subtype,
-                attr_val,
-                fix_attrs=fix_attrs,
-                validate_type=validate_type,
-                str_repr=f'{str_repr}["{attr_name}"]',
-            )
-        else:
-            instantiated_attr = attr_val
-        # Add custom __class__ QuamComponent logic here
-
-        validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
-
-        instantiated_attr_dict[attr_name] = instantiated_attr
+        instantiated_attr_dict[attr_name] = instantiate_attr(
+            attr_val=attr_val,
+            expected_type=required_subtype,
+            allow_none=False,
+            fix_attrs=fix_attrs,
+            validate_type=validate_type if required_subtype is not None else False,
+            str_repr=f'{str_repr}["{attr_name}"]',
+        )
 
     return instantiated_attr_dict
 
@@ -108,50 +111,24 @@ def instantiate_attrs_from_list(
     else:
         required_subtype = None
 
+    if not isinstance(attr_list, (list, UserList)):
+        raise TypeError(
+            f"Failed instantiating QUAM attribute '{str_repr}'. "
+            f"Expected list or UserList, got {type(attr_list)}: {attr_list}"
+        )
+
     instantiated_attr_list = []
     for k, attr_val in enumerate(attr_list):
-        if isinstance(attr_val, dict) and "__class__" in attr_val:
-            instantiated_attr = instantiate_quam_class(
-                get_class_from_path(attr_val["__class__"]),
-                attr_val,
+        instantiated_attr_list.append(
+            instantiate_attr(
+                attr_val=attr_val,
+                expected_type=required_subtype,
+                allow_none=False,
                 fix_attrs=fix_attrs,
-                validate_type=validate_type,
+                validate_type=validate_type if required_subtype is not None else False,
                 str_repr=f"{str_repr}[{k}]",
             )
-        elif not required_subtype:
-            instantiated_attr_list.append(attr_val)
-            continue
-        elif typing.get_origin(required_subtype) == list:
-            assert typing.get_origin(required_subtype) == list
-
-            instantiated_attr = instantiate_attrs_from_list(
-                attr_list=attr_val,
-                required_type=required_subtype,
-                fix_attrs=fix_attrs,
-                validate_type=validate_type,
-                str_repr=f"{str_repr}[{k}]",
-            )
-        elif not isclass(required_subtype):
-            instantiated_attr = attr_val
-        elif issubclass(required_subtype, QuamComponent):
-            if string_reference.is_reference(attr_val):
-                instantiated_attr = attr_val
-            else:
-                instantiated_attr = instantiate_quam_class(
-                    required_subtype,
-                    attr_val,
-                    fix_attrs=fix_attrs,
-                    validate_type=validate_type,
-                    str_repr=f"{str_repr}[{k}]",
-                )
-        else:
-            instantiated_attr = attr_val
-        # Add custom __class__ QuamComponent logic here
-        if required_subtype:
-            validate_obj_type(instantiated_attr, required_subtype, str_repr=str_repr)
-
-        instantiated_attr_list.append(instantiated_attr)
-
+        )
     return instantiated_attr_list
 
 
@@ -224,6 +201,24 @@ def instantiate_attr(
         )
         if typing.get_origin(expected_type) == dict:
             expected_type = dict
+    elif typing.get_origin(expected_type) in union_types:
+        for union_type in typing.get_args(expected_type):
+            try:
+                instantiated_attr = instantiate_attr(
+                    attr_val=attr_val,
+                    expected_type=union_type,
+                    allow_none=allow_none,
+                    fix_attrs=fix_attrs,
+                    validate_type=validate_type,
+                    str_repr=str_repr,
+                )
+                break
+            except TypeError:
+                continue
+        else:
+            raise TypeError(
+                f"Could not instantiate {str_repr} with any of the types in {expected_type}"
+            )
     elif (
         isinstance(expected_type, list)
         or typing.get_origin(expected_type) == list
@@ -240,8 +235,6 @@ def instantiate_attr(
             expected_type = list
         elif typing.get_origin(expected_type) == tuple:
             instantiated_attr = tuple(instantiated_attr)
-    elif typing.get_origin(expected_type) == typing.Union:
-        instantiated_attr = attr_val
     elif typing.get_origin(expected_type) == tuple:
         if isinstance(attr_val, list):
             attr_val = tuple(attr_val)
@@ -367,7 +360,13 @@ def instantiate_quam_class(
     # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
 
     if "__class__" in contents:
-        quam_class = get_class_from_path(contents["__class__"])
+        try:
+            quam_class = get_class_from_path(contents["__class__"])
+        except ModuleNotFoundError:
+            warnings.warn(
+                f"Could not instantiate {str_repr} with class {contents['__class__']}, "
+                f"falling back to {quam_class.__name__}"
+            )
 
     if not isinstance(contents, dict):
         raise TypeError(

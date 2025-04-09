@@ -1,6 +1,8 @@
 import pytest
 from quam.components.channels import IQChannel
+from quam.utils.exceptions import InvalidReferenceError
 from quam.utils.string_reference import *
+from quam.utils.exceptions import InvalidReferenceError
 
 
 def test_is_reference():
@@ -114,7 +116,7 @@ def test_get_relative_reference_value():
 
 def test_get_referenced_value():
     root = DotDict({"a": 1, "b": 2, "nested": {"a": 3, "b": 4}})
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidReferenceError):
         assert get_referenced_value(root, "#/a")
 
     assert get_referenced_value(root, "#/a", root) == 1
@@ -123,7 +125,7 @@ def test_get_referenced_value():
 
     assert get_referenced_value(root.nested, "#./a", root) == 3
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidReferenceError):
         get_referenced_value(root.nested, "#./f", root)
 
 
@@ -147,3 +149,53 @@ def test_delimiter():
         assert transmon.xy.name == "q1$xy"
     finally:
         quam.utils.string_reference.DELIMITER = "."
+
+
+def test_get_parent_reference_absolute():
+    parent, attr = split_reference("#/a/b")
+    assert parent == "#/a"
+    assert attr == "b"
+
+    parent, attr = split_reference("#/a/b/c")
+    assert parent == "#/a/b"
+    assert attr == "c"
+
+    parent, attr = split_reference("#/a")
+    assert parent == "#/"
+    assert attr == "a"
+
+    with pytest.raises(ValueError):
+        split_reference("#/")
+
+
+def test_get_parent_reference_relative():
+    parent, attr = split_reference("#./a/b")
+    assert parent == "#./a"
+    assert attr == "b"
+
+    parent, attr = split_reference("#../a/b")
+    assert parent == "#../a"
+    assert attr == "b"
+
+    parent, attr = split_reference("#./a")
+    assert parent == "#./"
+    assert attr == "a"
+
+    parent, attr = split_reference("#../a")
+    assert parent == "#../"
+    assert attr == "a"
+
+    parent, attr = split_reference("#./")
+    assert parent == "#../"
+    assert attr == ""
+
+    parent, attr = split_reference("#../")
+    assert parent == "#../../"
+    assert attr == ""
+
+
+def test_get_parent_reference_invalid():
+    with pytest.raises(ValueError):
+        split_reference("a")
+    with pytest.raises(ValueError):
+        split_reference("#")

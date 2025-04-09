@@ -1,17 +1,29 @@
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 import numbers
 import warnings
-from typing import Any, ClassVar, Dict, List, Union, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple
 import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
+
+from qm.qua._dsl import (
+    AmpValuesType,
+    ChirpType,
+    StreamType,
+)
+
+from quam.utils.qua_types import ScalarInt, ScalarBool
 
 
 __all__ = [
     "Pulse",
     "BaseReadoutPulse",
     "ReadoutPulse",
+    "WaveformPulse",
+    "DragGaussianPulse",
+    "DragCosinePulse",
     "DragPulse",
     "SquarePulse",
     "SquareReadoutPulse",
@@ -23,7 +35,7 @@ __all__ = [
 
 @quam_dataclass
 class Pulse(QuamComponent):
-    """QuAM base component for a pulse.
+    """QUAM base component for a pulse.
 
     Pulses are added to a channel using
     ```
@@ -155,6 +167,82 @@ class Pulse(QuamComponent):
         """
         ...
 
+    def play(
+        self,
+        amplitude_scale: Union[float, AmpValuesType] = None,
+        duration: ScalarInt = None,
+        condition: ScalarBool = None,
+        chirp: ChirpType = None,
+        truncate: ScalarInt = None,
+        timestamp_stream: StreamType = None,
+        continue_chirp: bool = False,
+        target: str = "",
+        validate: bool = True,
+    ) -> None:
+        """Play the pulse on the channel.
+
+        The corresponding channel to play the pulse on is determined from the
+        parent of the pulse.
+
+        Args:
+            pulse_name (str): The name of the pulse to play. Should be registered in
+                `self.operations`.
+            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
+                Can be either a float, or qua.amp(float).
+            duration (int): Duration of the pulse in units of the clock cycle (4ns).
+                If not provided, the default pulse duration will be used. It is possible
+                to dynamically change the duration of both constant and arbitrary
+                pulses. Arbitrary pulses can only be stretched, not compressed.
+            chirp (Union[(list[int], str), (int, str)]): Allows to perform
+                piecewise linear sweep of the element's intermediate
+                frequency in time. Input should be a tuple, with the 1st
+                element being a list of rates and the second should be a
+                string with the units. The units can be either: 'Hz/nsec',
+                'mHz/nsec', 'uHz/nsec', 'pHz/nsec' or 'GHz/sec', 'MHz/sec',
+                'KHz/sec', 'Hz/sec', 'mHz/sec'.
+            truncate (Scalar[int]): Allows playing
+                only part of the pulse, truncating the end. If provided,
+                will play only up to the given time in units of the clock
+                cycle (4ns).
+            condition (Scalar[bool]): Will play analog
+                pulse only if the condition's value is true. Any digital
+                pulses associated with the operation will always play.
+            timestamp_stream (Union[str, _ResultSource]): (Supported from
+                QOP 2.2) Adding a `timestamp_stream` argument will save the
+                time at which the operation occurred to a stream. If the
+                `timestamp_stream` is a string ``label``, then the timestamp
+                handle can be retrieved with
+                `qm._results.JobResults.get` with the same ``label``.
+            validate (bool): If True (default), validate that the pulse is registered
+                in Channel.operations
+
+        Raises:
+            ValueError: If the pulse is not attached to a channel.
+            KeyError: If the pulse is not registered in the channel's operations.
+        """
+        if self.id is not None:
+            name = self.id
+        elif self.parent is not None:
+            name = self.parent.get_attr_name(self)
+        else:
+            raise ValueError(f"Cannot determine name of pulse '{self}'")
+
+        if self.channel is None:
+            raise ValueError(f"Pulse '{name}' is not attached to a channel")
+
+        self.channel.play(
+            pulse_name=name,
+            amplitude_scale=amplitude_scale,
+            duration=duration,
+            condition=condition,
+            chirp=chirp,
+            truncate=truncate,
+            timestamp_stream=timestamp_stream,
+            continue_chirp=continue_chirp,
+            target=target,
+            validate=validate,
+        )
+
     def _config_add_pulse(self, config: Dict[str, Any]):
         """Add the pulse to the config
 
@@ -180,10 +268,11 @@ class Pulse(QuamComponent):
 
         Raises:
             ValueError: If the waveform type (single or IQ) does not match the parent
-                channel type (SingleChannel, IQChannel, InOutIQChannel).
+                channel type (SingleChannel, IQChannel, InOutIQChannel, MWChannel,
+                InOutMWChannel).
         """
 
-        from quam.components.channels import SingleChannel, IQChannel
+        from quam.components.channels import SingleChannel, IQChannel, MWChannel
 
         pulse_config = config["pulses"][self.pulse_name]
 
@@ -197,7 +286,7 @@ class Pulse(QuamComponent):
             wf_type = "constant"
             if isinstance(waveform, complex):
                 waveforms = {"I": waveform.real, "Q": waveform.imag}
-            elif isinstance(self.channel, IQChannel):
+            elif isinstance(self.channel, (IQChannel, MWChannel)):
                 waveforms = {"I": waveform, "Q": 0.0}
             else:
                 waveforms = {"single": waveform}
@@ -206,7 +295,7 @@ class Pulse(QuamComponent):
             wf_type = "arbitrary"
             if np.iscomplexobj(waveform):
                 waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
-            elif isinstance(self.channel, IQChannel):
+            elif isinstance(self.channel, (IQChannel, MWChannel)):
                 waveforms = {"I": waveform, "Q": np.zeros_like(waveform)}
             else:
                 waveforms = {"single": list(waveform)}
@@ -216,10 +305,10 @@ class Pulse(QuamComponent):
         # Add check that waveform type (single or IQ) matches parent
         if "single" in waveforms and not isinstance(self.channel, SingleChannel):
             raise ValueError(
-                "Waveform type 'single' not allowed for IQChannel"
+                "Waveform type 'single' not allowed for (IQChannel, MWChannel)"
                 f" '{self.channel.name}'"
             )
-        elif "I" in waveforms and not isinstance(self.channel, IQChannel):
+        elif "I" in waveforms and not isinstance(self.channel, (IQChannel, MWChannel)):
             raise ValueError(
                 "Waveform type 'IQ' not allowed for SingleChannel"
                 f" '{self.channel.name}'"
@@ -283,7 +372,7 @@ class Pulse(QuamComponent):
 
 @quam_dataclass
 class BaseReadoutPulse(Pulse, ABC):
-    """QuAM abstract base component for a general  readout pulse.
+    """QUAM abstract base component for a general  readout pulse.
 
     Readout pulse classes should usually inherit from `ReadoutPulse`, the
     exception being when a custom integration weights function is required.
@@ -353,7 +442,7 @@ class BaseReadoutPulse(Pulse, ABC):
 
 @quam_dataclass
 class ReadoutPulse(BaseReadoutPulse, ABC):
-    """QuAM abstract base component for most readout pulses.
+    """QUAM abstract base component for most readout pulses.
 
     This class is a subclass of `ReadoutPulse` and should be used for most readout
     pulses. It provides a default implementation of the `integration_weights_function`
@@ -363,11 +452,6 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
         length (int): The length of the pulse in samples.
         digital_marker (str, list, optional): The digital marker to use for the pulse.
             Default is "ON".
-        amplitude (float): The constant amplitude of the pulse.
-        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel or the I port
-                of an IQ channel
-            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
         integration_weights (list[float], list[tuple[float, int]], optional): The
             integration weights, can be either
             - a list of floats (one per sample), the length must match the pulse length
@@ -377,17 +461,21 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             integration weights in radians.
     """
 
-    integration_weights: Union[List[float], List[Tuple[float, int]]] = None
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = (
+        "#./default_integration_weights"
+    )
     integration_weights_angle: float = 0
+
+    @property
+    def default_integration_weights(self) -> List[Tuple[float, int]]:
+        return [(1, self.length)]
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
         from qualang_tools.config import convert_integration_weights
 
         phase = np.exp(1j * self.integration_weights_angle)
 
-        if self.integration_weights is None or not len(self.integration_weights):
-            integration_weights = [(1, self.length)]
-        elif isinstance(self.integration_weights[0], float):
+        if isinstance(self.integration_weights[0], float):
             integration_weights = convert_integration_weights(self.integration_weights)
         else:
             integration_weights = self.integration_weights
@@ -401,7 +489,51 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
 
 
 @quam_dataclass
-class DragPulse(Pulse):
+class WaveformPulse(Pulse):
+    """Pulse that uses a pre-defined waveform, as opposed to a function.
+
+    For a single channel, only `waveform_I` is required.
+    For an IQ channel, both `waveform_I` and `waveform_Q` are required.
+
+    The length of the pulse is derived from the length of `waveform_I`.
+
+    Args:
+        waveform_I (list[float]): The in-phase waveform.
+        waveform_Q (list[float], optional): The quadrature waveform.
+    """
+
+    waveform_I: List[float]  # pyright: ignore
+    waveform_Q: Optional[List[float]] = None
+    # Length is derived from the waveform_I length, but still needs to be declared
+    # to satisfy the dataclass, but we'll override its behavior
+    length: Optional[int] = None  # pyright: ignore
+
+    @property
+    def length(self):  # noqa: 811
+        if not isinstance(self.waveform_I, Iterable):
+            return None
+        return len(self.waveform_I)
+
+    @length.setter
+    def length(self, length: Optional[int]):
+        if length is not None and not isinstance(length, property):
+            raise AttributeError(f"length is not writable with value {length}")
+
+    def waveform_function(self):
+        if self.waveform_Q is None:
+            return np.array(self.waveform_I)
+        return np.array(self.waveform_I) + 1.0j * np.array(self.waveform_Q)
+
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> Dict[str, Any]:
+        d = super().to_dict(follow_references, include_defaults)
+        d.pop("length")
+        return d
+
+
+@quam_dataclass
+class DragGaussianPulse(Pulse):
     """Gaussian-based DRAG pulse that compensate for the leakage and AC stark shift.
 
     These DRAG waveforms has been implemented following the next Refs.:
@@ -436,6 +568,9 @@ class DragPulse(Pulse):
     detuning: float = 0.0
     subtracted: bool = True
 
+    def __post_init__(self) -> None:
+        return super().__post_init__()
+
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 
@@ -457,8 +592,68 @@ class DragPulse(Pulse):
 
 
 @quam_dataclass
+class DragPulse(DragGaussianPulse):
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "DragPulse is deprecated. Use DragGaussianPulse instead.",
+            DeprecationWarning,
+        )
+        return super().__post_init__()
+
+
+@quam_dataclass
+class DragCosinePulse(Pulse):
+    """Cosine based DRAG pulse that compensate for the leakage and AC stark shift.
+
+    These DRAG waveforms has been implemented following the next Refs.:
+    Chen et al. PRL, 116, 020501 (2016)
+    https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.020501
+    and Chen's thesis
+    https://web.physics.ucsb.edu/~martinisgroup/theses/Chen2018.pdf
+
+    Args:
+        length (int): The pulse length in ns.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        amplitude (float): The amplitude in volts.
+        alpha (float): The DRAG coefficient.
+        anharmonicity (float): f_21 - f_10 - The differences in energy between the 2-1
+            and the 1-0 energy levels, in Hz.
+        detuning (float): The frequency shift to correct for AC stark shift, in Hz.
+    """
+
+    axis_angle: float
+    amplitude: float
+    alpha: float
+    anharmonicity: float
+    detuning: float = 0.0
+
+    def __post_init__(self) -> None:
+        return super().__post_init__()
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import drag_cosine_pulse_waveforms
+
+        I, Q = drag_cosine_pulse_waveforms(
+            amplitude=self.amplitude,
+            length=self.length,
+            alpha=self.alpha,
+            anharmonicity=self.anharmonicity,
+            detuning=self.detuning,
+        )
+        I, Q = np.array(I), np.array(Q)
+
+        I_rot = I * np.cos(self.axis_angle) - Q * np.sin(self.axis_angle)
+        Q_rot = I * np.sin(self.axis_angle) + Q * np.cos(self.axis_angle)
+
+        return I_rot + 1.0j * Q_rot
+
+
+@quam_dataclass
 class SquarePulse(Pulse):
-    """Square pulse QuAM component.
+    """Square pulse QUAM component.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -483,7 +678,7 @@ class SquarePulse(Pulse):
 
 @quam_dataclass
 class SquareReadoutPulse(ReadoutPulse, SquarePulse):
-    """QuAM component for a square readout pulse.
+    """QUAM component for a square readout pulse.
 
     Args:
         length (int): The length of the pulse in samples.
@@ -506,6 +701,7 @@ class SquareReadoutPulse(ReadoutPulse, SquarePulse):
     ...
 
 
+@quam_dataclass
 class ConstantReadoutPulse(SquareReadoutPulse):
     def __post_init__(self) -> None:
         warnings.warn(
@@ -517,7 +713,7 @@ class ConstantReadoutPulse(SquareReadoutPulse):
 
 @quam_dataclass
 class GaussianPulse(Pulse):
-    """Gaussian pulse QuAM component.
+    """Gaussian pulse QUAM component.
 
     Args:
         amplitude (float): The amplitude of the pulse in volts.
@@ -555,7 +751,7 @@ class GaussianPulse(Pulse):
 
 @quam_dataclass
 class FlatTopGaussianPulse(Pulse):
-    """Gaussian pulse with flat top QuAM component.
+    """Gaussian pulse with flat top QUAM component.
 
     Args:
         length (int): The total length of the pulse in samples.
