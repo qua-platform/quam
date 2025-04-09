@@ -21,13 +21,11 @@ class OctaveQuam(QuamRoot):
 
 @pytest.fixture
 def octave():
-    return Octave(name="octave1", ip="127.0.0.1", port=80)
+    return Octave(name="octave1")
 
 
 def test_instantiate_octave(octave):
     assert octave.name == "octave1"
-    assert octave.ip == "127.0.0.1"
-    assert octave.port == 80
     assert octave.RF_outputs == {}
     assert octave.RF_inputs == {}
     assert octave.loopbacks == []
@@ -72,14 +70,6 @@ def test_octave_config_conflicting_entry(octave):
 
     with pytest.raises(KeyError):
         octave.apply_to_config(config)
-
-
-def test_get_octave_config(octave):
-    octave_config = octave.get_octave_config()
-    assert list(octave_config.devices) == ["octave1"]
-    connection_details = octave_config.devices["octave1"]
-    assert connection_details.host == "127.0.0.1"
-    assert connection_details.port == 80
 
 
 def test_frequency_converter_no_octave():
@@ -350,9 +340,7 @@ def test_load_octave(octave):
                 4: {"id": 4, "__class__": "quam.components.octave.OctaveUpConverter"},
                 5: {"id": 5, "__class__": "quam.components.octave.OctaveUpConverter"},
             },
-            "ip": "127.0.0.1",
             "name": "octave1",
-            "port": 80,
         },
     }
     assert d == d_expected
