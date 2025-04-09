@@ -9,7 +9,7 @@ class Migrate(MigrateBase):
     @staticmethod
     def backward(data: RawConfigType) -> RawConfigType:
         new_quam = data.pop("quam")
-        assert new_quam.get("version", 1) == Migrate.to_version
+        assert new_quam.get("version", 2) == Migrate.to_version
         new_quam.pop("raise_error_missing_reference")
         new_quam["version"] = Migrate.from_version
         new_data = {"quam": new_quam, **data}
@@ -18,7 +18,6 @@ class Migrate(MigrateBase):
     @staticmethod
     def forward(data: RawConfigType) -> RawConfigType:
         new_quam = data.pop("quam")
-        assert new_quam["version"] == Migrate.from_version
         new_quam["raise_error_missing_reference"] = False
         new_quam["version"] = Migrate.to_version
         new_data = {"quam": new_quam, **data}

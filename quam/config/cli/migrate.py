@@ -38,7 +38,7 @@ def migrate_command(ctx: click.Context, config_path: Path, to_version: int) -> N
         click.secho("Config file wasn't found. Nothing to migrate", fg="yellow")
         return
     quam_config = common_config.get(QUAM_CONFIG_KEY, {})
-    from_version = quam_config.get("version")
+    from_version = quam_config.get("version", 1)
     if from_version is None:
         click.secho(
             "Can't resolve current config version from file. Please regenerate "
