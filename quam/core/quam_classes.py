@@ -32,6 +32,7 @@ from quam.utils import (
     type_is_optional,
     generate_config_final_actions,
 )
+from quam.config import get_quam_config
 from quam.core.quam_instantiation import instantiate_quam_class
 from .qua_config_template import qua_config_template
 
@@ -580,7 +581,27 @@ class QuamBase(ReferenceClass):
                 ref = f"{self.__class__.__name__}: {self.get_reference()}"
             except Exception:
                 ref = self.__class__.__name__
-            warnings.warn(f"Could not get reference {reference} from {ref}.\n{str(e)}")
+
+            # Clean up the error message to remove redundant parts
+            error_msg = str(e)
+            # Remove any nested "Error:" patterns
+            if ", Error:" in error_msg:
+                error_msg = error_msg.split(", Error:")[0]
+            # Remove starting "Error:" if present
+            if error_msg.startswith("Error:"):
+                error_msg = error_msg[6:].strip()
+
+            error_cls = e.__class__.__name__
+            msg = (
+                f"Could not get reference {reference} from QUAM component {ref}. "
+                f"{error_cls}: {error_msg}"
+            )
+
+            cfg = get_quam_config()
+            if not cfg.raise_error_missing_reference:
+                warnings.warn(msg)
+            else:
+                raise ValueError(msg) from e
             return reference
 
     def print_summary(self, indent: int = 0):
@@ -980,7 +1001,7 @@ class QuamDict(UserDict, QuamBase):
 
         """
         return False
-    
+
     def get_raw_value(self, attr: str) -> Any:
         """Get the value of an attribute without following references.
 

@@ -1,7 +1,6 @@
 from typing import Any, ClassVar
 import warnings
 
-
 __all__ = ["ReferenceClass"]
 
 
@@ -35,7 +34,6 @@ class ReferenceClass:
         """
         return super().__getattribute__(attr)
 
-
     def get_unreferenced_value(self, attr: str) -> Any:
         """Deprecated method. Use `get_raw_value` instead."""
         warnings.warn(
@@ -54,7 +52,10 @@ class ReferenceClass:
             if self._is_reference(attr_val):
                 return self._get_referenced_value(attr_val)
             return attr_val
-        except Exception:
+        except Exception as e:
+            error_msg = str(e)
+            if "is not a valid reference" in error_msg:
+                raise e
             return attr_val
 
     def _is_valid_setattr(
