@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.4.0]
 
 ### Added
 
@@ -11,6 +11,7 @@
 - Add `Channel.reset_if_phase()` which matches the QUA command `reset_if_phase(element)`
 - Add the QUAM config, which can be called from the terminal command `quam config`.
   This enables adding a default QUAM state path
+- Add config entry `raise_error_missing_reference` to raise error if a reference is missing, rather than a warning
 - Add the following properties to the `JSONSerialiser`: `content_mapping`, `include_defaults`, and `state_path`.
 - Add `quam.__version__`
 
@@ -24,7 +25,6 @@
 - QuAM has been renamed to QUAM
   - Some root classes have been renamed to CamelCase (e.g. `BasicQuAM` -> `BasicQuam`)
 - Deprecate Quam component method`get_unreferenced_value` in favor of naming `get_raw_value`
-
 
 ## [0.3.10]
 

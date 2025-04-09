@@ -4,8 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quam"
-version = "0.3.10"
-#dynamic = ["version"]
+version = "0.4.0"
 description = "Quantum Abstract Machine (QUAM) facilitates development of abstraction layers in experiments."
 authors = [
     { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
@@ -37,7 +36,7 @@ dependencies = [
     "qm-qua >=1.1.0",
     "qualang-tools >= 0.15.0",
     "typeguard >= 4.1.0",
-    "qualibrate-config >= 0.1.3",
+    "qualibrate-config >= 0.1.4",
 ]
 
 [project.urls]
