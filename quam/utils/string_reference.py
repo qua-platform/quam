@@ -1,6 +1,7 @@
 from typing import Tuple, Any
 from collections import UserList, UserDict
 
+from quam.utils.exceptions import InvalidReferenceError
 
 DELIMITER = "."
 
@@ -106,10 +107,17 @@ def get_referenced_value(obj, string: str, root=None) -> Any:
         The value that the reference string points to
 
     Raises:
-        ValueError: If the string is not a valid reference
+        ValueError: If the string is not a valid reference format, i.e. doesn't start
+            correctly.
+        InvalidReferenceError: If the reference format is valid but the path cannot be
+            resolved.
     """
     if not is_reference(string):
-        raise ValueError(f"String {string} is not a reference")
+        # Keep ValueError for format issues
+        raise ValueError(
+            f"String {string} is not a reference format. "
+            "It should start with '#/', '#./' or '#../'"
+        )
 
     if is_absolute_reference(string):
         obj = root
@@ -117,7 +125,9 @@ def get_referenced_value(obj, string: str, root=None) -> Any:
     try:
         return get_relative_reference_value(obj, string)
     except (AttributeError, KeyError) as e:
-        raise ValueError(f"String {string} is not a valid reference, Error: {e}") from e
+        # Raise the specific error here, chaining the original exception
+        msg = f"Could not resolve reference '{string}'"
+        raise InvalidReferenceError(msg) from e
 
 
 def split_reference(string: str) -> Tuple[str, str]:

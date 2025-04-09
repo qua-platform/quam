@@ -89,9 +89,7 @@ def test_multiple_quam_reference():
 def test_detached_root():
     component = QuamComponentTest(a=1, b=2)
 
-    with pytest.warns(
-        UserWarning, match="No QuamRoot initialized, cannot retrieve reference"
-    ):
+    with pytest.warns(UserWarning, match="No QuamRoot initialized, cannot retrieve"):
         assert component._get_referenced_value("#/component/a") == "#/component/a"
 
     machine = QuamRootTest(component=QuamComponentTest(a=4, b=5))

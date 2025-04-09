@@ -38,7 +38,7 @@ def migrate_command(ctx: click.Context, config_path: Path, to_version: int) -> N
         click.secho("Config file wasn't found. Nothing to migrate", fg="yellow")
         return
     quam_config = common_config.get(QUAM_CONFIG_KEY, {})
-    from_version = quam_config.get("version")
+    from_version = quam_config.get("version", 1)
     if from_version is None:
         click.secho(
             "Can't resolve current config version from file. Please regenerate "
@@ -49,7 +49,9 @@ def migrate_command(ctx: click.Context, config_path: Path, to_version: int) -> N
     if from_version == to_version:
         click.echo("You have latest config version. Nothing to migrate.")
         return
-    migrated = make_migrations(common_config, from_version, to_version)
+    migrated = make_migrations(
+        common_config, from_version, to_version, "quam.config.cli.migrations"
+    )
     if to_version == QuamConfig.version:
         QuamTopLevelConfig(migrated)
     with config_file.open("wb") as f_out:

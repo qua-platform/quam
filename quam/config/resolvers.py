@@ -1,6 +1,6 @@
 import logging
 import os
-from functools import partial
+from functools import partial, cache
 from pathlib import Path
 from typing import Optional
 
@@ -28,6 +28,7 @@ def get_quam_config_path() -> Path:
     )
 
 
+@cache
 def get_quam_config(
     config_path: Optional[Path] = None,
     config: Optional[RawConfigType] = None,
