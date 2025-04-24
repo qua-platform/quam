@@ -10,7 +10,7 @@ authors = [
     { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
 ]
 license = { text = "BSD-3-Clause" }
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.8,<3.13"
 readme = "README.md"
 
 classifiers = [
