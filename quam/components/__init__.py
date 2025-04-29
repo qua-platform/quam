@@ -5,7 +5,6 @@ from .channels import *
 from . import pulses
 from .quantum_components import *
 from . import macro
-from quam.config import get_quam_config
 
 __all__ = [
     *basic_quam.__all__,
@@ -15,5 +14,4 @@ __all__ = [
     *quantum_components.__all__,
     "pulses",
     "macro",
-    "get_quam_config",
 ]

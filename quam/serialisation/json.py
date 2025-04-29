@@ -4,9 +4,17 @@ import json
 import os
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Tuple, Union, List
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    List,
+)
 
-from quam.config import get_quam_config
 from .base import AbstractSerialiser
 
 if TYPE_CHECKING:
@@ -60,7 +68,9 @@ class JSONSerialiser(AbstractSerialiser):
 
     default_filename: str = "state.json"
     default_foldername: str = "quam_state"
-    content_mapping: Dict[str, str] = {}  # Expected final format: component -> filename
+    content_mapping: Dict[str, str] = (
+        {}
+    )  # Expected final format: component -> filename
 
     @staticmethod
     def _validate_and_convert_content_mapping(
@@ -189,7 +199,9 @@ class JSONSerialiser(AbstractSerialiser):
 
     def __init__(
         self,
-        content_mapping: Optional[Dict] = None,  # Accept Dict initially for validation
+        content_mapping: Optional[
+            Dict
+        ] = None,  # Accept Dict initially for validation
         include_defaults: bool = False,
         state_path: Optional[Union[str, Path]] = None,
     ):
@@ -326,14 +338,18 @@ class JSONSerialiser(AbstractSerialiser):
         # Validate and convert the provided content_mapping, or use the instance's
         # (already validated) one
         if content_mapping is not None:
-            current_content_mapping = self._validate_and_convert_content_mapping(
-                content_mapping
+            current_content_mapping = (
+                self._validate_and_convert_content_mapping(content_mapping)
             )
         else:
-            current_content_mapping = self.content_mapping  # Already validated in init
+            current_content_mapping = (
+                self.content_mapping
+            )  # Already validated in init
 
         current_include_defaults = (
-            include_defaults if include_defaults is not None else self.include_defaults
+            include_defaults
+            if include_defaults is not None
+            else self.include_defaults
         )
 
         if path is None:
@@ -341,7 +357,9 @@ class JSONSerialiser(AbstractSerialiser):
         path = Path(path)
 
         # Get the dictionary representation of the object
-        contents_dict = quam_obj.to_dict(include_defaults=current_include_defaults)
+        contents_dict = quam_obj.to_dict(
+            include_defaults=current_include_defaults
+        )
 
         # Apply ignore filter directly to the source dictionary before saving
         # This modification is temporary for the save operation.
@@ -374,7 +392,6 @@ class JSONSerialiser(AbstractSerialiser):
         Resolution order:
         1. `self.state_path` (if set during `__init__`).
         2. `QUAM_STATE_PATH` environment variable.
-        3. `state_path` from QUAM configuration (via `get_quam_config`).
         4. Fallback to `default_foldername` or `default_filename` in the current
            directory.
 
@@ -389,19 +406,6 @@ class JSONSerialiser(AbstractSerialiser):
         env_path = os.environ.get("QUAM_STATE_PATH")
         if env_path:
             return Path(env_path).resolve()
-
-        # 3. Check configuration file
-        try:
-            cfg = get_quam_config()
-            if cfg and cfg.state_path is not None:
-                return Path(cfg.state_path).resolve()
-
-        except (AttributeError, FileNotFoundError):  # Catch potential errors
-            warnings.warn(
-                "Could not determine state path from QUAM configuration. "
-                "Falling back to environment or default.",
-                UserWarning,
-            )
 
         # 4. No path found - Fallback to saving in current directory
         # Decide on using the folder or single file default based on content_mapping
@@ -423,7 +427,9 @@ class JSONSerialiser(AbstractSerialiser):
             )
         return default_path.resolve()
 
-    def _load_from_file(self, filepath: Path) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def _load_from_file(
+        self, filepath: Path
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Loads dictionary content from a single JSON file.
 
@@ -497,7 +503,9 @@ class JSONSerialiser(AbstractSerialiser):
         found_files = list(dirpath.rglob("*.json"))
 
         if not found_files:
-            warnings.warn(f"No JSON files found in directory {dirpath}", UserWarning)
+            warnings.warn(
+                f"No JSON files found in directory {dirpath}", UserWarning
+            )
             return contents, metadata
 
         processed_files_count = 0
@@ -508,7 +516,8 @@ class JSONSerialiser(AbstractSerialiser):
                 )  # Metadata from single file load is not needed here
                 if not file_contents:  # Skip empty files
                     warnings.warn(
-                        f"Skipping empty or invalid JSON file: {file}", UserWarning
+                        f"Skipping empty or invalid JSON file: {file}",
+                        UserWarning,
                     )
                     continue
 
@@ -538,7 +547,10 @@ class JSONSerialiser(AbstractSerialiser):
                     inferred_mapping[key] = relative_filepath
 
                 # Check if this file is the default file at the root level
-                if file.name == self.default_filename and file.parent == dirpath:
+                if (
+                    file.name == self.default_filename
+                    and file.parent == dirpath
+                ):
                     metadata["default_filename"] = file.name
 
             except (
@@ -547,7 +559,9 @@ class JSONSerialiser(AbstractSerialiser):
                 TypeError,
                 RuntimeError,
             ) as e:
-                warnings.warn(f"Skipping file {file} due to error: {e}", UserWarning)
+                warnings.warn(
+                    f"Skipping file {file} due to error: {e}", UserWarning
+                )
 
         if processed_files_count == 0 and found_files:
             warnings.warn(
@@ -598,7 +612,9 @@ class JSONSerialiser(AbstractSerialiser):
             load_path = Path(path).resolve()
 
         if not load_path.exists():
-            raise FileNotFoundError(f"Path {load_path} not found, cannot load JSON.")
+            raise FileNotFoundError(
+                f"Path {load_path} not found, cannot load JSON."
+            )
 
         contents: Dict[str, Any]
         metadata: Dict[str, Any]
@@ -608,11 +624,15 @@ class JSONSerialiser(AbstractSerialiser):
         elif load_path.is_dir():
             contents, metadata = self._load_from_directory(load_path)
         else:
-            raise ValueError(f"Path {load_path} is neither a valid file nor directory.")
+            raise ValueError(
+                f"Path {load_path} is neither a valid file nor directory."
+            )
 
         # Update the instance's content_mapping *only if* it wasn't explicitly set
         # during initialization or via the save method argument override.
-        is_default_mapping = self.content_mapping == self.__class__.content_mapping
+        is_default_mapping = (
+            self.content_mapping == self.__class__.content_mapping
+        )
         if is_default_mapping and "content_mapping" in metadata:
             self.content_mapping = metadata["content_mapping"]
 

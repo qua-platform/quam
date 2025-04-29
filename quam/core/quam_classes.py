@@ -33,7 +33,6 @@ from quam.utils import (
     generate_config_final_actions,
 )
 from quam.core.quam_instantiation import instantiate_quam_class
-from quam.config import get_quam_config
 from quam.utils.exceptions import InvalidReferenceError
 
 from .qua_config_template import qua_config_template
@@ -50,7 +49,9 @@ __all__ = [
 ]
 
 
-def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> Optional[type]:
+def _get_value_annotation(
+    cls_or_obj: Union[type, object], attr: str
+) -> Optional[type]:
     """Get the type annotation for the values in a QuamDict or QuamList.
 
     If the QuamDict is defined as Dict[str, int], this will return int.
@@ -78,10 +79,14 @@ def _get_value_annotation(cls_or_obj: Union[type, object], attr: str) -> Optiona
 def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     """Convert a dict or list to a QuamDict or QuamList if possible."""
     if isinstance(value, dict):
-        value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
+        value_annotation = _get_value_annotation(
+            cls_or_obj=cls_or_obj, attr=attr
+        )
         return QuamDict(value, value_annotation=value_annotation)
     elif type(value) == list:
-        value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
+        value_annotation = _get_value_annotation(
+            cls_or_obj=cls_or_obj, attr=attr
+        )
         return QuamList(value, value_annotation=value_annotation)
     else:
         return value
@@ -120,7 +125,9 @@ def sort_quam_components(
 
             if "after" in component.config_settings:
                 for after_component in component.config_settings["after"]:
-                    after_component_idx = sorted_components.index(after_component)
+                    after_component_idx = sorted_components.index(
+                        after_component
+                    )
                     if after_component_idx < component_idx:
                         continue
                     sorted_components.remove(after_component)
@@ -129,11 +136,15 @@ def sort_quam_components(
 
             if "before" in component.config_settings:
                 for before_component in component.config_settings["before"]:
-                    before_component_idx = sorted_components.index(before_component)
+                    before_component_idx = sorted_components.index(
+                        before_component
+                    )
                     if before_component_idx > component_idx:
                         continue
                     sorted_components.remove(before_component)
-                    sorted_components.insert(component_idx + 1, before_component)
+                    sorted_components.insert(
+                        component_idx + 1, before_component
+                    )
                     adjustments_made = True
 
         if not adjustments_made:
@@ -216,7 +227,10 @@ class ParentDescriptor:
             instance.__dict__.pop("parent", None)
             return
 
-        if "parent" in instance.__dict__ and instance.__dict__["parent"] is not value:
+        if (
+            "parent" in instance.__dict__
+            and instance.__dict__["parent"] is not value
+        ):
             cls = instance.__class__.__name__
             raise AttributeError(
                 f"Cannot overwrite parent attribute of {cls}. "
@@ -427,7 +441,9 @@ class QuamBase(ReferenceClass):
                     f"relative_path {relative_path} is not a reference"
                 )
 
-            reference = string_reference.join_references(reference, relative_path)
+            reference = string_reference.join_references(
+                reference, relative_path
+            )
         elif attr is not None:
             reference = f"{reference}/{attr}"
 
@@ -486,7 +502,8 @@ class QuamBase(ReferenceClass):
             that the object can be reconstructed when loading from a file.
         """
         attrs = self.get_attrs(
-            follow_references=follow_references, include_defaults=include_defaults
+            follow_references=follow_references,
+            include_defaults=include_defaults,
         )
         quam_dict = {}
         for attr, val in attrs.items():
@@ -574,7 +591,9 @@ class QuamBase(ReferenceClass):
             return reference
 
         try:
-            return string_reference.get_referenced_value(self, reference, root=root)
+            return string_reference.get_referenced_value(
+                self, reference, root=root
+            )
         except InvalidReferenceError as e:
             try:
                 ref = f"{self.__class__.__name__}: {self.get_reference()}"
@@ -589,12 +608,7 @@ class QuamBase(ReferenceClass):
                 f"Error: {base_error_msg}"
             )
 
-            try:
-                cfg = get_quam_config()
-                raise_error_missing_reference = cfg.raise_error_missing_reference
-            except FileNotFoundError:
-                # Default behavior if config file not found
-                raise_error_missing_reference = False
+            raise_error_missing_reference = False
 
             if not raise_error_missing_reference:
                 warnings.warn(msg)
@@ -722,7 +736,9 @@ class QuamRoot(QuamBase):
 
         reference = "#/"
         if relative_path is not None:
-            reference = string_reference.join_references(reference, relative_path)
+            reference = string_reference.join_references(
+                reference, relative_path
+            )
         return reference
 
     def get_root(self: QuamRootType) -> QuamRootType:
