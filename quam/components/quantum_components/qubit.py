@@ -56,6 +56,14 @@ class Qubit(QuantumComponent):
             if isinstance(val, Channel)
         }
 
+    @property
+    def channel_names(self) -> List[str]:
+        return [
+            ch.name
+            for qubit in quantum_components
+            for ch in qubit.channels.values()
+        ]
+
     def get_pulse(self, pulse_name: str) -> Pulse:
         """Returns the pulse with the given name
 
@@ -84,24 +92,34 @@ class Qubit(QuantumComponent):
         *args: "Qubit",
     ):
         """Aligns the execution of all channels of this qubit and all other qubits"""
-        quantum_components = [self]
+        channel_names = self.channel_names
 
         if isinstance(other_qubits, Qubit):
-            quantum_components.append(other_qubits)
+            channel_names += other_qubits.channel_names
         elif isinstance(other_qubits, Iterable):
-            quantum_components.extend(other_qubits)
+            for qubit in other_qubits:
+                channel_names += qubit.channel_names
         elif other_qubits is not None:
-            raise ValueError(f"Invalid type for other_qubits: {type(other_qubits)}")
+            raise ValueError(
+                f"Invalid type for other_qubits: {type(other_qubits)}"
+            )
 
         if args:
             assert all(isinstance(arg, Qubit) for arg in args)
-            quantum_components.extend(args)
+            for qubit in args:
+                channel_names += qubit.channel_names
 
-        channel_names = {
-            ch.name for qubit in quantum_components for ch in qubit.channels.values()
-        }
+        channel_names_set = set(channel_names)
 
-        align(*channel_names)
+        align(*channel_names_set)
+
+    def wait(self, duration: int):
+        """Waits for the given duration
+
+        Args:
+            duration: The duration to wait for, in units of clock cycles (4 ns)
+        """
+        qua.wait(duration, *self.channel_names)
 
     def __matmul__(self, other):  # TODO Add QubitPair return type
         """Allows access to qubit pairs using the '@' operator, e.g. (q1 @ q2)"""
@@ -136,7 +154,10 @@ class Qubit(QuantumComponent):
             qubit_pairs = root_quam.qubit_pairs
 
         for qubit_pair in qubit_pairs:
-            if qubit_pair.qubit_control is self and qubit_pair.qubit_target is other:
+            if (
+                qubit_pair.qubit_control is self
+                and qubit_pair.qubit_target is other
+            ):
                 return qubit_pair
         else:
             raise ValueError(
