@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Fixed
+
+- Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.
+
 ## [0.4.0]
 
 ### Added

@@ -307,7 +307,7 @@ class QuamBase(ReferenceClass):
             AttributeError if not found.
         """
         for attr_name in self._get_attr_names():
-            if getattr(self, attr_name) is attr_val:
+            if self.get_raw_value(attr_name) is attr_val:
                 return attr_name
         else:
             raise AttributeError(
@@ -963,7 +963,7 @@ class QuamDict(UserDict, QuamBase):
             AttributeError if not found.
         """
         for attr_name in self._get_attr_names():
-            if attr_name in self and self[attr_name] is attr_val:
+            if attr_name in self and self.get_raw_value(attr_name) is attr_val:
                 return attr_name
         else:
             raise AttributeError(

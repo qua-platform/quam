@@ -2,7 +2,7 @@ from typing import List
 from dataclasses import is_dataclass, field
 import pytest
 
-from quam.core import *
+from quam.core import QuamBase, QuamRoot, QuamComponent, QuamDict, quam_dataclass
 
 
 def test_error_create_base_classes_directly():
@@ -259,3 +259,22 @@ def test_parent_attr_name(BareQuamComponent):
     outer_quam_component.quam_component = None
     with pytest.raises(AttributeError):
         inner_quam_component.parent.get_attr_name(inner_quam_component)
+
+
+def test_get_attr_name_with_reference():
+    @quam_dataclass
+    class TestQuamComponent(QuamComponent):
+        a: dict
+        b: dict
+
+    component = TestQuamComponent(a="#./b", b={"value": 43})
+    
+    assert component.a is component.b
+    assert component.get_attr_name(component.b) == "b"
+
+
+def test_quam_dict_get_attr_name_with_reference():
+    d = QuamDict(a="#./b", b={"value": 42})
+
+    assert d.a is d.b
+    assert d.get_attr_name(d.b) == "b"
