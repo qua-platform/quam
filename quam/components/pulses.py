@@ -296,7 +296,7 @@ class Pulse(QuamComponent):
             if np.iscomplexobj(waveform):
                 waveforms = {"I": list(waveform.real), "Q": list(waveform.imag)}
             elif isinstance(self.channel, (IQChannel, MWChannel)):
-                waveforms = {"I": waveform, "Q": np.zeros_like(waveform)}
+                waveforms = {"I": list(waveform), "Q": list(np.zeros_like(waveform))}
             else:
                 waveforms = {"single": list(waveform)}
         else:

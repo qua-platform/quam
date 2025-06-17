@@ -188,7 +188,6 @@ class QuamTestPulseReferenced(QuamRoot):
 
 
 def test_pulses_referenced():
-
     channel = SingleChannel(id="single", opx_output=("con1", 1))
     machine = QuamTestPulseReferenced(channel=channel)
 
@@ -257,3 +256,85 @@ def test_pulse_play_no_channel(mocker):
     pulse = pulses.SquarePulse(length=60, amplitude=0)
     with pytest.raises(ValueError):
         pulse.play()
+
+
+def test_arbitrary_waveform_iq_channel_list_conversion():
+    """Test that arbitrary waveforms on IQ channels convert both I and Q to lists"""
+    IQ_channel = IQChannel(
+        id="IQ",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
+    )
+
+    # Create a Gaussian pulse that returns an arbitrary waveform (numpy array)
+    gaussian_pulse = pulses.GaussianPulse(
+        length=16, amplitude=1.0, sigma=4.0, axis_angle=None
+    )
+    IQ_channel.operations["gaussian"] = gaussian_pulse
+
+    cfg = {"pulses": {}, "waveforms": {}}
+    gaussian_pulse.apply_to_config(cfg)
+
+    # Check that both I and Q waveforms are lists
+    pulse_config = cfg["pulses"][gaussian_pulse.pulse_name]
+    i_waveform_name = pulse_config["waveforms"]["I"]
+    q_waveform_name = pulse_config["waveforms"]["Q"]
+
+    i_waveform = cfg["waveforms"][i_waveform_name]["samples"]
+    q_waveform = cfg["waveforms"][q_waveform_name]["samples"]
+
+    assert isinstance(i_waveform, list), "I waveform should be a list"
+    assert isinstance(q_waveform, list), "Q waveform should be a list"
+    assert len(i_waveform) == 16, "I waveform should have correct length"
+    assert len(q_waveform) == 16, "Q waveform should have correct length"
+    # Q waveform should be all zeros since axis_angle=None
+    assert all(q == 0.0 for q in q_waveform), "Q waveform should be all zeros"
+
+
+def test_complex_arbitrary_waveform_iq_channel_list_conversion():
+    """Test that complex arbitrary waveforms on IQ channels convert both I and Q to lists"""
+    from quam.components.channels import IQChannel, MWChannel
+
+    IQ_channel = IQChannel(
+        id="IQ",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
+    )
+
+    # Create a custom pulse that returns a complex waveform
+    @quam_dataclass
+    class CustomComplexPulse(pulses.Pulse):
+        amplitude: float = 1.0
+
+        def waveform_function(self):
+            # Return a complex numpy array
+            return np.array([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j])
+
+    complex_pulse = CustomComplexPulse(length=4)
+    IQ_channel.operations["complex"] = complex_pulse
+
+    cfg = {"pulses": {}, "waveforms": {}}
+    complex_pulse.apply_to_config(cfg)
+
+    # Check that both I and Q waveforms are lists
+    pulse_config = cfg["pulses"][complex_pulse.pulse_name]
+    i_waveform_name = pulse_config["waveforms"]["I"]
+    q_waveform_name = pulse_config["waveforms"]["Q"]
+
+    i_waveform = cfg["waveforms"][i_waveform_name]["samples"]
+    q_waveform = cfg["waveforms"][q_waveform_name]["samples"]
+
+    assert isinstance(i_waveform, list), "I waveform should be a list"
+    assert isinstance(q_waveform, list), "Q waveform should be a list"
+    assert len(i_waveform) == 4, "I waveform should have correct length"
+    assert len(q_waveform) == 4, "Q waveform should have correct length"
+    assert i_waveform == [1.0, 2.0, 3.0, 4.0], "I waveform should match real part"
+    assert q_waveform == [1.0, 2.0, 3.0, 4.0], "Q waveform should match imaginary part"
