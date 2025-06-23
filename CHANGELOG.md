@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- Added `duration` and `fidelity` as optional parameters to `QuamMacro`
+
 ### Fixed
 
 - Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.
