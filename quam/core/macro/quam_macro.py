@@ -1,8 +1,8 @@
 from abc import ABC
+from typing import Optional
 from quam.core.quam_classes import quam_dataclass, QuamComponent
 from quam.utils import string_reference as str_ref
 from quam.core.macro.base_macro import BaseMacro
-
 
 __all__ = ["QuamMacro"]
 
@@ -10,6 +10,8 @@ __all__ = ["QuamMacro"]
 @quam_dataclass
 class QuamMacro(QuamComponent, BaseMacro, ABC):
     id: str = "#./inferred_id"
+    duration: Optional[float] = None
+    fidelity: Optional[float] = None
 
     @property
     def inferred_id(self):
