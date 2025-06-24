@@ -16,7 +16,7 @@ Start by importing the necessary components for a superconducting quantum circui
 
 ```python
 from quam.components import *
-from quam.examples.superconducting_qubits import Transmon, Quam
+from quam.examples.superconducting_qubits import Transmon, QuAM
 ```
 
 As can be seen, we use transmon-specific components from `quam.examples.superconducting_qubits` to set up the quantum circuit.
@@ -27,11 +27,11 @@ Users are recommended to create their own custom components for specialized need
 QUAM requires an initial setup where all components are instantiated. Create the root QUAM object, which acts as the top-level container for your quantum setup (see [QUAM Root Documentation](/components/quam-root) for details):
 
 ```python
-machine = Quam() # (1)
+machine = QuAM() # (1)
 
 ```
 
-1.  The `Quam` instance is called `machine` instead of `quam` to avoid conflicts with the statement `import quam`
+1.  The `QuAM` instance is called `machine` instead of `quam` to avoid conflicts with the statement `import quam`
 
 Initially, `machine` is an empty container. You'll populate it with quantum circuit components, specifically Transmon qubits and associated resonators.
 
@@ -375,7 +375,7 @@ The contents of `state.json` will mirror the structure and settings of your QUAM
 To resume work with a previously configured setup:
 
 ```python
-loaded_machine = Quam.load("state.json")
+loaded_machine = QuAM.load("state.json")
 ```
 
 ## Workflow
@@ -389,7 +389,7 @@ Follow these steps for a typical execution flow in QUAM:
 
 ```python
 # Load QUAM
-machine = Quam.load("state.json")
+machine = QuAM.load("state.json")
 
 # Run QUA program and analyse results to extract the optimal pulse amplitude
 results = some_qua_program()
