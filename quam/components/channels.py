@@ -61,6 +61,7 @@ from qm.qua import (
 )
 
 __all__ = [
+    "StickyChannelAddon",
     "Channel",
     "DigitalOutputChannel",
     "StickyChannelAddon",
@@ -308,6 +309,7 @@ class Channel(QuamComponent, ABC):
 
     id: Union[str, int] = None
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
+    sticky: StickyChannelAddon = None
 
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
     sticky: Optional[StickyChannelAddon] = None
