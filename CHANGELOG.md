@@ -8,6 +8,7 @@
 
 - Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.
 - Fixed arbitrary waveforms on IQ/MW channels not converting Q component to list consistently
+- Fixed type annotation issue in `QuamRoot.load()` method causing linting errors for subclasses like `BasicQuam`
 
 ## [0.4.0]
 
