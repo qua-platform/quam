@@ -1,3 +1,5 @@
+from typing import Union, List
+
 __all__ = [
     "ScalarInt",
     "ScalarFloat",
@@ -10,7 +12,7 @@ __all__ = [
     "AmpValuesType",
     "ChirpType",
     "StreamType",
-    "_PulseAmp",
+    "PulseAmp",
 ]
 
 try:
@@ -26,6 +28,7 @@ try:
     QuaVariableBool = QuaVariable[bool]
     QuaVariableInt = QuaVariable[int]
     QuaVariableFloat = QuaVariable[float]
+    PulseAmp = Union[Scalar[float], List[Scalar[float]]]
 
 except ImportError:
     from qm.qua._dsl import (
@@ -34,6 +37,8 @@ except ImportError:
         QuaExpressionType,
         ChirpType,
         StreamType,
+        _PulseAmp,
+        AmpValuesType,
     )
 
     ScalarInt = QuaNumberType
@@ -45,6 +50,4 @@ except ImportError:
     QuaVariableBool = QuaVariableType
     QuaVariableInt = QuaVariableType
     QuaVariableFloat = QuaVariableType
-
-
-from qm.qua._dsl import _PulseAmp
+    PulseAmp = _PulseAmp

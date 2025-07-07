@@ -31,7 +31,7 @@ from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
 from quam.utils.qua_types import (
-    _PulseAmp,
+    PulseAmp,
     ChirpType,
     StreamType,
     ScalarInt,
@@ -57,7 +57,7 @@ from qm.qua import (
     frame_rotation,
     frame_rotation_2pi,
     time_tagging,
-    reset_if_phase
+    reset_if_phase,
 )
 
 __all__ = [
@@ -413,7 +413,7 @@ class Channel(QuamComponent, ABC):
             )
 
         if amplitude_scale is not None:
-            if isinstance(amplitude_scale, _PulseAmp):
+            if isinstance(amplitude_scale, PulseAmp):
                 warnings.warn(
                     "Setting amplitude_scale=amp(...) is deprecated, please "
                     "pass a float or list of floats instead",
@@ -856,7 +856,7 @@ class InSingleChannel(Channel):
             qua_vars = [declare(fixed) for _ in range(2)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if not isinstance(amplitude_scale, PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
             pulse_name *= amplitude_scale
 
@@ -935,7 +935,7 @@ class InSingleChannel(Channel):
             qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if not isinstance(amplitude_scale, PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
             pulse_name *= amplitude_scale
 
@@ -1018,7 +1018,7 @@ class InSingleChannel(Channel):
             qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if not isinstance(amplitude_scale, PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
             pulse_name *= amplitude_scale
 
@@ -1282,14 +1282,13 @@ class IQChannel(_OutComplexChannel):
                 f"reference: {self.frequency_converter_up}"
             )
         else:
-
             element_config["mixInputs"] = {}  # To be filled in next section
             if self.mixer is not None:
                 element_config["mixInputs"]["mixer"] = self.mixer.name
             if self.local_oscillator is not None:
-                element_config["mixInputs"][
-                    "lo_frequency"
-                ] = self.local_oscillator.frequency
+                element_config["mixInputs"]["lo_frequency"] = (
+                    self.local_oscillator.frequency
+                )
 
         opx_outputs = [self.opx_output_I, self.opx_output_Q]
         offsets = [self.opx_output_offset_I, self.opx_output_offset_Q]
@@ -1358,7 +1357,7 @@ class _InComplexChannel(Channel, ABC):
             qua_vars = [declare(fixed) for _ in range(2)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if not isinstance(amplitude_scale, PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
             pulse_name *= amplitude_scale
 
@@ -1447,7 +1446,7 @@ class _InComplexChannel(Channel, ABC):
             qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if not isinstance(amplitude_scale, PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
             pulse_name *= amplitude_scale
 
@@ -1534,7 +1533,7 @@ class _InComplexChannel(Channel, ABC):
             qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
+            if not isinstance(amplitude_scale, PulseAmp):
                 amplitude_scale = amp(amplitude_scale)
             pulse_name *= amplitude_scale
 
