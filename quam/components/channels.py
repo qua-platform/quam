@@ -1864,11 +1864,15 @@ class InMWChannel(_InComplexChannel):
             perspective, e.g. MWFEMAnalogInputPort("con1", 1, 1)
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
+        time_of_flight (int): Round-trip signal duration in nanoseconds. Default is 280,
+            which is a reasonable default for the MW FEM.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing. Default is 0.
     """
 
     opx_input: MWFEMAnalogInputPort
 
-    time_of_flight: int = 140
+    time_of_flight: int = 280
     smearing: int = 0
 
     def apply_to_config(self, config: Dict) -> None:
