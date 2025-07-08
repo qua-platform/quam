@@ -57,7 +57,7 @@ from qm.qua import (
     frame_rotation,
     frame_rotation_2pi,
     time_tagging,
-    reset_if_phase
+    reset_if_phase,
 )
 
 __all__ = [
@@ -779,7 +779,7 @@ class InSingleChannel(Channel):
     opx_input: LF_input_port_types
     opx_input_offset: float = None
 
-    time_of_flight: int = 24
+    time_of_flight: int = 140
     smearing: int = 0
 
     time_tagging: Optional[TimeTaggingAddon] = None
@@ -1282,14 +1282,13 @@ class IQChannel(_OutComplexChannel):
                 f"reference: {self.frequency_converter_up}"
             )
         else:
-
             element_config["mixInputs"] = {}  # To be filled in next section
             if self.mixer is not None:
                 element_config["mixInputs"]["mixer"] = self.mixer.name
             if self.local_oscillator is not None:
-                element_config["mixInputs"][
-                    "lo_frequency"
-                ] = self.local_oscillator.frequency
+                element_config["mixInputs"]["lo_frequency"] = (
+                    self.local_oscillator.frequency
+                )
 
         opx_outputs = [self.opx_output_I, self.opx_output_Q]
         offsets = [self.opx_output_offset_I, self.opx_output_offset_Q]
@@ -1587,7 +1586,7 @@ class InIQChannel(_InComplexChannel):
     opx_input_I: LF_input_port_types
     opx_input_Q: LF_input_port_types
 
-    time_of_flight: int = 24
+    time_of_flight: int = 140
     smearing: int = 0
 
     opx_input_offset_I: float = None
@@ -1865,11 +1864,15 @@ class InMWChannel(_InComplexChannel):
             perspective, e.g. MWFEMAnalogInputPort("con1", 1, 1)
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
+        time_of_flight (int): Round-trip signal duration in nanoseconds. Default is 280,
+            which is a reasonable default for the MW FEM.
+        smearing (int): Additional window of ADC integration in nanoseconds.
+            Used to account for signal smearing. Default is 0.
     """
 
     opx_input: MWFEMAnalogInputPort
 
-    time_of_flight: int = 24
+    time_of_flight: int = 280
     smearing: int = 0
 
     def apply_to_config(self, config: Dict) -> None:

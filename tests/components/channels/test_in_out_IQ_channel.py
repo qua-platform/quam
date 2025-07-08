@@ -91,7 +91,7 @@ def test_empty_in_out_IQ_channel():
                 "operations": {},
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
             }
         },
         "pulses": {},
@@ -188,7 +188,7 @@ def test_readout_resonator_with_readout():
                 },
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
                 "operations": {"readout": "IQ1.readout.pulse"},
             }
         },
@@ -369,7 +369,7 @@ def test_empty_in_out_IQ_channel_ports():
                 "operations": {},
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
             }
         },
         "pulses": {},

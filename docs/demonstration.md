@@ -211,7 +211,7 @@ QUAM:
         intermediate_frequency: 0.0
         opx_input_I: ('con1', 1)
         opx_input_Q: ('con1', 2)
-        time_of_flight: 24
+        time_of_flight: 140
         smearing: 0
         opx_input_offset_I: None
         opx_input_offset_Q: None
@@ -268,7 +268,7 @@ QUAM:
         intermediate_frequency: 0.0
         opx_input_I: ('con1', 1)
         opx_input_Q: ('con1', 2)
-        time_of_flight: 24
+        time_of_flight: 140
         smearing: 0
         opx_input_offset_I: None
         opx_input_offset_Q: None
@@ -445,7 +445,7 @@ qua_config = machine.generate_config()
             "operations": {"readout": "IQ0.readout.pulse"},
             "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         },
         "IQ1": {
             "intermediate_frequency": 0.0,
@@ -458,7 +458,7 @@ qua_config = machine.generate_config()
             "operations": {},
             "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         },
         "q0.xy": {
             "intermediate_frequency": 100000000.0,

@@ -64,7 +64,7 @@ def test_generate_config(qua_config):
             "operations": {},
             "outputs": {"out1": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }
 
@@ -104,6 +104,6 @@ def test_generate_config(qua_config):
             "operations": {},
             "outputs": {"out1": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }

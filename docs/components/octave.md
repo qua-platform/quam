@@ -214,7 +214,7 @@ qua_config = machine.generate_config()
       "intermediate_frequency": 0.0,
       "RF_inputs": { "port": ["octave1", 2] },
       "smearing": 0,
-      "time_of_flight": 24,
+      "time_of_flight": 140,
       "RF_outputs": { "port": ["octave1", 1] }
     }
   },

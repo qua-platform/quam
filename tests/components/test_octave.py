@@ -308,7 +308,7 @@ def test_channel_add_RF_inputs(octave, qua_config):
             "RF_outputs": {"port": ("octave1", 4)},
             "operations": {},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }
 
