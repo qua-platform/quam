@@ -766,7 +766,7 @@ class QuamRoot(QuamBase):
 
     @classmethod
     def load(
-        cls: QuamRootType,
+        cls: type[QuamRootType],
         filepath_or_dict: Optional[Union[str, Path, dict]] = None,
         validate_type: bool = True,
         fix_attrs: bool = True,
