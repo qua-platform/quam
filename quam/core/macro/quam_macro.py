@@ -11,7 +11,7 @@ __all__ = ["QuamMacro"]
 class QuamMacro(QuamComponent, BaseMacro, ABC):
     id: str = "#./inferred_id"
     fidelity: Optional[float] = None
-    duration: Optional[Union[float, str]] = "#./inferred_duration"
+    duration: Optional[float] = "#./inferred_duration"
 
     @property
     def inferred_id(self):
