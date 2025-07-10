@@ -43,7 +43,7 @@ class PulseMacro(QubitMacro):
         )
 
     @property
-    def duration(self) -> float:
+    def inferred_duration(self) -> float:
         if isinstance(self.pulse, Pulse):
             return self.pulse.length * 1e-9
         else:
