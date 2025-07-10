@@ -41,3 +41,11 @@ class PulseMacro(QubitMacro):
         pulse.play(
             amplitude_scale=amplitude_scale, duration=duration, **kwargs  # type: ignore
         )
+
+    @property
+    def duration(self) -> float:
+        if isinstance(self.pulse, Pulse):
+            return self.pulse.length * 1e-9
+        else:
+            return self.qubit.get_pulse(self.pulse).length * 1e-9
+    

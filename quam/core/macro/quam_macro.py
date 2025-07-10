@@ -10,7 +10,6 @@ __all__ = ["QuamMacro"]
 @quam_dataclass
 class QuamMacro(QuamComponent, BaseMacro, ABC):
     id: str = "#./inferred_id"
-    duration: Optional[float] = None
     fidelity: Optional[float] = None
 
     @property
@@ -24,3 +23,12 @@ class QuamMacro(QuamComponent, BaseMacro, ABC):
             raise AttributeError(
                 f"Cannot infer id of {self} because it is not attached to a parent"
             )
+        
+    @property
+    def duration(self) -> Optional[float]:
+        """
+        This property is used to get the duration of the macro (in seconds).
+        It is not implemented in the base class, but can be overridden in subclasses.
+        If not implemented, the macro is assumed to have no fixed duration.
+        """
+        return None
