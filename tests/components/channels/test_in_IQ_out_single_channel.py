@@ -58,7 +58,7 @@ def test_generate_config(qua_config):
             "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
             "singleInput": {"port": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }
 
@@ -93,6 +93,6 @@ def test_generate_config_ports(qua_config):
             "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
             "singleInput": {"port": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }
