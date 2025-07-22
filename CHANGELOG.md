@@ -9,6 +9,9 @@
 - Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.
 - Fixed arbitrary waveforms on IQ/MW channels not converting Q component to list consistently
 - Updated `outputPulseParameters` to `timeTaggingParameters` for `TimeTaggingAddon`, following deprecation in `qm-qua 1.2.2a3`
+- Changed default `time_of_flight` from 24 ns to 140 ns to fix error on newer qm-qua versions
+  - 140 ns seems like a reasonable default for most channels
+- Fixed type annotation issue in `QuamRoot.load()` method causing linting errors for subclasses like `BasicQuam`
 
 ## [0.4.0]
 

@@ -126,7 +126,7 @@ q1: Transmon
     thread: None
     core: None
     opx_input: "#/ports/mw_inputs/con1/1/2"
-    time_of_flight: 24
+    time_of_flight: 140
     smearing: 0
     LO_frequency: "#./upconverter_frequency"
     RF_frequency: "#./inferred_RF_frequency"
@@ -157,7 +157,7 @@ q1 @ q2
 /// details | `q1 @ q2` output
 
 ```
-QubitPair(id='q1@q2', macros={}, qubit_control=Transmon(id='q1', macros={}, xy=MWChannel(operations={}, id=None, digital_outputs={}, sticky=None, intermediate_frequency=100000000.0, thread=None, core=None, LO_frequency=5000000000.0, RF_frequency=5100000000.0, opx_output=MWFEMAnalogOutputPort(controller_id='con1', fem_id=1, port_id=1, band=1, upconverter_frequency=5000000000.0, upconverters=None, delay=0, shareable=False, sampling_rate=1000000000.0, full_scale_power_dbm=-11), upconverter=1), resonator=InOutMWChannel(operations={}, id=None, digital_outputs={}, sticky=None, intermediate_frequency=100000000.0, thread=None, core=None, opx_input=MWFEMAnalogInputPort(controller_id='con1', fem_id=1, port_id=2, band=1, downconverter_frequency=5000000000.0, gain_db=None, sampling_rate=1000000000.0, shareable=False), time_of_flight=24, smearing=0, LO_frequency=5000000000.0, RF_frequency=5100000000.0, opx_output=MWFEMAnalogOutputPort(controller_id='con1', fem_id=1, port_id=2, band=1, upconverter_frequency=5000000000.0, upconverters=None, delay=0, shareable=False, sampling_rate=1000000000.0, full_scale_power_dbm=-11), upconverter=1)), qubit_target=Transmon(id='q2', macros={}, xy=MWChannel(operations={}, id=None, digital_outputs={}, sticky=None, intermediate_frequency=100000000.0, thread=None, core=None, LO_frequency=5000000000.0, RF_frequency=5100000000.0, opx_output=MWFEMAnalogOutputPort(controller_id='con1', fem_id=1, port_id=2, band=1, upconverter_frequency=5000000000.0, upconverters=None, delay=0, shareable=False, sampling_rate=1000000000.0, full_scale_power_dbm=-11), upconverter=1), resonator=None))
+QubitPair(id='q1@q2', macros={}, qubit_control=Transmon(id='q1', macros={}, xy=MWChannel(operations={}, id=None, digital_outputs={}, sticky=None, intermediate_frequency=100000000.0, thread=None, core=None, LO_frequency=5000000000.0, RF_frequency=5100000000.0, opx_output=MWFEMAnalogOutputPort(controller_id='con1', fem_id=1, port_id=1, band=1, upconverter_frequency=5000000000.0, upconverters=None, delay=0, shareable=False, sampling_rate=1000000000.0, full_scale_power_dbm=-11), upconverter=1), resonator=InOutMWChannel(operations={}, id=None, digital_outputs={}, sticky=None, intermediate_frequency=100000000.0, thread=None, core=None, opx_input=MWFEMAnalogInputPort(controller_id='con1', fem_id=1, port_id=2, band=1, downconverter_frequency=5000000000.0, gain_db=None, sampling_rate=1000000000.0, shareable=False), time_of_flight=140, smearing=0, LO_frequency=5000000000.0, RF_frequency=5100000000.0, opx_output=MWFEMAnalogOutputPort(controller_id='con1', fem_id=1, port_id=2, band=1, upconverter_frequency=5000000000.0, upconverters=None, delay=0, shareable=False, sampling_rate=1000000000.0, full_scale_power_dbm=-11), upconverter=1)), qubit_target=Transmon(id='q2', macros={}, xy=MWChannel(operations={}, id=None, digital_outputs={}, sticky=None, intermediate_frequency=100000000.0, thread=None, core=None, LO_frequency=5000000000.0, RF_frequency=5100000000.0, opx_output=MWFEMAnalogOutputPort(controller_id='con1', fem_id=1, port_id=2, band=1, upconverter_frequency=5000000000.0, upconverters=None, delay=0, shareable=False, sampling_rate=1000000000.0, full_scale_power_dbm=-11), upconverter=1), resonator=None))
 ```
 
 ///
