@@ -272,7 +272,7 @@ class TimeTaggingAddon(QuamComponent):
         # TODO should we also check derivative threshold? What should the max value be?
 
         ch_cfg = config["elements"][self.channel.name]
-        ch_cfg["outputPulseParameters"] = {
+        ch_cfg["timeTaggingParameters"] = {
             "signalThreshold": int(self.signal_threshold * 4096),
             "signalPolarity": self.signal_polarity,
             "derivativeThreshold": int(self.derivative_threshold * 4096),
