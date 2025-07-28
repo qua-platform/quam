@@ -864,9 +864,9 @@ class InSingleChannel(Channel):
         measure(
             pulse_name,
             self.name,
-            stream,
             demod.full(integration_weight_labels[0], qua_vars[0], "out1"),
             demod.full(integration_weight_labels[1], qua_vars[1], "out1"),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -1844,7 +1844,7 @@ class MWChannel(_OutComplexChannel):
         if self.opx_output.upconverter_frequency is not None:
             return self.opx_output.upconverter_frequency
         if self.opx_output.upconverters is not None:
-            return self.opx_output.upconverters[self.upconverter]
+            return self.opx_output.upconverters[self.upconverter]["frequency"]
         raise ValueError(
             "MWChannel: Either upconverter_frequency or upconverters must be provided"
         )
