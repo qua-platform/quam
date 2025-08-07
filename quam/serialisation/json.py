@@ -190,7 +190,7 @@ class JSONSerialiser(AbstractSerialiser):
     def __init__(
         self,
         content_mapping: Optional[Dict] = None,  # Accept Dict initially for validation
-        include_defaults: bool = False,
+        include_defaults: Optional[bool] = None,
         state_path: Optional[Union[str, Path]] = None,
     ):
         """
@@ -202,7 +202,8 @@ class JSONSerialiser(AbstractSerialiser):
                 format is detected, a warning is issued and it's converted.
                 If None, uses the class default.
             include_defaults: Whether to include fields set to their default
-                values in the output. Defaults to False.
+                values in the output. If None, reads from config. If config
+                is unavailable, defaults to True (new behavior).
             state_path: An optional default path for saving/loading state. If provided,
                 this path takes precedence over environment variables or configuration
                 files when determining the default save/load location.
@@ -217,7 +218,22 @@ class JSONSerialiser(AbstractSerialiser):
             initial_mapping
         )
 
-        self.include_defaults = include_defaults
+        # Determine include_defaults value
+        if include_defaults is None:
+            # Read from config
+            try:
+                config = get_quam_config()
+                if config is not None and hasattr(config, 'include_defaults_in_save'):
+                    self.include_defaults = config.include_defaults_in_save
+                else:
+                    # Config not found or doesn't have the field - use new default
+                    self.include_defaults = True
+            except Exception:
+                # Config loading failed - use new default
+                self.include_defaults = True
+        else:
+            # Explicit parameter overrides config
+            self.include_defaults = include_defaults
         # Store the state_path, resolving it if provided
         self.state_path: Optional[Path] = (
             Path(state_path).resolve() if state_path else None

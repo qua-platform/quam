@@ -20,9 +20,10 @@ class TestJSONSerialiserConfigIntegration:
 
     def test_serialiser_with_no_config_defaults_to_true(self, prevent_default_config_loading):
         """Test that JSONSerialiser defaults to include_defaults=True when no config."""
-        # This should use the new default behavior when config is not available
-        serialiser = JSONSerialiser()
-        assert serialiser.include_defaults is True
+        # Mock to ensure no config is found
+        with patch('quam.serialisation.json.get_quam_config', return_value=None):
+            serialiser = JSONSerialiser()
+            assert serialiser.include_defaults is True
 
     def test_serialiser_reads_config_include_defaults_true(self, prevent_default_config_loading):
         """Test that JSONSerialiser reads include_defaults_in_save=True from config."""
