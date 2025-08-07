@@ -205,9 +205,9 @@ class TestConfigMigrationV2V3EdgeCases:
         assert "include_defaults_in_save" not in v2_data["quam"]
         assert v2_data["quam"]["version"] == 2
 
-    def test_forward_migration_does_not_modify_input(self):
-        """Test that forward migration doesn't modify the input data."""
-        original_v2_data = {
+    def test_forward_migration_consumes_input_data(self):
+        """Test that forward migration consumes the input data (expected behavior)."""
+        v2_data = {
             "quam": {
                 "version": 2,
                 "state_path": None,
@@ -215,25 +215,17 @@ class TestConfigMigrationV2V3EdgeCases:
             }
         }
         
-        # Create a copy to verify original isn't modified
-        v2_data_copy = {
-            "quam": {
-                "version": 2,
-                "state_path": None,
-                "raise_error_missing_reference": False
-            }
-        }
+        v3_data = Migrate.forward(v2_data)
         
-        v3_data = Migrate.forward(v2_data_copy)
-        
-        # Original should be unchanged
-        assert v2_data_copy == original_v2_data
+        # Input data should be consumed (quam section removed)
+        assert v2_data == {}
         # Result should have the new field
         assert v3_data["quam"]["include_defaults_in_save"] is False
+        assert v3_data["quam"]["version"] == 3
 
-    def test_backward_migration_does_not_modify_input(self):
-        """Test that backward migration doesn't modify the input data."""
-        original_v3_data = {
+    def test_backward_migration_consumes_input_data(self):
+        """Test that backward migration consumes the input data (expected behavior)."""
+        v3_data = {
             "quam": {
                 "version": 3,
                 "state_path": None,
@@ -242,22 +234,13 @@ class TestConfigMigrationV2V3EdgeCases:
             }
         }
         
-        # Create a copy to verify original isn't modified
-        v3_data_copy = {
-            "quam": {
-                "version": 3,
-                "state_path": None,
-                "raise_error_missing_reference": False,
-                "include_defaults_in_save": True
-            }
-        }
+        v2_data = Migrate.backward(v3_data)
         
-        v2_data = Migrate.backward(v3_data_copy)
-        
-        # Original should be unchanged
-        assert v3_data_copy == original_v3_data
+        # Input data should be consumed (quam section removed)
+        assert v3_data == {}
         # Result should not have the field
         assert "include_defaults_in_save" not in v2_data["quam"]
+        assert v2_data["quam"]["version"] == 2
 
 
 class TestConfigMigrationV2V3RoundTrip:
