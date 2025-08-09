@@ -740,7 +740,7 @@ class QuamRoot(QuamBase):
         self,
         path: Optional[Union[Path, str]] = None,
         content_mapping: Optional[Dict[str, str]] = None,
-        include_defaults: bool = False,
+        include_defaults: Optional[bool] = None,
         ignore: Optional[Sequence[str]] = None,
     ):
         """Save the entire QuamRoot object to a file. This includes nested objects.
@@ -753,7 +753,8 @@ class QuamRoot(QuamBase):
                 be used to save different parts of the QuamRoot object to different
                 files.
             include_defaults: Whether to include attributes that have the default
-                value.
+                value. If None, uses the serialiser's configured default (which
+                reads from config or defaults to True).
             ignore: A list of components to ignore.
         """
         self.serialiser.save(
@@ -1058,7 +1059,9 @@ class QuamDict(UserDict, QuamBase):
         Returns:
             A dictionary representation of the object.
         """
-        quam_dict = super().to_dict()
+        quam_dict = super().to_dict(
+            follow_references=follow_references, include_defaults=include_defaults
+        )
 
         # Remove __class__ from the dictionary as it's the default for a dict
         quam_dict.pop("__class__", None)
