@@ -5,6 +5,11 @@ from quam.components.pulses import SquarePulse
 from quam.core.quam_classes import QuamRoot, quam_dataclass
 from quam.components.macro import PulseMacro
 
+try:
+    from qm.exceptions import NoScopeFoundException
+except ImportError:
+    NoScopeFoundException = IndexError
+
 
 @quam_dataclass
 class MockQubit(Qubit):
@@ -53,7 +58,7 @@ def test_pulse_macro_pulse_string(test_qubit, mocker):
         "align": test_qubit.align,
     }
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         test_qubit.apply("test_pulse")
 
     mocker.patch("quam.components.channels.play")

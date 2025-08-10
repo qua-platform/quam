@@ -30,8 +30,8 @@ from quam.components.ports.digital_outputs import (
 from quam.core import QuamComponent, quam_dataclass
 from quam.core.quam_classes import QuamDict
 from quam.utils import string_reference as str_ref
+from quam.utils.pulse import add_amplitude_scale_to_pulse_name
 from quam.utils.qua_types import (
-    _PulseAmp,
     ChirpType,
     StreamType,
     ScalarInt,
@@ -356,7 +356,7 @@ class Channel(QuamComponent, ABC):
     def play(
         self,
         pulse_name: str,
-        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         duration: ScalarInt = None,
         condition: ScalarBool = None,
         chirp: ChirpType = None,
@@ -371,9 +371,9 @@ class Channel(QuamComponent, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude scale
-                of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             duration (Scalar[int]): Duration of the pulse in units of the
                 clock cycle (4ns). If not provided, the default pulse duration will be
                 used. It is possible to dynamically change the duration of both constant
@@ -412,20 +412,7 @@ class Channel(QuamComponent, ABC):
                 f"Operation '{pulse_name}' not found in channel '{self.name}'"
             )
 
-        if amplitude_scale is not None:
-            if isinstance(amplitude_scale, _PulseAmp):
-                warnings.warn(
-                    "Setting amplitude_scale=amp(...) is deprecated, please "
-                    "pass a float or list of floats instead",
-                    DeprecationWarning,
-                )
-            elif isinstance(amplitude_scale, Sequence):
-                amplitude_scale = amp(*amplitude_scale)
-            else:
-                amplitude_scale = amp(amplitude_scale)
-            pulse = pulse_name * amplitude_scale
-        else:
-            pulse = pulse_name
+        pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         # At the moment, self.name is not defined for Channel because it could
         # be a property or dataclass field in a subclass.
@@ -816,7 +803,7 @@ class InSingleChannel(Channel):
     def measure(
         self,
         pulse_name: str,
-        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         qua_vars: Tuple[QuaVariableFloat, ...] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
@@ -825,9 +812,9 @@ class InSingleChannel(Channel):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
-                scale of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             qua_vars (Tuple[QuaVariable[float], ...], optional): Two QUA
                 variables to store the I, Q measurement results.
                 If not provided, new variables will be declared and returned.
@@ -855,14 +842,11 @@ class InSingleChannel(Channel):
         else:
             qua_vars = [declare(fixed) for _ in range(2)]
 
-        if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
-                amplitude_scale = amp(amplitude_scale)
-            pulse_name *= amplitude_scale
+        pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
-            pulse_name,
+            pulse,
             self.name,
             demod.full(integration_weight_labels[0], qua_vars[0], "out1"),
             demod.full(integration_weight_labels[1], qua_vars[1], "out1"),
@@ -873,7 +857,7 @@ class InSingleChannel(Channel):
     def measure_accumulated(
         self,
         pulse_name: str,
-        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         num_segments: int = None,
         segment_length: int = None,
         qua_vars: Tuple[QuaVariableFloat, ...] = None,
@@ -884,9 +868,9 @@ class InSingleChannel(Channel):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
-                scale of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate.
@@ -935,13 +919,11 @@ class InSingleChannel(Channel):
             qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
 
         if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
-                amplitude_scale = amp(amplitude_scale)
-            pulse_name *= amplitude_scale
+            pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
-            pulse_name,
+            pulse,
             self.name,
             demod.accumulated(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
@@ -956,7 +938,7 @@ class InSingleChannel(Channel):
     def measure_sliced(
         self,
         pulse_name: str,
-        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         num_segments: int = None,
         segment_length: int = None,
         qua_vars: Tuple[QuaVariableFloat, ...] = None,
@@ -967,9 +949,9 @@ class InSingleChannel(Channel):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
-                scale of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate.
@@ -1017,14 +999,11 @@ class InSingleChannel(Channel):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
 
-        if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
-                amplitude_scale = amp(amplitude_scale)
-            pulse_name *= amplitude_scale
+        pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
-            pulse_name,
+            pulse,
             self.name,
             demod.sliced(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
@@ -1322,7 +1301,7 @@ class _InComplexChannel(Channel, ABC):
     def measure(
         self,
         pulse_name: str,
-        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         qua_vars: Tuple[QuaVariableFloat, QuaVariableFloat] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
@@ -1331,9 +1310,9 @@ class _InComplexChannel(Channel, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
-                scale of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             qua_vars (Tuple[QuaVariable[float], QuaVariable[float]], optional): Two QUA
                 variables to store the I and Q measurement results. If not provided,
                 new variables will be declared and returned.
@@ -1356,14 +1335,11 @@ class _InComplexChannel(Channel, ABC):
         else:
             qua_vars = [declare(fixed) for _ in range(2)]
 
-        if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
-                amplitude_scale = amp(amplitude_scale)
-            pulse_name *= amplitude_scale
+        pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
-            pulse_name,
+            pulse,
             self.name,
             dual_demod.full(
                 iw1=integration_weight_labels[0],
@@ -1400,9 +1376,9 @@ class _InComplexChannel(Channel, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
-                scale of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate the
@@ -1445,14 +1421,11 @@ class _InComplexChannel(Channel, ABC):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
 
-        if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
-                amplitude_scale = amp(amplitude_scale)
-            pulse_name *= amplitude_scale
+        pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
-            pulse_name,
+            pulse,
             self.name,
             demod.accumulated(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
@@ -1473,7 +1446,7 @@ class _InComplexChannel(Channel, ABC):
     def measure_sliced(
         self,
         pulse_name: str,
-        amplitude_scale: Union[ScalarFloat, Sequence[ScalarFloat]] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         num_segments: Optional[int] = None,
         segment_length: Optional[int] = None,
         qua_vars: Optional[Tuple[QuaVariableFloat, ...]] = None,
@@ -1487,9 +1460,9 @@ class _InComplexChannel(Channel, ABC):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (Union[ScalarFloat, Sequence[ScalarFloat]]): Amplitude
-                scale of the pulse. Can be either a float, qua.amp(float), or a list of
-                floats.
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             num_segments (int): The number of segments to accumulate.
                 Should either specify this or `segment_length`.
             segment_length (int): The length of the segment to accumulate the
@@ -1532,14 +1505,11 @@ class _InComplexChannel(Channel, ABC):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
 
-        if amplitude_scale is not None:
-            if not isinstance(amplitude_scale, _PulseAmp):
-                amplitude_scale = amp(amplitude_scale)
-            pulse_name *= amplitude_scale
+        pulse = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
-            pulse_name,
+            pulse,
             self.name,
             demod.sliced(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"

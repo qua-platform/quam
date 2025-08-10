@@ -2,19 +2,18 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 import numbers
 import warnings
-from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple, Sequence
 import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
-
-from qm.qua._dsl import (
-    AmpValuesType,
+from quam.utils.qua_types import (
+    ScalarInt,
+    ScalarBool,
+    ScalarFloat,
     ChirpType,
     StreamType,
 )
-
-from quam.utils.qua_types import ScalarInt, ScalarBool
 
 
 __all__ = [
@@ -169,7 +168,7 @@ class Pulse(QuamComponent):
 
     def play(
         self,
-        amplitude_scale: Union[float, AmpValuesType] = None,
+        amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
         duration: ScalarInt = None,
         condition: ScalarBool = None,
         chirp: ChirpType = None,
@@ -187,8 +186,9 @@ class Pulse(QuamComponent):
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
                 `self.operations`.
-            amplitude_scale (float, _PulseAmp): Amplitude scale of the pulse.
-                Can be either a float, or qua.amp(float).
+            amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
+                Amplitude scale of the pulse. Can be either a (qua) float, or a list of
+                (qua) floats. If None, the pulse is played without amplitude scaling.
             duration (int): Duration of the pulse in units of the clock cycle (4ns).
                 If not provided, the default pulse duration will be used. It is possible
                 to dynamically change the duration of both constant and arbitrary

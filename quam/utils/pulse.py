@@ -1,7 +1,11 @@
-from typing import Tuple
+from typing import Tuple, Optional, Union, Sequence
+
+from qm import qua
+
+from quam.utils.qua_types import ScalarFloat, _PulseAmp
 
 
-__all__ = ["pulse_str_to_axis_axis_angle"]
+__all__ = ["pulse_str_to_axis_axis_angle", "add_amplitude_scale_to_pulse_name"]
 
 
 def pulse_str_to_axis_axis_angle(pulse_str: str) -> Tuple[str, int]:
@@ -29,3 +33,27 @@ def pulse_str_to_axis_axis_angle(pulse_str: str) -> Tuple[str, int]:
     angle = int(angle_str)
 
     return axis, angle
+
+
+def add_amplitude_scale_to_pulse_name(
+    pulse_name: str,
+    amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]],
+) -> Union[str, _PulseAmp]:
+    """Adds an amplitude scale to a pulse name.
+
+    Args:
+        pulse_name: The name of the pulse.
+        amplitude_scale: The amplitude scale to add to the pulse name.
+            If None, the pulse name is returned unchanged.
+
+    Returns:
+        amplitude_scale == None → pulse_name
+        amplitude_scale == float → pulse_name * qua.amp(amplitude_scale)
+        amplitude_scale == list[float] → pulse_name * qua.amp(*amplitude_scale)
+    """
+    if amplitude_scale is None:
+        return pulse_name
+    elif isinstance(amplitude_scale, ScalarFloat):
+        return pulse_name * qua.amp(amplitude_scale)
+    else:  # isinstance(amplitude_scale, Sequence):
+        return pulse_name * qua.amp(*amplitude_scale)

@@ -7,7 +7,6 @@ __all__ = [
     "QuaVariableInt",
     "QuaVariableFloat",
     "QuaVariable",
-    "AmpValuesType",
     "ChirpType",
     "StreamType",
     "_PulseAmp",
