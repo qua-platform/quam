@@ -1844,7 +1844,16 @@ class MWChannel(_OutComplexChannel):
         if self.opx_output.upconverter_frequency is not None:
             return self.opx_output.upconverter_frequency
         if self.opx_output.upconverters is not None:
-            return self.opx_output.upconverters[self.upconverter]["frequency"]
+            upconverter_config = self.opx_output.upconverters.get(self.upconverter)
+            if upconverter_config is None:
+                raise ValueError(
+                    f"MWChannel: Upconverter {self.upconverter} not found in upconverters dictionary"
+                )
+            if "frequency" not in upconverter_config:
+                raise ValueError(
+                    f"MWChannel: 'frequency' key not found in upconverter {self.upconverter} configuration"
+                )
+            return upconverter_config["frequency"]
         raise ValueError(
             "MWChannel: Either upconverter_frequency or upconverters must be provided"
         )

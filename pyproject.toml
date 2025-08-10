@@ -33,7 +33,7 @@ keywords = [
 
 dependencies = [
     "numpy >= 1.21.2",
-    "qm-qua >=1.1.0",
+    "qm-qua >=1.2.2",
     "qualang-tools >= 0.15.0",
     "typeguard >= 4.1.0",
     "qualibrate-config >= 0.1.4",
@@ -73,6 +73,8 @@ packages = ["quam"]
 version_scheme = "only-version"
 local_scheme = "no-local-version"
 
+[tool.uv]
+prerelease = "allow"
 
 # Previous quam settings
 
