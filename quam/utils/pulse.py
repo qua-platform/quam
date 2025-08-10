@@ -1,4 +1,5 @@
 from typing import Tuple, Optional, Union, Sequence
+from typeguard import TypeCheckError, check_type
 
 from qm import qua
 
@@ -53,7 +54,17 @@ def add_amplitude_scale_to_pulse_name(
     """
     if amplitude_scale is None:
         return pulse_name
-    elif isinstance(amplitude_scale, ScalarFloat):
+
+    try:
+        check_type(amplitude_scale, ScalarFloat)
         return pulse_name * qua.amp(amplitude_scale)
-    else:  # isinstance(amplitude_scale, Sequence):
+    except TypeCheckError:
+        pass
+
+    try:
+        check_type(amplitude_scale, Sequence[ScalarFloat])
         return pulse_name * qua.amp(*amplitude_scale)
+    except TypeCheckError:
+        pass
+
+    raise ValueError(f"Invalid amplitude scale: {amplitude_scale}")
