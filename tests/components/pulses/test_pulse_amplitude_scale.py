@@ -29,11 +29,6 @@ def test_pulse_float_amplitude_scale(ch):
         ch.play("pulse", amplitude_scale=0.5)
 
 
-def test_pulse_amplitude_scale_qua_amp(ch):
-    with qua.program():
-        ch.play("pulse", amplitude_scale=qua.amp(0.5))
-
-
 def test_pulse_amplitude_scale_qua_var(ch):
     with qua.program():
         a = qua.declare(qua.fixed)

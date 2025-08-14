@@ -6,6 +6,10 @@ from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
 from quam.utils.dataclass import get_dataclass_attr_annotations
 
+try:
+    from qm.exceptions import NoScopeFoundException
+except ImportError:
+    NoScopeFoundException = IndexError
 
 def test_drag_gaussian_pulse():
     drag_pulse = pulses.DragGaussianPulse(
@@ -147,7 +151,7 @@ def test_IQ_pulse_play_validate():
     with pytest.raises(KeyError):
         single_channel.play("X180")
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         single_channel.play("X180", validate=False)
 
     single_channel.operations["X180"] = pulses.DragPulse(
@@ -159,7 +163,7 @@ def test_IQ_pulse_play_validate():
         anharmonicity=200e6,
     )
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         single_channel.play("X180")
 
 
