@@ -864,9 +864,9 @@ class InSingleChannel(Channel):
         measure(
             pulse_name,
             self.name,
-            stream,
             demod.full(integration_weight_labels[0], qua_vars[0], "out1"),
             demod.full(integration_weight_labels[1], qua_vars[1], "out1"),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -943,13 +943,13 @@ class InSingleChannel(Channel):
         measure(
             pulse_name,
             self.name,
-            stream,
             demod.accumulated(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
             ),
             demod.accumulated(
                 integration_weight_labels[1], qua_vars[1], segment_length, "out1"
             ),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -1026,13 +1026,13 @@ class InSingleChannel(Channel):
         measure(
             pulse_name,
             self.name,
-            stream,
             demod.sliced(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
             ),
             demod.sliced(
                 integration_weight_labels[1], qua_vars[1], segment_length, "out1"
             ),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -1090,8 +1090,8 @@ class InSingleChannel(Channel):
         measure(
             pulse_name,
             self.name,
-            stream,
             time_tagging_func(target=times, max_time=max_time, targetLen=counts),
+            adc_stream=stream,
         )
         return times, counts
 
@@ -1365,7 +1365,6 @@ class _InComplexChannel(Channel, ABC):
         measure(
             pulse_name,
             self.name,
-            stream,
             dual_demod.full(
                 iw1=integration_weight_labels[0],
                 element_output1="out1",
@@ -1380,6 +1379,7 @@ class _InComplexChannel(Channel, ABC):
                 element_output2="out2",
                 target=qua_vars[1],
             ),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -1454,7 +1454,6 @@ class _InComplexChannel(Channel, ABC):
         measure(
             pulse_name,
             self.name,
-            stream,
             demod.accumulated(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
             ),
@@ -1467,6 +1466,7 @@ class _InComplexChannel(Channel, ABC):
             demod.accumulated(
                 integration_weight_labels[0], qua_vars[3], segment_length, "out2"
             ),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -1541,7 +1541,6 @@ class _InComplexChannel(Channel, ABC):
         measure(
             pulse_name,
             self.name,
-            stream,
             demod.sliced(
                 integration_weight_labels[0], qua_vars[0], segment_length, "out1"
             ),
@@ -1554,6 +1553,7 @@ class _InComplexChannel(Channel, ABC):
             demod.sliced(
                 integration_weight_labels[0], qua_vars[3], segment_length, "out2"
             ),
+            adc_stream=stream,
         )
         return tuple(qua_vars)
 
@@ -1844,7 +1844,16 @@ class MWChannel(_OutComplexChannel):
         if self.opx_output.upconverter_frequency is not None:
             return self.opx_output.upconverter_frequency
         if self.opx_output.upconverters is not None:
-            return self.opx_output.upconverters[self.upconverter]
+            upconverter_config = self.opx_output.upconverters.get(self.upconverter)
+            if upconverter_config is None:
+                raise ValueError(
+                    f"MWChannel: Upconverter {self.upconverter} not found in upconverters dictionary"
+                )
+            if "frequency" not in upconverter_config:
+                raise ValueError(
+                    f"MWChannel: 'frequency' key not found in upconverter {self.upconverter} configuration"
+                )
+            return upconverter_config["frequency"]
         raise ValueError(
             "MWChannel: Either upconverter_frequency or upconverters must be provided"
         )
