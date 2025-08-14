@@ -3,7 +3,7 @@ from typeguard import TypeCheckError, check_type
 
 from qm import qua
 
-from quam.utils.qua_types import ScalarFloat, _PulseAmp
+from quam.utils.qua_types import ScalarFloat
 
 
 __all__ = ["pulse_str_to_axis_axis_angle", "add_amplitude_scale_to_pulse_name"]
@@ -39,7 +39,7 @@ def pulse_str_to_axis_axis_angle(pulse_str: str) -> Tuple[str, int]:
 def add_amplitude_scale_to_pulse_name(
     pulse_name: str,
     amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]],
-) -> Union[str, _PulseAmp]:
+) -> Union[str, tuple]:
     """Adds an amplitude scale to a pulse name.
 
     Args:

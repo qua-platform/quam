@@ -13,6 +13,7 @@
 - Fixed type annotation issue in `QuamRoot.load()` method causing linting errors for subclasses like `BasicQuam`
 - Fixed `Pulse.waveform_function` return type being wrong
 - Compatibility with qm-qua 1.2.3: Updated channel measure command to explicitly pass `adc_stream`
+- Removed all private imports from `qm.qua`
 
 ## [0.4.0]
 

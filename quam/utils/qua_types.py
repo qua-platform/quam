@@ -9,7 +9,6 @@ __all__ = [
     "QuaVariable",
     "ChirpType",
     "StreamType",
-    "_PulseAmp",
 ]
 
 try:
@@ -45,5 +44,3 @@ except ImportError:
     QuaVariableInt = QuaVariableType
     QuaVariableFloat = QuaVariableType
 
-
-from qm.qua._dsl import _PulseAmp
