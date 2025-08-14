@@ -14,7 +14,7 @@ def test_add_amplitude_scale_scalar_value():
     """Test that scalar amplitude_scale creates qua.amp with single value."""
     with qua.program():
         result = add_amplitude_scale_to_pulse_name("test_pulse", 0.5)
-        # Result should be a tuple (pulse_name, amp_tuple) 
+        # Result should be a tuple (pulse_name, amp_tuple)
         assert isinstance(result, tuple)
         assert len(result) == 2
         assert result[0] == "test_pulse"
@@ -40,6 +40,20 @@ def test_add_amplitude_scale_sequence():
         assert len(result) == 2
         assert result[0] == "test_pulse"
         assert len(result[1]) == 4  # 4 amplitude values
+
+
+def test_add_amplitude_scale_mixed_sequence():
+    """Test that sequence with mixed scalar and QUA variable elements works."""
+    with qua.program():
+        amp_var = qua.declare(qua.fixed)
+        result = add_amplitude_scale_to_pulse_name(
+            "test_pulse", [0.1, 0.2, amp_var, 0.4]
+        )
+        # Result should be a tuple (pulse_name, amp_tuple) with 4 elements including QUA var
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+        assert result[0] == "test_pulse"
+        assert len(result[1]) == 4  # 4 amplitude values (3 scalars + 1 QUA var)
 
 
 def test_add_amplitude_scale_invalid_type():
