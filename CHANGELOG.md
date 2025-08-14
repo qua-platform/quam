@@ -4,6 +4,10 @@
 
 - Added `duration` and `fidelity` as optional parameters to `QuamMacro`
 
+### Changed
+
+- `JSONSerialiser.load()` now skips hidden directories when loading from a directory
+
 ### Fixed
 
 - Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.
