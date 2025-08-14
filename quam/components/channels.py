@@ -412,7 +412,9 @@ class Channel(QuamComponent, ABC):
                 f"Operation '{pulse_name}' not found in channel '{self.name}'"
             )
 
-        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         # At the moment, self.name is not defined for Channel because it could
         # be a property or dataclass field in a subclass.
@@ -842,7 +844,9 @@ class InSingleChannel(Channel):
         else:
             qua_vars = [declare(fixed) for _ in range(2)]
 
-        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -918,8 +922,9 @@ class InSingleChannel(Channel):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
 
-        if amplitude_scale is not None:
-            pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -999,7 +1004,9 @@ class InSingleChannel(Channel):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(2)]
 
-        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -1335,7 +1342,9 @@ class _InComplexChannel(Channel, ABC):
         else:
             qua_vars = [declare(fixed) for _ in range(2)]
 
-        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -1421,7 +1430,9 @@ class _InComplexChannel(Channel, ABC):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
 
-        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
@@ -1505,7 +1516,9 @@ class _InComplexChannel(Channel, ABC):
         else:
             qua_vars = [declare(fixed, size=num_segments) for _ in range(4)]
 
-        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(pulse_name, amplitude_scale)
+        pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
+            pulse_name, amplitude_scale
+        )
 
         integration_weight_labels = list(pulse.integration_weights_mapping)
         measure(
