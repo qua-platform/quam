@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 import numbers
 import warnings
-from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple, Sequence
 import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
@@ -113,7 +113,7 @@ class Pulse(QuamComponent):
     def digital_marker_name(self):
         return f"{self.name}{str_ref.DELIMITER}dm"
 
-    def calculate_waveform(self) -> Union[float, complex, List[float], List[complex]]:
+    def calculate_waveform(self) -> Union[float, complex, Sequence[float], Sequence[complex]]:
         """Calculate the waveform of the pulse.
 
         This function calls `Pulse.waveform_function`, which should generally be
@@ -126,8 +126,8 @@ class Pulse(QuamComponent):
             The processed waveform, which can be either
             - a single float for a constant single-channel waveform,
             - a single complex number for a constant IQ waveform,
-            - a list of floats for an arbitrary single-channel waveform,
-            - a list of complex numbers for an arbitrary IQ waveform,
+            - a sequence of floats for an arbitrary single-channel waveform,
+            - a sequence of complex numbers for an arbitrary IQ waveform,
         """
         waveform = self.waveform_function()
 
@@ -145,10 +145,10 @@ class Pulse(QuamComponent):
     ) -> Union[
         float,
         complex,
-        List[float],
-        List[complex],
+        Sequence[float],
+        Sequence[complex],
         Tuple[float, float],
-        Tuple[List[float], List[float]],
+        Tuple[Sequence[float], Sequence[float]],
     ]:
         """Function that returns the waveform of the pulse.
 
@@ -161,9 +161,10 @@ class Pulse(QuamComponent):
             The waveform of the pulse. Can be one of the following:
             - a single float for a constant single-channel waveform,
             - a single complex number for a constant IQ waveform,
-            - a list of floats for an arbitrary single-channel waveform,
-            - a list of complex numbers for an arbitrary IQ waveform,
-            - a tuple of floats or float lists for an arbitrary IQ waveform
+            - a sequence of floats for an arbitrary single-channel waveform,
+            - a sequence of complex numbers for an arbitrary IQ waveform,
+            - a tuple of floats for a constant IQ waveform,
+            - a tuple of sequences for an arbitrary IQ waveform
         """
         ...
 
