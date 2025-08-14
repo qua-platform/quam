@@ -11,6 +11,7 @@
 - Changed default `time_of_flight` from 24 ns to 140 ns to fix error on newer qm-qua versions
   - 140 ns seems like a reasonable default for most channels
 - Fixed type annotation issue in `QuamRoot.load()` method causing linting errors for subclasses like `BasicQuam`
+- Fixed `Pulse.waveform_function` return type being wrong
 - Compatibility with qm-qua 1.2.3: Updated channel measure command to explicitly pass `adc_stream`
 
 ## [0.4.0]
