@@ -212,3 +212,203 @@ def test_load_default_path(serialiser, monkeypatch, tmp_path, sample_dict_basic)
     contents, metadata = serialiser.load()  # No path argument
     assert contents == root_content
     assert metadata["default_foldername"] == str(default_load_path)
+
+
+def test_load_from_directory_skip_hidden_folders(serialiser, tmp_path):
+    """Test that hidden folders (starting with dot) are skipped during loading."""
+    dirpath = tmp_path / "load_dir_hidden"
+    dirpath.mkdir()
+
+    # Create valid JSON files in regular directories
+    regular_content = {"component1": {"id": "regular", "value": 1}}
+    regular_file = dirpath / "component1.json"
+    with regular_file.open("w", encoding="utf-8") as f:
+        json.dump(regular_content, f)
+
+    # Create hidden directories with JSON files that should be skipped
+    hidden_dir1 = dirpath / ".ipynb_checkpoints"
+    hidden_dir1.mkdir()
+    checkpoint_content = {"component2": {"id": "checkpoint", "value": 2}}
+    checkpoint_file = hidden_dir1 / "checkpoint.json"
+    with checkpoint_file.open("w", encoding="utf-8") as f:
+        json.dump(checkpoint_content, f)
+
+    # Create another hidden directory
+    hidden_dir2 = dirpath / ".git"
+    hidden_dir2.mkdir()
+    git_content = {"component3": {"id": "git", "value": 3}}
+    git_file = hidden_dir2 / "config.json"
+    with git_file.open("w", encoding="utf-8") as f:
+        json.dump(git_content, f)
+
+    # Create a nested hidden directory
+    nested_hidden = dirpath / "subdir" / ".hidden"
+    nested_hidden.mkdir(parents=True)
+    nested_content = {"component4": {"id": "nested", "value": 4}}
+    nested_file = nested_hidden / "nested.json"
+    with nested_file.open("w", encoding="utf-8") as f:
+        json.dump(nested_content, f)
+
+    # Load from directory - should only include regular files
+    contents, metadata = serialiser._load_from_directory(dirpath)
+
+    # Assert only regular content is loaded (hidden directories are skipped)
+    assert contents == regular_content
+    assert "component2" not in contents  # From .ipynb_checkpoints
+    assert "component3" not in contents  # From .git
+    assert "component4" not in contents  # From nested .hidden
+    assert metadata["content_mapping"]["component1"] == "component1.json"
+    assert len(metadata["content_mapping"]) == 1
+
+
+def test_load_from_directory_skip_nested_hidden_folders(serialiser, tmp_path):
+    """Test that deeply nested hidden folders are properly skipped."""
+    dirpath = tmp_path / "load_dir_nested_hidden"
+    dirpath.mkdir()
+
+    # Create valid content in regular path
+    regular_content = {"main": {"id": "main", "value": 1}}
+    regular_file = dirpath / "main.json"
+    with regular_file.open("w", encoding="utf-8") as f:
+        json.dump(regular_content, f)
+
+    # Create deeply nested hidden structure: dir/.hidden/subdir/file.json
+    deeply_hidden = dirpath / "regular_dir" / ".hidden_subdir" / "another_level"
+    deeply_hidden.mkdir(parents=True)
+    hidden_content = {"hidden": {"id": "hidden", "value": 999}}
+    hidden_file = deeply_hidden / "hidden.json"
+    with hidden_file.open("w", encoding="utf-8") as f:
+        json.dump(hidden_content, f)
+
+    # Load from directory
+    contents, metadata = serialiser._load_from_directory(dirpath)
+
+    # Assert only regular content is loaded
+    assert contents == regular_content
+    assert "hidden" not in contents
+    assert len(metadata["content_mapping"]) == 1
+
+
+def test_load_from_directory_mixed_hidden_and_regular(serialiser, tmp_path):
+    """Test loading with mix of hidden and regular directories at levels."""
+    dirpath = tmp_path / "load_dir_mixed"
+    dirpath.mkdir()
+
+    # Create structure with mixed hidden and regular directories
+    # Root level regular file
+    root_content = {"root": {"value": "root"}}
+    root_file = dirpath / "root.json"
+    with root_file.open("w", encoding="utf-8") as f:
+        json.dump(root_content, f)
+
+    # Regular subdirectory with file
+    regular_subdir = dirpath / "components"
+    regular_subdir.mkdir()
+    comp_content = {"components": {"comp1": {"id": "c1"}}}
+    comp_file = regular_subdir / "components.json"
+    with comp_file.open("w", encoding="utf-8") as f:
+        json.dump(comp_content, f)
+
+    # Hidden directory at root level
+    hidden_root = dirpath / ".cache"
+    hidden_root.mkdir()
+    cache_content = {"cache": {"data": "cached"}}
+    cache_file = hidden_root / "cache.json"
+    with cache_file.open("w", encoding="utf-8") as f:
+        json.dump(cache_content, f)
+
+    # Regular directory with hidden subdirectory
+    regular_with_hidden = dirpath / "data"
+    regular_with_hidden.mkdir()
+    hidden_in_regular = regular_with_hidden / ".tmp"
+    hidden_in_regular.mkdir()
+    tmp_content = {"tmp": {"temp": "data"}}
+    tmp_file = hidden_in_regular / "tmp.json"
+    with tmp_file.open("w", encoding="utf-8") as f:
+        json.dump(tmp_content, f)
+
+    # Valid file in the regular 'data' directory
+    data_content = {"data": {"info": "valid"}}
+    data_file = regular_with_hidden / "data.json"
+    with data_file.open("w", encoding="utf-8") as f:
+        json.dump(data_content, f)
+
+    # Load from directory
+    contents, metadata = serialiser._load_from_directory(dirpath)
+
+    # Expected content should only include files from non-hidden paths
+    expected_contents = {
+        "root": {"value": "root"},
+        "components": {"comp1": {"id": "c1"}},
+        "data": {"info": "valid"},
+    }
+
+    assert contents == expected_contents
+    assert "cache" not in contents  # From .cache directory
+    assert "tmp" not in contents  # From .tmp directory
+
+    # Verify content mapping
+    assert metadata["content_mapping"]["root"] == "root.json"
+    comp_path = "components/components.json"
+    assert metadata["content_mapping"]["components"] == comp_path
+    assert metadata["content_mapping"]["data"] == "data/data.json"
+    assert len(metadata["content_mapping"]) == 3
+
+
+def test_load_from_directory_hidden_file_in_regular_dir(serialiser, tmp_path):
+    """Test that hidden files in regular directories are processed."""
+    dirpath = tmp_path / "load_dir_hidden_files"
+    dirpath.mkdir()
+
+    # Create a regular JSON file
+    regular_content = {"regular": {"value": 1}}
+    regular_file = dirpath / "regular.json"
+    with regular_file.open("w", encoding="utf-8") as f:
+        json.dump(regular_content, f)
+
+    # Create a hidden JSON file (file starting with dot, not directory)
+    # Note: This should still be processed since we only skip hidden directories
+    hidden_file_content = {"hidden_file": {"value": 2}}
+    hidden_file = dirpath / ".hidden_file.json"
+    with hidden_file.open("w", encoding="utf-8") as f:
+        json.dump(hidden_file_content, f)
+
+    # Load from directory
+    contents, metadata = serialiser._load_from_directory(dirpath)
+
+    # Both files should be loaded since we only skip hidden directories
+    expected_contents = {"regular": {"value": 1}, "hidden_file": {"value": 2}}
+
+    assert contents == expected_contents
+    assert metadata["content_mapping"]["regular"] == "regular.json"
+    assert metadata["content_mapping"]["hidden_file"] == ".hidden_file.json"
+
+
+def test_load_from_directory_only_hidden_folders(serialiser, tmp_path):
+    """Test behavior when directory contains only hidden folders with JSON."""
+    dirpath = tmp_path / "load_dir_only_hidden"
+    dirpath.mkdir()
+
+    # Create only hidden directories with JSON files
+    hidden_dir1 = dirpath / ".ipynb_checkpoints"
+    hidden_dir1.mkdir()
+    checkpoint_content = {"checkpoint": {"value": 1}}
+    checkpoint_file = hidden_dir1 / "checkpoint.json"
+    with checkpoint_file.open("w", encoding="utf-8") as f:
+        json.dump(checkpoint_content, f)
+
+    hidden_dir2 = dirpath / ".pytest_cache"
+    hidden_dir2.mkdir()
+    cache_content = {"cache": {"value": 2}}
+    cache_file = hidden_dir2 / "cache.json"
+    with cache_file.open("w", encoding="utf-8") as f:
+        json.dump(cache_content, f)
+
+    # Load from directory - should find no valid files and emit warning
+    with pytest.warns(UserWarning, match="No JSON files found"):
+        contents, metadata = serialiser._load_from_directory(dirpath)
+
+    # Should return empty content
+    assert contents == {}
+    assert metadata["content_mapping"] == {}
+    assert metadata["default_filename"] is None

@@ -254,9 +254,8 @@ class JSONSerialiser(AbstractSerialiser):
                 is not supported in this method.
         """
         remaining_contents = full_contents.copy()
-        files_to_save: Dict[Path, Dict[str, Any]] = (
-            {}
-        )  # Stores filepath -> content dict
+        # Stores filepath -> content dict
+        files_to_save: Dict[Path, Dict[str, Any]] = {}
 
         # Iterate through components and assign them to files based on mapping
         mapped_keys = set()
@@ -476,6 +475,7 @@ class JSONSerialiser(AbstractSerialiser):
         """
         Loads and merges content from all .json files in a directory and its
         subdirectories. Infers the content mapping (component -> filename).
+        Skips hidden directories (those starting with a dot).
 
         Args:
             dirpath: The path to the directory to load from.
@@ -494,7 +494,15 @@ class JSONSerialiser(AbstractSerialiser):
             "default_foldername": str(dirpath.resolve()),
         }
 
-        found_files = list(dirpath.rglob("*.json"))
+        # Find all JSON files, excluding those in hidden directories (starting with dot)
+        found_files = []
+        for json_file in dirpath.rglob("*.json"):
+            # Check if any part of the path contains a directory starting with dot
+            relative_path = json_file.relative_to(dirpath)
+            if any(part.startswith(".") for part in relative_path.parts[:-1]):
+                # Skip files in hidden directories
+                continue
+            found_files.append(json_file)
 
         if not found_files:
             warnings.warn(f"No JSON files found in directory {dirpath}", UserWarning)
