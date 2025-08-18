@@ -387,3 +387,37 @@ def test_instantiation_nested_tuple():
         quam_class=NestedTupleComponent,
         contents={"nested_tuple": [[1, "a"], [2, "b"]]},
     )
+
+
+def test_instantiate_component_float_to_int_coercion():
+    """Test that float values are coerced to integers during component instantiation."""
+
+    @quam_dataclass
+    class TestIntComponent(QuamComponent):
+        required_int: int
+        optional_int: int = 42
+
+    # Test data with float values where integers expected
+    test_data = {
+        "required_int": 5.0,  # Should become 5
+        "optional_int": 10.7,  # Should become 10 (truncated)
+    }
+
+    # Test instantiation - should succeed with coercion
+    component = instantiate_quam_class(TestIntComponent, test_data)
+    assert component.required_int == 5
+    assert component.optional_int == 10
+    assert isinstance(component.required_int, int)
+    assert isinstance(component.optional_int, int)
+
+    # Test edge cases
+    edge_test_data = {
+        "required_int": 1.0,  # Exact float -> int
+        "optional_int": -3.9,  # Negative float truncation
+    }
+
+    component2 = instantiate_quam_class(TestIntComponent, edge_test_data)
+    assert component2.required_int == 1
+    assert component2.optional_int == -3  # Truncated towards zero
+    assert isinstance(component2.required_int, int)
+    assert isinstance(component2.optional_int, int)

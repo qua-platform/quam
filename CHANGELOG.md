@@ -14,6 +14,7 @@
 - Fixed `Pulse.waveform_function` return type being wrong
 - Compatibility with qm-qua 1.2.3: Updated channel measure command to explicitly pass `adc_stream`
 - Removed all private imports from `qm.qua`
+- Fixed float-to-int coercion during component instantiation
 
 ## [0.4.0]
 
