@@ -140,6 +140,6 @@ class Qubit(QuantumComponent):
                 return qubit_pair
         else:
             raise ValueError(
-                "Qubit pair not found: qubit_control={self.name}, "
-                "qubit_target={other.name}"
+                f"Qubit pair not found: qubit_control={self.name}, "
+                f"qubit_target={other.name}"
             )
