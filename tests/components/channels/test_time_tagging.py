@@ -14,8 +14,8 @@ def test_time_tagging_cfg():
     machine = SingleChannelQuam(channel=channel)
     cfg = machine.generate_config()
 
-    assert "outputPulseParameters" in cfg["elements"]["channel"]
-    assert cfg["elements"]["channel"]["outputPulseParameters"] == {
+    assert "timeTaggingParameters" in cfg["elements"]["channel"]
+    assert cfg["elements"]["channel"]["timeTaggingParameters"] == {
         "signalThreshold": 800,
         "signalPolarity": "below",
         "derivativeThreshold": 300,
@@ -29,7 +29,7 @@ def test_time_tagging_cfg_disabled():
 
     machine = SingleChannelQuam(channel=channel)
     cfg = machine.generate_config()
-    assert "outputPulseParameters" not in cfg["elements"]["channel"]
+    assert "timeTaggingParameters" not in cfg["elements"]["channel"]
 
 
 def test_time_tagging_cfg_custom_thresholds():
@@ -40,8 +40,8 @@ def test_time_tagging_cfg_custom_thresholds():
 
     machine = SingleChannelQuam(channel=channel)
     cfg = machine.generate_config()
-    assert "outputPulseParameters" in cfg["elements"]["channel"]
-    assert cfg["elements"]["channel"]["outputPulseParameters"] == {
+    assert "timeTaggingParameters" in cfg["elements"]["channel"]
+    assert cfg["elements"]["channel"]["timeTaggingParameters"] == {
         "signalThreshold": int(0.2 * 4096),
         "signalPolarity": "below",
         "derivativeThreshold": int(0.1 * 4096),
