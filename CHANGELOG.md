@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Fixed
+
+- Fixed `Pulse.digital_marker` not being converted to a list in the config generation
+
 ## [0.4.2]
 
 ### Added
