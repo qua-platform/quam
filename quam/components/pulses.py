@@ -112,7 +112,9 @@ class Pulse(QuamComponent):
     def digital_marker_name(self):
         return f"{self.name}{str_ref.DELIMITER}dm"
 
-    def calculate_waveform(self) -> Union[float, complex, Sequence[float], Sequence[complex]]:
+    def calculate_waveform(
+        self,
+    ) -> Union[float, complex, Sequence[float], Sequence[complex]]:
         """Calculate the waveform of the pulse.
 
         This function calls `Pulse.waveform_function`, which should generally be
@@ -256,8 +258,6 @@ class Pulse(QuamComponent):
             "operation": self.operation,
             "length": self.length,
         }
-        if self.digital_marker is not None:
-            pulse_config["digital_marker"] = self.digital_marker
 
     def _config_add_waveforms(self, config):
         """Add the waveform to the config
@@ -348,8 +348,9 @@ class Pulse(QuamComponent):
                 )
             digital_marker_name = self.digital_marker
         else:
+            digital_marker_list = [tuple(t) for t in self.digital_marker]
             config["digital_waveforms"][self.digital_marker_name] = {
-                "samples": self.digital_marker
+                "samples": digital_marker_list
             }
             digital_marker_name = self.digital_marker_name
 
