@@ -29,7 +29,10 @@ __all__ = [
     "GaussianPulse",
     "FlatTopGaussianPulse",
     "ConstantReadoutPulse",
-]
+    "FlatTopBlackmanPulse",
+    "BlackmanIntegralPulse",
+    "FlatTopTanhPulse",
+    "FlatTopCosinePulse"]
 
 
 @quam_dataclass
@@ -794,3 +797,136 @@ class FlatTopGaussianPulse(Pulse):
             waveform = waveform * np.exp(1j * self.axis_angle)
 
         return waveform
+
+@quam_dataclass
+class FlatTopBlackmanPulse(Pulse):
+    """Blackman rise/fall, flat-top pulse.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        flat_length (int): Flat-top length (samples).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int 
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_blackman_waveform
+
+        rise_fall_length = (self.length - self.flat_length) // 2
+        if self.flat_length + 2 * rise_fall_length != self.length:
+            raise ValueError(
+                "FlatTopBlackmanPulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
+            )
+
+        wf = flattop_blackman_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=rise_fall_length,
+            return_part="all",
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+    
+@quam_dataclass
+class BlackmanIntegralPulse(Pulse):
+    """Adiabatic Blackman-integral ramp from v_start to v_end.
+
+    Args:
+        length (int): Pulse length (samples).
+        v_start (float): Starting amplitude (V).
+        v_end (float): Ending amplitude (V).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+    # amplitude: float
+    v_start: float
+    v_end: float
+    axis_angle: float = None
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import blackman_integral_waveform
+
+        wf = blackman_integral_waveform(
+            pulse_length=self.length,
+            v_start=self.v_start,
+            v_end=self.v_end,
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+
+@quam_dataclass
+class FlatTopCosinePulse(Pulse):
+    """Cosine rise/fall, flat-top pulse.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        flat_length (int): Flat-top length (samples).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int = 0
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_cosine_waveform
+
+        rise_fall_length = (self.length - self.flat_length) // 2
+        if self.flat_length + 2 * rise_fall_length != self.length:
+            raise ValueError(
+                "FlatTopCosinePulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
+            )
+
+        wf = flattop_cosine_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=rise_fall_length,
+            return_part="all",
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+    
+@quam_dataclass
+class FlatTopTanhPulse(Pulse):
+    """tanh rise/fall, flat-top pulse.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        flat_length (int): Flat-top length (samples).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int = 0
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_tanh_waveform
+
+        rise_fall_length = (self.length - self.flat_length) // 2
+        if self.flat_length + 2 * rise_fall_length != self.length:
+            raise ValueError(
+                "FlatTopTanhPulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
+            )
+
+        wf = flattop_tanh_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=rise_fall_length,
+            return_part="all",
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
