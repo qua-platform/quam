@@ -358,6 +358,53 @@ loaded_config = None
 
 ///
 
+## Method Macros
+
+In addition to defining macros as separate classes, QUAM supports defining macros directly as methods within your qubit class using the `@QuantumComponent.register_macro` decorator (or `@method_macro`). This provides a cleaner way to organize qubit-specific operations.
+
+Here's an example of adding a reset method to the Transmon class:
+
+```python
+from quam.core import QuantumComponent
+from qm import qua
+
+@quam_dataclass
+class Transmon(Qubit):
+    xy: MWChannel
+    resonator: Optional[InOutMWChannel] = None
+    
+    @QuantumComponent.register_macro
+    def reset(self, threshold: float = 0.0):
+        """Reset the qubit to ground state using active reset"""
+        # Measure the qubit state
+        I, Q = self.resonator.measure("readout")
+        
+        # Apply a conditional π-pulse if qubit is in excited state
+        with qua.if_(I > threshold):
+            self.xy.play("x180")
+        
+        # Add a wait time for relaxation
+        self.xy.wait(100)
+```
+
+The method macro automatically becomes available in the qubit's macro registry:
+
+```python
+# Create a Transmon instance
+q1 = Transmon(id="q1", xy=xy_channel, resonator=resonator_channel)
+
+# The reset method is automatically available as a macro
+with qua.program() as prog:
+    q1.apply("reset", threshold=0.1)  # Call via apply
+    # OR directly as a method:
+    q1.reset(threshold=0.1)
+
+# Method macros appear in the macro registry
+print(q1.get_macros())  # {'reset': <MethodMacro 'reset'>, ...}
+```
+
+Method macros provide better code organization by keeping qubit-specific logic within the qubit class itself, while still maintaining full compatibility with the QUAM macro system.
+
 ### Clifford macro
 
 Next, we define a single-qubit "CliffordMacro". For illustration, we will define a few pulses
