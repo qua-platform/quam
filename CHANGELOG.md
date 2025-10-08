@@ -3,6 +3,7 @@
 ### Added
 
 - Added `duration` and `fidelity` as optional parameters to `QuamMacro`
+- Added new pulses: `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopTanhPulse`, `FlatTopCosinePulse`
 
 ### Fixed
 
