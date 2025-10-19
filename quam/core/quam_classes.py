@@ -1,5 +1,6 @@
 from __future__ import annotations
 from collections.abc import Iterable
+from collections import UserList
 import sys
 import warnings
 from pathlib import Path
@@ -670,13 +671,25 @@ class QuamBase(ReferenceClass):
             )
 
         parent_obj = self._get_referenced_value(parent_reference)
-        raw_referenced_value = parent_obj.get_raw_value(ref_attr)
-        if string_reference.is_reference(raw_referenced_value) and isinstance(
-            parent_obj, QuamBase
-        ):
-            parent_obj.set_at_reference(ref_attr, value)
+
+        # Handle list index references
+        if ref_attr.isdigit() and isinstance(parent_obj, (list, UserList)):
+            # This is a list index reference
+            try:
+                parent_obj[int(ref_attr)] = value
+            except (IndexError, KeyError) as e:
+                raise AttributeError(
+                    f"Cannot set index {ref_attr} on object {parent_obj}"
+                ) from e
         else:
-            setattr(parent_obj, ref_attr, value)
+            # Handle regular attribute references
+            raw_referenced_value = parent_obj.get_raw_value(ref_attr)
+            if string_reference.is_reference(raw_referenced_value) and isinstance(
+                parent_obj, QuamBase
+            ):
+                parent_obj.set_at_reference(ref_attr, value)
+            else:
+                setattr(parent_obj, ref_attr, value)
 
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
