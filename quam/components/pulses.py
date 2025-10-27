@@ -934,7 +934,7 @@ class FlatTopTanhPulse(Pulse):
 
 @quam_dataclass
 class CosineBipolarPulse(Pulse):
-    """Slepian bipolar pulse QUAM component.
+    """Cosine bipolar pulse QUAM component.
 
     Args:
         length (int): The total length of the pulse in samples.
