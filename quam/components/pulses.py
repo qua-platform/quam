@@ -32,7 +32,8 @@ __all__ = [
     "FlatTopBlackmanPulse",
     "BlackmanIntegralPulse",
     "FlatTopTanhPulse",
-    "FlatTopCosinePulse"]
+    "FlatTopCosinePulse",
+    "CosineBipolarPulse"]
 
 
 @quam_dataclass
@@ -810,7 +811,7 @@ class FlatTopBlackmanPulse(Pulse):
     """
     amplitude: float
     axis_angle: float = None
-    flat_length: int 
+    flat_length: int
 
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import flattop_blackman_waveform
@@ -832,7 +833,7 @@ class FlatTopBlackmanPulse(Pulse):
         if self.axis_angle is not None:
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
-    
+
 @quam_dataclass
 class BlackmanIntegralPulse(Pulse):
     """Adiabatic Blackman-integral ramp from v_start to v_end.
@@ -895,7 +896,7 @@ class FlatTopCosinePulse(Pulse):
         if self.axis_angle is not None:
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
-    
+
 @quam_dataclass
 class FlatTopTanhPulse(Pulse):
     """tanh rise/fall, flat-top pulse.
@@ -930,3 +931,92 @@ class FlatTopTanhPulse(Pulse):
         if self.axis_angle is not None:
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
+
+@quam_dataclass
+class CosineBipolarPulse(Pulse):
+    """Slepian bipolar pulse QUAM component.
+
+    Args:
+        length (int): The total length of the pulse in samples.
+        amplitude (float): The amplitude of the pulse in volts.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+                of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        flat_length (int): The length of the pulse's flat top in samples.
+            The rise and fall lengths are calculated from the total length and the
+            flat length.
+    """
+
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int
+
+    def waveform_function(self):
+        # Helper segment generators (length 0 returns empty array)
+        def halfcos_up(n: int):
+            if n <= 0:
+                return np.array([])
+            t = np.arange(n) / n
+            return 0.5 * (1 - np.cos(np.pi * t))  # 0 -> 1
+
+        def halfcos_down(n: int):
+            if n <= 0:
+                return np.array([])
+            t = np.arange(n) / n
+            return 0.5 * (1 + np.cos(np.pi * t))  # 1 -> 0
+
+        def cos_switch(n: int):
+            if n <= 0:
+                return np.array([])
+            t = np.arange(n) / n
+            return np.cos(np.pi * t)  # +1 -> -1
+
+        L = int(self.length)
+        F = int(self.flat_length)
+        if F > L:
+            raise ValueError(
+                f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L})."
+            )
+
+        remaining = L - F
+        if remaining <= 0:
+            rise_len = switch_len = fall_len = 0
+        else:
+            base = remaining // 3
+            extra = remaining % 3
+            rise_len = base + (1 if extra > 0 else 0)
+            switch_len = base
+            fall_len = base + (1 if extra > 1 else 0)
+
+        flat_pos_len = F // 2 + (F % 2)  # positive half gets extra sample if odd
+        flat_neg_len = F // 2
+
+        A = float(self.amplitude)
+
+        seg_rise = A * halfcos_up(rise_len)
+        seg_flat_pos = A * np.ones(flat_pos_len)
+        seg_switch = A * cos_switch(switch_len)
+        seg_flat_neg = -A * np.ones(flat_neg_len)
+        seg_fall = -A * halfcos_down(fall_len)
+
+        p = np.concatenate(
+            [seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall]
+        )
+
+        current_len = len(p)
+        if current_len < L:
+            pad_total = L - current_len
+            pad_front = pad_total // 2
+            pad_back = pad_total - pad_front
+            p = np.concatenate([np.zeros(pad_front), p, np.zeros(pad_back)])
+        elif current_len > L:
+            trim_total = current_len - L
+            trim_front = trim_total // 2
+            trim_back = trim_total - trim_front
+            p = p[trim_front: current_len - trim_back]
+
+        if self.axis_angle is not None:
+            p = p * np.exp(1j * self.axis_angle)
+
+        return p.tolist()
