@@ -3,6 +3,7 @@
 ### Fixed
 
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
+- Fixed `QuamBase.set_at_reference` not working for list index references
 
 ## [0.4.2]
 

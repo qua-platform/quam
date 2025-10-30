@@ -1,5 +1,5 @@
 import pytest
-from quam.core.quam_classes import QuamBase, QuamRoot, quam_dataclass
+from quam.core.quam_classes import QuamBase, QuamRoot, QuamList, quam_dataclass
 from typing import Optional
 
 
@@ -176,3 +176,80 @@ def test_set_at_reference_allow_non_reference():
         parent.child.set_at_reference("value", 43)
 
     assert parent.child.value == 789
+
+
+@quam_dataclass
+class ListContainerQuam(QuamBase):
+    values: QuamList = None
+    list_ref: str = "#./values/0"
+
+
+def test_set_at_reference_list_index():
+    """Test setting a value through a reference that ends with a list index"""
+    container = ListContainerQuam(values=QuamList())
+    container.values.extend([1, 2, 3])
+
+    # Set value through list index reference
+    container.set_at_reference("list_ref", 999)
+
+    # Check that the value was set correctly in the list
+    assert container.values[0] == 999
+    # Reference string should remain unchanged
+    assert container.get_raw_value("list_ref") == "#./values/0"
+
+
+def test_set_at_reference_list_index_multiple_indices():
+    """Test setting values through references to different list indices"""
+    container = ListContainerQuam(values=QuamList())
+    container.values.extend([1, 2, 3])
+
+    # Add reference to index 1
+    container.list_ref_1 = "#./values/1"
+
+    # Set values through list index references
+    container.set_at_reference("list_ref", 999)
+    container.set_at_reference("list_ref_1", 888)
+
+    # Check that the values were set correctly
+    assert container.values[0] == 999
+    assert container.values[1] == 888
+    assert container.values[2] == 3  # unchanged
+
+
+def test_set_at_reference_list_index_nested_reference():
+    """Test setting a value through a nested reference that ends with a list index"""
+    @quam_dataclass
+    class NestedContainerQuam(QuamBase):
+        inner_list: QuamList = None
+
+    @quam_dataclass
+    class OuterContainerQuam(QuamBase):
+        nested: NestedContainerQuam = None
+        nested_ref: str = "#./nested/inner_list/0"
+
+    nested = NestedContainerQuam(inner_list=QuamList())
+    nested.inner_list.extend([100, 200, 300])
+
+    outer = OuterContainerQuam(nested=nested)
+
+    # Set value through nested list index reference
+    outer.set_at_reference("nested_ref", 555)
+
+    # Check that the value was set correctly
+    assert outer.nested.inner_list[0] == 555
+    assert outer.nested.inner_list[1] == 200  # unchanged
+    # Reference string should remain unchanged
+    assert outer.get_raw_value("nested_ref") == "#./nested/inner_list/0"
+
+
+def test_set_at_reference_list_index_out_of_range():
+    """Test setting a value through a reference to a list index that doesn't exist"""
+    container = ListContainerQuam(values=QuamList())
+    container.values.extend([1, 2, 3])
+
+    # Reference to an index that doesn't exist
+    container.list_ref_oob = "#./values/10"
+
+    # This should fail when trying to set
+    with pytest.raises((AttributeError, IndexError)):
+        container.set_at_reference("list_ref_oob", 999)
