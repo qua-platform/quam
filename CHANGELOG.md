@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- Added `CosineBipolarPulse` 
+
 ### Fixed
 
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
