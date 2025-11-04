@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from quam.core import *
 from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
+from quam.core import *
 from quam.utils.dataclass import get_dataclass_attr_annotations
 
 try:
@@ -11,10 +11,9 @@ try:
 except ImportError:
     NoScopeFoundException = IndexError
 
+
 def test_drag_gaussian_pulse():
-    drag_pulse = pulses.DragGaussianPulse(
-        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
-    )
+    drag_pulse = pulses.DragGaussianPulse(amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0)
 
     assert drag_pulse.operation == "control"
     assert drag_pulse.length == 20
@@ -38,9 +37,7 @@ def test_drag_gaussian_pulse():
 
 
 def test_drag_cosine_pulse():
-    drag_pulse = pulses.DragCosinePulse(
-        amplitude=1, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
-    )
+    drag_pulse = pulses.DragCosinePulse(amplitude=1, alpha=2, anharmonicity=200e6, length=20, axis_angle=0)
 
     assert drag_pulse.operation == "control"
     assert drag_pulse.length == 20
@@ -75,9 +72,7 @@ def test_IQ_channel():
         opx_output_I=0,
         opx_output_Q=1,
         intermediate_frequency=100e6,
-        frequency_converter_up=FrequencyConverter(
-            mixer=Mixer(), local_oscillator=LocalOscillator()
-        ),
+        frequency_converter_up=FrequencyConverter(mixer=Mixer(), local_oscillator=LocalOscillator()),
     )
     d = IQ_channel.to_dict()
     assert d == {
@@ -101,13 +96,9 @@ def test_single_pulse_IQ_channel():
         opx_output_I=0,
         opx_output_Q=1,
         intermediate_frequency=100e6,
-        frequency_converter_up=FrequencyConverter(
-            mixer=Mixer(), local_oscillator=LocalOscillator()
-        ),
+        frequency_converter_up=FrequencyConverter(mixer=Mixer(), local_oscillator=LocalOscillator()),
     )
-    IQ_channel.operations["X180"] = pulses.GaussianPulse(
-        length=16, amplitude=1, sigma=12
-    )
+    IQ_channel.operations["X180"] = pulses.GaussianPulse(length=16, amplitude=1, sigma=12)
 
     cfg = {"pulses": {}, "waveforms": {}}
     pulse = IQ_channel.operations["X180"]
@@ -199,9 +190,7 @@ def test_pulses_referenced():
     channel.operations["pulse"] = pulse
     channel.operations["pulse_referenced"] = "#./pulse"
 
-    assert (
-        channel.operations["pulse_referenced"] == channel.operations["pulse"] == pulse
-    )
+    assert channel.operations["pulse_referenced"] == channel.operations["pulse"] == pulse
 
     state = machine.to_dict()
 
@@ -212,10 +201,7 @@ def test_pulses_referenced():
     assert pulse_loaded.to_dict() == pulse.to_dict()
 
     assert machine_loaded.channel.operations["pulse_referenced"] == pulse_loaded
-    assert (
-        machine_loaded.channel.operations.get_raw_value("pulse_referenced")
-        == "#./pulse"
-    )
+    assert machine_loaded.channel.operations.get_raw_value("pulse_referenced") == "#./pulse"
 
 
 def test_pulse_attr_annotations():
@@ -231,9 +217,7 @@ def test_deprecated_drag_pulse():
         DeprecationWarning,
         match="DragPulse is deprecated. Use DragGaussianPulse instead.",
     ):
-        pulses.DragPulse(
-            axis_angle=0, amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20
-        )
+        pulses.DragPulse(axis_angle=0, amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20)
 
 
 def test_pulse_play(mocker):
@@ -269,15 +253,11 @@ def test_arbitrary_waveform_iq_channel_list_conversion():
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
         intermediate_frequency=100e6,
-        frequency_converter_up=FrequencyConverter(
-            mixer=Mixer(), local_oscillator=LocalOscillator()
-        ),
+        frequency_converter_up=FrequencyConverter(mixer=Mixer(), local_oscillator=LocalOscillator()),
     )
 
     # Create a Gaussian pulse that returns an arbitrary waveform (numpy array)
-    gaussian_pulse = pulses.GaussianPulse(
-        length=16, amplitude=1.0, sigma=4.0, axis_angle=None
-    )
+    gaussian_pulse = pulses.GaussianPulse(length=16, amplitude=1.0, sigma=4.0, axis_angle=None)
     IQ_channel.operations["gaussian"] = gaussian_pulse
 
     cfg = {"pulses": {}, "waveforms": {}}
@@ -308,9 +288,7 @@ def test_complex_arbitrary_waveform_iq_channel_list_conversion():
         opx_output_I=("con1", 1),
         opx_output_Q=("con1", 2),
         intermediate_frequency=100e6,
-        frequency_converter_up=FrequencyConverter(
-            mixer=Mixer(), local_oscillator=LocalOscillator()
-        ),
+        frequency_converter_up=FrequencyConverter(mixer=Mixer(), local_oscillator=LocalOscillator()),
     )
 
     # Create a custom pulse that returns a complex waveform
@@ -342,3 +320,30 @@ def test_complex_arbitrary_waveform_iq_channel_list_conversion():
     assert len(q_waveform) == 4, "Q waveform should have correct length"
     assert i_waveform == [1.0, 2.0, 3.0, 4.0], "I waveform should match real part"
     assert q_waveform == [1.0, 2.0, 3.0, 4.0], "Q waveform should match imaginary part"
+
+
+def test_cosinebipolarpulse():
+    # Basic instantiation and property checks
+    pulse = pulses.CosineBipolarPulse(length=20, amplitude=1.0, flat_length=8)
+    assert pulse.length == 20
+    assert pulse.amplitude == 1.0
+    assert pulse.flat_length == 8
+    assert pulse.axis_angle is None
+
+    # Check waveform length and net-zero property
+    waveform = np.array(pulse.waveform_function())
+    assert len(waveform) == 20
+    # Net-zero: sum should be close to zero
+    print(np.sum(waveform.real))
+    assert np.isclose(np.sum(waveform.real), 0, atol=1e-10)
+    # Flat region: check values in the middle
+    assert np.allclose(waveform[4:8], 1.0)
+    assert np.allclose(waveform[12:16], -1.0)
+
+    # flat_length must be even
+    with pytest.raises(ValueError):
+        pulses.CosineBipolarPulse(length=10, amplitude=1.0, flat_length=3)
+
+    # flat_length cannot exceed total length
+    with pytest.raises(ValueError):
+        pulses.CosineBipolarPulse(length=8, amplitude=1.0, flat_length=10)

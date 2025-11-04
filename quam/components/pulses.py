@@ -1,20 +1,14 @@
-from abc import ABC, abstractmethod
-from collections.abc import Iterable
 import numbers
 import warnings
-from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple, Sequence
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from typing import Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
+
 import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
-from quam.utils.qua_types import (
-    ScalarInt,
-    ScalarBool,
-    ScalarFloat,
-    ChirpType,
-    StreamType,
-)
-
+from quam.utils.qua_types import ChirpType, ScalarBool, ScalarFloat, ScalarInt, StreamType
 
 __all__ = [
     "Pulse",
@@ -33,7 +27,8 @@ __all__ = [
     "BlackmanIntegralPulse",
     "FlatTopTanhPulse",
     "FlatTopCosinePulse",
-    "CosineBipolarPulse"]
+    "CosineBipolarPulse",
+]
 
 
 @quam_dataclass
@@ -92,10 +87,7 @@ class Pulse(QuamComponent):
     @property
     def name(self):
         if self.channel is None:
-            raise AttributeError(
-                f"Cannot get full name of pulse '{self}' because it is not"
-                " attached to a channel"
-            )
+            raise AttributeError(f"Cannot get full name of pulse '{self}' because it is not" " attached to a channel")
 
         if self.id is not None:
             name = self.id
@@ -277,7 +269,7 @@ class Pulse(QuamComponent):
                 InOutMWChannel).
         """
 
-        from quam.components.channels import SingleChannel, IQChannel, MWChannel
+        from quam.components.channels import IQChannel, MWChannel, SingleChannel
 
         pulse_config = config["pulses"][self.pulse_name]
 
@@ -309,15 +301,9 @@ class Pulse(QuamComponent):
 
         # Add check that waveform type (single or IQ) matches parent
         if "single" in waveforms and not isinstance(self.channel, SingleChannel):
-            raise ValueError(
-                "Waveform type 'single' not allowed for (IQChannel, MWChannel)"
-                f" '{self.channel.name}'"
-            )
+            raise ValueError("Waveform type 'single' not allowed for (IQChannel, MWChannel)" f" '{self.channel.name}'")
         elif "I" in waveforms and not isinstance(self.channel, (IQChannel, MWChannel)):
-            raise ValueError(
-                "Waveform type 'IQ' not allowed for SingleChannel"
-                f" '{self.channel.name}'"
-            )
+            raise ValueError("Waveform type 'IQ' not allowed for SingleChannel" f" '{self.channel.name}'")
 
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
@@ -346,16 +332,11 @@ class Pulse(QuamComponent):
         if isinstance(self.digital_marker, str):
             # Use a common config digital marker
             if self.digital_marker not in config["digital_waveforms"]:
-                raise KeyError(
-                    "{self.name}.digital_marker={self.digital_marker} not in"
-                    " config['digital_waveforms']"
-                )
+                raise KeyError("{self.name}.digital_marker={self.digital_marker} not in" " config['digital_waveforms']")
             digital_marker_name = self.digital_marker
         else:
             digital_marker_list = [tuple(t) for t in self.digital_marker]
-            config["digital_waveforms"][self.digital_marker_name] = {
-                "samples": digital_marker_list
-            }
+            config["digital_waveforms"][self.digital_marker_name] = {"samples": digital_marker_list}
             digital_marker_name = self.digital_marker_name
 
         config["pulses"][self.pulse_name]["digital_marker"] = digital_marker_name
@@ -467,9 +448,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             integration weights in radians.
     """
 
-    integration_weights: Union[List[float], List[Tuple[float, int]]] = (
-        "#./default_integration_weights"
-    )
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = "#./default_integration_weights"
     integration_weights_angle: float = 0
 
     @property
@@ -530,9 +509,7 @@ class WaveformPulse(Pulse):
             return np.array(self.waveform_I)
         return np.array(self.waveform_I) + 1.0j * np.array(self.waveform_Q)
 
-    def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = False
-    ) -> Dict[str, Any]:
+    def to_dict(self, follow_references: bool = False, include_defaults: bool = False) -> Dict[str, Any]:
         d = super().to_dict(follow_references, include_defaults)
         d.pop("length")
         return d
@@ -799,6 +776,7 @@ class FlatTopGaussianPulse(Pulse):
 
         return waveform
 
+
 @quam_dataclass
 class FlatTopBlackmanPulse(Pulse):
     """Blackman rise/fall, flat-top pulse.
@@ -809,6 +787,7 @@ class FlatTopBlackmanPulse(Pulse):
         flat_length (int): Flat-top length (samples).
         axis_angle (float, optional): IQ axis angle in radians.
     """
+
     amplitude: float
     axis_angle: float = None
     flat_length: int
@@ -834,6 +813,7 @@ class FlatTopBlackmanPulse(Pulse):
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
 
+
 @quam_dataclass
 class BlackmanIntegralPulse(Pulse):
     """Adiabatic Blackman-integral ramp from v_start to v_end.
@@ -844,6 +824,7 @@ class BlackmanIntegralPulse(Pulse):
         v_end (float): Ending amplitude (V).
         axis_angle (float, optional): IQ axis angle in radians.
     """
+
     # amplitude: float
     v_start: float
     v_end: float
@@ -862,6 +843,7 @@ class BlackmanIntegralPulse(Pulse):
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
 
+
 @quam_dataclass
 class FlatTopCosinePulse(Pulse):
     """Cosine rise/fall, flat-top pulse.
@@ -872,6 +854,7 @@ class FlatTopCosinePulse(Pulse):
         flat_length (int): Flat-top length (samples).
         axis_angle (float, optional): IQ axis angle in radians.
     """
+
     amplitude: float
     axis_angle: float = None
     flat_length: int = 0
@@ -882,8 +865,7 @@ class FlatTopCosinePulse(Pulse):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
-                "FlatTopCosinePulse requires (length - flat_length) to be even "
-                f"({self.length=} {self.flat_length=})"
+                "FlatTopCosinePulse requires (length - flat_length) to be even " f"({self.length=} {self.flat_length=})"
             )
 
         wf = flattop_cosine_waveform(
@@ -897,6 +879,7 @@ class FlatTopCosinePulse(Pulse):
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
 
+
 @quam_dataclass
 class FlatTopTanhPulse(Pulse):
     """tanh rise/fall, flat-top pulse.
@@ -907,6 +890,7 @@ class FlatTopTanhPulse(Pulse):
         flat_length (int): Flat-top length (samples).
         axis_angle (float, optional): IQ axis angle in radians.
     """
+
     amplitude: float
     axis_angle: float = None
     flat_length: int = 0
@@ -917,8 +901,7 @@ class FlatTopTanhPulse(Pulse):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
-                "FlatTopTanhPulse requires (length - flat_length) to be even "
-                f"({self.length=} {self.flat_length=})"
+                "FlatTopTanhPulse requires (length - flat_length) to be even " f"({self.length=} {self.flat_length=})"
             )
 
         wf = flattop_tanh_waveform(
@@ -932,89 +915,97 @@ class FlatTopTanhPulse(Pulse):
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
 
+
 @quam_dataclass
 class CosineBipolarPulse(Pulse):
-    """Cosine bipolar pulse QUAM component.
+    """
+    CosineBipolarPulse QUAM component.
+
+    This pulse generates a net-zero waveform composed of two symmetric cosine-shaped lobes,
+    designed to minimize DC offset and long-timescale distortions. The waveform starts with a
+    smooth cosine rise, transitions through a positive flat section, passes through a
+    cosine-shaped switch to a negative flat section, and ends with a symmetric cosine rise.
+    The positive and negative flat regions are of equal length, ensuring the total area under
+    the curve is zero.
+
+    This net-zero property makes the CosineBipolarPulse especially robust against slow baseline
+    drifts and long-memory effects in experimental setups. The smooth transitions between segments reduce spectral leakage and
+    high-frequency components, making this pulse suitable for sensitive quantum control
+    applications.
+
+    Increasing the total pulse length while keeping the flat length constant results in longer,
+    smoother rise/fall and switch regions, further reducing spectral content at high frequencies.
 
     Args:
-        length (int): The total length of the pulse in samples.
-        amplitude (float): The amplitude of the pulse in volts.
+        length (int): Total length of the pulse in samples.
+        amplitude (float): Peak amplitude of the pulse in volts.
         axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is meant for a single channel or the I port
-                of an IQ channel
-            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
-        flat_length (int): The length of the pulse's flat top in samples.
-            The rise and fall lengths are calculated from the total length and the
-            flat length.
+            If None (default), the pulse is for a single channel or the I port of an IQ channel.
+            If not None, the pulse is for an IQ channel (0 is X, pi/2 is Y).
+        flat_length (int): Length of the flat-top region in samples (must be even and
+            less than or equal to total length). The flat region is split equally between
+            positive and negative halves.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
 
+    def __post_init__(self):
+        L = int(self.length)
+        F = int(self.flat_length)
+
+        if F > L:
+            raise ValueError(f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L}).")
+        if F % 2 != 0:
+            raise ValueError(
+                f"CosineBipolarPulse.flat_length ({F}) must be an even number to split equally into + and - halves."
+            )
+
     def waveform_function(self):
         # Helper segment generators (length 0 returns empty array)
-        def halfcos_up(n: int):
+        def halfcos(n: int):
             if n <= 0:
                 return np.array([])
             t = np.arange(n) / n
-            return 0.5 * (1 - np.cos(np.pi * t))  # 0 -> 1
-
-        def halfcos_down(n: int):
-            if n <= 0:
-                return np.array([])
-            t = np.arange(n) / n
-            return 0.5 * (1 + np.cos(np.pi * t))  # 1 -> 0
+            return 0.5 * (1 - np.cos(np.pi * t))
 
         def cos_switch(n: int):
+            """
+            Endpoint-exclusive cosine from +1 to -1 with zero discrete sum.
+            Uses midpoint sampling: theta_k = (k + 0.5)*pi/n, k=0..n-1.
+            """
             if n <= 0:
                 return np.array([])
-            t = np.arange(n) / n
-            return np.cos(np.pi * t)  # +1 -> -1
+            k = np.arange(n, dtype=float)
+            theta = (k + 0.5) * np.pi / n
+            return np.cos(theta)  # strictly between +1 and -1, antisymmetric -> net zero
 
         L = int(self.length)
         F = int(self.flat_length)
-        if F > L:
-            raise ValueError(
-                f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L})."
-            )
 
         remaining = L - F
-        if remaining <= 0:
+        if remaining == 0:
             rise_len = switch_len = fall_len = 0
         else:
             base = remaining // 3
             extra = remaining % 3
-            rise_len = base + (1 if extra > 0 else 0)
-            switch_len = base
-            fall_len = base + (1 if extra > 1 else 0)
+            rise_len = base + (1 if extra == 2 else 0)
+            switch_len = base + (extra if extra == 1 else 0)
+            fall_len = base + (1 if extra == 2 else 0)
 
-        flat_pos_len = F // 2 + (F % 2)  # positive half gets extra sample if odd
+        flat_pos_len = F // 2
         flat_neg_len = F // 2
 
         A = float(self.amplitude)
 
-        seg_rise = A * halfcos_up(rise_len)
+        seg_rise = A * halfcos(rise_len)
         seg_flat_pos = A * np.ones(flat_pos_len)
         seg_switch = A * cos_switch(switch_len)
         seg_flat_neg = -A * np.ones(flat_neg_len)
-        seg_fall = -A * halfcos_down(fall_len)
+        seg_fall = -A * halfcos(fall_len)[::-1]
 
-        p = np.concatenate(
-            [seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall]
-        )
-
-        current_len = len(p)
-        if current_len < L:
-            pad_total = L - current_len
-            pad_front = pad_total // 2
-            pad_back = pad_total - pad_front
-            p = np.concatenate([np.zeros(pad_front), p, np.zeros(pad_back)])
-        elif current_len > L:
-            trim_total = current_len - L
-            trim_front = trim_total // 2
-            trim_back = trim_total - trim_front
-            p = p[trim_front: current_len - trim_back]
+        p = np.concatenate([seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall])
 
         if self.axis_angle is not None:
             p = p * np.exp(1j * self.axis_angle)
