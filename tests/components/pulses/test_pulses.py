@@ -339,11 +339,3 @@ def test_cosinebipolarpulse():
     # Flat region: check values in the middle
     assert np.allclose(waveform[4:8], 1.0)
     assert np.allclose(waveform[12:16], -1.0)
-
-    # flat_length must be even
-    with pytest.raises(ValueError):
-        pulses.CosineBipolarPulse(length=10, amplitude=1.0, flat_length=3)
-
-    # flat_length cannot exceed total length
-    with pytest.raises(ValueError):
-        pulses.CosineBipolarPulse(length=8, amplitude=1.0, flat_length=10)

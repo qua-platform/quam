@@ -951,17 +951,6 @@ class CosineBipolarPulse(Pulse):
     axis_angle: float = None
     flat_length: int
 
-    def __post_init__(self):
-        L = int(self.length)
-        F = int(self.flat_length)
-
-        if F > L:
-            raise ValueError(f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L}).")
-        if F % 2 != 0:
-            raise ValueError(
-                f"CosineBipolarPulse.flat_length ({F}) must be an even number to split equally into + and - halves."
-            )
-
     def waveform_function(self):
         # Helper segment generators (length 0 returns empty array)
         def halfcos(n: int):
@@ -983,6 +972,13 @@ class CosineBipolarPulse(Pulse):
 
         L = int(self.length)
         F = int(self.flat_length)
+
+        if F > L:
+            raise ValueError(f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L}).")
+        if F % 2 != 0:
+            raise ValueError(
+                f"CosineBipolarPulse.flat_length ({F}) must be an even number to split equally into + and - halves."
+            )
 
         remaining = L - F
         if remaining == 0:
