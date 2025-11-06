@@ -8,7 +8,13 @@ import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
-from quam.utils.qua_types import ChirpType, ScalarBool, ScalarFloat, ScalarInt, StreamType
+from quam.utils.qua_types import (
+    ChirpType,
+    ScalarBool,
+    ScalarFloat,
+    ScalarInt,
+    StreamType,
+)
 
 __all__ = [
     "Pulse",
@@ -87,7 +93,10 @@ class Pulse(QuamComponent):
     @property
     def name(self):
         if self.channel is None:
-            raise AttributeError(f"Cannot get full name of pulse '{self}' because it is not" " attached to a channel")
+            raise AttributeError(
+                f"Cannot get full name of pulse '{self}' because it is not"
+                " attached to a channel"
+            )
 
         if self.id is not None:
             name = self.id
@@ -301,9 +310,15 @@ class Pulse(QuamComponent):
 
         # Add check that waveform type (single or IQ) matches parent
         if "single" in waveforms and not isinstance(self.channel, SingleChannel):
-            raise ValueError("Waveform type 'single' not allowed for (IQChannel, MWChannel)" f" '{self.channel.name}'")
+            raise ValueError(
+                "Waveform type 'single' not allowed for (IQChannel, MWChannel)"
+                f" '{self.channel.name}'"
+            )
         elif "I" in waveforms and not isinstance(self.channel, (IQChannel, MWChannel)):
-            raise ValueError("Waveform type 'IQ' not allowed for SingleChannel" f" '{self.channel.name}'")
+            raise ValueError(
+                "Waveform type 'IQ' not allowed for SingleChannel"
+                f" '{self.channel.name}'"
+            )
 
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
@@ -332,11 +347,16 @@ class Pulse(QuamComponent):
         if isinstance(self.digital_marker, str):
             # Use a common config digital marker
             if self.digital_marker not in config["digital_waveforms"]:
-                raise KeyError("{self.name}.digital_marker={self.digital_marker} not in" " config['digital_waveforms']")
+                raise KeyError(
+                    "{self.name}.digital_marker={self.digital_marker} not in"
+                    " config['digital_waveforms']"
+                )
             digital_marker_name = self.digital_marker
         else:
             digital_marker_list = [tuple(t) for t in self.digital_marker]
-            config["digital_waveforms"][self.digital_marker_name] = {"samples": digital_marker_list}
+            config["digital_waveforms"][self.digital_marker_name] = {
+                "samples": digital_marker_list
+            }
             digital_marker_name = self.digital_marker_name
 
         config["pulses"][self.pulse_name]["digital_marker"] = digital_marker_name
@@ -448,7 +468,9 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             integration weights in radians.
     """
 
-    integration_weights: Union[List[float], List[Tuple[float, int]]] = "#./default_integration_weights"
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = (
+        "#./default_integration_weights"
+    )
     integration_weights_angle: float = 0
 
     @property
@@ -509,7 +531,9 @@ class WaveformPulse(Pulse):
             return np.array(self.waveform_I)
         return np.array(self.waveform_I) + 1.0j * np.array(self.waveform_Q)
 
-    def to_dict(self, follow_references: bool = False, include_defaults: bool = False) -> Dict[str, Any]:
+    def to_dict(
+        self, follow_references: bool = False, include_defaults: bool = False
+    ) -> Dict[str, Any]:
         d = super().to_dict(follow_references, include_defaults)
         d.pop("length")
         return d
@@ -865,7 +889,8 @@ class FlatTopCosinePulse(Pulse):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
-                "FlatTopCosinePulse requires (length - flat_length) to be even " f"({self.length=} {self.flat_length=})"
+                "FlatTopCosinePulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
             )
 
         wf = flattop_cosine_waveform(
@@ -901,7 +926,8 @@ class FlatTopTanhPulse(Pulse):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
-                "FlatTopTanhPulse requires (length - flat_length) to be even " f"({self.length=} {self.flat_length=})"
+                "FlatTopTanhPulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
             )
 
         wf = flattop_tanh_waveform(
@@ -968,13 +994,17 @@ class CosineBipolarPulse(Pulse):
                 return np.array([])
             k = np.arange(n, dtype=float)
             theta = (k + 0.5) * np.pi / n
-            return np.cos(theta)  # strictly between +1 and -1, antisymmetric -> net zero
+            return np.cos(
+                theta
+            )  # strictly between +1 and -1, antisymmetric -> net zero
 
         L = int(self.length)
         F = int(self.flat_length)
 
         if F > L:
-            raise ValueError(f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L}).")
+            raise ValueError(
+                f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L})."
+            )
         if F % 2 != 0:
             raise ValueError(
                 f"CosineBipolarPulse.flat_length ({F}) must be an even number to split equally into + and - halves."
