@@ -947,30 +947,26 @@ class CosineBipolarPulse(Pulse):
     """
     CosineBipolarPulse QUAM component.
 
-    This pulse generates a net-zero waveform composed of two symmetric cosine-shaped lobes,
-    designed to minimize DC offset and long-timescale distortions. The waveform starts with a
-    smooth cosine rise, transitions through a positive flat section, passes through a
-    cosine-shaped switch to a negative flat section, and ends with a symmetric cosine rise.
-    The positive and negative flat regions are of equal length, ensuring the total area under
-    the curve is zero.
+    Generates a net-zero pulse with two symmetric cosine-shaped lobes.
+    Minimizes DC offset and long-timescale distortions. Waveform: smooth cosine
+    rise to positive flat section, cosine switch to negative flat, ends with
+    symmetric cosine rise. Positive and negative flat regions are equal length, so
+    the area is zero.
 
-    This net-zero property makes the CosineBipolarPulse especially robust against slow baseline
-    drifts and long-memory effects in experimental setups. The smooth transitions between segments reduce spectral leakage and
-    high-frequency components, making this pulse suitable for sensitive quantum control
-    applications.
+    Net-zero property helps against slow baseline drifts and long-memory effects.
+    Smooth transitions reduce spectral leakage and high-frequency noise — suitable
+    for sensitive quantum control.
 
-    Increasing the total pulse length while keeping the flat length constant results in longer,
-    smoother rise/fall and switch regions, further reducing spectral content at high frequencies.
+    Increasing the total length with constant flat length makes longer, smoother
+    rises/falls and switching, further reducing high-frequency content.
 
     Args:
-        length (int): Total length of the pulse in samples.
-        amplitude (float): Peak amplitude of the pulse in volts.
-        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
-            If None (default), the pulse is for a single channel or the I port of an IQ channel.
-            If not None, the pulse is for an IQ channel (0 is X, pi/2 is Y).
-        flat_length (int): Length of the flat-top region in samples (must be even and
-            less than or equal to total length). The flat region is split equally between
-            positive and negative halves.
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        axis_angle (float, optional): IQ axis angle in radians. If None, use for
+            a single channel or I of IQ; if not None, use for IQ (0 is X, pi/2 is Y).
+        flat_length (int): Flat region length (must be even and ≤ total length).
+            Split equally between positive and negative.
     """
 
     amplitude: float
@@ -1003,11 +999,12 @@ class CosineBipolarPulse(Pulse):
 
         if F > L:
             raise ValueError(
-                f"CosineBipolarPulse.flat_length ({F}) cannot exceed total length ({L})."
+                f"CosineBipolarPulse.flat_length={F} cannot exceed total length={L}."
             )
         if F % 2 != 0:
             raise ValueError(
-                f"CosineBipolarPulse.flat_length ({F}) must be an even number to split equally into + and - halves."
+                f"CosineBipolarPulse.flat_length={F} must be an even number to split "
+                "equally into + and - halves."
             )
 
         remaining = L - F
