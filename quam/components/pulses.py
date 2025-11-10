@@ -972,6 +972,7 @@ class CosineBipolarPulse(Pulse):
     amplitude: float
     axis_angle: float = None
     flat_length: int
+    padding: int = 0
 
     def waveform_function(self):
         # Helper segment generators (length 0 returns empty array)
@@ -994,12 +995,12 @@ class CosineBipolarPulse(Pulse):
                 theta
             )  # strictly between +1 and -1, antisymmetric -> net zero
 
-        L = int(self.length)
+        L = int(self.length) - self.padding
         F = int(self.flat_length)
 
-        if F > L:
+        if F > L + self.padding:
             raise ValueError(
-                f"CosineBipolarPulse.flat_length={F} cannot exceed total length={L}."
+                f"CosineBipolarPulse.flat_length={F} cannot exceed total length={L + self.padding}."
             )
         if F % 2 != 0:
             raise ValueError(
@@ -1029,7 +1030,7 @@ class CosineBipolarPulse(Pulse):
         seg_fall = -A * halfcos(fall_len)[::-1]
 
         p = np.concatenate([seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall])
-
+        p = np.concatenate([p, np.zeros(self.padding)])
         if self.axis_angle is not None:
             p = p * np.exp(1j * self.axis_angle)
 
