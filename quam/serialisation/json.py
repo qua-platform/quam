@@ -69,8 +69,8 @@ class JSONSerialiser(AbstractSerialiser):
         Priority (highest to lowest):
         1. Explicit parameter passed to save() (handled in save() method)
         2. Instance value (self.include_defaults)
-        3. Config setting (quam.config.include_defaults_in_serialization)
-        4. Fallback to False for backward compatibility
+        3. Config setting (quam.config.serialization.include_defaults)
+        4. Fallback to True (default behavior)
 
         Returns:
             bool: Whether to include default values in serialization.
@@ -79,7 +79,9 @@ class JSONSerialiser(AbstractSerialiser):
             return self.include_defaults
 
         config = get_quam_config()
-        return config.include_defaults_in_serialization
+        if config.serialization is not None:
+            return config.serialization.include_defaults
+        return True
 
     @staticmethod
     def _validate_and_convert_content_mapping(

@@ -10,7 +10,7 @@ class Migrate(MigrateBase):
     def backward(data: RawConfigType) -> RawConfigType:
         new_quam = data.pop("quam")
         assert new_quam.get("version", 3) == Migrate.to_version
-        new_quam.pop("include_defaults_in_serialization")
+        new_quam.pop("serialization", None)
         new_quam["version"] = Migrate.from_version
         new_data = {"quam": new_quam, **data}
         return new_data
@@ -18,7 +18,7 @@ class Migrate(MigrateBase):
     @staticmethod
     def forward(data: RawConfigType) -> RawConfigType:
         new_quam = data.pop("quam")
-        new_quam["include_defaults_in_serialization"] = True
+        new_quam["serialization"] = {"include_defaults": True}
         new_quam["version"] = Migrate.to_version
         new_data = {"quam": new_quam, **data}
         return new_data

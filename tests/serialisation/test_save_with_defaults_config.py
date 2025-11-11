@@ -60,10 +60,12 @@ def test_quamroot_save_excludes_defaults_when_config_false():
     with tempfile.TemporaryDirectory() as tmpdir:
         save_path = Path(tmpdir) / "state.json"
 
-        # Mock the config to return False for include_defaults_in_serialization
+        # Mock the config to return False for serialization.include_defaults
         with patch("quam.serialisation.json.get_quam_config") as mock_config:
+            mock_serialization = MagicMock()
+            mock_serialization.include_defaults = False
             mock_instance = MagicMock()
-            mock_instance.include_defaults_in_serialization = False
+            mock_instance.serialization = mock_serialization
             mock_config.return_value = mock_instance
 
             root.save(save_path)
