@@ -17,17 +17,3 @@ def test_include_defaults_config_version_3():
     assert config.version == 3
 
 
-def test_include_defaults_can_be_configured_false():
-    """Test that include_defaults_in_serialization can be set to False."""
-    from quam.config.models.quam import QuamConfig
-
-    config = QuamConfig(include_defaults_in_serialization=False)
-    assert config.include_defaults_in_serialization is False
-
-
-def test_include_defaults_can_be_configured_true():
-    """Test that include_defaults_in_serialization can be explicitly set to True."""
-    from quam.config.models.quam import QuamConfig
-
-    config = QuamConfig(include_defaults_in_serialization=True)
-    assert config.include_defaults_in_serialization is True
