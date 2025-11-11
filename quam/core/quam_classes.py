@@ -467,7 +467,7 @@ class QuamBase(ReferenceClass):
         return attrs
 
     def to_dict(
-        self, follow_references: bool = False, include_defaults: Optional[bool] = None
+        self, follow_references: bool = False, include_defaults: bool = False
     ) -> Dict[str, Any]:
         """Convert this object to a dictionary.
 
@@ -475,7 +475,6 @@ class QuamBase(ReferenceClass):
             follow_references: Whether to follow references when getting the value.
                 If False, the reference will be returned as a string.
             include_defaults: Whether to include attributes that have the default value.
-                If None, uses the config setting (include_defaults_in_serialization).
 
         Returns:
             A dictionary representation of this object.
@@ -486,15 +485,8 @@ class QuamBase(ReferenceClass):
             `"__class__"` key will be added to the dictionary. This is to ensure
             that the object can be reconstructed when loading from a file.
         """
-        # Resolve include_defaults: explicit value > config > default False
-        if include_defaults is None:
-            config = get_quam_config()
-            resolved_include_defaults = config.include_defaults_in_serialization
-        else:
-            resolved_include_defaults = include_defaults
-
         attrs = self.get_attrs(
-            follow_references=follow_references, include_defaults=resolved_include_defaults
+            follow_references=follow_references, include_defaults=include_defaults
         )
         quam_dict = {}
         for attr, val in attrs.items():

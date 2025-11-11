@@ -1,4 +1,4 @@
-"""Test to_dict() behavior with include_defaults_in_serialization config."""
+"""Test to_dict() explicit parameter behavior (backward compatibility)."""
 
 from dataclasses import field
 from typing import List
@@ -24,17 +24,10 @@ class NestedComponent(QuamComponent):
     count: int = 10
 
 
-def test_to_dict_explicit_include_defaults_true_overrides_config():
-    """Test that explicit include_defaults=True parameter overrides config."""
+def test_to_dict_explicit_include_defaults_true():
+    """Test that explicit include_defaults=True includes defaults."""
     comp = SimpleComponent(required_val=1)
-
-    # Even if config says False, explicit True should include defaults
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = False
-        mock_config.return_value = mock_instance
-
-        result = comp.to_dict(include_defaults=True)
+    result = comp.to_dict(include_defaults=True)
 
     assert result["required_val"] == 1
     assert result["optional_val"] == 42
@@ -42,17 +35,10 @@ def test_to_dict_explicit_include_defaults_true_overrides_config():
     assert result["optional_list"] == []
 
 
-def test_to_dict_explicit_include_defaults_false_overrides_config():
-    """Test that explicit include_defaults=False parameter overrides config."""
+def test_to_dict_explicit_include_defaults_false():
+    """Test that explicit include_defaults=False excludes defaults."""
     comp = SimpleComponent(required_val=1)
-
-    # Even if config says True, explicit False should exclude defaults
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = True
-        mock_config.return_value = mock_instance
-
-        result = comp.to_dict(include_defaults=False)
+    result = comp.to_dict(include_defaults=False)
 
     assert result["required_val"] == 1
     assert "optional_val" not in result
@@ -60,35 +46,10 @@ def test_to_dict_explicit_include_defaults_false_overrides_config():
     assert "optional_list" not in result
 
 
-def test_to_dict_uses_config_when_include_defaults_not_specified():
-    """Test that to_dict() uses config setting when include_defaults not specified."""
+def test_to_dict_default_excludes_defaults():
+    """Test that to_dict() without parameters excludes defaults (backward compatibility)."""
     comp = SimpleComponent(required_val=1)
-
-    # Config says True, no explicit parameter → should include defaults
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = True
-        mock_config.return_value = mock_instance
-
-        result = comp.to_dict()
-
-    assert result["required_val"] == 1
-    assert result["optional_val"] == 42
-    assert result["optional_str"] == "default_string"
-    assert result["optional_list"] == []
-
-
-def test_to_dict_uses_config_false_when_not_specified():
-    """Test that to_dict() respects config=False when include_defaults not specified."""
-    comp = SimpleComponent(required_val=1)
-
-    # Config says False, no explicit parameter → should exclude defaults
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = False
-        mock_config.return_value = mock_instance
-
-        result = comp.to_dict()
+    result = comp.to_dict()
 
     assert result["required_val"] == 1
     assert "optional_val" not in result
@@ -96,17 +57,12 @@ def test_to_dict_uses_config_false_when_not_specified():
     assert "optional_list" not in result
 
 
-def test_to_dict_nested_respects_config():
-    """Test that nested components also respect the config setting."""
+def test_to_dict_nested_respects_include_defaults_param():
+    """Test that nested components respect include_defaults parameter."""
     simple = SimpleComponent(required_val=5, optional_val=100)
     nested = NestedComponent(name="test", simple=simple)
 
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = True
-        mock_config.return_value = mock_instance
-
-        result = nested.to_dict()
+    result = nested.to_dict(include_defaults=True)
 
     assert result["name"] == "test"
     assert result["count"] == 10  # default value included
@@ -120,20 +76,15 @@ def test_to_dict_nested_respects_config():
     assert simple_result["optional_list"] == []
 
 
-def test_to_dict_nested_excludes_defaults_when_config_false():
-    """Test that nested components exclude defaults when config is False."""
+def test_to_dict_nested_excludes_defaults_by_default():
+    """Test that nested components exclude defaults by default."""
     simple = SimpleComponent(required_val=5, optional_val=100)
     nested = NestedComponent(name="test", simple=simple)
 
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = False
-        mock_config.return_value = mock_instance
-
-        result = nested.to_dict()
+    result = nested.to_dict()
 
     assert result["name"] == "test"
-    assert "count" not in result  # default value excluded
+    assert "count" not in result  # default value excluded by default
     assert "simple" in result
 
     # Nested component should also exclude defaults
@@ -142,22 +93,3 @@ def test_to_dict_nested_excludes_defaults_when_config_false():
     assert simple_result["optional_val"] == 100
     assert "optional_str" not in simple_result
     assert "optional_list" not in simple_result
-
-
-def test_to_dict_explicit_parameter_overrides_for_nested():
-    """Test that explicit include_defaults parameter overrides config for nested components."""
-    simple = SimpleComponent(required_val=5)
-    nested = NestedComponent(name="test", simple=simple)
-
-    # Config says False, but explicit True should include defaults
-    with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = MagicMock()
-        mock_instance.include_defaults_in_serialization = False
-        mock_config.return_value = mock_instance
-
-        result = nested.to_dict(include_defaults=True)
-
-    assert result["count"] == 10  # default included despite config=False
-    simple_result = result["simple"]
-    assert simple_result["optional_val"] == 42
-    assert simple_result["optional_str"] == "default_string"
