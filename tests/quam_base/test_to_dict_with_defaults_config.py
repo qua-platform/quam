@@ -6,7 +6,7 @@ from typing import List
 import pytest
 from quam.core.quam_classes import QuamComponent, quam_dataclass
 from quam.config.models.quam import QuamConfig
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 
 @quam_dataclass
@@ -30,7 +30,8 @@ def test_to_dict_explicit_include_defaults_true_overrides_config():
 
     # Even if config says False, explicit True should include defaults
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=False)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = False
         mock_config.return_value = mock_instance
 
         result = comp.to_dict(include_defaults=True)
@@ -47,7 +48,8 @@ def test_to_dict_explicit_include_defaults_false_overrides_config():
 
     # Even if config says True, explicit False should exclude defaults
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=True)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = True
         mock_config.return_value = mock_instance
 
         result = comp.to_dict(include_defaults=False)
@@ -64,7 +66,8 @@ def test_to_dict_uses_config_when_include_defaults_not_specified():
 
     # Config says True, no explicit parameter → should include defaults
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=True)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = True
         mock_config.return_value = mock_instance
 
         result = comp.to_dict()
@@ -81,7 +84,8 @@ def test_to_dict_uses_config_false_when_not_specified():
 
     # Config says False, no explicit parameter → should exclude defaults
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=False)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = False
         mock_config.return_value = mock_instance
 
         result = comp.to_dict()
@@ -98,7 +102,8 @@ def test_to_dict_nested_respects_config():
     nested = NestedComponent(name="test", simple=simple)
 
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=True)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = True
         mock_config.return_value = mock_instance
 
         result = nested.to_dict()
@@ -121,7 +126,8 @@ def test_to_dict_nested_excludes_defaults_when_config_false():
     nested = NestedComponent(name="test", simple=simple)
 
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=False)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = False
         mock_config.return_value = mock_instance
 
         result = nested.to_dict()
@@ -145,7 +151,8 @@ def test_to_dict_explicit_parameter_overrides_for_nested():
 
     # Config says False, but explicit True should include defaults
     with patch("quam.core.quam_classes.get_quam_config") as mock_config:
-        mock_instance = QuamConfig(include_defaults_in_serialization=False)
+        mock_instance = MagicMock()
+        mock_instance.include_defaults_in_serialization = False
         mock_config.return_value = mock_instance
 
         result = nested.to_dict(include_defaults=True)

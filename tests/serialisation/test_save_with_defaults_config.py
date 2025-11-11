@@ -10,7 +10,7 @@ import pytest
 from quam.core.quam_classes import QuamComponent, QuamRoot, quam_dataclass
 from quam.config.models.quam import QuamConfig
 from quam.config.resolvers import get_quam_config
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 
 @quam_dataclass
@@ -62,7 +62,8 @@ def test_quamroot_save_excludes_defaults_when_config_false():
 
         # Mock the config to return False for include_defaults_in_serialization
         with patch("quam.serialisation.json.get_quam_config") as mock_config:
-            mock_instance = QuamConfig(include_defaults_in_serialization=False)
+            mock_instance = MagicMock()
+            mock_instance.include_defaults_in_serialization = False
             mock_config.return_value = mock_instance
 
             root.save(save_path)
