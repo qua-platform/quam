@@ -749,12 +749,10 @@ class QuamBase(ReferenceClass):
                     f"Cannot set at reference because attr '{attr}' is not a reference. "
                     f"'{attr}' = {raw_value}"
                 )
-            else:
-                setattr(self, attr, value)
-                return
-
-        # Follow the reference chain to get the ultimate target
-        target_obj, target_attr = self._follow_reference_chain(self, attr)
+            target_obj, target_attr = self, attr
+        else:
+            # Follow the reference chain to get the ultimate target
+            target_obj, target_attr = self._follow_reference_chain(self, attr)
 
         # Use __setitem__ for dict/list types, otherwise use setattr
         if isinstance(target_obj, (dict, list, UserDict, UserList, QuamDict, QuamList)):
