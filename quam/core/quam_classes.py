@@ -245,6 +245,7 @@ class QuamBase(ReferenceClass):
     parent: ClassVar["QuamBase"] = ParentDescriptor()
     _last_instantiated_root: ClassVar[Optional["QuamRoot"]] = None
     config_settings: ClassVar[Dict[str, Any]] = None
+    _MAX_REFERENCE_DEPTH: ClassVar[int] = 10
 
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
@@ -666,7 +667,7 @@ class QuamBase(ReferenceClass):
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
     def _follow_reference_chain(
-        self, obj: "QuamBase", attr: str, max_depth: int = 100
+        self, obj: "QuamBase", attr: str, max_depth: Optional[int] = None
     ) -> tuple["QuamBase", str]:
         """Recursively follow a reference chain to find the ultimate target.
 
@@ -678,7 +679,7 @@ class QuamBase(ReferenceClass):
             obj: The QuamBase object containing the attribute.
             attr: The attribute name to follow (may be a list index like "0").
             max_depth: Maximum recursion depth to prevent infinite loops
-                (default: 100).
+                (default: QuamBase._MAX_REFERENCE_DEPTH).
 
         Returns:
             A tuple of (target_object, final_attr_name) where:
@@ -689,9 +690,11 @@ class QuamBase(ReferenceClass):
             AttributeError: If a reference in the chain cannot be resolved.
             RecursionError: If max_depth is exceeded (indicates circular reference).
         """
+        if max_depth is None:
+            max_depth = self._MAX_REFERENCE_DEPTH
         if max_depth <= 0:
             raise RecursionError(
-                f"Reference chain exceeded maximum depth of 100. "
+                f"Reference chain exceeded maximum depth of {self._MAX_REFERENCE_DEPTH}. "
                 f"Possible circular reference starting from {obj.get_attr_path()}"
             )
 
@@ -1022,7 +1025,7 @@ class QuamDict(UserDict, QuamBase):
 
         # Follow reference chains until reaching a non-reference value
         depth = 0
-        max_depth = 100
+        max_depth = self._MAX_REFERENCE_DEPTH
         try:
             while string_reference.is_reference(elem) and depth < max_depth:
                 new_elem = self._get_referenced_value(elem)
@@ -1258,7 +1261,7 @@ class QuamList(UserList, QuamBase):
 
         # Follow reference chains until reaching a non-reference value
         depth = 0
-        max_depth = 100
+        max_depth = self._MAX_REFERENCE_DEPTH
         while string_reference.is_reference(elem) and depth < max_depth:
             new_elem = self._get_referenced_value(elem)
             # If _get_referenced_value returns the same reference string,
