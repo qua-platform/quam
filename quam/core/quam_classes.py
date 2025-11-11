@@ -690,6 +690,9 @@ class QuamBase(ReferenceClass):
             AttributeError: If a reference in the chain cannot be resolved.
             RecursionError: If max_depth is exceeded (indicates circular reference).
         """
+        # Normalize attr to string for consistent handling
+        attr = str(attr)
+
         if max_depth is None:
             max_depth = self._MAX_REFERENCE_DEPTH
         if max_depth <= 0:
@@ -698,7 +701,16 @@ class QuamBase(ReferenceClass):
                 f"Possible circular reference starting from {obj.get_attr_path()}"
             )
 
-        raw_value = obj.get_raw_value(attr)
+        # Handle list/dict index access specially
+        if attr.isdigit() and isinstance(obj, (list, UserList, QuamList)):
+            # For list indices, get the raw element directly from the list
+            index = int(attr)
+            if isinstance(obj, QuamList):
+                raw_value = obj.data[index]
+            else:
+                raw_value = obj[index]
+        else:
+            raw_value = obj.get_raw_value(attr)
 
         # Base case: value is not a reference
         if not string_reference.is_reference(raw_value):
@@ -997,7 +1009,13 @@ class QuamDict(UserDict, QuamBase):
             return elem
 
         target_obj, target_attr = self._follow_reference_chain(self, i)
-        return target_obj.get_raw_value(target_attr)
+        # Handle list/dict indices that result from following the chain
+        if target_attr.isdigit() and isinstance(target_obj, (list, UserList, QuamList)):
+            return target_obj[int(target_attr)]
+        elif isinstance(target_obj, (dict, UserDict, QuamDict)):
+            return target_obj[target_attr]
+        else:
+            return target_obj.get_raw_value(target_attr)
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
@@ -1205,7 +1223,13 @@ class QuamList(UserList, QuamBase):
             return elem
 
         target_obj, target_attr = self._follow_reference_chain(self, i)
-        return target_obj.get_raw_value(target_attr)
+        # Handle list/dict indices that result from following the chain
+        if target_attr.isdigit() and isinstance(target_obj, (list, UserList, QuamList)):
+            return target_obj[int(target_attr)]
+        elif isinstance(target_obj, (dict, UserDict, QuamDict)):
+            return target_obj[target_attr]
+        else:
+            return target_obj.get_raw_value(target_attr)
 
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)
