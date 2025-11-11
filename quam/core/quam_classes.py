@@ -369,17 +369,27 @@ class QuamBase(ReferenceClass):
         return type(val) == required_type
 
     def get_reference(
-        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+        self,
+        attr: Optional[str] = None,
+        relative_path: Optional[str] = None,
+        follow_chain: bool = False,
     ) -> Optional[str]:
-        """Get the reference path of this object.
+        """Get the reference path of this object or one of its attributes.
 
         Args:
             attr: The optional attribute to get the reference path for.
                 If None, the reference path of the object itself is returned.
             relative_path: The optional relative path to join with the reference path.
+            follow_chain: If True and attr is a reference, follow the reference chain
+                to return the ultimate target reference. Default is False for backward
+                compatibility. Only applies when attr is specified.
 
         Returns:
-            The reference path of this object.
+            The reference path of this object or the specified attribute.
+
+        Raises:
+            ValueError: If both attr and relative_path are specified, or if follow_chain
+                is True but attr is not a reference.
 
         Examples:
             We assume a QuamRoot object with a component "elem".
@@ -388,6 +398,9 @@ class QuamBase(ReferenceClass):
             - elem.get_reference(relative_path="#./child") == "#/elem/child"
             - elem.get_reference(relative_path="#../child") == "#/child"
             - elem.get_reference(relative_path="#./child/grandchild") == "#/elem/child/grandchild"
+
+            With follow_chain=True (if attr contains a reference to another reference):
+            - elem.get_reference(attr="chain_ref", follow_chain=True)  # returns ultimate target
         """
 
         if attr is not None and relative_path is not None:
@@ -395,6 +408,24 @@ class QuamBase(ReferenceClass):
                 "Cannot specify both attr and relative_path. "
                 "Please specify only one of them."
             )
+
+        # Handle follow_chain before computing the reference path
+        if follow_chain and attr is not None:
+            raw_value = self.get_raw_value(attr)
+            if not string_reference.is_reference(raw_value):
+                raise ValueError(
+                    f"Cannot follow reference chain for attr '{attr}': "
+                    f"value is not a reference (value={raw_value})"
+                )
+            # Follow the reference chain to get the ultimate target
+            try:
+                target_obj, target_attr = self._follow_reference_chain(self, attr)
+                # Return the reference path to the ultimate target
+                return target_obj.get_reference(attr=target_attr)
+            except (AttributeError, ValueError, RecursionError) as e:
+                raise ValueError(
+                    f"Failed to follow reference chain for attr '{attr}': {e}"
+                ) from e
 
         if self.parent is None:
             raise AttributeError(
@@ -604,43 +635,6 @@ class QuamBase(ReferenceClass):
                 raise InvalidReferenceError(msg) from e
             return reference
 
-    def _resolve_reference_string(self, ref_string: str, max_depth: int = 10) -> Any:
-        """Recursively resolve a reference string to its ultimate value.
-
-        This helper resolves reference chains stored as values (e.g., in list/dict elements).
-        It follows each reference until reaching a non-reference value.
-
-        Args:
-            ref_string: The reference string to resolve (e.g., "#./target").
-            max_depth: Maximum recursion depth to prevent circular references (default: 10).
-
-        Returns:
-            The resolved value. If the reference cannot be resolved (broken reference),
-            returns the reference string itself.
-
-        Raises:
-            RecursionError: If max_depth is exceeded (circular reference detected).
-        """
-        if max_depth <= 0:
-            raise RecursionError(
-                f"Reference chain exceeded maximum depth of 10. "
-                f"Possible circular reference."
-            )
-
-        # Base case: not a reference
-        if not string_reference.is_reference(ref_string):
-            return ref_string
-
-        # Get the next value by resolving the reference
-        next_value = self._get_referenced_value(ref_string)
-
-        # If resolution returned the same string, it's a broken reference
-        if next_value == ref_string:
-            return ref_string
-
-        # Recursive case: resolve the next value in the chain
-        return self._resolve_reference_string(next_value, max_depth - 1)
-
     def print_summary(self, indent: int = 0):
         """Print a summary of the QuamBase object.
 
@@ -671,10 +665,67 @@ class QuamBase(ReferenceClass):
             else:
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
+    def _follow_reference_chain(
+        self, obj: "QuamBase", attr: str, max_depth: int = 100
+    ) -> tuple["QuamBase", str]:
+        """Recursively follow a reference chain to find the ultimate target.
+
+        This method follows reference strings through nested references until
+        reaching a non-reference value. It is used internally by
+        set_at_reference() and get_reference() to handle chained references.
+
+        Args:
+            obj: The QuamBase object containing the attribute.
+            attr: The attribute name to follow (may be a list index like "0").
+            max_depth: Maximum recursion depth to prevent infinite loops
+                (default: 100).
+
+        Returns:
+            A tuple of (target_object, final_attr_name) where:
+            - target_object: The QuamBase object containing the ultimate value
+            - final_attr_name: The final attribute name (after following all chains)
+
+        Raises:
+            AttributeError: If a reference in the chain cannot be resolved.
+            RecursionError: If max_depth is exceeded (indicates circular reference).
+        """
+        if max_depth <= 0:
+            raise RecursionError(
+                f"Reference chain exceeded maximum depth of 100. "
+                f"Possible circular reference starting from {obj.get_attr_path()}"
+            )
+
+        raw_value = obj.get_raw_value(attr)
+
+        # Base case: value is not a reference
+        if not string_reference.is_reference(raw_value):
+            return obj, attr
+
+        # Recursive case: follow the reference chain
+        parent_reference, parent_attr = string_reference.split_reference(raw_value)
+        if not parent_attr:
+            raise ValueError(
+                f"Invalid reference {raw_value}: must have an attribute part"
+            )
+
+        parent_obj = obj._get_referenced_value(parent_reference)
+        if not isinstance(parent_obj, QuamBase):
+            raise TypeError(
+                f"Cannot follow reference chain through non-QuamBase object: "
+                f"{type(parent_obj)}"
+            )
+
+        # Recursively follow the chain
+        return self._follow_reference_chain(parent_obj, parent_attr, max_depth - 1)
+
     def set_at_reference(
         self, attr: str, value: Any, allow_non_reference: bool = False
     ):
-        """Follow the reference of an attribute and set the value at the reference
+        """Follow the reference of an attribute and set the value at the reference.
+
+        This method follows reference chains recursively. If an attribute contains
+        a reference to another reference, both references are preserved while the
+        ultimate target value is updated.
 
         Args:
             attr: The attribute to set the value at the reference of.
@@ -713,27 +764,21 @@ class QuamBase(ReferenceClass):
         if ref_attr.isdigit() and isinstance(parent_obj, (list, UserList)):
             try:
                 index = int(ref_attr)
-                # Check if list element is a reference that needs recursive handling
-                if not isinstance(parent_obj, QuamBase):
+                if isinstance(parent_obj, QuamBase):
+                    element_ref = parent_obj.data[index]
+                    # If the list element is a reference, follow the chain to find
+                    # the ultimate target and set the value there
+                    if string_reference.is_reference(element_ref):
+                        target_obj, target_attr = self._follow_reference_chain(
+                            parent_obj, ref_attr
+                        )
+                        setattr(target_obj, target_attr, value)
+                    else:
+                        # Element is not a reference - direct assignment
+                        parent_obj[index] = value
+                else:
                     # Plain list - direct assignment
                     parent_obj[index] = value
-                elif not string_reference.is_reference(parent_obj.data[index]):
-                    # QuamList element is not a reference - direct assignment
-                    parent_obj[index] = value
-                elif parent_obj.parent is None:
-                    # QuamList has no parent - direct assignment
-                    parent_obj[index] = value
-                else:
-                    # Element is a reference - create temporary attribute to leverage
-                    # existing recursive reference handling
-                    element_ref = parent_obj.data[index]
-                    list_parent = parent_obj.parent
-                    temp_attr = "_temp_ref"
-                    setattr(list_parent, temp_attr, element_ref)
-                    try:
-                        list_parent.set_at_reference(temp_attr, value)
-                    finally:
-                        delattr(list_parent, temp_attr)
             except (IndexError, KeyError) as e:
                 raise AttributeError(
                     f"Cannot set index {ref_attr} on object {parent_obj}"
@@ -974,25 +1019,39 @@ class QuamDict(UserDict, QuamBase):
 
     def __getitem__(self, i):
         elem = super().__getitem__(i)
-        if string_reference.is_reference(elem):
+
+        # Follow reference chains until reaching a non-reference value
+        depth = 0
+        max_depth = 100
+        try:
+            while string_reference.is_reference(elem) and depth < max_depth:
+                new_elem = self._get_referenced_value(elem)
+                # If _get_referenced_value returns the same reference string,
+                # it means the reference couldn't be resolved (broken reference)
+                if new_elem == elem:
+                    # Return the reference string itself (broken reference)
+                    break
+                elem = new_elem
+                depth += 1
+
+            if depth >= max_depth:
+                try:
+                    ref_str = self.get_reference()
+                except (AttributeError, ValueError):
+                    ref_str = f"{self.__class__.__name__} (no reference available)"
+                raise RecursionError(
+                    f"Reference chain in {ref_str} exceeded maximum "
+                    f"depth of {max_depth}. Possible circular reference."
+                )
+        except InvalidReferenceError as e:
             try:
-                elem = self._resolve_reference_string(elem, max_depth=10)
-            except RecursionError as e:
-                try:
-                    repr_str = f"{self.__class__.__name__}: {self.get_reference()}"
-                except Exception:
-                    repr_str = self.__class__.__name__
-                raise KeyError(
-                    f"Could not get referenced value {elem} from {repr_str}"
-                ) from e
-            except InvalidReferenceError as e:
-                try:
-                    repr_str = f"{self.__class__.__name__}: {self.get_reference()}"
-                except Exception:
-                    repr_str = self.__class__.__name__
-                raise KeyError(
-                    f"Could not get referenced value {elem} from {repr_str}"
-                ) from e
+                repr_str = f"{self.__class__.__name__}: {self.get_reference()}"
+            except Exception:
+                repr_str = self.__class__.__name__
+            raise KeyError(
+                f"Could not get referenced value {elem} from {repr_str}"
+            ) from e
+
         return elem
 
     # Overriding methods from UserDict
@@ -1197,16 +1256,29 @@ class QuamList(UserList, QuamBase):
             # This automatically gets the referenced values
             return list(elem)
 
-        if string_reference.is_reference(elem):
+        # Follow reference chains until reaching a non-reference value
+        depth = 0
+        max_depth = 100
+        while string_reference.is_reference(elem) and depth < max_depth:
+            new_elem = self._get_referenced_value(elem)
+            # If _get_referenced_value returns the same reference string,
+            # it means the reference couldn't be resolved (broken reference)
+            if new_elem == elem:
+                # Return the reference string itself (broken reference)
+                break
+            elem = new_elem
+            depth += 1
+
+        if depth >= max_depth:
             try:
-                elem = self._resolve_reference_string(elem, max_depth=10)
-            except RecursionError as e:
-                raise IndexError(
-                    f"Could not get referenced value {elem}"
-                ) from e
-            except InvalidReferenceError:
-                # If resolution fails, return the reference string as-is (broken reference)
-                pass
+                ref_str = self.get_reference()
+            except (AttributeError, ValueError):
+                ref_str = f"{self.__class__.__name__} (no reference available)"
+            raise RecursionError(
+                f"Reference chain in {ref_str} exceeded maximum depth "
+                f"of {max_depth}. Possible circular reference."
+            )
+
         return elem
 
     def __setitem__(self, i, item):
