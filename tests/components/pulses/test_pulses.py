@@ -1,15 +1,16 @@
 import numpy as np
 import pytest
 
-from quam.core import *
 from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
+from quam.core import *
 from quam.utils.dataclass import get_dataclass_attr_annotations
 
 try:
     from qm.exceptions import NoScopeFoundException
 except ImportError:
     NoScopeFoundException = IndexError
+
 
 def test_drag_gaussian_pulse():
     drag_pulse = pulses.DragGaussianPulse(
@@ -342,3 +343,22 @@ def test_complex_arbitrary_waveform_iq_channel_list_conversion():
     assert len(q_waveform) == 4, "Q waveform should have correct length"
     assert i_waveform == [1.0, 2.0, 3.0, 4.0], "I waveform should match real part"
     assert q_waveform == [1.0, 2.0, 3.0, 4.0], "Q waveform should match imaginary part"
+
+
+def test_cosinebipolarpulse():
+    # Basic instantiation and property checks
+    pulse = pulses.CosineBipolarPulse(length=20, amplitude=1.0, flat_length=8)
+    assert pulse.length == 20
+    assert pulse.amplitude == 1.0
+    assert pulse.flat_length == 8
+    assert pulse.axis_angle is None
+
+    # Check waveform length and net-zero property
+    waveform = np.array(pulse.waveform_function())
+    assert len(waveform) == 20
+    # Net-zero: sum should be close to zero
+    print(np.sum(waveform.real))
+    assert np.isclose(np.sum(waveform.real), 0, atol=1e-10)
+    # Flat region: check values in the middle
+    assert np.allclose(waveform[4:8], 1.0)
+    assert np.allclose(waveform[12:16], -1.0)
