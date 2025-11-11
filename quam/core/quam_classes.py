@@ -674,9 +674,29 @@ class QuamBase(ReferenceClass):
 
         # Handle list index references
         if ref_attr.isdigit() and isinstance(parent_obj, (list, UserList)):
-            # This is a list index reference
             try:
-                parent_obj[int(ref_attr)] = value
+                index = int(ref_attr)
+                # Check if list element is a reference that needs recursive handling
+                if not isinstance(parent_obj, QuamBase):
+                    # Plain list - direct assignment
+                    parent_obj[index] = value
+                elif not string_reference.is_reference(parent_obj.data[index]):
+                    # QuamList element is not a reference - direct assignment
+                    parent_obj[index] = value
+                elif parent_obj.parent is None:
+                    # QuamList has no parent - direct assignment
+                    parent_obj[index] = value
+                else:
+                    # Element is a reference - create temporary attribute to leverage
+                    # existing recursive reference handling
+                    element_ref = parent_obj.data[index]
+                    list_parent = parent_obj.parent
+                    temp_attr = "_temp_ref"
+                    setattr(list_parent, temp_attr, element_ref)
+                    try:
+                        list_parent.set_at_reference(temp_attr, value)
+                    finally:
+                        delattr(list_parent, temp_attr)
             except (IndexError, KeyError) as e:
                 raise AttributeError(
                     f"Cannot set index {ref_attr} on object {parent_obj}"

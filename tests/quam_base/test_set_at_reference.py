@@ -253,3 +253,66 @@ def test_set_at_reference_list_index_out_of_range():
     # This should fail when trying to set
     with pytest.raises((AttributeError, IndexError)):
         container.set_at_reference("list_ref_oob", 999)
+
+
+def test_set_at_reference_list_element_is_reference():
+    """Test setting a value where the list element itself is a reference string
+
+    When a list element is a reference string (like "#./target"),
+    set_at_reference should follow the reference chain and update the target,
+    preserving the reference in the list.
+
+    This tests: list_ref -> values/0 (which contains "#./target") -> target
+    """
+    @quam_dataclass
+    class ContainerWithTarget(QuamRoot):
+        target: int = 0
+        values: QuamList = None
+        list_ref: str = "#./values/0"
+
+    container = ContainerWithTarget(values=QuamList())
+    # The list element is itself a reference to target
+    container.values.extend(["#./target"])
+
+    # Verify initial state: the reference string is in the list
+    assert container.get_raw_value("values")[0] == "#./target"
+    assert container.target == 0  # initial value
+
+    # Set value through the list reference
+    # This should follow: list_ref -> values/0 (which is "#./target") -> update target
+    container.set_at_reference("list_ref", 777)
+
+    # The reference should be preserved in the list, and target should be updated
+    assert container.target == 777, "Target should be updated to 777"
+    assert container.get_raw_value("values")[0] == "#./target", "Reference should be preserved in list"
+
+
+def test_set_at_reference_double_list_reference():
+    """Test setting a value where list element is a reference to another list index
+
+    When a list element contains a reference to another location (even in the same list),
+    set_at_reference should follow the reference chain.
+
+    This tests: list_ref -> values/0 (which contains "#./values/1") -> values/1
+    """
+    @quam_dataclass
+    class ContainerWithNestedListRefs(QuamRoot):
+        values: QuamList = None
+        list_ref: str = "#./values/0"
+
+    container = ContainerWithNestedListRefs(values=QuamList())
+    # values[0] is a reference to values[1]
+    # values[1] is the actual value
+    container.values.extend(["#./values/1", 42])
+
+    # Verify initial state
+    assert container.get_raw_value("values")[0] == "#./values/1"
+    assert container.values[1] == 42
+
+    # Set value through list_ref
+    # This should follow: list_ref -> values/0 (which is "#./values/1") -> values/1
+    container.set_at_reference("list_ref", 555)
+
+    # values[1] should be updated, reference in values[0] should be preserved
+    assert container.values[1] == 555, "values[1] should be updated to 555"
+    assert container.get_raw_value("values")[0] == "#./values/1", "Reference should be preserved in list"
