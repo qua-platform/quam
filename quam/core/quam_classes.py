@@ -753,48 +753,20 @@ class QuamBase(ReferenceClass):
                 setattr(self, attr, value)
                 return
 
-        parent_reference, ref_attr = string_reference.split_reference(raw_value)
-        if not ref_attr:
-            raise ValueError(
-                f"Unsuccessful attempt to set the value at reference {raw_value} for "
-                f"attribute {attr} because the reference is invalid as it has no "
-                "attribute"
-            )
+        # Follow the reference chain to get the ultimate target
+        target_obj, target_attr = self._follow_reference_chain(self, attr)
 
-        parent_obj = self._get_referenced_value(parent_reference)
-
-        # Handle list index references
-        if ref_attr.isdigit() and isinstance(parent_obj, (list, UserList)):
-            try:
-                index = int(ref_attr)
-                if isinstance(parent_obj, QuamBase):
-                    element_ref = parent_obj.data[index]
-                    # If the list element is a reference, follow the chain to find
-                    # the ultimate target and set the value there
-                    if string_reference.is_reference(element_ref):
-                        target_obj, target_attr = self._follow_reference_chain(
-                            parent_obj, ref_attr
-                        )
-                        setattr(target_obj, target_attr, value)
-                    else:
-                        # Element is not a reference - direct assignment
-                        parent_obj[index] = value
-                else:
-                    # Plain list - direct assignment
-                    parent_obj[index] = value
-            except (IndexError, KeyError) as e:
-                raise AttributeError(
-                    f"Cannot set index {ref_attr} on object {parent_obj}"
-                ) from e
-        else:
-            # Handle regular attribute references
-            raw_referenced_value = parent_obj.get_raw_value(ref_attr)
-            if string_reference.is_reference(raw_referenced_value) and isinstance(
-                parent_obj, QuamBase
+        # Use __setitem__ for dict/list types, otherwise use setattr
+        if isinstance(target_obj, (dict, list, UserDict, UserList, QuamDict, QuamList)):
+            # Convert string index to int for list types
+            if (
+                isinstance(target_obj, (list, UserList, QuamList))
+                and target_attr.isdigit()
             ):
-                parent_obj.set_at_reference(ref_attr, value)
-            else:
-                setattr(parent_obj, ref_attr, value)
+                target_attr = int(target_attr)
+            target_obj[target_attr] = value
+        else:
+            setattr(target_obj, target_attr, value)
 
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
@@ -1023,39 +995,11 @@ class QuamDict(UserDict, QuamBase):
     def __getitem__(self, i):
         elem = super().__getitem__(i)
 
-        # Follow reference chains until reaching a non-reference value
-        depth = 0
-        max_depth = self._MAX_REFERENCE_DEPTH
-        try:
-            while string_reference.is_reference(elem) and depth < max_depth:
-                new_elem = self._get_referenced_value(elem)
-                # If _get_referenced_value returns the same reference string,
-                # it means the reference couldn't be resolved (broken reference)
-                if new_elem == elem:
-                    # Return the reference string itself (broken reference)
-                    break
-                elem = new_elem
-                depth += 1
+        if not string_reference.is_reference(elem):
+            return elem
 
-            if depth >= max_depth:
-                try:
-                    ref_str = self.get_reference()
-                except (AttributeError, ValueError):
-                    ref_str = f"{self.__class__.__name__} (no reference available)"
-                raise RecursionError(
-                    f"Reference chain in {ref_str} exceeded maximum "
-                    f"depth of {max_depth}. Possible circular reference."
-                )
-        except InvalidReferenceError as e:
-            try:
-                repr_str = f"{self.__class__.__name__}: {self.get_reference()}"
-            except Exception:
-                repr_str = self.__class__.__name__
-            raise KeyError(
-                f"Could not get referenced value {elem} from {repr_str}"
-            ) from e
-
-        return elem
+        target_obj, target_attr = self._follow_reference_chain(self, i)
+        return target_obj.get_raw_value(target_attr)
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
@@ -1259,30 +1203,11 @@ class QuamList(UserList, QuamBase):
             # This automatically gets the referenced values
             return list(elem)
 
-        # Follow reference chains until reaching a non-reference value
-        depth = 0
-        max_depth = self._MAX_REFERENCE_DEPTH
-        while string_reference.is_reference(elem) and depth < max_depth:
-            new_elem = self._get_referenced_value(elem)
-            # If _get_referenced_value returns the same reference string,
-            # it means the reference couldn't be resolved (broken reference)
-            if new_elem == elem:
-                # Return the reference string itself (broken reference)
-                break
-            elem = new_elem
-            depth += 1
+        elif not string_reference.is_reference(elem):
+            return elem
 
-        if depth >= max_depth:
-            try:
-                ref_str = self.get_reference()
-            except (AttributeError, ValueError):
-                ref_str = f"{self.__class__.__name__} (no reference available)"
-            raise RecursionError(
-                f"Reference chain in {ref_str} exceeded maximum depth "
-                f"of {max_depth}. Possible circular reference."
-            )
-
-        return elem
+        target_obj, target_attr = self._follow_reference_chain(self, i)
+        return target_obj.get_raw_value(target_attr)
 
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)
