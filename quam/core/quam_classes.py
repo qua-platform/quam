@@ -604,6 +604,43 @@ class QuamBase(ReferenceClass):
                 raise InvalidReferenceError(msg) from e
             return reference
 
+    def _resolve_reference_string(self, ref_string: str, max_depth: int = 10) -> Any:
+        """Recursively resolve a reference string to its ultimate value.
+
+        This helper resolves reference chains stored as values (e.g., in list/dict elements).
+        It follows each reference until reaching a non-reference value.
+
+        Args:
+            ref_string: The reference string to resolve (e.g., "#./target").
+            max_depth: Maximum recursion depth to prevent circular references (default: 10).
+
+        Returns:
+            The resolved value. If the reference cannot be resolved (broken reference),
+            returns the reference string itself.
+
+        Raises:
+            RecursionError: If max_depth is exceeded (circular reference detected).
+        """
+        if max_depth <= 0:
+            raise RecursionError(
+                f"Reference chain exceeded maximum depth of 10. "
+                f"Possible circular reference."
+            )
+
+        # Base case: not a reference
+        if not string_reference.is_reference(ref_string):
+            return ref_string
+
+        # Get the next value by resolving the reference
+        next_value = self._get_referenced_value(ref_string)
+
+        # If resolution returned the same string, it's a broken reference
+        if next_value == ref_string:
+            return ref_string
+
+        # Recursive case: resolve the next value in the chain
+        return self._resolve_reference_string(next_value, max_depth - 1)
+
     def print_summary(self, indent: int = 0):
         """Print a summary of the QuamBase object.
 
@@ -939,14 +976,22 @@ class QuamDict(UserDict, QuamBase):
         elem = super().__getitem__(i)
         if string_reference.is_reference(elem):
             try:
-                elem = self._get_referenced_value(elem)
+                elem = self._resolve_reference_string(elem, max_depth=10)
+            except RecursionError as e:
+                try:
+                    repr_str = f"{self.__class__.__name__}: {self.get_reference()}"
+                except Exception:
+                    repr_str = self.__class__.__name__
+                raise KeyError(
+                    f"Could not get referenced value {elem} from {repr_str}"
+                ) from e
             except InvalidReferenceError as e:
                 try:
-                    repr = f"{self.__class__.__name__}: {self.get_reference()}"
+                    repr_str = f"{self.__class__.__name__}: {self.get_reference()}"
                 except Exception:
-                    repr = self.__class__.__name__
+                    repr_str = self.__class__.__name__
                 raise KeyError(
-                    f"Could not get referenced value {elem} from {repr}"
+                    f"Could not get referenced value {elem} from {repr_str}"
                 ) from e
         return elem
 
@@ -1153,7 +1198,15 @@ class QuamList(UserList, QuamBase):
             return list(elem)
 
         if string_reference.is_reference(elem):
-            elem = self._get_referenced_value(elem)
+            try:
+                elem = self._resolve_reference_string(elem, max_depth=10)
+            except RecursionError as e:
+                raise IndexError(
+                    f"Could not get referenced value {elem}"
+                ) from e
+            except InvalidReferenceError:
+                # If resolution fails, return the reference string as-is (broken reference)
+                pass
         return elem
 
     def __setitem__(self, i, item):
