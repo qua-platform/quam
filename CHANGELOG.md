@@ -7,6 +7,7 @@
 ### Fixed
 
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
+- Fixed passing follow_references and include_defaults kwargs to super().to_dict() in QuamDict.to_dict() method.
 
 ## [0.4.2]
 
