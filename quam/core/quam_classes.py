@@ -1058,7 +1058,10 @@ class QuamDict(UserDict, QuamBase):
         Returns:
             A dictionary representation of the object.
         """
-        quam_dict = super().to_dict()
+        quam_dict = super().to_dict(
+            follow_references=follow_references,
+            include_defaults=include_defaults,
+        )
 
         # Remove __class__ from the dictionary as it's the default for a dict
         quam_dict.pop("__class__", None)
