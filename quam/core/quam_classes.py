@@ -474,7 +474,7 @@ class QuamBase(ReferenceClass):
         Args:
             follow_references: Whether to follow references when getting the value.
                 If False, the reference will be returned as a string.
-            include_defaults: Whether to include attributes that have the default
+            include_defaults: Whether to include attributes that have the default value.
 
         Returns:
             A dictionary representation of this object.
@@ -740,7 +740,7 @@ class QuamRoot(QuamBase):
         self,
         path: Optional[Union[Path, str]] = None,
         content_mapping: Optional[Dict[str, str]] = None,
-        include_defaults: bool = False,
+        include_defaults: Optional[bool] = None,
         ignore: Optional[Sequence[str]] = None,
     ):
         """Save the entire QuamRoot object to a file. This includes nested objects.

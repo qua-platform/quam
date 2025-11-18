@@ -18,7 +18,7 @@ def test_serialise_random_object(tmp_path):
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
-    serialiser.save(quam_root, path)
+    serialiser.save(quam_root, path, include_defaults=False)
 
     d = json.loads(path.read_text())
 
@@ -34,7 +34,7 @@ def test_serialise_random_object(tmp_path):
     quam_root.b = RandomObject()  # type: ignore
 
     with pytest.raises(TypeError):
-        serialiser.save(quam_root, path)
+        serialiser.save(quam_root, path, include_defaults=False)
 
 
 def test_serialise_ignore(tmp_path):
@@ -42,7 +42,7 @@ def test_serialise_ignore(tmp_path):
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
-    serialiser.save(quam_root, path, ignore=["b"])
+    serialiser.save(quam_root, path, ignore=["b"], include_defaults=False)
 
     d = json.loads(path.read_text())
 
@@ -57,7 +57,7 @@ def test_serialise_ignore_nonexisting(tmp_path):
 
     serialiser = JSONSerialiser()
     path = tmp_path / "quam_root.json"
-    serialiser.save(quam_root, path, ignore=["c"])
+    serialiser.save(quam_root, path, ignore=["c"], include_defaults=False)
 
     d = json.loads(path.read_text())
 

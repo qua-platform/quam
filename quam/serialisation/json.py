@@ -62,6 +62,27 @@ class JSONSerialiser(AbstractSerialiser):
     default_foldername: str = "quam_state"
     content_mapping: Dict[str, str] = {}  # Expected final format: component -> filename
 
+    def _resolve_include_defaults(self) -> bool:
+        """
+        Resolves the include_defaults setting using a priority chain.
+
+        Priority (highest to lowest):
+        1. Explicit parameter passed to save() (handled in save() method)
+        2. Instance value (self.include_defaults)
+        3. Config setting (quam.config.serialization.include_defaults)
+        4. Fallback to True (default behavior)
+
+        Returns:
+            bool: Whether to include default values in serialization.
+        """
+        if self.include_defaults is not None:
+            return self.include_defaults
+
+        config = get_quam_config()
+        if config.serialization is not None:
+            return config.serialization.include_defaults
+        return True
+
     @staticmethod
     def _validate_and_convert_content_mapping(
         mapping: Optional[Dict],
@@ -190,7 +211,7 @@ class JSONSerialiser(AbstractSerialiser):
     def __init__(
         self,
         content_mapping: Optional[Dict] = None,  # Accept Dict initially for validation
-        include_defaults: bool = False,
+        include_defaults: Optional[bool] = None,
         state_path: Optional[Union[str, Path]] = None,
     ):
         """
@@ -332,9 +353,11 @@ class JSONSerialiser(AbstractSerialiser):
         else:
             current_content_mapping = self.content_mapping  # Already validated in init
 
-        current_include_defaults = (
-            include_defaults if include_defaults is not None else self.include_defaults
-        )
+        # Resolve include_defaults with priority: parameter > instance > config > fallback
+        if include_defaults is not None:
+            current_include_defaults = include_defaults
+        else:
+            current_include_defaults = self._resolve_include_defaults()
 
         if path is None:
             path = self._get_state_path()
