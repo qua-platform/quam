@@ -987,9 +987,9 @@ class CosineBipolarPulse(Pulse):
         else:
             base = self.smoothing_time // 4
             extra = self.smoothing_time % 4
-            rise_len = base + (1 if extra == 2 or 3 else 0)
-            switch_len = 2 * base + (extra if extra == 1 else 0)
-            fall_len = base + (1 if extra == 2 or 3 else 0)
+            rise_len = base + (1 if extra in (2, 3) else 0)
+            switch_len = 2 * base + (1 if extra in (1, 3) else 0)
+            fall_len = base + (1 if extra in (2, 3) else 0)
 
         flat_pos_len = F // 2
         flat_neg_len = F // 2
