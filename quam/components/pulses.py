@@ -751,17 +751,14 @@ class FlatTopGaussianPulse(Pulse):
     amplitude: float
     axis_angle: float = None
     flat_length: int
+    smoothing_time: int = 0
 
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
 
-        rise_fall_length = (self.length - self.flat_length) // 2
-        if not self.flat_length + 2 * rise_fall_length == self.length:
-            raise ValueError(
-                "FlatTopGaussianPulse rise_fall_length (=length-flat_length) must be"
-                f" a multiple of 2 ({self.length} - {self.flat_length} ="
-                f" {self.length - self.flat_length})"
-            )
+        rise_fall_length = self.smoothing_time // 2
+        if not self.smoothing_time % 2 == 0:
+            raise ValueError("FlatTopGaussianPulse rise_fall_length must be a multiple of 2")
 
         waveform = flattop_gaussian_waveform(
             amplitude=self.amplitude,
@@ -769,7 +766,9 @@ class FlatTopGaussianPulse(Pulse):
             rise_fall_length=rise_fall_length,
             return_part="all",
         )
-        waveform = np.array(waveform)
+
+        zero_padding = np.zeros(self.length - len(waveform))
+        waveform = np.concatenate((waveform, zero_padding))
 
         if self.axis_angle is not None:
             waveform = waveform * np.exp(1j * self.axis_angle)
