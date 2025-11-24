@@ -46,6 +46,39 @@ IQ_channel = IQChannel(
 )
 ```
 
+!!! note "Port Properties in Channels (Deprecated)"
+    Some properties such as `opx_output_offset`, `shareable`, and `inverted` are currently available as channel attributes for backwards compatibility. However, these properties belong to ports and should be configured through explicit [Port][quam.components.ports.BasePort] objects. Setting these properties on channels is **deprecated** and will be removed in a future version.
+
+For more advanced port management, including port containers, port references, and hardware-specific configurations (LF-FEM, MW-FEM, OPX+), see the [Channel Ports](channel-ports.md) documentation.
+
+#### Using Explicit Ports (Recommended)
+
+For advanced control over port properties, define ports explicitly and reference them from channels:
+
+```python
+from quam.components import BasicQuam, SingleChannel
+from quam.components.ports import FEMPortsContainer
+
+# Create QUAM instance with port container
+machine = BasicQuam(ports=FEMPortsContainer())
+
+# Define port with its properties
+port = machine.ports.get_analog_output(
+    "con1", 1, 2,  # controller, fem_id, port_id
+    create=True,
+    offset=0.15,  # DC offset configured on port
+    shareable=True,  # Port sharing configured on port
+    sampling_rate=2e9,
+)
+
+# Create channel that references the port
+machine.channels["drive"] = SingleChannel(
+    opx_output=port.get_reference()  # Reference to configured port
+)
+```
+
+This approach ensures centralized port configuration and enables port sharing across channels. See [Channel Ports](channel-ports.md) for complete documentation.
+
 
 ### DC Offset
 Each analog channel can have a specified DC offset that remains for the duration of the QUA program.

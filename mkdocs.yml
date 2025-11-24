@@ -50,6 +50,7 @@ nav:
       - "components/index.md"
       - "components/quam-root.md"
       - "components/channels.md"
+      - "components/channel-ports.md"
       - "components/pulses.md"
       - "components/octave.md"
       - "components/qubits-and-qubit-pairs.md"
@@ -62,7 +63,6 @@ nav:
   - "API References":
       - "API_references/index.md"
       - "QUAM Components":
-      
           - "QUAM Channels API": "API_references/components/channels_API.md"
           - "QUAM Pulses API": "API_references/components/pulses_API.md"
           - "QUAM Ports API": "API_references/components/ports_API.md"
