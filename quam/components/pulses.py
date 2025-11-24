@@ -2,6 +2,7 @@ import numbers
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from dataclasses import field
 from typing import Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -737,7 +738,6 @@ class FlatTopGaussianPulse(Pulse):
     """Gaussian pulse with flat top QUAM component.
 
     Args:
-        length (int): The total length of the pulse in samples.
         amplitude (float): The amplitude of the pulse in volts.
         axis_angle (float, optional): IQ axis angle of the output pulse in radians.
             If None (default), the pulse is meant for a single channel or the I port
@@ -746,12 +746,22 @@ class FlatTopGaussianPulse(Pulse):
         flat_length (int): The length of the pulse's flat top in samples.
             The rise and fall lengths are calculated from the total length and the
             flat length.
+        smoothing_time (int): The total rise and fall time in samples.
+            Default is 0.
+        post_zero_padding_time (int): The amount of zero padding to add after the
+            pulse in samples. Default is 0.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
     smoothing_time: int = 0
+    post_zero_padding_time: int = 0
+    length: int = field(default="#./inferred_total_length", init=False)
+
+    @property
+    def inferred_total_length(self) -> int:
+        return int(np.ceil((self.flat_length + self.smoothing_time + self.post_zero_padding_time) / 4) * 4)
 
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
@@ -934,18 +944,28 @@ class CosineBipolarPulse(Pulse):
     rises/falls and switching, further reducing high-frequency content.
 
     Args:
-        length (int): Total pulse length (samples).
         amplitude (float): Peak amplitude (V).
         axis_angle (float, optional): IQ axis angle in radians. If None, use for
             a single channel or I of IQ; if not None, use for IQ (0 is X, pi/2 is Y).
         flat_length (int): Flat region length (must be even and ≤ total length).
             Split equally between positive and negative.
+        smoothing_time (int): Total length of rise, switch, and fall segments
+            (samples). Default 0 for abrupt transitions. Increasing this smooths
+            edges, reducing high-frequency content.
+        post_zero_padding_time (int): Additional zeros appended after the pulse
+            (samples). Default 0.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
     smoothing_time: int = 0
+    post_zero_padding_time: int = 0
+    length: int = field(default="#./inferred_total_length", init=False)
+
+    @property
+    def inferred_total_length(self) -> int:
+        return int(np.ceil((self.flat_length + self.smoothing_time + self.post_zero_padding_time) / 4) * 4)
 
     def waveform_function(self):
         # Helper segment generators (length 0 returns empty array)
@@ -1001,6 +1021,13 @@ class CosineBipolarPulse(Pulse):
         seg_flat_neg = -A * np.ones(flat_neg_len)
         seg_fall = -A * halfcos(fall_len)[::-1]
         zero_padding = np.zeros(L - (self.smoothing_time + F))
+
+        p = np.concatenate([seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding])
+
+        if self.axis_angle is not None:
+            p = p * np.exp(1j * self.axis_angle)
+
+        return p.tolist()
 
         p = np.concatenate([seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding])
 
