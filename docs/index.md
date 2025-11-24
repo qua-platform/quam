@@ -15,6 +15,7 @@ QUAM is not just a tool but a gateway to streamlined and efficient quantum compu
 <div class="grid" markdown>
 
 - **Component-Based Setup:** Utilize a standard set of QUAM components like [Mixers][quam.components.hardware.Mixer] and [IQChannels][quam.components.channels.IQChannel] to digitally represent and manipulate your quantum environment.
+- **Gate-Level Operations:** Work with high-level [quantum components](features/gate-level-operations.md) like qubits and qubit pairs, and use macro operations for common quantum gate sequences, bringing your code closer to quantum circuit thinking.
 - **Automated Configuration:** Automatically generate the necessary QUA configuration from your QUAM setup, simplifying the transition from design to deployment.
 - **Extensibility:** Easily extend QUAM with [custom classes](components/custom-components.md) to accommodate complex quantum setups, providing flexibility and power in your quantum computing applications.
 - **State Management:** Effortlessly save and load your QUAM state, enabling consistent results and reproducibility in experiments.
