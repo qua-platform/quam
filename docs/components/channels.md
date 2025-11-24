@@ -46,8 +46,10 @@ IQ_channel = IQChannel(
 )
 ```
 
-!!! note "Port Properties in Channels (Deprecated)"
-    Some properties such as `opx_output_offset`, `shareable`, and `inverted` are currently available as channel attributes for backwards compatibility. However, these properties belong to ports and should be configured through explicit [Port][quam.components.ports.BasePort] objects. Setting these properties on channels is **deprecated** and will be removed in a future version.
+!!! warning "Port Properties in Channels (Deprecated)"
+    Some properties such as `opx_output_offset`, `opx_input_offset`, `filter_fir_taps`, `filter_iir_taps`, `shareable`, and `inverted` are currently available as channel attributes for backwards compatibility. However, these properties belong to ports and should be configured through explicit [Port][quam.components.ports.BasePort] objects.
+
+    **These properties are deprecated and will be removed in a future version.** Runtime deprecation warnings are now emitted when these properties are used, providing migration guidance. See the [Migration Guide](#migrating-from-channel-level-port-properties) below for details on how to update your code.
 
 For more advanced port management, including port containers, port references, and hardware-specific configurations (LF-FEM, MW-FEM, OPX+), see the [Channel Ports](channel-ports.md) documentation.
 
@@ -82,7 +84,32 @@ This approach ensures centralized port configuration and enables port sharing ac
 
 ### DC Offset
 Each analog channel can have a specified DC offset that remains for the duration of the QUA program.
-This can be set through `SingleChannel.opx_output_offset` for the [SingleChannel][quam.components.channels.SingleChannel], and through `IQChannel.opx_output_offset_I` and `IQChannel.opx_output_offset_Q` for the [IQChannel][quam.components.channels.IQChannel].
+
+**Recommended Approach** - Configure DC offset on the port:
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+# For single channels
+port = OPXPlusAnalogOutputPort("con1", 1, offset=0.15)
+channel = SingleChannel(opx_output=port)
+
+# For IQ channels with different I/Q offsets
+port_I = OPXPlusAnalogOutputPort("con1", 2, offset=0.10)
+port_Q = OPXPlusAnalogOutputPort("con1", 3, offset=0.12)
+IQ_channel = IQChannel(opx_output_I=port_I, opx_output_Q=port_Q)
+```
+
+**Deprecated Approach** - Setting offset on channel (emits deprecation warning):
+```python
+# Still works but will be removed in a future version
+channel = SingleChannel(opx_output=("con1", 1), opx_output_offset=0.15)
+IQ_channel = IQChannel(
+    opx_output_I=("con1", 2),
+    opx_output_Q=("con1", 3),
+    opx_output_offset_I=0.10,
+    opx_output_offset_Q=0.12
+)
+```
 
 Note that if multiple channels are attached to the same OPX output port(s), they may not have different output offsets.
 This raises a warning and chooses the DC offset of the last channel. 
@@ -289,10 +316,134 @@ times, counts = channel.measure_time_tagging(size=1000, max_duration=3000)
 - The `max_duration` parameter specifies the maximum duration to collect samples for.
 
 
-Two QUA variables are returned: 
+Two QUA variables are returned:
 
 - `times` is a QUA array containing the times of arrival of the signal.
   It will contain at most `size` entries, though it may contain fewer if the maximum duration is reached first.
 - `counts` is a QUA integer containing the number of measured events, being at most equal to `size`.
 
 Additional information on time tagging can be found in the [Time Tagging QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging).
+
+
+## Migrating from Channel-Level Port Properties
+
+As of QUAM v0.5.0, port-related properties on channels are deprecated. This section provides guidance on migrating your code to use explicit Port objects instead.
+
+### Why Migrate?
+
+Port properties such as `opx_output_offset`, `filter_fir_taps`, `shareable`, and `inverted` logically belong to ports, not channels. Using explicit Port objects:
+
+- **Clarifies ownership**: Properties are configured where they belong
+- **Enables port sharing**: Multiple channels can reference the same configured port
+- **Centralizes configuration**: Port containers provide unified port management
+- **Prepares for future**: Channel-level properties will be removed in a future version
+
+### Migration Examples
+
+#### DC Offsets
+
+**Before (Deprecated):**
+```python
+channel = SingleChannel(
+    opx_output=("con1", 1),
+    opx_output_offset=0.15
+)
+```
+
+**After (Recommended):**
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+port = OPXPlusAnalogOutputPort("con1", 1, offset=0.15)
+channel = SingleChannel(opx_output=port)
+```
+
+#### Filter Configuration
+
+**Before (Deprecated):**
+```python
+channel = SingleChannel(
+    opx_output=("con1", 1),
+    filter_fir_taps=[0.1, 0.2, 0.3],
+    filter_iir_taps=[0.5, 0.6]
+)
+```
+
+**After (Recommended):**
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+port = OPXPlusAnalogOutputPort(
+    "con1", 1,
+    feedforward_filter=[0.1, 0.2, 0.3],
+    feedback_filter=[0.5, 0.6]
+)
+channel = SingleChannel(opx_output=port)
+```
+
+#### Digital Channel Properties
+
+**Before (Deprecated):**
+```python
+digital_channel = DigitalOutputChannel(
+    opx_output=("con1", 1),
+    shareable=True,
+    inverted=True
+)
+```
+
+**After (Recommended):**
+```python
+from quam.components.ports import OPXPlusDigitalOutputPort
+
+port = OPXPlusDigitalOutputPort("con1", 1, shareable=True, inverted=True)
+digital_channel = DigitalOutputChannel(opx_output=port)
+```
+
+#### IQ Channels with Offsets
+
+**Before (Deprecated):**
+```python
+IQ_channel = IQChannel(
+    opx_output_I=("con1", 2),
+    opx_output_Q=("con1", 3),
+    opx_output_offset_I=0.10,
+    opx_output_offset_Q=0.12
+)
+```
+
+**After (Recommended):**
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+port_I = OPXPlusAnalogOutputPort("con1", 2, offset=0.10)
+port_Q = OPXPlusAnalogOutputPort("con1", 3, offset=0.12)
+IQ_channel = IQChannel(opx_output_I=port_I, opx_output_Q=port_Q)
+```
+
+### Using Port Containers (Best Practice)
+
+For complex systems with many ports, use a port container for centralized management:
+
+```python
+from quam.components import BasicQuam
+from quam.components.ports import FEMPortsContainer
+
+# Set up port container
+machine = BasicQuam(ports=FEMPortsContainer())
+
+# Create ports with properties
+output_port = machine.ports.get_analog_output(
+    "con1", 1, 2,  # controller, fem_id, port_id
+    create=True,
+    offset=0.15,
+    shareable=True
+)
+
+# Reference port in channel
+machine.channels["drive"] = SingleChannel(
+    opx_output=output_port.get_reference()
+)
+```
+
+See the [Channel Ports documentation](channel-ports.md) for more details on port containers and advanced port management.

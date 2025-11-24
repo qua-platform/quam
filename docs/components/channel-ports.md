@@ -256,6 +256,38 @@ Ports support crosstalk compensation, FIR/IIR filters (OPX+), and exponential fi
 
 - **Use port references**: Always use `port.get_reference()` instead of passing port objects directly
 - **Centralized management**: Create all ports before channels for better organization
-- **Use port properties**: Directly set port properties on the port object rather than through channel attributes, as they are deprecated.
+- **Configure properties on ports**: Set properties like `offset`, `shareable`, `inverted`, and filters directly on Port objects, not on channels. Channel-level port properties are deprecated and will be removed in a future version.
+- **Avoid deprecated channel properties**: Do not use `opx_output_offset`, `opx_input_offset`, `filter_fir_taps`, `filter_iir_taps`, `shareable`, or `inverted` on channel objects. These emit deprecation warnings and will be removed.
 - **Port sharing**: Set `shareable=True` when multiple channels use the same port
 - **Choose the right type**: MW-FEM for microwave/RF, LF-FEM for high-rate baseband/IF
+
+## Migrating from Channel-Level Port Properties
+
+!!! warning "Deprecated Channel Properties"
+    As of QUAM v0.5.0, setting port properties on channels is deprecated. Runtime warnings are emitted to help you migrate your code. See the [Channels Migration Guide](channels.md#migrating-from-channel-level-port-properties) for detailed examples.
+
+### Quick Migration Guide
+
+If you're currently setting port properties on channels, migrate to explicit Port objects:
+
+| Channel Property | Port Property | Port Class |
+|-----------------|---------------|------------|
+| `opx_output_offset` | `offset` | `OPXPlusAnalogOutputPort`, `LFFEMAnalogOutputPort` |
+| `opx_input_offset` | `offset` | `OPXPlusAnalogInputPort`, `LFFEMAnalogInputPort` |
+| `filter_fir_taps` | `feedforward_filter` | `LFAnalogOutputPort` (all output ports) |
+| `filter_iir_taps` | `feedback_filter` (OPX+) or `exponential_filter` (LF-FEM) | `LFAnalogOutputPort` (all output ports) |
+| `shareable` (any channel) | `shareable` | All port types |
+| `inverted` (digital) | `inverted` | `DigitalOutputPort` types |
+
+**Example:**
+```python
+# Old (deprecated - emits warning)
+channel = SingleChannel(opx_output=("con1", 1), opx_output_offset=0.15)
+
+# New (recommended)
+from quam.components.ports import OPXPlusAnalogOutputPort
+port = OPXPlusAnalogOutputPort("con1", 1, offset=0.15)
+channel = SingleChannel(opx_output=port)
+```
+
+See the complete [migration guide in the Channels documentation](channels.md#migrating-from-channel-level-port-properties) for more examples.
