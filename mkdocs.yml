@@ -62,6 +62,7 @@ nav:
   - "API References":
       - "API_references/index.md"
       - "QUAM Components":
+      
           - "QUAM Channels API": "API_references/components/channels_API.md"
           - "QUAM Pulses API": "API_references/components/pulses_API.md"
           - "QUAM Hardware API": "API_references/components/hardware_API.md"
