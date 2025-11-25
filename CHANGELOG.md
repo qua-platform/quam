@@ -46,6 +46,10 @@ All deprecated properties now show migration guidance with code examples. See [P
 - Added `duration` and `fidelity` as optional parameters to `QuamMacro`
 - Added new pulses: `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopTanhPulse`, `FlatTopCosinePulse`
 
+### Changed
+
+- `JSONSerialiser.load()` now skips hidden directories when loading from a directory
+
 ### Fixed
 
 - Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.

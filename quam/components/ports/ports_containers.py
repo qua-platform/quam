@@ -16,7 +16,6 @@ from .analog_inputs import (
 from .digital_outputs import OPXPlusDigitalOutputPort, FEMDigitalOutputPort
 from .digital_inputs import OPXPlusDigitalInputPort
 
-
 __all__ = ["OPXPlusPortsContainer", "FEMPortsContainer"]
 
 OPXPlusPortTypes = Union[
@@ -203,6 +202,8 @@ class FEMPortsContainer(QuamComponent):
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_output":
+            # Set default values in kwargs before passing to constructor
+            # Safe to mutate since kwargs is used only once per port creation
             if "upconverter_frequency" not in kwargs and "upconverters" not in kwargs:
                 kwargs["upconverter_frequency"] = 5e9
             if "band" not in kwargs:
@@ -211,6 +212,8 @@ class FEMPortsContainer(QuamComponent):
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_input":
+            # Set default values in kwargs before passing to constructor
+            # Safe to mutate since kwargs is used only once per port creation
             if "band" not in kwargs:
                 kwargs["band"] = 1
             if "downconverter_frequency" not in kwargs:
