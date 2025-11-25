@@ -35,9 +35,63 @@ def qua_config():
     return deepcopy(qua_config_template)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def prevent_default_config_loading():
+    """
+    Prevents loading ~/.qualibrate config during tests by changing the default
+    config filename to a non-existent file.
+
+    This ensures tests pass regardless of whether ~/.qualibrate exists on the system.
+    """
+    try:
+        import qualibrate_config.vars
+        original_filename = qualibrate_config.vars.DEFAULT_CONFIG_FILENAME
+        new_filename = "nonexisting_config_for_testing.toml"
+        qualibrate_config.vars.DEFAULT_CONFIG_FILENAME = new_filename
+        yield
+        qualibrate_config.vars.DEFAULT_CONFIG_FILENAME = original_filename
+    except ImportError:
+        # qualibrate_config not available, no need to mock
+        yield
+
+
 @pytest.fixture(scope="function", autouse=True)
 def mock_quam_config():
-    """Mock get_quam_config to prevent loading system config during tests."""
-    with patch('quam.core.quam_classes.get_quam_config') as mock:
-        mock.side_effect = FileNotFoundError("No config file in test environment")
-        yield mock
+    """
+    Mock get_quam_config to prevent loading system config during tests.
+
+    Patches all import locations where get_quam_config is used to ensure
+    no config files are loaded from the system during testing.
+
+    Returns a minimal mock config object with default values matching QuamConfig.
+    """
+    # Create a minimal mock config object that matches QuamConfig structure
+    class MockSerializationConfig:
+        include_defaults = True
+
+    class MockQuamConfig:
+        version = 3
+        state_path = None
+        raise_error_missing_reference = False
+        serialization = MockSerializationConfig()
+
+    mock_config = MockQuamConfig()
+
+    import_locations = [
+        'quam.core.quam_classes.get_quam_config',
+        'quam.serialisation.json.get_quam_config',
+        'quam.components.get_quam_config',
+    ]
+
+    patches = [patch(location) for location in import_locations]
+    mocks = []
+
+    for p in patches:
+        mock = p.start()
+        mock.return_value = mock_config
+        mocks.append(mock)
+
+    yield mocks
+
+    for p in patches:
+        p.stop()

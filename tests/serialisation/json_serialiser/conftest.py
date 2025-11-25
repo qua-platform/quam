@@ -11,12 +11,6 @@ from dataclasses import field
 # import sys
 # sys.path.insert(0, str(Path(__file__).parent.parent)) # Assuming tests are one level above quam package
 
-# Try to import the necessary module for the new fixture
-try:
-    import qualibrate_config.vars
-except ImportError:
-    qualibrate_config = None  # Flag that the module is missing
-
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
 from quam.serialisation.json import JSONSerialiser, convert_int_keys
 
@@ -61,26 +55,8 @@ class MockQuamRoot(QuamRoot):
     default_val: int = 10  # Example default
 
 
-# Fixture to prevent loading user's default config
-@pytest.fixture(autouse=True, scope="session")
-def prevent_default_config_loading():
-    """
-    Overrides the default config filename during tests to prevent
-    loading a user's actual config file when testing default path logic.
-    """
-    if qualibrate_config is None:
-        print(
-            "\nSkipping prevent_default_config_loading fixture: qualibrate_config.vars"
-            " not found."
-        )
-        yield
-        return
-
-    original_filename = qualibrate_config.vars.DEFAULT_CONFIG_FILENAME
-    new_filename = "nonexisting_config_for_testing.toml"
-    qualibrate_config.vars.DEFAULT_CONFIG_FILENAME = new_filename
-    yield  # Let the tests run with the modified filename
-    qualibrate_config.vars.DEFAULT_CONFIG_FILENAME = original_filename
+# Note: prevent_default_config_loading fixture is now in tests/conftest.py
+# and applies to all tests automatically
 
 
 @pytest.fixture

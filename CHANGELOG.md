@@ -6,9 +6,19 @@
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
 - Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
+- Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
+- Added v2→v3 config migration with automatic upgrade support for the new serialization settings
 
 ### Changed
 
+- **Breaking Change**: Default serialization behavior changed from excluding defaults to including them for more explicit state representation
+- Config version bumped from v2 to v3
+- Restructured config to use nested `serialization` subcategory under `quam` config section
+- Priority chain for resolving `include_defaults` setting:
+  1. Explicit parameter to `save()` or `to_dict()`
+  2. `JSONSerialiser` instance value
+  3. Config setting `quam.serialization.include_defaults`
+  4. Fallback to `True` (default behavior)
 - Enhanced deprecation warnings for channel-level port properties to include migration examples with code snippets
 - Improved docstring return type formatting in serialization (`quam/serialisation/json.py`) and utility modules (`quam/utils/string_reference.py`)
 - Expanded documentation for channel-ports.md with comprehensive examples of port container usage
