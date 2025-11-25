@@ -78,17 +78,20 @@ def mock_quam_config():
     mock_config = MockQuamConfig()
 
     import_locations = [
+        'quam.config.resolvers.get_quam_config',  # Source - covers all imports
         'quam.core.quam_classes.get_quam_config',
         'quam.serialisation.json.get_quam_config',
         'quam.components.get_quam_config',
     ]
 
-    patches = [patch(location) for location in import_locations]
+    patches = []
     mocks = []
 
-    for p in patches:
+    for location in import_locations:
+        p = patch(location)
         mock = p.start()
         mock.return_value = mock_config
+        patches.append(p)
         mocks.append(mock)
 
     yield mocks
