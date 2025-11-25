@@ -1,7 +1,6 @@
 from typing import Dict
 from dataclasses import field
 import warnings
-from quam.config.models import quam
 from quam.core import QuamRoot, quam_dataclass
 from quam.components.channels import Channel
 from quam.components.octave import Octave
@@ -38,6 +37,7 @@ class BasicFEMQuam(BasicQuam):
     Attributes:
         ports (FEMPortsContainer): Container for FEM-specific analog and digital ports.
     """
+
     ports: FEMPortsContainer = field(default_factory=FEMPortsContainer)
 
 
@@ -50,6 +50,7 @@ class BasicOPXPlusQuam(BasicQuam):
     Attributes:
         ports (OPXPlusPortsContainer): Container for OPX+ analog and digital ports.
     """
+
     ports: OPXPlusPortsContainer = field(default_factory=OPXPlusPortsContainer)
 
 

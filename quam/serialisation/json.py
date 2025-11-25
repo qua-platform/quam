@@ -223,7 +223,9 @@ class JSONSerialiser(AbstractSerialiser):
                 format is detected, a warning is issued and it's converted.
                 If None, uses the class default.
             include_defaults: Whether to include fields set to their default
-                values in the output. If None, resolves via config or defaults to True.
+                values in the output. If None, follows priority chain:
+                1. Config setting (quam.config.serialization.include_defaults)
+                2. Fallback to True (default behavior)
             state_path: An optional default path for saving/loading state. If provided,
                 this path takes precedence over environment variables or configuration
                 files when determining the default save/load location.
@@ -352,7 +354,8 @@ class JSONSerialiser(AbstractSerialiser):
         else:
             current_content_mapping = self.content_mapping  # Already validated in init
 
-        # Resolve include_defaults with priority: parameter > instance > config > fallback
+        # Resolve include_defaults with priority:
+        # parameter > instance > config > fallback
         if include_defaults is not None:
             current_include_defaults = include_defaults
         else:
