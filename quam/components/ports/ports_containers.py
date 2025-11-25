@@ -205,16 +205,20 @@ class FEMPortsContainer(QuamComponent):
         elif port_type == "mw_output":
             if "upconverter_frequency" not in kwargs and "upconverters" not in kwargs:
                 kwargs["upconverter_frequency"] = 5e9
+            if "band" not in kwargs:
+                kwargs["band"] = 1
             ports[port_id] = MWFEMAnalogOutputPort(
-                controller_id, fem_id, port_id, band=kwargs.get("band", 1), **kwargs
+                controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_input":
+            if "band" not in kwargs:
+                kwargs["band"] = 1
+            if "downconverter_frequency" not in kwargs:
+                kwargs["downconverter_frequency"] = 5e9
             ports[port_id] = MWFEMAnalogInputPort(
                 controller_id,
                 fem_id,
                 port_id,
-                band=kwargs.get("band", 1),  # TODO Are default values the best here?
-                downconverter_frequency=kwargs.get("downconverter_frequency", 5e9),
                 **kwargs,
             )
         elif port_type == "digital_output":

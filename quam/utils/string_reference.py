@@ -34,9 +34,8 @@ def split_next_attribute(string: str, splitter: str = "/") -> Tuple[str, str]:
         string: string to split
         splitter:  splitter to split the string at (default: "/")
     Returns:
-        A tuple consisting of:
-        - A string of the next attribute, i.e. until the first splitter
-        - The remaining string from the first splitter
+        Tuple[str, str]: A tuple containing the next attribute (until the first
+            splitter) and the remaining string from the first splitter.
     """
     string = string.lstrip("#/")
 
@@ -137,7 +136,8 @@ def split_reference(string: str) -> Tuple[str, str]:
         string: The reference string
 
     Returns:
-        A tuple containing the parent reference string and the attribute
+        Tuple[str, str]: A tuple containing the parent reference string and
+            the attribute.
 
     Raises:
         ValueError: If the string is not a valid reference

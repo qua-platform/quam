@@ -16,8 +16,8 @@ def pulse_str_to_axis_axis_angle(pulse_str: str) -> Tuple[str, int]:
         pulse_str: A pulse string, e.g. 'X90'.
 
     Returns:
-        axis (str): The axis, one of "X", "Y" or "Z".
-        angle (int): The rotation angle in degrees.
+        Tuple[str, int]: A tuple containing the axis (one of "X", "Y" or "Z")
+            and the rotation angle in degrees.
 
     Raises:
         ValueError: If the pulse string is incorrect
