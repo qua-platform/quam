@@ -223,7 +223,7 @@ class JSONSerialiser(AbstractSerialiser):
                 format is detected, a warning is issued and it's converted.
                 If None, uses the class default.
             include_defaults: Whether to include fields set to their default
-                values in the output. Defaults to False.
+                values in the output. If None, resolves via config or defaults to True.
             state_path: An optional default path for saving/loading state. If provided,
                 this path takes precedence over environment variables or configuration
                 files when determining the default save/load location.

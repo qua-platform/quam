@@ -247,7 +247,7 @@ def test_save_with_ignore(serialiser, sample_quam_object, tmp_path):
     """Test save method with 'ignore' argument for single file."""
     filepath = tmp_path / "save_ignore.json"
     ignore_keys = ["wiring", "default_val"]
-    serialiser.save(sample_quam_object, filepath, ignore=ignore_keys)
+    serialiser.save(sample_quam_object, filepath, ignore=ignore_keys, include_defaults=False)
 
     assert filepath.exists()
     with filepath.open("r", encoding="utf-8") as f:
