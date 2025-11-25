@@ -50,6 +50,7 @@ nav:
       - "components/index.md"
       - "components/quam-root.md"
       - "components/channels.md"
+      - "components/channel-ports.md"
       - "components/pulses.md"
       - "components/octave.md"
       - "components/qubits-and-qubit-pairs.md"
@@ -64,8 +65,11 @@ nav:
       - "QUAM Components":
           - "QUAM Channels API": "API_references/components/channels_API.md"
           - "QUAM Pulses API": "API_references/components/pulses_API.md"
+          - "QUAM Ports API": "API_references/components/ports_API.md"
           - "QUAM Hardware API": "API_references/components/hardware_API.md"
           - "QUAM Octave API": "API_references/components/octave_API.md"
+          - "QUAM Quantum Components API": "API_references/components/quantum_components_API.md"
+          - "QUAM Macro API": "API_references/components/macro_API.md"
           - "BasicQUAM API": "API_references/components/basic_quam_API.md"
       - "QUAM Core Classes API": "API_references/core/quam_classes_API.md"
 plugins:

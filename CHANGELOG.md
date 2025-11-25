@@ -2,7 +2,49 @@
 
 ### Added
 
+- Added `CosineBipolarPulse`
+- Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
+- Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
+- Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
+- Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
+- Added v2→v3 config migration with automatic upgrade support for the new serialization settings
+
+### Changed
+
+- **Breaking Change**: Default serialization behavior changed from excluding defaults to including them for more explicit state representation
+- Config version bumped from v2 to v3
+- Restructured config to use nested `serialization` subcategory under `quam` config section
+- Priority chain for resolving `include_defaults` setting:
+  1. Explicit parameter to `save()` or `to_dict()`
+  2. `JSONSerialiser` instance value
+  3. Config setting `quam.serialization.include_defaults`
+  4. Fallback to `True` (default behavior)
+- Enhanced deprecation warnings for channel-level port properties to include migration examples with code snippets
+- Improved docstring return type formatting in serialization (`quam/serialisation/json.py`) and utility modules (`quam/utils/string_reference.py`)
+- Expanded documentation for channel-ports.md with comprehensive examples of port container usage
+
+### Deprecated
+
+- `SingleChannel.opx_output_offset` - Use `Port.offset` instead
+- `SingleChannel.filter_fir_taps` - Use `Port.feedforward_filter` instead
+- `SingleChannel.filter_iir_taps` - Use `Port.feedback_filter` instead
+- `DigitalOutputChannel.shareable` - Use `Port.shareable` instead
+- `DigitalOutputChannel.inverted` - Use `Port.inverted` instead
+
+All deprecated properties now show migration guidance with code examples. See [Port documentation](https://qua-platform.github.io/quam/components/channel-ports/) for migration details.
+
+### Fixed
+
+- Fixed `Pulse.digital_marker` not being converted to a list in the config generation
+- Fixed passing follow_references and include_defaults kwargs to super().to_dict() in QuamDict.to_dict() method
+- Fixed qubit and qubit-pair reference issues
+
+## [0.4.2]
+
+### Added
+
 - Added `duration` and `fidelity` as optional parameters to `QuamMacro`
+- Added new pulses: `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopTanhPulse`, `FlatTopCosinePulse`
 
 ### Changed
 
@@ -12,11 +54,14 @@
 
 - Fixed `QuamBase.get_attr_name()` failing when an attribute was a reference.
 - Fixed arbitrary waveforms on IQ/MW channels not converting Q component to list consistently
+- Updated `outputPulseParameters` to `timeTaggingParameters` for `TimeTaggingAddon`, following deprecation in `qm-qua 1.2.2a3`
 - Changed default `time_of_flight` from 24 ns to 140 ns to fix error on newer qm-qua versions
   - 140 ns seems like a reasonable default for most channels
 - Fixed type annotation issue in `QuamRoot.load()` method causing linting errors for subclasses like `BasicQuam`
 - Fixed `Pulse.waveform_function` return type being wrong
 - Compatibility with qm-qua 1.2.3: Updated channel measure command to explicitly pass `adc_stream`
+- Removed all private imports from `qm.qua`
+- Fixed float-to-int coercion during component instantiation
 
 ## [0.4.0]
 

@@ -249,6 +249,10 @@ def instantiate_attr(
         instantiated_attr = attr_val
 
     if validate_type:
+        # Handle specific case: float-to-int coercion for saved state compatibility
+        if expected_type == int and isinstance(instantiated_attr, float):
+            instantiated_attr = int(instantiated_attr)
+        
         # TODO Add logic that required attributes cannot be None
         validate_obj_type(
             elem=instantiated_attr,

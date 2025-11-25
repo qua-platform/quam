@@ -17,3 +17,4 @@ requires.txt
 SOURCES.txt
 top_level.txt
 uv.lock
+sessions/

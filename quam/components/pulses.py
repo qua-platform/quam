@@ -1,20 +1,20 @@
-from abc import ABC, abstractmethod
-from collections.abc import Iterable
 import numbers
 import warnings
-from typing import Any, ClassVar, Dict, List, Optional, Union, Tuple, Sequence
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from typing import Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
+
 import numpy as np
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 from quam.utils.qua_types import (
-    ScalarInt,
+    ChirpType,
     ScalarBool,
     ScalarFloat,
-    ChirpType,
+    ScalarInt,
     StreamType,
 )
-
 
 __all__ = [
     "Pulse",
@@ -29,6 +29,11 @@ __all__ = [
     "GaussianPulse",
     "FlatTopGaussianPulse",
     "ConstantReadoutPulse",
+    "FlatTopBlackmanPulse",
+    "BlackmanIntegralPulse",
+    "FlatTopTanhPulse",
+    "FlatTopCosinePulse",
+    "CosineBipolarPulse",
 ]
 
 
@@ -112,7 +117,9 @@ class Pulse(QuamComponent):
     def digital_marker_name(self):
         return f"{self.name}{str_ref.DELIMITER}dm"
 
-    def calculate_waveform(self) -> Union[float, complex, Sequence[float], Sequence[complex]]:
+    def calculate_waveform(
+        self,
+    ) -> Union[float, complex, Sequence[float], Sequence[complex]]:
         """Calculate the waveform of the pulse.
 
         This function calls `Pulse.waveform_function`, which should generally be
@@ -256,8 +263,6 @@ class Pulse(QuamComponent):
             "operation": self.operation,
             "length": self.length,
         }
-        if self.digital_marker is not None:
-            pulse_config["digital_marker"] = self.digital_marker
 
     def _config_add_waveforms(self, config):
         """Add the waveform to the config
@@ -273,7 +278,7 @@ class Pulse(QuamComponent):
                 InOutMWChannel).
         """
 
-        from quam.components.channels import SingleChannel, IQChannel, MWChannel
+        from quam.components.channels import IQChannel, MWChannel, SingleChannel
 
         pulse_config = config["pulses"][self.pulse_name]
 
@@ -348,8 +353,9 @@ class Pulse(QuamComponent):
                 )
             digital_marker_name = self.digital_marker
         else:
+            digital_marker_list = [tuple(t) for t in self.digital_marker]
             config["digital_waveforms"][self.digital_marker_name] = {
-                "samples": self.digital_marker
+                "samples": digital_marker_list
             }
             digital_marker_name = self.digital_marker_name
 
@@ -793,3 +799,238 @@ class FlatTopGaussianPulse(Pulse):
             waveform = waveform * np.exp(1j * self.axis_angle)
 
         return waveform
+
+
+@quam_dataclass
+class FlatTopBlackmanPulse(Pulse):
+    """Blackman rise/fall, flat-top pulse.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        flat_length (int): Flat-top length (samples).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_blackman_waveform
+
+        rise_fall_length = (self.length - self.flat_length) // 2
+        if self.flat_length + 2 * rise_fall_length != self.length:
+            raise ValueError(
+                "FlatTopBlackmanPulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
+            )
+
+        wf = flattop_blackman_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=rise_fall_length,
+            return_part="all",
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+
+
+@quam_dataclass
+class BlackmanIntegralPulse(Pulse):
+    """Adiabatic Blackman-integral ramp from v_start to v_end.
+
+    Args:
+        length (int): Pulse length (samples).
+        v_start (float): Starting amplitude (V).
+        v_end (float): Ending amplitude (V).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+
+    # amplitude: float
+    v_start: float
+    v_end: float
+    axis_angle: float = None
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import blackman_integral_waveform
+
+        wf = blackman_integral_waveform(
+            pulse_length=self.length,
+            v_start=self.v_start,
+            v_end=self.v_end,
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+
+
+@quam_dataclass
+class FlatTopCosinePulse(Pulse):
+    """Cosine rise/fall, flat-top pulse.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        flat_length (int): Flat-top length (samples).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int = 0
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_cosine_waveform
+
+        rise_fall_length = (self.length - self.flat_length) // 2
+        if self.flat_length + 2 * rise_fall_length != self.length:
+            raise ValueError(
+                "FlatTopCosinePulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
+            )
+
+        wf = flattop_cosine_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=rise_fall_length,
+            return_part="all",
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+
+
+@quam_dataclass
+class FlatTopTanhPulse(Pulse):
+    """tanh rise/fall, flat-top pulse.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        flat_length (int): Flat-top length (samples).
+        axis_angle (float, optional): IQ axis angle in radians.
+    """
+
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int = 0
+
+    def waveform_function(self):
+        from qualang_tools.config.waveform_tools import flattop_tanh_waveform
+
+        rise_fall_length = (self.length - self.flat_length) // 2
+        if self.flat_length + 2 * rise_fall_length != self.length:
+            raise ValueError(
+                "FlatTopTanhPulse requires (length - flat_length) to be even "
+                f"({self.length=} {self.flat_length=})"
+            )
+
+        wf = flattop_tanh_waveform(
+            amplitude=self.amplitude,
+            flat_length=self.flat_length,
+            rise_fall_length=rise_fall_length,
+            return_part="all",
+        )
+        wf = np.array(wf)
+        if self.axis_angle is not None:
+            wf = wf * np.exp(1j * self.axis_angle)
+        return wf
+
+
+@quam_dataclass
+class CosineBipolarPulse(Pulse):
+    """
+    CosineBipolarPulse QUAM component.
+
+    Generates a net-zero pulse with two symmetric cosine-shaped lobes.
+    Minimizes DC offset and long-timescale distortions. Waveform: smooth cosine
+    rise to positive flat section, cosine switch to negative flat, ends with
+    symmetric cosine rise. Positive and negative flat regions are equal length, so
+    the area is zero.
+
+    Net-zero property helps against slow baseline drifts and long-memory effects.
+    Smooth transitions reduce spectral leakage and high-frequency noise — suitable
+    for sensitive quantum control.
+
+    Increasing the total length with constant flat length makes longer, smoother
+    rises/falls and switching, further reducing high-frequency content.
+
+    Args:
+        length (int): Total pulse length (samples).
+        amplitude (float): Peak amplitude (V).
+        axis_angle (float, optional): IQ axis angle in radians. If None, use for
+            a single channel or I of IQ; if not None, use for IQ (0 is X, pi/2 is Y).
+        flat_length (int): Flat region length (must be even and ≤ total length).
+            Split equally between positive and negative.
+    """
+
+    amplitude: float
+    axis_angle: float = None
+    flat_length: int
+
+    def waveform_function(self):
+        # Helper segment generators (length 0 returns empty array)
+        def halfcos(n: int):
+            if n <= 0:
+                return np.array([])
+            t = np.arange(n) / n
+            return 0.5 * (1 - np.cos(np.pi * t))
+
+        def cos_switch(n: int):
+            """
+            Endpoint-exclusive cosine from +1 to -1 with zero discrete sum.
+            Uses midpoint sampling: theta_k = (k + 0.5)*pi/n, k=0..n-1.
+            """
+            if n <= 0:
+                return np.array([])
+            k = np.arange(n, dtype=float)
+            theta = (k + 0.5) * np.pi / n
+            return np.cos(
+                theta
+            )  # strictly between +1 and -1, antisymmetric -> net zero
+
+        L = int(self.length)
+        F = int(self.flat_length)
+
+        if F > L:
+            raise ValueError(
+                f"CosineBipolarPulse.flat_length={F} cannot exceed total length={L}."
+            )
+        if F % 2 != 0:
+            raise ValueError(
+                f"CosineBipolarPulse.flat_length={F} must be an even number to split "
+                "equally into + and - halves."
+            )
+
+        remaining = L - F
+        if remaining == 0:
+            rise_len = switch_len = fall_len = 0
+        else:
+            base = remaining // 3
+            extra = remaining % 3
+            rise_len = base + (1 if extra == 2 else 0)
+            switch_len = base + (extra if extra == 1 else 0)
+            fall_len = base + (1 if extra == 2 else 0)
+
+        flat_pos_len = F // 2
+        flat_neg_len = F // 2
+
+        A = float(self.amplitude)
+
+        seg_rise = A * halfcos(rise_len)
+        seg_flat_pos = A * np.ones(flat_pos_len)
+        seg_switch = A * cos_switch(switch_len)
+        seg_flat_neg = -A * np.ones(flat_neg_len)
+        seg_fall = -A * halfcos(fall_len)[::-1]
+
+        p = np.concatenate([seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall])
+
+        if self.axis_angle is not None:
+            p = p * np.exp(1j * self.axis_angle)
+
+        return p.tolist()
