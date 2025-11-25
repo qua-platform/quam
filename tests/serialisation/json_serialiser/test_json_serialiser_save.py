@@ -191,12 +191,12 @@ def test_save_split_content_empty_input_no_mapping(serialiser, tmp_path):
 def test_save_single_file(serialiser, sample_quam_object, tmp_path):
     """Test saving to a single JSON file when path has .json suffix."""
     filepath = tmp_path / "single_save.json"
-    serialiser.save(sample_quam_object, filepath)
+    serialiser.save(sample_quam_object, filepath, include_defaults=False)
 
     assert filepath.exists()
     with filepath.open("r", encoding="utf-8") as f:
         loaded = json.load(f)
-    # Compare with dict representation (default: exclude defaults)
+    # Compare with dict representation (explicitly exclude defaults)
     expected_dict = sample_quam_object.to_dict(include_defaults=False)
     expected_dict["__class__"] = (  # Class added by default for root
         f"{sample_quam_object.__module__}.{sample_quam_object.__class__.__name__}"
@@ -247,7 +247,7 @@ def test_save_with_ignore(serialiser, sample_quam_object, tmp_path):
     """Test save method with 'ignore' argument for single file."""
     filepath = tmp_path / "save_ignore.json"
     ignore_keys = ["wiring", "default_val"]
-    serialiser.save(sample_quam_object, filepath, ignore=ignore_keys)
+    serialiser.save(sample_quam_object, filepath, ignore=ignore_keys, include_defaults=False)
 
     assert filepath.exists()
     with filepath.open("r", encoding="utf-8") as f:
@@ -302,7 +302,7 @@ def test_save_default_path(serialiser, sample_quam_object, monkeypatch, tmp_path
     monkeypatch.setattr(serialiser, "_get_state_path", lambda: default_save_path)
 
     # Default mapping is empty, save goes to default_filename inside folder
-    serialiser.save(sample_quam_object)
+    serialiser.save(sample_quam_object, include_defaults=False)
 
     expected_file = default_save_path / serialiser.default_filename
     assert default_save_path.exists()

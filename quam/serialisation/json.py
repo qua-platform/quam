@@ -62,6 +62,27 @@ class JSONSerialiser(AbstractSerialiser):
     default_foldername: str = "quam_state"
     content_mapping: Dict[str, str] = {}  # Expected final format: component -> filename
 
+    def _resolve_include_defaults(self) -> bool:
+        """
+        Resolves the include_defaults setting using a priority chain.
+
+        Priority (highest to lowest):
+        1. Explicit parameter passed to save() (handled in save() method)
+        2. Instance value (self.include_defaults)
+        3. Config setting (quam.config.serialization.include_defaults)
+        4. Fallback to True (default behavior)
+
+        Returns:
+            bool: Whether to include default values in serialization.
+        """
+        if self.include_defaults is not None:
+            return self.include_defaults
+
+        config = get_quam_config()
+        if config.serialization is not None:
+            return config.serialization.include_defaults
+        return True
+
     @staticmethod
     def _validate_and_convert_content_mapping(
         mapping: Optional[Dict],
@@ -190,7 +211,7 @@ class JSONSerialiser(AbstractSerialiser):
     def __init__(
         self,
         content_mapping: Optional[Dict] = None,  # Accept Dict initially for validation
-        include_defaults: bool = False,
+        include_defaults: Optional[bool] = None,
         state_path: Optional[Union[str, Path]] = None,
     ):
         """
@@ -202,7 +223,9 @@ class JSONSerialiser(AbstractSerialiser):
                 format is detected, a warning is issued and it's converted.
                 If None, uses the class default.
             include_defaults: Whether to include fields set to their default
-                values in the output. Defaults to False.
+                values in the output. If None, follows priority chain:
+                1. Config setting (quam.config.serialization.include_defaults)
+                2. Fallback to True (default behavior)
             state_path: An optional default path for saving/loading state. If provided,
                 this path takes precedence over environment variables or configuration
                 files when determining the default save/load location.
@@ -254,9 +277,8 @@ class JSONSerialiser(AbstractSerialiser):
                 is not supported in this method.
         """
         remaining_contents = full_contents.copy()
-        files_to_save: Dict[Path, Dict[str, Any]] = (
-            {}
-        )  # Stores filepath -> content dict
+        # Stores filepath -> content dict
+        files_to_save: Dict[Path, Dict[str, Any]] = {}
 
         # Iterate through components and assign them to files based on mapping
         mapped_keys = set()
@@ -332,9 +354,12 @@ class JSONSerialiser(AbstractSerialiser):
         else:
             current_content_mapping = self.content_mapping  # Already validated in init
 
-        current_include_defaults = (
-            include_defaults if include_defaults is not None else self.include_defaults
-        )
+        # Resolve include_defaults with priority:
+        # parameter > instance > config > fallback
+        if include_defaults is not None:
+            current_include_defaults = include_defaults
+        else:
+            current_include_defaults = self._resolve_include_defaults()
 
         if path is None:
             path = self._get_state_path()
@@ -431,11 +456,10 @@ class JSONSerialiser(AbstractSerialiser):
             filepath: The exact path to the JSON file.
 
         Returns:
-            A tuple containing:
-            1. The loaded dictionary content.
-            2. Metadata dictionary including inferred 'content_mapping
-               (component -> filename), 'default_filename', and
-               'default_foldername'.
+            Tuple[Dict[str, Any], Dict[str, Any]]: A tuple containing the loaded
+                dictionary content and metadata dictionary including inferred
+                'content_mapping' (component -> filename), 'default_filename',
+                and 'default_foldername'.
 
         Raises:
             TypeError: If the filepath does not have a .json suffix.
@@ -476,15 +500,15 @@ class JSONSerialiser(AbstractSerialiser):
         """
         Loads and merges content from all .json files in a directory and its
         subdirectories. Infers the content mapping (component -> filename).
+        Skips hidden directories (those starting with a dot).
 
         Args:
             dirpath: The path to the directory to load from.
 
         Returns:
-            A tuple containing:
-            1. The merged dictionary content.
-            2. Metadata dictionary including inferred 'content_mapping',
-               'default_filename', and 'default_foldername'.
+            Tuple[Dict[str, Any], Dict[str, Any]]: A tuple containing the merged
+                dictionary content and metadata dictionary including inferred
+                'content_mapping', 'default_filename', and 'default_foldername'.
         """
         contents: Dict[str, Any] = {}
         inferred_mapping: Dict[str, str] = {}  # component -> relative_filename
@@ -494,7 +518,15 @@ class JSONSerialiser(AbstractSerialiser):
             "default_foldername": str(dirpath.resolve()),
         }
 
-        found_files = list(dirpath.rglob("*.json"))
+        # Find all JSON files, excluding those in hidden directories (starting with dot)
+        found_files = []
+        for json_file in dirpath.rglob("*.json"):
+            # Check if any part of the path contains a directory starting with dot
+            relative_path = json_file.relative_to(dirpath)
+            if any(part.startswith(".") for part in relative_path.parts[:-1]):
+                # Skip files in hidden directories
+                continue
+            found_files.append(json_file)
 
         if not found_files:
             warnings.warn(f"No JSON files found in directory {dirpath}", UserWarning)
@@ -582,10 +614,10 @@ class JSONSerialiser(AbstractSerialiser):
                   default state path logic via `_get_state_path()`.
 
         Returns:
-            A tuple containing:
-            1. Dictionary representation of the loaded QUAM object.
-            2. Metadata dictionary including inferred 'content_mapping' (component ->
-               filename), 'default_filename', 'default_foldername'.
+            Tuple[Dict[str, Any], Dict[str, Any]]: A tuple containing the dictionary
+                representation of the loaded QUAM object and metadata dictionary
+                including inferred 'content_mapping' (component -> filename),
+                'default_filename', and 'default_foldername'.
 
         Raises:
             FileNotFoundError: If the resolved path does not exist.
