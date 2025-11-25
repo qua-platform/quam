@@ -1,5 +1,6 @@
 from copy import deepcopy
 import pytest
+from unittest.mock import patch
 
 from quam.core import *
 
@@ -32,3 +33,11 @@ def qua_config():
     from quam.core.qua_config_template import qua_config_template
 
     return deepcopy(qua_config_template)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_quam_config():
+    """Mock get_quam_config to prevent loading system config during tests."""
+    with patch('quam.core.quam_classes.get_quam_config') as mock:
+        mock.side_effect = FileNotFoundError("No config file in test environment")
+        yield mock

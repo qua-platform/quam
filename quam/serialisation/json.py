@@ -454,11 +454,10 @@ class JSONSerialiser(AbstractSerialiser):
             filepath: The exact path to the JSON file.
 
         Returns:
-            A tuple containing:
-            1. The loaded dictionary content.
-            2. Metadata dictionary including inferred 'content_mapping
-               (component -> filename), 'default_filename', and
-               'default_foldername'.
+            Tuple[Dict[str, Any], Dict[str, Any]]: A tuple containing the loaded
+                dictionary content and metadata dictionary including inferred
+                'content_mapping' (component -> filename), 'default_filename',
+                and 'default_foldername'.
 
         Raises:
             TypeError: If the filepath does not have a .json suffix.
@@ -504,10 +503,9 @@ class JSONSerialiser(AbstractSerialiser):
             dirpath: The path to the directory to load from.
 
         Returns:
-            A tuple containing:
-            1. The merged dictionary content.
-            2. Metadata dictionary including inferred 'content_mapping',
-               'default_filename', and 'default_foldername'.
+            Tuple[Dict[str, Any], Dict[str, Any]]: A tuple containing the merged
+                dictionary content and metadata dictionary including inferred
+                'content_mapping', 'default_filename', and 'default_foldername'.
         """
         contents: Dict[str, Any] = {}
         inferred_mapping: Dict[str, str] = {}  # component -> relative_filename
@@ -605,10 +603,10 @@ class JSONSerialiser(AbstractSerialiser):
                   default state path logic via `_get_state_path()`.
 
         Returns:
-            A tuple containing:
-            1. Dictionary representation of the loaded QUAM object.
-            2. Metadata dictionary including inferred 'content_mapping' (component ->
-               filename), 'default_filename', 'default_foldername'.
+            Tuple[Dict[str, Any], Dict[str, Any]]: A tuple containing the dictionary
+                representation of the loaded QUAM object and metadata dictionary
+                including inferred 'content_mapping' (component -> filename),
+                'default_filename', and 'default_foldername'.
 
         Raises:
             FileNotFoundError: If the resolved path does not exist.

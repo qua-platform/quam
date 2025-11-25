@@ -8,6 +8,12 @@ Channels are fundamental building blocks in QUAM that facilitate the routing of 
 
 - **[Channels Documentation](channels.md)**: Explore the detailed documentation on different types of channels including IQ Channels, Single Analog Output Channels, and more.
 
+## Channel Ports
+
+Ports represent the physical connection points between quantum control hardware and quantum devices. QUAM provides port containers for centralized port management, supporting LF-FEM, MW-FEM, and OPX+ hardware with advanced features like port sharing, references, and hardware-specific configurations.
+
+- **[Channel Ports Documentation](channel-ports.md)**: Learn how to use port containers, create port references, and configure hardware-specific port properties for FEM and OPX+ systems.
+
 ## Pulses
 
 Pulses in QUAM are used to manipulate qubit states through precise control over their quantum properties. These are defined with specific parameters like amplitude, duration, and waveform, allowing detailed control over quantum operations.

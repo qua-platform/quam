@@ -229,3 +229,62 @@ def test_quam_dict_print_summary():
         quam_dict.print_summary()
     s = f.getvalue()
     assert s == 'QuamDict (parent unknown):\n  a: "b"\n  1: 2\n'
+
+
+def test_quam_dict_to_dict_include_defaults():
+    """Test that include_defaults kwarg is properly passed through QuamDict.to_dict()
+
+    Reproduces issue #166: https://github.com/qua-platform/quam/issues/166
+    The bug is that QuamDict.to_dict() doesn't pass kwargs to super().to_dict()
+    """
+    @quam_dataclass
+    class MyComponent(QuamComponent):
+        a: int = 5
+        b: str = "hello"
+
+    @quam_dataclass
+    class TestRoot(QuamRoot):
+        component: Dict[str, MyComponent]
+
+    # Create a component with default values
+    machine = TestRoot(component={"test": MyComponent()})
+
+    # Without include_defaults, defaults should not be in the dict
+    result_without_defaults = machine.to_dict(include_defaults=False)
+    assert "a" not in result_without_defaults["component"]["test"]
+    assert "b" not in result_without_defaults["component"]["test"]
+
+    # With include_defaults=True, defaults should be included
+    result_with_defaults = machine.to_dict(include_defaults=True)
+    assert result_with_defaults["component"]["test"]["a"] == 5
+    assert result_with_defaults["component"]["test"]["b"] == "hello"
+
+
+def test_quam_dict_to_dict_follow_references():
+    """Test that follow_references kwarg is properly passed through QuamDict.to_dict()
+
+    Related to issue #166: https://github.com/qua-platform/quam/issues/166
+    The key point is that the parameter gets passed to nested components in the dict.
+    """
+    @quam_dataclass
+    class MyComponent(QuamComponent):
+        ref_value: str = "#./target"
+        target: int = 42
+
+    @quam_dataclass
+    class TestRoot(QuamRoot):
+        component: Dict[str, MyComponent]
+
+    # Create components with a reference
+    machine = TestRoot(component={"test": MyComponent()})
+
+    # The main goal is to ensure both parameters are passed without errors
+    # Whether the reference is resolved depends on the parent-child hierarchy
+    result_without_follow = machine.to_dict(follow_references=False)
+    result_with_follow = machine.to_dict(follow_references=True)
+
+    # Both should succeed without KeyError - the parameters were properly passed
+    assert "component" in result_without_follow
+    assert "test" in result_without_follow["component"]
+    assert "component" in result_with_follow
+    assert "test" in result_with_follow["component"]

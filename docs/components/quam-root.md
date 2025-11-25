@@ -4,7 +4,7 @@ The Quantum Abstract Machine (QUAM) utilizes a hierarchical data structure in wh
 
 ## Overview
 
-The root QUAM object is structured as a subclass of [QuamRoot][quam.core.quam_classes.QuamRoot] module. For straightforward implementations, such as those described in the [Migrating to QUAM](/migrating-to-quam) section, the [BasicQUAM][quam.components.basic_quam.BasicQUAM] class typically suffices:
+The root QUAM object is structured as a subclass of [QuamRoot][quam.core.quam_classes.QuamRoot] module. For straightforward implementations, such as those described in the [Migrating to QUAM](/migrating-to-quam) section, the [BasicQuam][quam.components.basic_quam.BasicQuam] class typically suffices:
 
 ```python
 from quam.components import BasicQuam
