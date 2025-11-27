@@ -2,6 +2,7 @@
 
 ### Added
 
+- `CosineBipolarPulse` and `FlatTopGaussianPulse` now have a smoothing time and zero padding parameters. Total duration is automatically calculated and should not be set on instantiation.
 - Added `CosineBipolarPulse` 
 
 ### Fixed
