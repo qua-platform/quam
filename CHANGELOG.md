@@ -4,11 +4,42 @@
 
 - `CosineBipolarPulse` and `FlatTopGaussianPulse` now have a smoothing time and zero padding parameters. Total duration is automatically calculated and should not be set on instantiation.
 - Added `CosineBipolarPulse` 
+- Added `CosineBipolarPulse`
+- Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
+- Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
+- Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
+- Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
+- Added v2→v3 config migration with automatic upgrade support for the new serialization settings
+
+### Changed
+
+- **Breaking Change**: Default serialization behavior changed from excluding defaults to including them for more explicit state representation
+- Config version bumped from v2 to v3
+- Restructured config to use nested `serialization` subcategory under `quam` config section
+- Priority chain for resolving `include_defaults` setting:
+  1. Explicit parameter to `save()` or `to_dict()`
+  2. `JSONSerialiser` instance value
+  3. Config setting `quam.serialization.include_defaults`
+  4. Fallback to `True` (default behavior)
+- Enhanced deprecation warnings for channel-level port properties to include migration examples with code snippets
+- Improved docstring return type formatting in serialization (`quam/serialisation/json.py`) and utility modules (`quam/utils/string_reference.py`)
+- Expanded documentation for channel-ports.md with comprehensive examples of port container usage
+
+### Deprecated
+
+- `SingleChannel.opx_output_offset` - Use `Port.offset` instead
+- `SingleChannel.filter_fir_taps` - Use `Port.feedforward_filter` instead
+- `SingleChannel.filter_iir_taps` - Use `Port.feedback_filter` instead
+- `DigitalOutputChannel.shareable` - Use `Port.shareable` instead
+- `DigitalOutputChannel.inverted` - Use `Port.inverted` instead
+
+All deprecated properties now show migration guidance with code examples. See [Port documentation](https://qua-platform.github.io/quam/components/channel-ports/) for migration details.
 
 ### Fixed
 
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
-- Fixed passing follow_references and include_defaults kwargs to super().to_dict() in QuamDict.to_dict() method.
+- Fixed passing follow_references and include_defaults kwargs to super().to_dict() in QuamDict.to_dict() method
+- Fixed qubit and qubit-pair reference issues
 
 ## [0.4.2]
 
@@ -16,6 +47,10 @@
 
 - Added `duration` and `fidelity` as optional parameters to `QuamMacro`
 - Added new pulses: `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopTanhPulse`, `FlatTopCosinePulse`
+
+### Changed
+
+- `JSONSerialiser.load()` now skips hidden directories when loading from a directory
 
 ### Fixed
 

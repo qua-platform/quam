@@ -22,7 +22,7 @@ Each of these steps is designed to ensure a seamless transition to QUAM, leverag
 
 ## 1: Create a Root QUAM Object
 
-Begin by establishing a [QuamRoot][quam.core.quam_classes.QuamRoot] object, which serves as the top-level container for all other QUAM components. For simplicity, you can use the pre-defined [BasicQUAM][quam.components.basic_quam.BasicQUAM] class:
+Begin by establishing a [QuamRoot][quam.core.quam_classes.QuamRoot] object, which serves as the top-level container for all other QUAM components. For simplicity, you can use the pre-defined [BasicQuam][quam.components.basic_quam.BasicQuam] class:
 
 ```python
 from quam.components import BasicQuam

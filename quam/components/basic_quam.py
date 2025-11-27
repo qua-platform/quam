@@ -4,9 +4,12 @@ import warnings
 from quam.core import QuamRoot, quam_dataclass
 from quam.components.channels import Channel
 from quam.components.octave import Octave
+from quam.components.ports import FEMPortsContainer, OPXPlusPortsContainer
 
 __all__ = [
     "BasicQuam",
+    "BasicFEMQuam",
+    "BasicOPXPlusQuam",
 ]
 
 
@@ -23,6 +26,32 @@ class BasicQuam(QuamRoot):
 
     channels: Dict[str, Channel] = field(default_factory=dict)
     octaves: Dict[str, Octave] = field(default_factory=dict)
+
+
+@quam_dataclass
+class BasicFEMQuam(BasicQuam):
+    """Basic QUAM root component for FEM (Frequency Encoded Multiplexing) systems.
+
+    Extends BasicQuam with FEM-specific port configurations for quantum control hardware.
+
+    Attributes:
+        ports (FEMPortsContainer): Container for FEM-specific analog and digital ports.
+    """
+
+    ports: FEMPortsContainer = field(default_factory=FEMPortsContainer)
+
+
+@quam_dataclass
+class BasicOPXPlusQuam(BasicQuam):
+    """Basic QUAM root component for OPX+ systems.
+
+    Extends BasicQuam with OPX+-specific port configurations for quantum control hardware.
+
+    Attributes:
+        ports (OPXPlusPortsContainer): Container for OPX+ analog and digital ports.
+    """
+
+    ports: OPXPlusPortsContainer = field(default_factory=OPXPlusPortsContainer)
 
 
 class BasicQuAM(BasicQuam):

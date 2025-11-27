@@ -25,15 +25,22 @@ The `Qubit` class models a physical qubit on the QPU, encapsulating:
 The `Qubit` class is typically subclassed to add channels and other qubit-specific information as properties. Here's an example using a `Transmon` class:
 
 ```python
-from quam.components import BasicQuam, Qubit, IQChannel, SingleChannel
-from quam.core import quam_dataclass
+from typing import Dict
+from dataclasses import field
+from quam.components import Qubit, QubitPair, IQChannel, SingleChannel
+from quam.core import QuamRoot, quam_dataclass
 
 @quam_dataclass
 class Transmon(Qubit):
     drive: IQChannel
     flux: SingleChannel
 
-machine = BasicQuam()
+@quam_dataclass
+class Quam(QuamRoot):
+    qubits: Dict[str, Qubit] = field(default_factory=dict)
+    qubit_pairs: Dict[str, QubitPair] = field(default_factory=dict)
+
+machine = Quam()
 
 q1 = machine.qubits["q1"] = Transmon(
     drive=IQChannel(
@@ -42,6 +49,15 @@ q1 = machine.qubits["q1"] = Transmon(
         frequency_converter_up=None  # Frequency converter not needed for this example
     ),
     flux=SingleChannel(opx_output=("con1", 1, 3)),
+)
+
+q2 = machine.qubits["q2"] = Transmon(
+    drive=IQChannel(
+        opx_output_I=("con1", 1, 4),
+        opx_output_Q=("con1", 1, 5),
+        frequency_converter_up=None
+    ),
+    flux=SingleChannel(opx_output=("con1", 1, 6)),
 )
 ```
 
