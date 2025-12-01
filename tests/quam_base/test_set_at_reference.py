@@ -35,11 +35,16 @@ def test_set_at_reference():
 
 
 def test_set_at_reference_non_reference():
-    """Test that setting a non-reference attribute raises ValueError"""
+    """Test that setting a non-reference attribute succeeds with new default"""
     parent = ParentQuam(child=ChildQuam())
 
+    # With allow_non_reference=True (new default), this should succeed
+    parent.set_at_reference("normal_value", 123)
+    assert parent.normal_value == 123
+
+    # Explicitly passing allow_non_reference=False should raise ValueError
     with pytest.raises(ValueError, match="is not a reference"):
-        parent.set_at_reference("normal_value", 123)
+        parent.set_at_reference("normal_value", 456, allow_non_reference=False)
 
 
 def test_set_at_reference_invalid_reference():
@@ -167,15 +172,15 @@ def test_set_triple_reference():
 
 
 def test_set_at_reference_allow_non_reference():
-    """Test setting a value through a reference with allow_non_reference=True"""
+    """Test setting a value through a reference with allow_non_reference parameter"""
     parent = ParentQuam(child=ChildQuam(value=42), ref_value="#./child/value")
-    parent.set_at_reference("ref_value", 789, allow_non_reference=True)
+    # With new default (allow_non_reference=True), following reference should work
+    parent.set_at_reference("ref_value", 789)
     assert parent.ref_value == 789
 
-    with pytest.raises(ValueError):
-        parent.child.set_at_reference("value", 43)
-
-    assert parent.child.value == 789
+    # Non-reference attribute should also work now with default True
+    parent.child.set_at_reference("value", 43)
+    assert parent.child.value == 43
 
 
 @quam_dataclass

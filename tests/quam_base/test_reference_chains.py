@@ -408,14 +408,19 @@ def test_set_at_absolute_reference():
 
 
 def test_set_at_reference_non_reference_raises():
-    """set_at_reference on non-reference should raise ValueError."""
+    """set_at_reference on non-reference now works with new default."""
     root = QuamRootForTesting(
         target=SimpleTarget(value=0),
     )
     root.normal_value = 42
 
+    # With new default (allow_non_reference=True), this should succeed
+    root.set_at_reference("normal_value", 123)
+    assert root.normal_value == 123
+
+    # Explicitly passing allow_non_reference=False should raise ValueError
     with pytest.raises(ValueError, match="is not a reference"):
-        root.set_at_reference("normal_value", 123)
+        root.set_at_reference("normal_value", 456, allow_non_reference=False)
 
 
 # Edge cases and error handling
