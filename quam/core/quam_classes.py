@@ -725,9 +725,13 @@ class QuamBase(ReferenceClass):
 
         parent_obj = obj._get_referenced_value(parent_reference)
         if not isinstance(parent_obj, QuamBase):
-            raise TypeError(
-                f"Cannot follow reference chain through non-QuamBase object: "
-                f"{type(parent_obj)}"
+            # This can happen when:
+            # 1. Broken reference: _get_referenced_value returns the reference string
+            # 2. Reference to a non-QuamBase value (e.g., primitive)
+            # Raise AttributeError to match the expected contract for set_at_reference
+            raise AttributeError(
+                f"Cannot follow reference chain: '{parent_reference}' resolved to "
+                f"{type(parent_obj).__name__}, not a QuamBase object"
             )
 
         # Recursively follow the chain
@@ -1008,14 +1012,21 @@ class QuamDict(UserDict, QuamBase):
         if not string_reference.is_reference(elem):
             return elem
 
-        target_obj, target_attr = self._follow_reference_chain(self, i)
-        # Handle list/dict indices that result from following the chain
-        if target_attr.isdigit() and isinstance(target_obj, (list, UserList, QuamList)):
-            return target_obj[int(target_attr)]
-        elif isinstance(target_obj, (dict, UserDict, QuamDict)):
-            return target_obj[target_attr]
-        else:
-            return target_obj.get_raw_value(target_attr)
+        try:
+            target_obj, target_attr = self._follow_reference_chain(self, i)
+            # Handle list/dict indices that result from following the chain
+            if target_attr.isdigit() and isinstance(
+                target_obj, (list, UserList, QuamList)
+            ):
+                return target_obj[int(target_attr)]
+            elif isinstance(target_obj, (dict, UserDict, QuamDict)):
+                return target_obj[target_attr]
+            else:
+                return target_obj.get_raw_value(target_attr)
+        except (AttributeError, KeyError, ValueError):
+            # Chain couldn't be followed (broken reference, missing attribute, etc.)
+            # Return the reference string - _get_referenced_value handles warnings
+            return self._get_referenced_value(elem)
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
@@ -1225,14 +1236,21 @@ class QuamList(UserList, QuamBase):
         elif not string_reference.is_reference(elem):
             return elem
 
-        target_obj, target_attr = self._follow_reference_chain(self, i)
-        # Handle list/dict indices that result from following the chain
-        if target_attr.isdigit() and isinstance(target_obj, (list, UserList, QuamList)):
-            return target_obj[int(target_attr)]
-        elif isinstance(target_obj, (dict, UserDict, QuamDict)):
-            return target_obj[target_attr]
-        else:
-            return target_obj.get_raw_value(target_attr)
+        try:
+            target_obj, target_attr = self._follow_reference_chain(self, i)
+            # Handle list/dict indices that result from following the chain
+            if target_attr.isdigit() and isinstance(
+                target_obj, (list, UserList, QuamList)
+            ):
+                return target_obj[int(target_attr)]
+            elif isinstance(target_obj, (dict, UserDict, QuamDict)):
+                return target_obj[target_attr]
+            else:
+                return target_obj.get_raw_value(target_attr)
+        except (AttributeError, KeyError, ValueError):
+            # Chain couldn't be followed (broken reference, missing attribute, etc.)
+            # Return the reference string - _get_referenced_value handles warnings
+            return self._get_referenced_value(elem)
 
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)
