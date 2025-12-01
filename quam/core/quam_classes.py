@@ -1,5 +1,6 @@
 from __future__ import annotations
 from collections.abc import Iterable
+from collections import UserList
 import sys
 import warnings
 from pathlib import Path
@@ -244,6 +245,7 @@ class QuamBase(ReferenceClass):
     parent: ClassVar["QuamBase"] = ParentDescriptor()
     _last_instantiated_root: ClassVar[Optional["QuamRoot"]] = None
     config_settings: ClassVar[Dict[str, Any]] = None
+    _MAX_REFERENCE_DEPTH: ClassVar[int] = 10
 
     def __init__(self):
         # This prohibits instantiating without it being a dataclass
@@ -368,17 +370,27 @@ class QuamBase(ReferenceClass):
         return type(val) == required_type
 
     def get_reference(
-        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+        self,
+        attr: Optional[str] = None,
+        relative_path: Optional[str] = None,
+        follow_chain: bool = False,
     ) -> Optional[str]:
-        """Get the reference path of this object.
+        """Get the reference path of this object or one of its attributes.
 
         Args:
             attr: The optional attribute to get the reference path for.
                 If None, the reference path of the object itself is returned.
             relative_path: The optional relative path to join with the reference path.
+            follow_chain: If True and attr is a reference, follow the reference chain
+                to return the ultimate target reference. Default is False for backward
+                compatibility. Only applies when attr is specified.
 
         Returns:
-            The reference path of this object.
+            The reference path of this object or the specified attribute.
+
+        Raises:
+            ValueError: If both attr and relative_path are specified, or if follow_chain
+                is True but attr is not a reference.
 
         Examples:
             We assume a QuamRoot object with a component "elem".
@@ -387,6 +399,9 @@ class QuamBase(ReferenceClass):
             - elem.get_reference(relative_path="#./child") == "#/elem/child"
             - elem.get_reference(relative_path="#../child") == "#/child"
             - elem.get_reference(relative_path="#./child/grandchild") == "#/elem/child/grandchild"
+
+            With follow_chain=True (if attr contains a reference to another reference):
+            - elem.get_reference(attr="chain_ref", follow_chain=True)  # returns ultimate target
         """
 
         if attr is not None and relative_path is not None:
@@ -394,6 +409,24 @@ class QuamBase(ReferenceClass):
                 "Cannot specify both attr and relative_path. "
                 "Please specify only one of them."
             )
+
+        # Handle follow_chain before computing the reference path
+        if follow_chain and attr is not None:
+            raw_value = self.get_raw_value(attr)
+            if not string_reference.is_reference(raw_value):
+                raise ValueError(
+                    f"Cannot follow reference chain for attr '{attr}': "
+                    f"value is not a reference (value={raw_value})"
+                )
+            # Follow the reference chain to get the ultimate target
+            try:
+                target_obj, target_attr = self._follow_reference_chain(self, attr)
+                # Return the reference path to the ultimate target
+                return target_obj.get_reference(attr=target_attr)
+            except (AttributeError, ValueError, RecursionError) as e:
+                raise ValueError(
+                    f"Failed to follow reference chain for attr '{attr}': {e}"
+                ) from e
 
         if self.parent is None:
             raise AttributeError(
@@ -633,10 +666,85 @@ class QuamBase(ReferenceClass):
             else:
                 print(" " * (indent + 2) + f"{attr}: {val}")
 
+    def _follow_reference_chain(
+        self, obj: "QuamBase", attr: str, max_depth: Optional[int] = None
+    ) -> tuple["QuamBase", str]:
+        """Recursively follow a reference chain to find the ultimate target.
+
+        This method follows reference strings through nested references until
+        reaching a non-reference value. It is used internally by
+        set_at_reference() and get_reference() to handle chained references.
+
+        Args:
+            obj: The QuamBase object containing the attribute.
+            attr: The attribute name to follow (may be a list index like "0").
+            max_depth: Maximum recursion depth to prevent infinite loops
+                (default: QuamBase._MAX_REFERENCE_DEPTH).
+
+        Returns:
+            A tuple of (target_object, final_attr_name) where:
+            - target_object: The QuamBase object containing the ultimate value
+            - final_attr_name: The final attribute name (after following all chains)
+
+        Raises:
+            AttributeError: If a reference in the chain cannot be resolved.
+            RecursionError: If max_depth is exceeded (indicates circular reference).
+        """
+        # Normalize attr to string for consistent handling
+        attr = str(attr)
+
+        if max_depth is None:
+            max_depth = self._MAX_REFERENCE_DEPTH
+        if max_depth <= 0:
+            raise RecursionError(
+                f"Reference chain exceeded maximum depth of {self._MAX_REFERENCE_DEPTH}. "
+                f"Possible circular reference starting from {obj.get_attr_path()}"
+            )
+
+        # Handle list/dict index access specially
+        if attr.isdigit() and isinstance(obj, (list, UserList, QuamList)):
+            # For list indices, get the raw element directly from the list
+            index = int(attr)
+            if isinstance(obj, QuamList):
+                raw_value = obj.data[index]
+            else:
+                raw_value = obj[index]
+        else:
+            raw_value = obj.get_raw_value(attr)
+
+        # Base case: value is not a reference
+        if not string_reference.is_reference(raw_value):
+            return obj, attr
+
+        # Recursive case: follow the reference chain
+        parent_reference, parent_attr = string_reference.split_reference(raw_value)
+        if not parent_attr:
+            raise ValueError(
+                f"Invalid reference {raw_value}: must have an attribute part"
+            )
+
+        parent_obj = obj._get_referenced_value(parent_reference)
+        if not isinstance(parent_obj, QuamBase):
+            # This can happen when:
+            # 1. Broken reference: _get_referenced_value returns the reference string
+            # 2. Reference to a non-QuamBase value (e.g., primitive)
+            # Raise AttributeError to match the expected contract for set_at_reference
+            raise AttributeError(
+                f"Cannot follow reference chain: '{parent_reference}' resolved to "
+                f"{type(parent_obj).__name__}, not a QuamBase object"
+            )
+
+        # Recursively follow the chain
+        return self._follow_reference_chain(parent_obj, parent_attr, max_depth - 1)
+
     def set_at_reference(
         self, attr: str, value: Any, allow_non_reference: bool = False
     ):
-        """Follow the reference of an attribute and set the value at the reference
+        """Follow the reference of an attribute and set the value at the reference.
+
+        This method follows reference chains recursively. If an attribute contains
+        a reference to another reference, both references are preserved while the
+        ultimate target value is updated.
 
         Args:
             attr: The attribute to set the value at the reference of.
@@ -657,26 +765,22 @@ class QuamBase(ReferenceClass):
                     f"Cannot set at reference because attr '{attr}' is not a reference. "
                     f"'{attr}' = {raw_value}"
                 )
-            else:
-                setattr(self, attr, value)
-                return
-
-        parent_reference, ref_attr = string_reference.split_reference(raw_value)
-        if not ref_attr:
-            raise ValueError(
-                f"Unsuccessful attempt to set the value at reference {raw_value} for "
-                f"attribute {attr} because the reference is invalid as it has no "
-                "attribute"
-            )
-
-        parent_obj = self._get_referenced_value(parent_reference)
-        raw_referenced_value = parent_obj.get_raw_value(ref_attr)
-        if string_reference.is_reference(raw_referenced_value) and isinstance(
-            parent_obj, QuamBase
-        ):
-            parent_obj.set_at_reference(ref_attr, value)
+            target_obj, target_attr = self, attr
         else:
-            setattr(parent_obj, ref_attr, value)
+            # Follow the reference chain to get the ultimate target
+            target_obj, target_attr = self._follow_reference_chain(self, attr)
+
+        # Use __setitem__ for dict/list types, otherwise use setattr
+        if isinstance(target_obj, (dict, list, UserDict, UserList, QuamDict, QuamList)):
+            # Convert string index to int for list types
+            if (
+                isinstance(target_obj, (list, UserList, QuamList))
+                and target_attr.isdigit()
+            ):
+                target_attr = int(target_attr)
+            target_obj[target_attr] = value
+        else:
+            setattr(target_obj, target_attr, value)
 
 
 # Type annotation for QuamRoot, can be replaced by typing.Self from Python 3.11
@@ -904,18 +1008,25 @@ class QuamDict(UserDict, QuamBase):
 
     def __getitem__(self, i):
         elem = super().__getitem__(i)
-        if string_reference.is_reference(elem):
-            try:
-                elem = self._get_referenced_value(elem)
-            except InvalidReferenceError as e:
-                try:
-                    repr = f"{self.__class__.__name__}: {self.get_reference()}"
-                except Exception:
-                    repr = self.__class__.__name__
-                raise KeyError(
-                    f"Could not get referenced value {elem} from {repr}"
-                ) from e
-        return elem
+
+        if not string_reference.is_reference(elem):
+            return elem
+
+        try:
+            target_obj, target_attr = self._follow_reference_chain(self, i)
+            # Handle list/dict indices that result from following the chain
+            if target_attr.isdigit() and isinstance(
+                target_obj, (list, UserList, QuamList)
+            ):
+                return target_obj[int(target_attr)]
+            elif isinstance(target_obj, (dict, UserDict, QuamDict)):
+                return target_obj[target_attr]
+            else:
+                return target_obj.get_raw_value(target_attr)
+        except (AttributeError, KeyError, ValueError):
+            # Chain couldn't be followed (broken reference, missing attribute, etc.)
+            # Return the reference string - _get_referenced_value handles warnings
+            return self._get_referenced_value(elem)
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
@@ -1122,9 +1233,24 @@ class QuamList(UserList, QuamBase):
             # This automatically gets the referenced values
             return list(elem)
 
-        if string_reference.is_reference(elem):
-            elem = self._get_referenced_value(elem)
-        return elem
+        elif not string_reference.is_reference(elem):
+            return elem
+
+        try:
+            target_obj, target_attr = self._follow_reference_chain(self, i)
+            # Handle list/dict indices that result from following the chain
+            if target_attr.isdigit() and isinstance(
+                target_obj, (list, UserList, QuamList)
+            ):
+                return target_obj[int(target_attr)]
+            elif isinstance(target_obj, (dict, UserDict, QuamDict)):
+                return target_obj[target_attr]
+            else:
+                return target_obj.get_raw_value(target_attr)
+        except (AttributeError, KeyError, ValueError):
+            # Chain couldn't be followed (broken reference, missing attribute, etc.)
+            # Return the reference string - _get_referenced_value handles warnings
+            return self._get_referenced_value(elem)
 
     def __setitem__(self, i, item):
         converted_item = convert_dict_and_list(item)

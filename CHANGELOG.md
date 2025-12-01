@@ -36,6 +36,10 @@ All deprecated properties now show migration guidance with code examples. See [P
 ### Fixed
 
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
+- Fixed `QuamBase.set_at_reference` not working for list index references:
+  - Reference chain following now handles broken references gracefully (warn instead of crash)
+  - List/dict element references now resolve correctly using proper reference syntax (`#../` for parent context)
+  - Improved error handling in `QuamList.__getitem__` and `QuamDict.__getitem__` for chain resolution failures
 - Fixed passing follow_references and include_defaults kwargs to super().to_dict() in QuamDict.to_dict() method
 - Fixed qubit and qubit-pair reference issues
 
