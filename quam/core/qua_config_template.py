@@ -1,5 +1,4 @@
 qua_config_template = {
-    "version": 1,
     "controllers": {},
     "elements": {},
     "pulses": {
