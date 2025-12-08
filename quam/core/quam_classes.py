@@ -738,7 +738,7 @@ class QuamBase(ReferenceClass):
         return self._follow_reference_chain(parent_obj, parent_attr, max_depth - 1)
 
     def set_at_reference(
-        self, attr: str, value: Any, allow_non_reference: bool = False
+        self, attr: str, value: Any, allow_non_reference: bool = True
     ):
         """Follow the reference of an attribute and set the value at the reference.
 
@@ -750,7 +750,8 @@ class QuamBase(ReferenceClass):
             attr: The attribute to set the value at the reference of.
             value: The value to set.
             allow_non_reference: Whether to allow the attribute to be a non-reference.
-                If False, the attribute must be a reference or an error is raised.
+                If True (default), non-reference attributes are allowed. If False,
+                the attribute must be a reference or an error is raised.
 
         Raises:
             ValueError: If the attribute is not a reference and `allow_non_reference` is
