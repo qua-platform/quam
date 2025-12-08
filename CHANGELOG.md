@@ -36,6 +36,13 @@ All deprecated properties now show migration guidance with code examples. See [P
 
 ### Fixed
 
+- Fixed config version mismatch error handling:
+  - Separated error handling for config-too-old vs package-too-old scenarios
+  - Original version mismatch error was being masked by `ModuleNotFoundError` during migration
+  - Created two distinct exception types: `InvalidQuamConfigVersionError` (config old) and `GreaterThanSupportedQuamConfigVersionError` (package old)
+  - Error messages now clearly explain both options: upgrade package OR downgrade config at `~/.qualibrate/config.toml`
+  - Migration is only attempted when config is older than package (not when newer)
+  - Migration failures now provide helpful context instead of masking the original error
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
 - Fixed `QuamBase.set_at_reference` not working for list index references:
   - Reference chain following now handles broken references gracefully (warn instead of crash)

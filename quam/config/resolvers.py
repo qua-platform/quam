@@ -11,7 +11,12 @@ from qualibrate_config.vars import DEFAULT_CONFIG_FILENAME, QUALIBRATE_PATH
 
 from quam.config.cli import migrate_command
 from quam.config.models import QuamConfig, QuamTopLevelConfig
-from quam.config.validators import quam_version_validator, InvalidQuamConfigVersion
+from quam.config.validators import (
+    quam_version_validator,
+    InvalidQuamConfigVersion,
+    InvalidQuamConfigVersionError,
+    GreaterThanSupportedQuamConfigVersionError,
+)
 from quam.config.vars import CONFIG_PATH_ENV_NAME
 
 
@@ -68,11 +73,22 @@ def get_quam_config(
     )
     try:
         model = get_config_model_part(raw_config_validators=[quam_version_validator])
-    except InvalidQuamConfigVersion:
+    except GreaterThanSupportedQuamConfigVersionError:
+        # Package is too old, config is too new - don't attempt migration
+        raise
+    except InvalidQuamConfigVersionError:
         if not auto_migrate:
             raise
         logging.info("Automatically migrate to new quam config")
-        migrate_command(["--config-path", config_path], standalone_mode=False)
+        try:
+            migrate_command(["--config-path", str(config_path)], standalone_mode=False)
+        except Exception as migrate_error:
+            # If migration fails, provide helpful context
+            error_detail = f"Migration failed: {migrate_error.__class__.__name__}: {migrate_error}"
+            raise RuntimeError(
+                f"Failed to automatically migrate config. {error_detail}\n"
+                f"Please manually upgrade your configuration or run `quam migrate`."
+            ) from migrate_error
     except (RuntimeError, ValueError) as ex:
         raise RuntimeError(error_msg) from ex
     else:
