@@ -48,8 +48,8 @@ All deprecated properties now show migration guidance with code examples. See [P
   - Reference chain following now handles broken references gracefully (warn instead of crash)
   - List/dict element references now resolve correctly using proper reference syntax (`#../` for parent context)
   - Improved error handling in `QuamList.__getitem__` and `QuamDict.__getitem__` for chain resolution failures
-- Fixed passing follow_references and include_defaults kwargs to super().to_dict() in QuamDict.to_dict() method
-- Fixed qubit and qubit-pair reference issues
+- Fixed passing follow_references and include_defaults kwar
+- Fixed project-specific config not recognizing QUAM state path if the main config doesn't have a QUAM state path
 
 ## [0.4.2]
 
