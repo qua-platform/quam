@@ -9,6 +9,19 @@ from quam.config.vars import QUAM_CONFIG_KEY
 
 
 class InvalidQuamConfigVersion(RuntimeError):
+    """Base exception for QUAM config version issues"""
+    pass
+
+
+class InvalidQuamConfigVersionError(InvalidQuamConfigVersion):
+    """Config version older than package supports (config too old)"""
+
+    pass
+
+
+class GreaterThanSupportedQuamConfigVersionError(InvalidQuamConfigVersion):
+    """Config version newer than package supports (package too old)"""
+
     pass
 
 
@@ -17,11 +30,29 @@ def quam_version_validator(
     skip_if_none: bool = True,
 ) -> None:
     if not skip_if_none and QUAM_CONFIG_KEY not in config:
-        raise InvalidQuamConfigVersion("Qualibrate config has no 'quam' key")
+        raise InvalidQuamConfigVersionError(
+            "Qualibrate config has no 'quam' key"
+        )
     version = config[QUAM_CONFIG_KEY].get("version")
-    if version is None or version != QuamConfig.version:
-        raise InvalidQuamConfigVersion(
-            "You have old version of config. Please run `quam migrate`."
+    if version is None:
+        raise InvalidQuamConfigVersionError(
+            "Qualibrate config is missing 'version' field. "
+            "Either upgrade the QUAM package to the latest version, or manually "
+            "downgrade your configuration at ~/.qualibrate/config.toml to match "
+            "your installed version."
+        )
+    if version < QuamConfig.version:
+        raise InvalidQuamConfigVersionError(
+            f"Your config version ({version}) is older than the supported "
+            f"version ({QuamConfig.version}). "
+            "Please run `quam migrate` to upgrade your configuration."
+        )
+    elif version > QuamConfig.version:
+        raise GreaterThanSupportedQuamConfigVersionError(
+            f"Your QUAM package (v{QuamConfig.version}) is older than your "
+            f"config (v{version}). Please either upgrade the QUAM package to "
+            "the latest version, or manually downgrade your configuration at "
+            "~/.qualibrate/config.toml to match your installed version."
         )
 
 
