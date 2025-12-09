@@ -319,7 +319,7 @@ def test_load_octave(octave):
     machine = OctaveQuam(octave=octave)
     octave.initialize_frequency_converters()
 
-    d = machine.to_dict()
+    d = machine.to_dict(include_defaults=False)
 
     d_expected = {
         "__class__": "test_octave.OctaveQuam",
@@ -347,7 +347,7 @@ def test_load_octave(octave):
 
     machine2 = OctaveQuam.load(d)
 
-    assert d == machine2.to_dict()
+    assert d == machine2.to_dict(include_defaults=False)
 
 
 def test_frequency_converter_config_no_LO_frequency(octave):

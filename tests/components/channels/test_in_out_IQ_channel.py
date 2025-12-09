@@ -39,7 +39,7 @@ def test_empty_in_out_IQ_channel():
 
     readout_resonator.id = 1
 
-    d = readout_resonator.to_dict()
+    d = readout_resonator.to_dict(include_defaults=False)
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
@@ -130,7 +130,7 @@ def test_readout_resonator_with_readout():
         amplitude=0.1, length=1000
     )
 
-    d = readout_resonator.to_dict()
+    d = readout_resonator.to_dict(include_defaults=False)
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
@@ -301,7 +301,7 @@ def test_empty_in_out_IQ_channel_ports():
 
     readout_resonator.id = 1
 
-    d = readout_resonator.to_dict()
+    d = readout_resonator.to_dict(include_defaults=False)
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",

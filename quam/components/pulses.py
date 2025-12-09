@@ -532,7 +532,7 @@ class WaveformPulse(Pulse):
         return np.array(self.waveform_I) + 1.0j * np.array(self.waveform_Q)
 
     def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = False
+        self, follow_references: bool = False, include_defaults: bool = True
     ) -> Dict[str, Any]:
         d = super().to_dict(follow_references, include_defaults)
         d.pop("length")

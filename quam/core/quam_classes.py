@@ -509,7 +509,7 @@ class QuamBase(ReferenceClass):
         return attrs
 
     def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = False
+        self, follow_references: bool = False, include_defaults: bool = True
     ) -> Dict[str, Any]:
         """Convert this object to a dictionary.
 
@@ -1164,7 +1164,7 @@ class QuamDict(UserDict, QuamBase):
                 yield from attr_val.iterate_components(skip_elems=skip_elems)
 
     def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = False
+        self, follow_references: bool = False, include_defaults: bool = True
     ) -> dict:
         """Convert this object to a dictionary.
 
@@ -1322,7 +1322,7 @@ class QuamList(UserList, QuamBase):
             )
 
     def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = False
+        self, follow_references: bool = False, include_defaults: bool = True
     ) -> list:
         """Convert this object to a list, usually as part of a dictionary representation.
 

@@ -7,7 +7,7 @@ def test_instantiate_basic_quam_empty():
     assert quam.channels == {}
     assert quam.octaves == {}
 
-    d = quam.to_dict()
+    d = quam.to_dict(include_defaults=False)
     assert d == {
         "__class__": "quam.components.basic_quam.BasicQuam",
     }
@@ -15,7 +15,7 @@ def test_instantiate_basic_quam_empty():
 
 def test_instantiate_basic_quam_with_channel():
     quam = BasicQuam(channels={"single": SingleChannel(opx_output=("con1", 1))})
-    d = quam.to_dict()
+    d = quam.to_dict(include_defaults=False)
     assert d == {
         "__class__": "quam.components.basic_quam.BasicQuam",
         "channels": {
