@@ -78,7 +78,6 @@ class MyComponent(QuamComponent):
 - Fields marked with `skip_save=True` are excluded from both `to_dict()` and `save()` operations
 - These fields remain fully accessible at runtime (you can read and write them normally)
 - If a field contains a `QuamComponent`, the entire component tree is excluded from serialization
-- The `skip_save` metadata works alongside the existing `_skip_attrs` mechanism
 
 ### Example: Quantum Machine Manager
 
@@ -160,36 +159,6 @@ parent.to_dict()  # field excluded
 
 child = Child()
 child.to_dict()  # field included
-```
-
-## Programmatic Field Exclusion
-
-For dynamic exclusion of fields, you can use the `_skip_attrs` class variable:
-
-```python
-@quam_dataclass
-class MyComponent(QuamComponent):
-    _skip_attrs = ["dynamic_skip"]
-
-    saved_field: int = 1
-    dynamic_skip: int = 2  # Excluded via _skip_attrs
-
-obj = MyComponent()
-result = obj.to_dict()  # Only contains saved_field
-```
-
-You can combine both mechanisms:
-
-```python
-@quam_dataclass
-class MyComponent(QuamComponent):
-    _skip_attrs = ["programmatic_skip"]
-
-    saved: int = 1
-    programmatic_skip: int = 2
-    metadata_skip: int = field(default=3, metadata={"skip_save": True})
-
-# Both programmatic_skip and metadata_skip are excluded
 ```
 
 ## Best Practices
