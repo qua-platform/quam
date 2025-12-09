@@ -21,7 +21,7 @@ def test_opx_plus_digital_output_port():
     assert port.inverted is False
     assert port.shareable is False
 
-    assert port.to_dict() == {
+    assert port.to_dict(include_defaults=False) == {
         "__class__": "quam.components.ports.digital_outputs.OPXPlusDigitalOutputPort",
         "controller_id": "con1",
         "port_id": 2,
@@ -63,7 +63,7 @@ def test_opx_plus_digital_input_port():
     assert port.threshold == 2.0
     assert port.shareable == False
 
-    assert port.to_dict() == {
+    assert port.to_dict(include_defaults=False) == {
         "__class__": "quam.components.ports.digital_inputs.OPXPlusDigitalInputPort",
         "controller_id": "con1",
         "port_id": 2,
@@ -110,7 +110,7 @@ def test_fem_digital_output_port():
     assert port.shareable == False
     assert port.level == "LVTTL"
 
-    assert port.to_dict() == {
+    assert port.to_dict(include_defaults=False) == {
         "__class__": "quam.components.ports.digital_outputs.FEMDigitalOutputPort",
         "controller_id": "con1",
         "fem_id": 1,

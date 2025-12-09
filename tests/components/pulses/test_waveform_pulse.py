@@ -32,7 +32,7 @@ def test_waveform_pulse_IQ_mismatch():
 
 def test_waveform_pulse_to_dict():
     pulse = WaveformPulse(waveform_I=[1, 2, 3], waveform_Q=[4, 5, 6])
-    assert pulse.to_dict() == {
+    assert pulse.to_dict(include_defaults=False) == {
         "__class__": "quam.components.pulses.WaveformPulse",
         "waveform_I": [1, 2, 3],
         "waveform_Q": [4, 5, 6],

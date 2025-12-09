@@ -163,7 +163,7 @@ def test_transmon_add_pulse():
         amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
     )
 
-    quam_dict = transmon.to_dict()
+    quam_dict = transmon.to_dict(include_defaults=False)
     expected_quam_dict = {
         "__class__": "quam.examples.superconducting_qubits.components.Transmon",
         "id": 1,

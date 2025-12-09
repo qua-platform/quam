@@ -64,7 +64,7 @@ def test_drag_cosine_pulse():
 
 def test_channel():
     channel = Channel()
-    d = channel.to_dict()
+    d = channel.to_dict(include_defaults=False)
 
     assert d == {
         "__class__": "quam.components.channels.Channel",
@@ -80,7 +80,7 @@ def test_IQ_channel():
             mixer=Mixer(), local_oscillator=LocalOscillator()
         ),
     )
-    d = IQ_channel.to_dict()
+    d = IQ_channel.to_dict(include_defaults=False)
     assert d == {
         "__class__": "quam.components.channels.IQChannel",
         "opx_output_I": 0,
@@ -204,13 +204,13 @@ def test_pulses_referenced():
         channel.operations["pulse_referenced"] == channel.operations["pulse"] == pulse
     )
 
-    state = machine.to_dict()
+    state = machine.to_dict(include_defaults=False)
 
     machine_loaded = QuamTestPulseReferenced.load(state)
 
     pulse_loaded = machine_loaded.channel.operations["pulse"]
     assert isinstance(pulse_loaded, pulses.SquarePulse)
-    assert pulse_loaded.to_dict() == pulse.to_dict()
+    assert pulse_loaded.to_dict(include_defaults=False) == pulse.to_dict(include_defaults=False)
 
     assert machine_loaded.channel.operations["pulse_referenced"] == pulse_loaded
     assert (
