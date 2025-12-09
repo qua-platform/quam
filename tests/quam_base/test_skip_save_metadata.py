@@ -19,7 +19,7 @@ def test_skip_save_basic():
         hidden: int = field(default=2, metadata={"skip_save": True})
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "hidden" not in result
@@ -35,7 +35,7 @@ def test_skip_save_false_explicit():
         also_visible: int = field(default=2, metadata={"skip_save": False})
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "also_visible" in result
@@ -50,7 +50,7 @@ def test_skip_save_no_metadata():
         field_b: int = 2
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "field_a" in result
     assert "field_b" in result
@@ -66,7 +66,7 @@ def test_skip_save_multiple_fields():
         hidden_2: float = field(default=3.14, metadata={"skip_save": True})
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible_1" in result
     assert "visible_2" in result
@@ -111,7 +111,7 @@ def test_skip_save_nested_component():
         )
 
     obj = OuterComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "hidden" not in result
@@ -136,7 +136,7 @@ def test_skip_save_deeply_nested():
         level2: Level2 = field(default_factory=Level2, metadata={"skip_save": True})
 
     obj = Level1()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "val1" in result
     assert "level2" not in result
@@ -156,7 +156,7 @@ def test_skip_save_with_quam_dict_in_field():
 
     obj = TestComponent()
     obj.hidden_dict["key"] = "value"
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "hidden_dict" not in result
@@ -173,7 +173,7 @@ def test_skip_save_with_quam_list_in_field():
 
     obj = TestComponent()
     obj.hidden_list.append("item")
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "hidden_list" not in result
@@ -192,7 +192,7 @@ def test_skip_save_inherited_field():
         child_field: int = 3
 
     obj = ChildComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "inherited_visible" in result
     assert "child_field" in result
@@ -210,7 +210,7 @@ def test_skip_save_field_override_removes_metadata():
         field: int = 2  # Override without metadata
 
     obj = ChildComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     # Field should now be visible since metadata was removed
     assert "field" in result
@@ -234,7 +234,7 @@ def test_skip_save_multiple_inheritance_levels():
         c_visible: int = 5
 
     obj = Child()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "gp_visible" in result
     assert "p_visible" in result
@@ -304,7 +304,7 @@ def test_skip_save_with_skip_attrs():
         metadata_skip: int = field(default=3, metadata={"skip_save": True})
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "programmatic_skip" not in result
@@ -345,7 +345,7 @@ def test_skip_save_with_multiple_metadata_entries():
         )
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "hidden" not in result
@@ -372,7 +372,7 @@ def test_skip_save_empty_metadata():
         visible: int = field(default=1, metadata={})
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
 
@@ -386,7 +386,7 @@ def test_skip_save_classvar_not_affected():
         hidden: int = field(default=2, metadata={"skip_save": True})
 
     obj = TestComponent()
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     # ClassVar should not appear regardless
     assert "class_var" not in result
@@ -417,7 +417,7 @@ def test_skip_save_field_with_default_factory():
 
     obj = TestComponent()
     obj.hidden.append("item")
-    result = obj.to_dict(include_defaults=True)
+    result = obj.to_dict()
 
     assert "visible" in result
     assert "hidden" not in result
