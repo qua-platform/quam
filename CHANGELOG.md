@@ -8,6 +8,7 @@
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
 - Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
+- Added `skip_save` field metadata support to exclude specific dataclass fields from serialization while keeping them accessible at runtime. Use `field(metadata={"skip_save": True})` to mark fields that should not be saved to JSON
 
 ### Changed
 
