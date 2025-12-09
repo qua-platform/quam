@@ -110,7 +110,7 @@ def test_save_split_content_create_folder(serialiser, sample_quam_object, tmp_pa
     """Test that the target folder is created if it doesn't exist."""
     folder = tmp_path / "new_dir_split"
     assert not folder.exists()
-    full_contents = sample_quam_object.to_dict()
+    full_contents = sample_quam_object.to_dict(include_defaults=False)
     mapping = {"wiring": "wiring.json"}
 
     serialiser._save_split_content(full_contents, folder, mapping)
@@ -123,7 +123,7 @@ def test_save_split_content_create_folder(serialiser, sample_quam_object, tmp_pa
 def test_save_split_content_create_subfolder(serialiser, sample_quam_object, tmp_path):
     """Test creating subdirectories specified in the mapping filename."""
     folder = tmp_path / "split_subfolder"
-    full_contents = sample_quam_object.to_dict()
+    full_contents = sample_quam_object.to_dict(include_defaults=False)
     subfolder_name = "sub"
     mapping = {
         "wiring": f"{subfolder_name}/wiring.json",
@@ -162,7 +162,7 @@ def test_save_split_content_absolute_path_warning(
     """Test warning when an absolute path is used in content_mapping."""
     folder = tmp_path / "split_abs_warn"
     abs_path_str = str((tmp_path / "ignored_abs_path" / "wiring.json").absolute())
-    full_contents = sample_quam_object.to_dict()
+    full_contents = sample_quam_object.to_dict(include_defaults=False)
     mapping = {"wiring": abs_path_str}
 
     with pytest.warns(

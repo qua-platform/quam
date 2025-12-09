@@ -45,6 +45,7 @@ All deprecated properties now show migration guidance with code examples. See [P
   - Migration is only attempted when config is older than package (not when newer)
   - Migration failures now provide helpful context instead of masking the original error
 - Fixed `Pulse.digital_marker` not being converted to a list in the config generation
+- Fixed `include_defaults` parameter inconsistency: Updated `to_dict()` method signatures across `QuamBase`, `QuamDict`, `QuamList`, and `WaveformPulse` to default to `include_defaults=True`, aligning with the v3 config default behavior
 - Fixed `QuamBase.set_at_reference` not working for list index references:
   - Reference chain following now handles broken references gracefully (warn instead of crash)
   - List/dict element references now resolve correctly using proper reference syntax (`#../` for parent context)

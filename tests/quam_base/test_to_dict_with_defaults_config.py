@@ -46,15 +46,15 @@ def test_to_dict_explicit_include_defaults_false():
     assert "optional_list" not in result
 
 
-def test_to_dict_default_excludes_defaults():
-    """Test that to_dict() without parameters excludes defaults (backward compatibility)."""
+def test_to_dict_default_includes_defaults():
+    """Test that to_dict() without parameters includes defaults (v3 default behavior)."""
     comp = SimpleComponent(required_val=1)
     result = comp.to_dict()
 
     assert result["required_val"] == 1
-    assert "optional_val" not in result
-    assert "optional_str" not in result
-    assert "optional_list" not in result
+    assert result["optional_val"] == 42
+    assert result["optional_str"] == "default_string"
+    assert result["optional_list"] == []
 
 
 def test_to_dict_nested_respects_include_defaults_param():
@@ -76,20 +76,20 @@ def test_to_dict_nested_respects_include_defaults_param():
     assert simple_result["optional_list"] == []
 
 
-def test_to_dict_nested_excludes_defaults_by_default():
-    """Test that nested components exclude defaults by default."""
+def test_to_dict_nested_includes_defaults_by_default():
+    """Test that nested components include defaults by default (v3 default behavior)."""
     simple = SimpleComponent(required_val=5, optional_val=100)
     nested = NestedComponent(name="test", simple=simple)
 
     result = nested.to_dict()
 
     assert result["name"] == "test"
-    assert "count" not in result  # default value excluded by default
+    assert result["count"] == 10  # default value included by default
     assert "simple" in result
 
-    # Nested component should also exclude defaults
+    # Nested component should also include defaults
     simple_result = result["simple"]
     assert simple_result["required_val"] == 5
     assert simple_result["optional_val"] == 100
-    assert "optional_str" not in simple_result
-    assert "optional_list" not in simple_result
+    assert simple_result["optional_str"] == "default_string"
+    assert simple_result["optional_list"] == []
