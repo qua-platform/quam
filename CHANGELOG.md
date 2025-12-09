@@ -23,6 +23,7 @@
 - Enhanced deprecation warnings for channel-level port properties to include migration examples with code snippets
 - Improved docstring return type formatting in serialization (`quam/serialisation/json.py`) and utility modules (`quam/utils/string_reference.py`)
 - Expanded documentation for channel-ports.md with comprehensive examples of port container usage
+- Removed `version` field from qua config template
 
 ### Deprecated
 
