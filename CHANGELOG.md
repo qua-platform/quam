@@ -8,6 +8,7 @@
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
 - Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
+- Added support for channels as quantum components via multiple inheritance, enabling channel-level macros and operations (e.g., `class HybridChannel(SingleChannel, Qubit)`). This allows macros to be attached directly to channels instead of requiring a parent qubit component.
 
 ### Changed
 
