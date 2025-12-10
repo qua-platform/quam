@@ -2,6 +2,12 @@
 
 The features section of the Quantum Abstract Machine (QUAM) documentation highlights the unique capabilities and functionalities that enhance the usability and performance of the QUAM framework. Here, you will find detailed explanations and examples of how to leverage these features in your quantum projects.
 
+## Serialization and State Management
+
+QUAM provides comprehensive serialization capabilities to save and load quantum machine configurations, enabling persistent state management between sessions. The serialization system supports flexible control over what gets saved, including the ability to exclude runtime-only fields from persisted state.
+
+- **[Serialization Documentation](serialization.md)**: Learn how to save and load QUAM configurations, control default value inclusion, and exclude specific fields from serialization using the `skip_save` metadata. This feature is essential for managing machine state, version controlling configurations, and separating runtime data from persistent configuration.
+
 ## Gate-Level Operations
 
 Gate-level operations provide an abstraction layer that transforms low-level pulse definitions into high-level quantum gate operations. This feature allows users to build circuit-level QUA programs by working with quantum components (qubits and qubit pairs) and applying macros that represent common quantum gates.
