@@ -781,7 +781,7 @@ class FlatTopGaussianPulse(Pulse):
     flat_length: int
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
-    length: int = field(default="#./inferred_total_length", init=False)
+    length: int = field(default="#./inferred_total_length", init=True)
 
     @property
     def inferred_total_length(self) -> int:
@@ -999,7 +999,7 @@ class CosineBipolarPulse(Pulse):
     flat_length: int
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
-    length: int = field(default="#./inferred_total_length", init=False)
+    length: int = field(default="#./inferred_total_length", init=True)
 
     @property
     def inferred_total_length(self) -> int:
