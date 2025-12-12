@@ -770,24 +770,28 @@ class FlatTopGaussianPulse(Pulse):
         flat_length (int): The length of the pulse's flat top in samples.
             The rise and fall lengths are calculated from the total length and the
             flat length.
-        smoothing_time (int): The total rise and fall time in samples.
+        smoothing_length (int): The total rise and fall time in samples.
             Default is 0.
-        post_zero_padding_time (int): The amount of zero padding to add after the
+        post_zero_padding_length (int): The amount of zero padding to add after the
             pulse in samples. Default is 0.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
-    smoothing_time: int = 0
-    post_zero_padding_time: int = 0
+    smoothing_length: int = 0
+    post_zero_padding_length: int = 0
     length: int = field(default="#./inferred_total_length", init=False)
 
     @property
     def inferred_total_length(self) -> int:
         return int(
             np.ceil(
-                (self.flat_length + self.smoothing_time + self.post_zero_padding_time)
+                (
+                    self.flat_length
+                    + self.smoothing_length
+                    + self.post_zero_padding_length
+                )
                 / 4
             )
             * 4
@@ -796,8 +800,8 @@ class FlatTopGaussianPulse(Pulse):
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
 
-        rise_fall_length = self.smoothing_time // 2
-        if not self.smoothing_time % 2 == 0:
+        rise_fall_length = self.smoothing_length // 2
+        if not self.smoothing_length % 2 == 0:
             raise ValueError(
                 "FlatTopGaussianPulse rise_fall_length must be a multiple of 2"
             )
@@ -983,25 +987,29 @@ class CosineBipolarPulse(Pulse):
             a single channel or I of IQ; if not None, use for IQ (0 is X, pi/2 is Y).
         flat_length (int): Flat region length (must be even and ≤ total length).
             Split equally between positive and negative.
-        smoothing_time (int): Total length of rise, switch, and fall segments
+        smoothing_length (int): Total length of rise, switch, and fall segments
             (samples). Default 0 for abrupt transitions. Increasing this smooths
             edges, reducing high-frequency content.
-        post_zero_padding_time (int): Additional zeros appended after the pulse
+        post_zero_padding_length (int): Additional zeros appended after the pulse
             (samples). Default 0.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
-    smoothing_time: int = 0
-    post_zero_padding_time: int = 0
+    smoothing_length: int = 0
+    post_zero_padding_length: int = 0
     length: int = field(default="#./inferred_total_length", init=False)
 
     @property
     def inferred_total_length(self) -> int:
         return int(
             np.ceil(
-                (self.flat_length + self.smoothing_time + self.post_zero_padding_time)
+                (
+                    self.flat_length
+                    + self.smoothing_length
+                    + self.post_zero_padding_length
+                )
                 / 4
             )
             * 4
@@ -1040,17 +1048,17 @@ class CosineBipolarPulse(Pulse):
                 f"CosineBipolarPulse.flat_length={F} must be an even number to split "
                 "equally into + and - halves."
             )
-        if L - (self.smoothing_time + F) < 0:
+        if L - (self.smoothing_length + F) < 0:
             raise ValueError(
                 f"CosineBipolarPulse.smoothing_time + flat_length ="
-                f" {self.smoothing_time + F} exceeds total length={L}."
+                f" {self.smoothing_length + F} exceeds total length={L}."
             )
 
-        if self.smoothing_time == 0:
+        if self.smoothing_length == 0:
             rise_len = switch_len = fall_len = 0
         else:
-            base = self.smoothing_time // 4
-            extra = self.smoothing_time % 4
+            base = self.smoothing_length // 4
+            extra = self.smoothing_length % 4
             rise_len = base + (1 if extra in (2, 3) else 0)
             switch_len = 2 * base + (1 if extra in (1, 3) else 0)
             fall_len = base + (1 if extra in (2, 3) else 0)
@@ -1065,16 +1073,7 @@ class CosineBipolarPulse(Pulse):
         seg_switch = A * cos_switch(switch_len)
         seg_flat_neg = -A * np.ones(flat_neg_len)
         seg_fall = -A * halfcos(fall_len)[::-1]
-        zero_padding = np.zeros(L - (self.smoothing_time + F))
-
-        p = np.concatenate(
-            [seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding]
-        )
-
-        if self.axis_angle is not None:
-            p = p * np.exp(1j * self.axis_angle)
-
-        return p.tolist()
+        zero_padding = np.zeros(L - (self.smoothing_length + F))
 
         p = np.concatenate(
             [seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding]
