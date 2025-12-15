@@ -2,6 +2,7 @@ import numbers
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from dataclasses import field
 from typing import Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -761,7 +762,6 @@ class FlatTopGaussianPulse(Pulse):
     """Gaussian pulse with flat top QUAM component.
 
     Args:
-        length (int): The total length of the pulse in samples.
         amplitude (float): The amplitude of the pulse in volts.
         axis_angle (float, optional): IQ axis angle of the output pulse in radians.
             If None (default), the pulse is meant for a single channel or the I port
@@ -770,21 +770,40 @@ class FlatTopGaussianPulse(Pulse):
         flat_length (int): The length of the pulse's flat top in samples.
             The rise and fall lengths are calculated from the total length and the
             flat length.
+        smoothing_length (int): The total rise and fall time in samples.
+            Default is 0.
+        post_zero_padding_length (int): The amount of zero padding to add after the
+            pulse in samples. Default is 0.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
+    smoothing_length: int = 0
+    post_zero_padding_length: int = 0
+    length: int = field(default="#./inferred_total_length", init=True)
+
+    @property
+    def inferred_total_length(self) -> int:
+        return int(
+            np.ceil(
+                (
+                    self.flat_length
+                    + self.smoothing_length
+                    + self.post_zero_padding_length
+                )
+                / 4
+            )
+            * 4
+        )
 
     def waveform_function(self):
         from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
 
-        rise_fall_length = (self.length - self.flat_length) // 2
-        if not self.flat_length + 2 * rise_fall_length == self.length:
+        rise_fall_length = self.smoothing_length // 2
+        if not self.smoothing_length % 2 == 0:
             raise ValueError(
-                "FlatTopGaussianPulse rise_fall_length (=length-flat_length) must be"
-                f" a multiple of 2 ({self.length} - {self.flat_length} ="
-                f" {self.length - self.flat_length})"
+                "FlatTopGaussianPulse rise_fall_length must be a multiple of 2"
             )
 
         waveform = flattop_gaussian_waveform(
@@ -793,7 +812,9 @@ class FlatTopGaussianPulse(Pulse):
             rise_fall_length=rise_fall_length,
             return_part="all",
         )
-        waveform = np.array(waveform)
+
+        zero_padding = np.zeros(self.length - len(waveform))
+        waveform = np.concatenate((waveform, zero_padding))
 
         if self.axis_angle is not None:
             waveform = waveform * np.exp(1j * self.axis_angle)
@@ -961,17 +982,38 @@ class CosineBipolarPulse(Pulse):
     rises/falls and switching, further reducing high-frequency content.
 
     Args:
-        length (int): Total pulse length (samples).
         amplitude (float): Peak amplitude (V).
         axis_angle (float, optional): IQ axis angle in radians. If None, use for
             a single channel or I of IQ; if not None, use for IQ (0 is X, pi/2 is Y).
         flat_length (int): Flat region length (must be even and ≤ total length).
             Split equally between positive and negative.
+        smoothing_length (int): Total length of rise, switch, and fall segments
+            (samples). Default 0 for abrupt transitions. Increasing this smooths
+            edges, reducing high-frequency content.
+        post_zero_padding_length (int): Additional zeros appended after the pulse
+            (samples). Default 0.
     """
 
     amplitude: float
     axis_angle: float = None
     flat_length: int
+    smoothing_length: int = 0
+    post_zero_padding_length: int = 0
+    length: int = field(default="#./inferred_total_length", init=True)
+
+    @property
+    def inferred_total_length(self) -> int:
+        return int(
+            np.ceil(
+                (
+                    self.flat_length
+                    + self.smoothing_length
+                    + self.post_zero_padding_length
+                )
+                / 4
+            )
+            * 4
+        )
 
     def waveform_function(self):
         # Helper segment generators (length 0 returns empty array)
@@ -1006,16 +1048,20 @@ class CosineBipolarPulse(Pulse):
                 f"CosineBipolarPulse.flat_length={F} must be an even number to split "
                 "equally into + and - halves."
             )
+        if L - (self.smoothing_length + F) < 0:
+            raise ValueError(
+                f"CosineBipolarPulse.smoothing_time + flat_length ="
+                f" {self.smoothing_length + F} exceeds total length={L}."
+            )
 
-        remaining = L - F
-        if remaining == 0:
+        if self.smoothing_length == 0:
             rise_len = switch_len = fall_len = 0
         else:
-            base = remaining // 3
-            extra = remaining % 3
-            rise_len = base + (1 if extra == 2 else 0)
-            switch_len = base + (extra if extra == 1 else 0)
-            fall_len = base + (1 if extra == 2 else 0)
+            base = self.smoothing_length // 4
+            extra = self.smoothing_length % 4
+            rise_len = base + (1 if extra in (2, 3) else 0)
+            switch_len = 2 * base + (1 if extra in (1, 3) else 0)
+            fall_len = base + (1 if extra in (2, 3) else 0)
 
         flat_pos_len = F // 2
         flat_neg_len = F // 2
@@ -1027,8 +1073,11 @@ class CosineBipolarPulse(Pulse):
         seg_switch = A * cos_switch(switch_len)
         seg_flat_neg = -A * np.ones(flat_neg_len)
         seg_fall = -A * halfcos(fall_len)[::-1]
+        zero_padding = np.zeros(L - (self.smoothing_length + F))
 
-        p = np.concatenate([seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall])
+        p = np.concatenate(
+            [seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding]
+        )
 
         if self.axis_angle is not None:
             p = p * np.exp(1j * self.axis_angle)
