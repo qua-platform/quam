@@ -263,23 +263,26 @@ Ports support crosstalk compensation, FIR/IIR filters (OPX+), and exponential fi
 
 ## Migrating from Channel-Level Port Properties
 
-!!! warning "Deprecated Channel Properties"
-    As of QUAM v0.5.0, setting port properties on channels is deprecated. Runtime warnings are emitted to help you migrate your code. See the [Channels Migration Guide](channels.md#migrating-from-channel-level-port-properties) for detailed examples.
+/// details | Deprecated Channel Properties
+type: warning
+As of QUAM v0.5.0, setting port properties on channels is deprecated. Runtime warnings are emitted to help you migrate your code. See the [Channels Migration Guide](channels.md#migrating-from-channel-level-port-properties) for detailed examples.
+///
 
 ### Quick Migration Guide
 
 If you're currently setting port properties on channels, migrate to explicit Port objects:
 
-| Channel Property | Port Property | Port Class |
-|-----------------|---------------|------------|
-| `opx_output_offset` | `offset` | `OPXPlusAnalogOutputPort`, `LFFEMAnalogOutputPort` |
-| `opx_input_offset` | `offset` | `OPXPlusAnalogInputPort`, `LFFEMAnalogInputPort` |
-| `filter_fir_taps` | `feedforward_filter` | `LFAnalogOutputPort` (all output ports) |
-| `filter_iir_taps` | `feedback_filter` (OPX+) or `exponential_filter` (LF-FEM) | `LFAnalogOutputPort` (all output ports) |
-| `shareable` (any channel) | `shareable` | All port types |
-| `inverted` (digital) | `inverted` | `DigitalOutputPort` types |
+| Channel Property          | Port Property                                             | Port Class                                         |
+| ------------------------- | --------------------------------------------------------- | -------------------------------------------------- |
+| `opx_output_offset`       | `offset`                                                  | `OPXPlusAnalogOutputPort`, `LFFEMAnalogOutputPort` |
+| `opx_input_offset`        | `offset`                                                  | `OPXPlusAnalogInputPort`, `LFFEMAnalogInputPort`   |
+| `filter_fir_taps`         | `feedforward_filter`                                      | `LFAnalogOutputPort` (all output ports)            |
+| `filter_iir_taps`         | `feedback_filter` (OPX+) or `exponential_filter` (LF-FEM) | `LFAnalogOutputPort` (all output ports)            |
+| `shareable` (any channel) | `shareable`                                               | All port types                                     |
+| `inverted` (digital)      | `inverted`                                                | `DigitalOutputPort` types                          |
 
 **Example:**
+
 ```python
 # Old (deprecated - emits warning)
 channel = SingleChannel(opx_output=("con1", 1), opx_output_offset=0.15)
