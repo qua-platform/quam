@@ -28,13 +28,13 @@ __all__ = [
     "SquarePulse",
     "SquareReadoutPulse",
     "GaussianPulse",
-    "FlatTopGaussianPulse",
+    "_FlatTopGaussianPulse",
     "ConstantReadoutPulse",
     "FlatTopBlackmanPulse",
     "BlackmanIntegralPulse",
     "FlatTopTanhPulse",
     "FlatTopCosinePulse",
-    "CosineBipolarPulse",
+    "_CosineBipolarPulse",
 ]
 
 
@@ -758,8 +758,11 @@ class GaussianPulse(Pulse):
 
 
 @quam_dataclass
-class FlatTopGaussianPulse(Pulse):
-    """Gaussian pulse with flat top QUAM component.
+class _FlatTopGaussianPulse(Pulse):
+    """_FlatTopGaussianPulse QUAM component.
+
+    This class is deprecated and will be removed in a future release.
+    Please use the version in qualang-tools instead.
 
     Args:
         amplitude (float): The amplitude of the pulse in volts.
@@ -781,10 +784,16 @@ class FlatTopGaussianPulse(Pulse):
     flat_length: int
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
-    length: int = field(default="#./inferred_total_length", init=True)
+    length: int = "#./inferred_total_length"
 
     @property
     def inferred_total_length(self) -> int:
+        warnings.warn(
+            "_FlatTopGaussianPulse is deprecated and will be removed in a future release. "
+            "Please use the version in qualang-tools instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return int(
             np.ceil(
                 (
@@ -964,9 +973,12 @@ class FlatTopTanhPulse(Pulse):
 
 
 @quam_dataclass
-class CosineBipolarPulse(Pulse):
+class _CosineBipolarPulse(Pulse):
     """
-    CosineBipolarPulse QUAM component.
+    _CosineBipolarPulse QUAM component.
+
+    This class is deprecated and will be removed in a future release.
+    Please use the version in qualang-tools instead.
 
     Generates a net-zero pulse with two symmetric cosine-shaped lobes.
     Minimizes DC offset and long-timescale distortions. Waveform: smooth cosine
@@ -999,10 +1011,16 @@ class CosineBipolarPulse(Pulse):
     flat_length: int
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
-    length: int = field(default="#./inferred_total_length", init=True)
+    length: int = "#./inferred_total_length"
 
     @property
     def inferred_total_length(self) -> int:
+        warnings.warn(
+            "_CosineBipolarPulse is deprecated and will be removed in a future release. "
+            "Please use the version in qualang-tools instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return int(
             np.ceil(
                 (
