@@ -372,27 +372,40 @@ from qm import qua
 class Transmon(Qubit):
     xy: MWChannel
     resonator: Optional[InOutMWChannel] = None
-    
+
     @QuantumComponent.register_macro
     def reset(self, threshold: float = 0.0):
         """Reset the qubit to ground state using active reset"""
         # Measure the qubit state
         I, Q = self.resonator.measure("readout")
-        
+
         # Apply a conditional π-pulse if qubit is in excited state
         with qua.if_(I > threshold):
             self.xy.play("x180")
-        
+
         # Add a wait time for relaxation
         self.xy.wait(100)
 ```
 
-The method macro automatically becomes available in the qubit's macro registry:
+To use this method macro, you need to:
+
+1. **Ensure the readout pulse is registered** before calling the method macro. This must be done after the qubit is instantiated:
 
 ```python
-# Create a Transmon instance
-q1 = Transmon(id="q1", xy=xy_channel, resonator=resonator_channel)
+# Register the readout pulse in q1's resonator channel
+q1.resonator.operations["readout"] = pulses.SquareReadoutPulse(
+    length=1000, amplitude=0.1, threshold=0.215
+)
 
+# Register any pulses referenced in the method macro
+q1.xy.operations["x180"] = pulses.SquarePulse(
+    amplitude=0.2, length=100
+)
+```
+
+2. **Call the method macro** using either the apply method or directly as a method:
+
+```python
 # The reset method is automatically available as a macro
 with qua.program() as prog:
     q1.apply("reset", threshold=0.1)  # Call via apply
@@ -402,6 +415,11 @@ with qua.program() as prog:
 # Method macros appear in the macro registry
 print(q1.get_macros())  # {'reset': <MethodMacro 'reset'>, ...}
 ```
+
+**Important Prerequisites:**
+- Any pulses referenced in a method macro (like `"readout"` and `"x180"`) must be registered in the appropriate channel's `operations` dictionary before the macro is called
+- Method macros are methods on qubit classes decorated with `@QuantumComponent.register_macro` and automatically become available via both `qubit.apply("method_name")` and direct method calls `qubit.method_name()`
+- If a qubit doesn't have a specific channel (e.g., no `resonator`), calling that channel in a method macro will raise an `AttributeError`
 
 Method macros provide better code organization by keeping qubit-specific logic within the qubit class itself, while still maintaining full compatibility with the QUAM macro system.
 
