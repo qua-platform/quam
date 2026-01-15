@@ -347,7 +347,7 @@ def test_complex_arbitrary_waveform_iq_channel_list_conversion():
 
 def test_cosinebipolarpulse():
     # Basic instantiation and property checks
-    pulse = pulses.CosineBipolarPulse(
+    pulse = pulses._CosineBipolarPulse(
         amplitude=1.0, flat_length=80, smoothing_length=20, post_zero_padding_length=10
     )
     assert (
@@ -369,7 +369,7 @@ def test_cosinebipolarpulse():
 
 def test_flattopgaussianpulse():
     # Basic instantiation and property checks
-    pulse = pulses.FlatTopGaussianPulse(
+    pulse = pulses._FlatTopGaussianPulse(
         amplitude=1.0, flat_length=80, smoothing_length=20, post_zero_padding_length=10
     )
     assert (
