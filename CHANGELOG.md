@@ -2,9 +2,6 @@
 
 ### Added
 
-- `CosineBipolarPulse` and `FlatTopGaussianPulse` now have a smoothing time and zero padding parameters. Total duration is automatically calculated and should not be set on instantiation.
-- Added `CosineBipolarPulse` 
-- Added `CosineBipolarPulse`
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
 - Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
