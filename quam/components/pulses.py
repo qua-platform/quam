@@ -28,6 +28,7 @@ __all__ = [
     "SquarePulse",
     "SquareReadoutPulse",
     "GaussianPulse",
+    "FlatTopGaussianPulse",
     "ConstantReadoutPulse",
     "FlatTopBlackmanPulse",
     "BlackmanIntegralPulse",
