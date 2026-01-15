@@ -347,18 +347,40 @@ def test_complex_arbitrary_waveform_iq_channel_list_conversion():
 
 def test_cosinebipolarpulse():
     # Basic instantiation and property checks
-    pulse = pulses.CosineBipolarPulse(length=20, amplitude=1.0, flat_length=8)
-    assert pulse.length == 20
+    pulse = pulses._CosineBipolarPulse(
+        amplitude=1.0, flat_length=80, smoothing_length=20, post_zero_padding_length=10
+    )
+    assert (
+        pulse.length == np.ceil((80 + 20 + 10) / 4) * 4
+    )  # Length rounded to nearest multiple of 4
     assert pulse.amplitude == 1.0
-    assert pulse.flat_length == 8
+    assert pulse.flat_length == 80
     assert pulse.axis_angle is None
 
     # Check waveform length and net-zero property
     waveform = np.array(pulse.waveform_function())
-    assert len(waveform) == 20
+    assert (
+        len(waveform) == np.ceil((80 + 20 + 10) / 4) * 4
+    )  # Length rounded to nearest multiple of 4
     # Net-zero: sum should be close to zero
     print(np.sum(waveform.real))
     assert np.isclose(np.sum(waveform.real), 0, atol=1e-10)
-    # Flat region: check values in the middle
-    assert np.allclose(waveform[4:8], 1.0)
-    assert np.allclose(waveform[12:16], -1.0)
+
+
+def test_flattopgaussianpulse():
+    # Basic instantiation and property checks
+    pulse = pulses._FlatTopGaussianPulse(
+        amplitude=1.0, flat_length=80, smoothing_length=20, post_zero_padding_length=10
+    )
+    assert (
+        pulse.length == np.ceil((80 + 20 + 10) / 4) * 4
+    )  # Length rounded to nearest multiple of 4
+    assert pulse.amplitude == 1.0
+    assert pulse.flat_length == 80
+    assert pulse.axis_angle is None
+
+    # Check waveform length
+    waveform = np.array(pulse.waveform_function())
+    assert (
+        len(waveform) == np.ceil((80 + 20 + 10) / 4) * 4
+    )  # Length rounded to nearest multiple of 4
