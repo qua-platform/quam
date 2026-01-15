@@ -28,13 +28,11 @@ __all__ = [
     "SquarePulse",
     "SquareReadoutPulse",
     "GaussianPulse",
-    "_FlatTopGaussianPulse",
     "ConstantReadoutPulse",
     "FlatTopBlackmanPulse",
     "BlackmanIntegralPulse",
     "FlatTopTanhPulse",
     "FlatTopCosinePulse",
-    "_CosineBipolarPulse",
 ]
 
 
