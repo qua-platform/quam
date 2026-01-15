@@ -1,0 +1,1784 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="QM. Technologies Ltd.">
+      
+      
+      
+        <link rel="prev" href="../features/quam-references/">
+      
+      
+        <link rel="next" href="../API_references/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/qm_logo_white.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Migrating to QUAM - The Quantum Abstract Machine - QUAM Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#migrating-to-quam" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="The Quantum Abstract Machine - QUAM Documentation" class="md-header__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Quantum Abstract Machine - QUAM Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Migrating to QUAM
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to high contrast mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to high contrast mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-high-contrast" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18V6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="The Quantum Abstract Machine - QUAM Documentation" class="md-nav__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    The Quantum Abstract Machine - QUAM Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demonstration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Demonstration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/quam-root/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Root
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/channels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/channel-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel Ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/pulses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pulses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/octave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Octave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/qubits-and-qubit-pairs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qubits and Qubit Pairs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/custom-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serialization and State Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/gate-level-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gate-Level Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/quam-references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referencing Between Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to QUAM
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-of-migration-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview of Migration Process
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-create-a-root-quam-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1: Create a Root QUAM Object
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-add-octaves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2: Add Octaves
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-convert-elements-to-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3: Convert "elements" to Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3: Convert &#34;elements&#34; to Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-analog-output-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Analog Output Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iq-analog-output-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IQ Analog Output Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-analog-output-input-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Analog Output + Input Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iq-analog-output-input-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IQ Analog Output + Input Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-convert-pulses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4: Convert Pulses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4: Convert Pulses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview-of-qua-pulse-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview of QUA Pulse Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quam-pulse-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        QUAM Pulse Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="QUAM Pulse Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-converting-a-constant-voltage-pulse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Converting a Constant Voltage Pulse
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-generate-the-qua-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5: Generate the QUA configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-create-high-level-quam-components-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6: Create High-Level QUAM Components (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API References
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/channels_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Channels API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/pulses_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Pulses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/ports_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Ports API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/hardware_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Hardware API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/octave_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Octave API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/quantum_components_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Quantum Components API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/macro_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Macro API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/basic_quam_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BasicQUAM API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/core/quam_classes_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Core Classes API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="migrating-to-quam">Migrating to QUAM</h1>
+<p>QUAM, the Quantum Abstract Machine, serves as a powerful abstraction framework built over the QUA programming language. This guide aims to facilitate a smooth transition for developers from QUA to QUAM by detailing the necessary steps and modifications.</p>
+<h2 id="overview-of-migration-process">Overview of Migration Process</h2>
+<p>Migrating from QUA to QUAM involves a structured, five-step process that methodically transitions your existing quantum programming framework. Here's a brief overview of each step:</p>
+<ol>
+<li>
+<p><strong>Create a Root QUAM Object:</strong> Start by establishing a foundational <a class="autorefs autorefs-internal" href="../API_references/core/quam_classes/#quam.core.quam_classes.QuamRoot">QuamRoot</a> object that serves as the top-level container for all other QUAM components. This is where you'll begin building your new QUAM configuration.</p>
+</li>
+<li>
+<p><strong>Add Octaves:</strong> If your original QUA setup includes Octave components, this step involves integrating these components into the QUAM configuration, utilizing existing connectivity settings.</p>
+</li>
+<li>
+<p><strong>Convert "elements" to Channels:</strong> Each element in the QUA configuration that handles signal processing is mapped to a corresponding channel type in QUAM. This critical step ensures that the functional properties of your setup are preserved and adapted to the new architecture.</p>
+</li>
+<li>
+<p><strong>Convert Pulses:</strong> After setting up the channels, the next step is to configure the pulses. This involves translating QUA pulse specifications into QUAM's consolidated and parameterized pulse framework.</p>
+</li>
+<li>
+<p><strong>Generate the QUA configuration:</strong> Once the QUAM structure has been created and populated, you can generate the QUA configuration using the QUAM object. This configuration can then be used to run quantum programs on the OPX.</p>
+</li>
+<li>
+<p><strong>Create High-Level QUAM Components (Optional):</strong> This final step is about abstracting complex configurations into high-level components like qubits, which can simplify the management and scalability of your quantum programs.</p>
+</li>
+</ol>
+<p>Each of these steps is designed to ensure a seamless transition to QUAM, leveraging its robust abstraction capabilities to manage and organize your quantum computing elements more effectively.</p>
+<h2 id="1-create-a-root-quam-object">1: Create a Root QUAM Object</h2>
+<p>Begin by establishing a <a class="autorefs autorefs-internal" href="../API_references/core/quam_classes/#quam.core.quam_classes.QuamRoot">QuamRoot</a> object, which serves as the top-level container for all other QUAM components. For simplicity, you can use the pre-defined <a class="autorefs autorefs-internal" href="../API_references/components/basic_quam/#quam.components.basic_quam.BasicQuam">BasicQuam</a> class:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicQuam</span>
+
+<span class="n">machine</span> <span class="o">=</span> <span class="n">BasicQuam</span><span class="p">()</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>  <span class="c1"># outputs the current QUAM state</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">output</span><pre><span></span><code>QUAM:
+  channels: QuamDict Empty
+  octaves: QuamDict Empty
+</code></pre></div>
+<p>Next we populate the root-level <code>machine</code> object with QUAM components</p>
+<h2 id="2-add-octaves">2: Add Octaves</h2>
+<p>If you have one or more Octave components, you can add them to the QUA configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">Octave</span>
+
+<span class="n">machine</span><span class="o">.</span><span class="n">octaves</span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Octave</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;octave1&quot;</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+
+<span class="c1"># Initialize all frequency converters using the default connectivity to the OPX</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">initialize_frequency_converters</span><span class="p">()</span>
+</code></pre></div>
+<p>Refer to the <a class="autorefs autorefs-internal" href="../components/#octave">Octave documentation</a> for further configuration details</p>
+<h2 id="3-convert-elements-to-channels">3: Convert "elements" to Channels</h2>
+<p>The QUA configuration has a section labelled <code>"elements"</code>, which corresponds to a pulse processor that can send and/or receive signals.
+Each element has a direct mapping to one of the <a class="autorefs autorefs-internal" href="../API_references/components/channels/#quam.components.channels">quam.components.channels</a> in QUAM, though the channel type depends on the element.</p>
+<p>Here we show how to convert different types of elements to QUAM channels.
+We don't cover all possible properties; details for this can be found in the <a class="autorefs autorefs-internal" href="../components/#channels">Channels documentation</a> and the relevant API documentation for each channel type.
+We also postpone the discussion on the <code>"operations"</code> field for the next section on pulses.</p>
+<h3 id="single-analog-output-channel">Single Analog Output Channel</h3>
+<p>For straightforward configurations with only a single output port, use the <a class="autorefs autorefs-internal" href="../API_references/components/channels/#quam.components.channels.SingleChannel">SingleChannel</a> in QUAM. This example demonstrates the conversion of a single output setup in QUA to a SingleChannel in QUAM:</p>
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">qua_configuration["elements"]</span><pre><span></span><code><span class="nt">&quot;qubit_z&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;singleInput&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+  </div>
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">QUAM</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleChannel</span>
+
+<span class="n">machine</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;qubit_z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div>
+
+  </div>
+</div>
+
+<h3 id="iq-analog-output-channel">IQ Analog Output Channel</h3>
+<p>When dealing with IQ modulation, the IQChannel provides the necessary framework. Below are examples of converting an element with IQ outputs and a frequency upconverter:</p>
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">qua_configuration["elements"]</span><pre><span></span><code><span class="nt">&quot;qubit_xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100e6</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;mixInputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e9</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mixer_qubit&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">}</span>
+<span class="p">},</span>
+</code></pre></div>
+  </div>
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">QUAM</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQChannel</span><span class="p">,</span> <span class="n">FrequencyConverter</span><span class="p">,</span> <span class="n">LocalOscillator</span><span class="p">,</span> <span class="n">Mixer</span>
+
+<span class="n">channels</span><span class="p">[</span><span class="s2">&quot;qubit_XY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">frequency_converter_up</span><span class="o">=</span><span class="n">FrequencyConverter</span><span class="p">(</span>
+        <span class="n">local_oscillator</span><span class="o">=</span><span class="n">LocalOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="o">=</span><span class="mf">5e9</span><span class="p">),</span>
+        <span class="n">mixer</span><span class="o">=</span><span class="n">Mixer</span><span class="p">()</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+
+  </div>
+</div>
+
+<p>If an Octave is used for upconversion, the <a class="autorefs autorefs-internal" href="../API_references/components/channels/#quam.components.channels.IQChannel">IQChannel</a> should be connected to the <a class="autorefs autorefs-internal" href="../API_references/components/octave/#quam.components.octave.OctaveUpConverter">OctaveUpConverter</a>.</p>
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">qua_configuration["elements"]</span><pre><span></span><code><span class="nt">&quot;qubit_xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100e6</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;RF_inputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]},</span>
+<span class="w">    </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">}</span>
+<span class="p">},</span>
+</code></pre></div>
+  </div>
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">QUAM</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQChannel</span>
+
+<span class="c1"># Note the output/input is switched w.r.t. the QUA configuration</span>
+<span class="n">RF_output</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">octaves</span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">RF_outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">machine</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;qubit_xy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">frequency_converter_up</span><span class="o">=</span><span class="n">RF_output</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">RF_output</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>
+</code></pre></div>
+
+  </div>
+</div>
+
+<p>Detailed instructions can be found at the <a class="autorefs autorefs-internal" href="../components/#octave">Octave documentation</a>.</p>
+<h3 id="single-analog-output-input-channel">Single Analog Output + Input Channel</h3>
+<p>For elements that function as both input and output channels, use <a class="autorefs autorefs-internal" href="../API_references/components/channels/#quam.components.channels.InOutSingleChannel">InOutSingleChannel</a>. This setup allows for efficient bidirectional communication:</p>
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">qua_configuration["elements"]</span><pre><span></span><code><span class="nt">&quot;qubit_readout&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;singleInput&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;out1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+  </div>
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">QUAM</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">InOutSingleChannel</span>
+
+<span class="n">machine</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;qubit_readout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">InOutSingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_input</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div>
+
+  </div>
+</div>
+
+<h3 id="iq-analog-output-input-channel">IQ Analog Output + Input Channel</h3>
+<p>For complex setups involving both IQ modulation and bidirectional communication, the <a class="autorefs autorefs-internal" href="../API_references/components/channels/#quam.components.channels.InOutIQChannel">InOutIQChannel</a> is the appropriate choice:</p>
+<div class="code-flex-container">
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">qua_configuration["elements"]</span><pre><span></span><code><span class="nt">&quot;readout_resonator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100e6</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;RF_inputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]},</span>
+<span class="w">    </span><span class="nt">&quot;RF_outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]},</span>
+<span class="w">    </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">}</span>
+<span class="p">},</span>
+</code></pre></div>
+  </div>
+  <div class="code-flex-item">
+    <div class="highlight"><span class="filename">QUAM</span><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQChannel</span>
+
+<span class="c1"># Note the output/input is switched w.r.t. the QUA configuration</span>
+<span class="n">RF_output</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">octaves</span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">RF_outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">RF_input</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">octaves</span><span class="p">[</span><span class="s2">&quot;octave1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">RF_inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="n">machine</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;readout_resonator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">opx_input_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_input_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">frequency_converter_up</span><span class="o">=</span><span class="n">RF_output</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>
+    <span class="n">frequency_converter_down</span><span class="o">=</span><span class="n">RF_input</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">RF_output</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>
+</code></pre></div>
+
+  </div>
+</div>
+
+<h2 id="4-convert-pulses">4: Convert Pulses</h2>
+<p>After converting elements into channels, the next step is to configure the pulses. Pulses in QUA are defined across several fields within the configuration, each contributing to how the pulse is shaped and controlled. In QUAM, these properties are consolidated, allowing for a more streamlined and parameterized approach to pulse definition.</p>
+<h3 id="overview-of-qua-pulse-configuration">Overview of QUA Pulse Configuration</h3>
+<p>In the QUA configuration, pulses are defined through the following components:</p>
+<ul>
+<li><strong>"waveforms"</strong>: These are the actual waveform shapes labeled for reference within pulses.</li>
+<li><strong>"digital_waveforms"</strong>: Digital signals that can be paired with analog waveforms to control pulse execution.</li>
+<li><strong>"integration_weights"</strong>: Used for defining how signals are integrated during readout.</li>
+<li><strong>"pulses"</strong>: This is a collection of pulse definitions, specifying labels, duration, and type of operation (<code>"control"</code> or <code>"measurement"</code>). Pulses may reference waveforms, digital waveforms, and integration weights specified in the other fields.</li>
+<li><strong>element["operations"]</strong>: Maps operation names to specific pulses defined in the <code>"pulses"</code> collection, linking them to the relevant channel.</li>
+</ul>
+<h3 id="quam-pulse-configuration">QUAM Pulse Configuration</h3>
+<p>In QUAM, pulse properties are grouped and parameterized by pulse type, simplifying the configuration process. Here is how you would convert a typical pulse setup from QUA to QUAM:</p>
+<h4 id="example-converting-a-constant-voltage-pulse">Example: Converting a Constant Voltage Pulse</h4>
+<p>Consider a QUA pulse configured to deliver a constant voltage. In QUAM, this corresponds to the <a class="autorefs autorefs-internal" href="../API_references/components/pulses/#quam.components.pulses.SquarePulse">SquarePulse</a> component, which is designed for straightforward amplitude modulation.</p>
+<p><strong>QUA Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;elements&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;qubit_xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100e6</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;mixInputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5e9</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mixer_qubit&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;const_pulse&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;const_pulse&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;pulses&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;const_pulse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;control&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;const_wf&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zero_wf&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;const_wf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;zero_wf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>QUAM Conversion:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">pulses</span>
+
+<span class="c1"># Assuming qubit_xy is configured as an IQChannel</span>
+<span class="n">qubit_xy</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;const_pulse&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pulses</span><span class="o">.</span><span class="n">SquarePulse</span><span class="p">(</span>
+    <span class="n">length</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">axis_angle</span><span class="o">=</span><span class="mi">0</span>  <span class="c1"># Phase angle on the IQ plane</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>This example highlights the transformation of a basic pulse from QUA into a QUAM <code>SquarePulse</code>, demonstrating the streamlined approach QUAM offers for pulse configuration.</p>
+<p>For comprehensive details on configuring different types of pulses in QUAM, refer to the <a class="autorefs autorefs-internal" href="../components/#pulses">Pulses Documentation</a>.</p>
+<h2 id="5-generate-the-qua-configuration">5: Generate the QUA configuration</h2>
+<p>Once the QUA configuration has been converted to QUAM, QUAM can in turn be used to generate the QUA configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="n">qua_config</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">generate_config</span><span class="p">()</span>
+</code></pre></div>
+<p>This <code>qua_config</code> can then be used to create a <code>QuantumMachine</code> object, which can be used to run quantum programs on the OPX.</p>
+<h2 id="6-create-high-level-quam-components-optional">6: Create High-Level QUAM Components (Optional)</h2>
+<p>After converting the QUA configuration to the corresponding QUAM components, an optional next step is to group similar components into higher-level abstractions.
+As an example, in the code above we had multiple channels belonging to the same qubit (<code>qubit_xy</code>, <code>qubit_z</code>, <code>qubit_readout</code>).
+We can group these channels into a single <code>Qubit</code> object to simplify the management of the qubit's configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuamComponent</span><span class="p">,</span> <span class="n">quam_dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleChannel</span><span class="p">,</span> <span class="n">IQChannel</span><span class="p">,</span> <span class="n">InOutSingleChannel</span>
+
+<span class="nd">@quam_dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Qubit</span><span class="p">(</span><span class="n">QuamComponent</span><span class="p">):</span>
+    <span class="n">xy</span><span class="p">:</span> <span class="n">IQChannel</span>
+    <span class="n">z</span><span class="p">:</span> <span class="n">SingleChannel</span>
+    <span class="n">readout</span><span class="p">:</span> <span class="n">InOutSingleChannel</span>
+
+<span class="n">qubit</span> <span class="o">=</span> <span class="n">Qubit</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="n">qubit_xy</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">qubit_z</span><span class="p">,</span> <span class="n">readout</span><span class="o">=</span><span class="n">qubit_readout</span><span class="p">)</span>
+</code></pre></div>
+<p>This <code>Qubit</code> object can then be used to access the individual channels and their associated pulses, simplifying the management of the qubit's configuration.</p>
+<p>Note that the root-level QUAM object also needs to be customized to support the new <code>Qubit</code> object:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quam.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuamRoot</span>
+
+<span class="nd">@quam_dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Quam</span><span class="p">(</span><span class="n">QuamRoot</span><span class="p">):</span>
+    <span class="n">qubits</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Qubit</span><span class="p">]</span>
+
+<span class="n">machine</span> <span class="o">=</span> <span class="n">Quam</span><span class="p">(</span><span class="n">qubits</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;qubit1&quot;</span><span class="p">:</span> <span class="n">qubit</span><span class="p">})</span>
+</code></pre></div>
+<p>See <a href="/components/custom-components">Custom QUAM Components</a> for more information on creating custom QUAM components.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Following these steps will guide you through transitioning your existing QUA codebase to QUAM. The primary goal of this migration is to harness QUAM's abstraction capabilities to organize and manage the underlying quantum-computing elements. QUAM provides a structured way to encapsulate the complexity of your configurations, which can facilitate maintenance and scalability. By understanding the mapping of QUA elements to QUAM components, you can effectively utilize this abstraction layer to enhance the organization of your quantum programs.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Q.M Technologies Ltd.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "toc.integrate", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotations", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

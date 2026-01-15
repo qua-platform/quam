@@ -1,0 +1,1950 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="QM. Technologies Ltd.">
+      
+      
+      
+        <link rel="prev" href="../quam-root/">
+      
+      
+        <link rel="next" href="../channel-ports/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/qm_logo_white.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Channels - The Quantum Abstract Machine - QUAM Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#channels" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="The Quantum Abstract Machine - QUAM Documentation" class="md-header__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Quantum Abstract Machine - QUAM Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Channels
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to high contrast mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to high contrast mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-high-contrast" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18V6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="The Quantum Abstract Machine - QUAM Documentation" class="md-nav__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    The Quantum Abstract Machine - QUAM Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demonstration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Demonstration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quam-root/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Root
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channels
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#analog-output-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analog Output Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analog Output Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analog-channel-ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analog Channel Ports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analog Channel Ports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-explicit-ports-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Explicit Ports (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dc-offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DC Offset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequency-converters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frequency Converters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analog-pulses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analog Pulses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analog-output-input-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analog Output + Input Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analog Output + Input Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#readout-pulses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readout Pulses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#digital-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Digital Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#digital-only-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital-only Channel
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#digital-pulses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital Pulses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Digital Pulses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#digital-only-pulses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital-only Pulses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sticky-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sticky channels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#time-tagging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Time Tagging
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-from-channel-level-port-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrating from Channel-Level Port Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating from Channel-Level Port Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-migrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Migrate?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dc-offsets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DC Offsets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filter Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#digital-channel-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital Channel Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iq-channels-with-offsets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IQ Channels with Offsets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-port-containers-best-practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Port Containers (Best Practice)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../channel-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel Ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pulses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pulses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../octave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Octave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../qubits-and-qubit-pairs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qubits and Qubit Pairs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serialization and State Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/gate-level-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gate-Level Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/quam-references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referencing Between Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migrating-to-quam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API References
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/channels_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Channels API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/pulses_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Pulses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/ports_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Ports API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/hardware_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Hardware API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/octave_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Octave API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/quantum_components_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Quantum Components API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/macro_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Macro API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/components/basic_quam_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BasicQUAM API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_references/core/quam_classes_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Core Classes API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="channels">Channels</h1>
+<p>In the QUAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels">quam.components.channels</a> module.</p>
+<p>We distinguish between the following channel types, where the terms "output" and "input" are always from the perspective of the OPX hardware:</p>
+<p><strong>1. Analog output channels</strong></p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.SingleChannel">SingleChannel</a>: Represents a single OPX output channel.</li>
+<li><a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.IQChannel">IQChannel</a>: Represents an IQ OPX output channel.</li>
+</ul>
+<p><strong>2. Analog output + input channels</strong></p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InOutSingleChannel">InOutSingleChannel</a>: Represents a single OPX output + input channel.</li>
+<li><a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InOutIQChannel">InOutIQChannel</a>: Represents an IQ OPX output + input channel.</li>
+</ul>
+<p><strong>3. Digital channels</strong></p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.DigitalOutputChannel">DigitalOutputChannel</a>: Represents a digital output channel.</li>
+</ul>
+<p>Each analog <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.Channel">Channel</a> corresponds to an element in QUA, whereas the digital channel is part of an analog channel.</p>
+<p>These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QUAM release. If you need such channels, please create a <a href="https://github.com/qua-platform/quam/issues">Github issue</a>.</p>
+<h2 id="analog-output-channels">Analog Output Channels</h2>
+<p>Analog output channels are the primary means of controlling the quantum hardware. They can be used to send various types of signals, such as microwave or RF signals, to control the quantum system. The two types of analog output channels are the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.SingleChannel">SingleChannel</a> and the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.IQChannel">IQChannel</a>.</p>
+<h3 id="analog-channel-ports">Analog Channel Ports</h3>
+<p>A <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.SingleChannel">SingleChannel</a> is always attached to a single OPX output port, and similarly an <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.IQChannel">IQChannel</a> has an associated pair of IQ ports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleChannel</span><span class="p">,</span> <span class="n">IQChannel</span>
+
+<span class="n">single_channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+<span class="n">IQ_channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+</code></pre></div>
+<details>
+<summary>Port Properties in Channels (Deprecated)</summary>
+<p>type: warning
+Some properties such as <code>opx_output_offset</code>, <code>opx_input_offset</code>, <code>filter_fir_taps</code>, <code>filter_iir_taps</code>, <code>shareable</code>, and <code>inverted</code> are currently available as channel attributes for backwards compatibility. However, these properties belong to ports and should be configured through explicit <a class="autorefs autorefs-internal" title="BasePort" href="../../API_references/components/ports_API/#quam.components.ports.BasePort">Port</a> objects.</p>
+<p><strong>These properties are deprecated and will be removed in a future version.</strong> Runtime deprecation warnings are now emitted when these properties are used, providing migration guidance. See the <a href="#migrating-from-channel-level-port-properties">Migration Guide</a> below for details on how to update your code.</p>
+</details>
+<p>For more advanced port management, including port containers, port references, and hardware-specific configurations (LF-FEM, MW-FEM, OPX+), see the <a href="../channel-ports/">Channel Ports</a> documentation.</p>
+<h4 id="using-explicit-ports-recommended">Using Explicit Ports (Recommended)</h4>
+<p>For advanced control over port properties, define ports explicitly and reference them from channels:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicQuam</span><span class="p">,</span> <span class="n">SingleChannel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMPortsContainer</span>
+
+<span class="c1"># Create QUAM instance with port container</span>
+<span class="n">machine</span> <span class="o">=</span> <span class="n">BasicQuam</span><span class="p">(</span><span class="n">ports</span><span class="o">=</span><span class="n">FEMPortsContainer</span><span class="p">())</span>
+
+<span class="c1"># Define port with its properties</span>
+<span class="n">port</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">get_analog_output</span><span class="p">(</span>
+    <span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># controller, fem_id, port_id</span>
+    <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>  <span class="c1"># DC offset configured on port</span>
+    <span class="n">shareable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Port sharing configured on port</span>
+    <span class="n">sampling_rate</span><span class="o">=</span><span class="mf">2e9</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Create channel that references the port</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;drive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="n">port</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>  <span class="c1"># Reference to configured port</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>This approach ensures centralized port configuration and enables port sharing across channels. See <a href="../channel-ports/">Channel Ports</a> for complete documentation.</p>
+<h3 id="dc-offset">DC Offset</h3>
+<p>Each analog channel can have a specified DC offset that remains for the duration of the QUA program.</p>
+<p><strong>Recommended Approach</strong> - Configure DC offset on the port:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPXPlusAnalogOutputPort</span>
+
+<span class="c1"># For single channels</span>
+<span class="n">port</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+
+<span class="c1"># For IQ channels with different I/Q offsets</span>
+<span class="n">port_I</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.10</span><span class="p">)</span>
+<span class="n">port_Q</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.12</span><span class="p">)</span>
+<span class="n">IQ_channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span><span class="n">opx_output_I</span><span class="o">=</span><span class="n">port_I</span><span class="p">,</span> <span class="n">opx_output_Q</span><span class="o">=</span><span class="n">port_Q</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Deprecated Approach</strong> - Setting offset on channel (emits deprecation warning):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Still works but will be removed in a future version</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">opx_output_offset</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">IQ_channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="n">opx_output_offset_I</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span>
+    <span class="n">opx_output_offset_Q</span><span class="o">=</span><span class="mf">0.12</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Note that if multiple channels are attached to the same OPX output port(s), they may not have different output offsets.
+This raises a warning and chooses the DC offset of the last channel.</p>
+<p>The DC offset can also be modified while a QUA program is running:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">qm.qua</span><span class="w"> </span><span class="kn">import</span> <span class="n">program</span>
+
+<span class="k">with</span> <span class="n">program</span><span class="p">()</span> <span class="k">as</span> <span class="n">prog</span><span class="p">:</span>
+    <span class="n">single_channel</span><span class="o">.</span><span class="n">set_dc_offset</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">IQ_channel</span><span class="o">.</span><span class="n">set_dc_offset</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">element_input</span><span class="o">=</span><span class="s2">&quot;I&quot;</span><span class="p">)</span>  <span class="c1"># Set offset of port I</span>
+</code></pre></div>
+<p>The offsets can also be QUA variables.
+<a class="autorefs autorefs-internal" title="set_dc_offset(offset)" href="../../API_references/components/channels/#quam.components.channels.SingleChannel.set_dc_offset">Channel.set_dc_offset()</a> is a light wrapper around <code>qm.qua.set_dc_offset</code> to attach it to the channel.</p>
+<h3 id="frequency-converters">Frequency Converters</h3>
+<p>The <code>IQChannel</code> is usually connected to a mixer to upconvert the signal using a local oscillator.
+This frequency upconversion is represented in QUAM by a <a class="autorefs autorefs-internal" href="../../API_references/components/hardware/#quam.components.hardware.FrequencyConverter">FrequencyConverter</a></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.hardware</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrequencyConverter</span><span class="p">,</span> <span class="n">LocalOscillator</span><span class="p">,</span> <span class="n">Mixer</span>
+
+<span class="n">IQ_channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="n">intermediate_frequency</span><span class="o">=</span><span class="mf">100e6</span><span class="p">,</span>  <span class="c1"># Hz</span>
+    <span class="n">frequency_converter</span><span class="o">=</span><span class="n">FrequencyConverter</span><span class="p">(</span>
+        <span class="n">local_oscillator</span><span class="o">=</span><span class="n">LocalOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="o">=</span><span class="mf">6e9</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+        <span class="n">mixer</span><span class="o">=</span><span class="n">Mixer</span><span class="p">(),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Integrated frequency conversion systems such as <a href="https://docs.quantum-machines.co/1.1.7/qm-qua-sdk/docs/Hardware/octave/">QM's Octave</a> usually have additional features such as auto-calibration.
+For this reason they have a specialized frequency converter such as the <a class="autorefs autorefs-internal" href="../../API_references/components/octave/#quam.components.octave.OctaveUpConverter">OctaveUpConverter</a>.
+See the <a class="autorefs autorefs-internal" href="../#octave">QUAM Octave Documentation</a> documentation for details.</p>
+<h3 id="analog-pulses">Analog Pulses</h3>
+<p>QUAM has a range of standard <a class="autorefs autorefs-internal" href="../../API_references/components/pulses/#quam.components.pulses.Pulse">Pulse</a> components in <a class="autorefs autorefs-internal" href="../../API_references/components/pulses/#quam.components.pulses">quam.components.pulses</a>.
+These pulses can be registered as part of the analog channel via <code>Channel.operations</code> such that the channel can output the associated pulse waveforms:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">pulses</span>
+
+<span class="n">channel</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;X180&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pulses</span><span class="o">.</span><span class="n">SquarePulse</span><span class="p">(</span>
+    <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># V</span>
+    <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>  <span class="c1"># ns</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Once a pulse has been registered in a channel, it can be played within a QUA program:</p>
+<div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">program</span><span class="p">()</span> <span class="k">as</span> <span class="n">prog</span><span class="p">:</span>
+    <span class="n">channel</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="s2">&quot;X180&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><a class="autorefs autorefs-internal" title="play(pulse_name, amplitude_scale=None, duration=None, condition=None, chirp=None, truncate=None, timestamp_stream=None, continue_chirp=False, target='', validate=True)" href="../../API_references/components/channels/#quam.components.channels.Channel.play">Channel.play()</a> is a light wrapper around <a href="https://docs.quantum-machines.co/latest/qm-qua-sdk/docs/Introduction/qua_overview/?h=play#play-statement">qm.qua.play()</a> to attach it to the channel.</p>
+<p>Details on pulses in QUAM can be found at the <a class="autorefs autorefs-internal" href="../#pulses">Pulses Documentation</a>.</p>
+<h2 id="analog-output-input-channels">Analog Output + Input Channels</h2>
+<p>Aside from sending signals to the quantum hardware, data is usually also received back, and subsequently read out through the hardware's input ports.
+In QUAM, this is represented using the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InOutSingleChannel">InOutSingleChannel</a> and the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InOutIQChannel">InOutIQChannel</a>.
+These channels don't only have associated output port(s) but also input port(s):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">InOutSingleChannel</span><span class="p">,</span> <span class="n">InOutIQChannel</span>
+
+<span class="n">single_io_channel</span> <span class="o">=</span> <span class="n">InOutSingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_input</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+<span class="n">IQ_io_channel</span> <span class="o">=</span> <span class="n">InOutIQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="n">opx_input_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_input_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>These are extensions of the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.SingleChannel">SingleChannel</a> and the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.IQChannel">IQChannel</a> that add relevant features for readout.</p>
+<p>Both the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InOutSingleChannel">InOutSingleChannel</a> and the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InOutIQChannel">InOutIQChannel</a> combine output + input as in most cases a signal is also sent to probe the quantum hardware.
+Support for input-only analog channels is planned for a future release.</p>
+<h3 id="readout-pulses">Readout Pulses</h3>
+<p>Channels that have input ports can also have readout pulses:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">pulses</span>
+<span class="n">io_channel</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;readout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pulses</span><span class="o">.</span><span class="n">SquareReadoutPulse</span><span class="p">(</span>
+    <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>  <span class="c1"># ns</span>
+    <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># V</span>
+    <span class="n">integration_weights_angle</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>  <span class="c1"># rad, optional rotation of readout signal</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>As can be seen, the readout pulse (in this case <a class="autorefs autorefs-internal" href="../../API_references/components/pulses/#quam.components.pulses.SquareReadoutPulse">SquareReadoutPulse</a>) is similar to the regular pulses, but with additional parameters for readout.
+Specifically, it contains the attributes <code>integration_weights_angle</code> and <code>integration_weights</code> to specify how the readout signal should be integrated.</p>
+<h2 id="digital-channels">Digital Channels</h2>
+<p>QUAM supports digital output channels (output from the OPX perspective) through the component <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.DigitalOutputChannel">DigitalOutputChannel</a>.
+These can be added to any analog channel through the attribute <code>Channel.digital_outputs</code>. As an example:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleChannel</span><span class="p">,</span> <span class="n">DigitalOutputChannel</span>
+
+<span class="n">analog_channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">digital_outputs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;dig_out1&quot;</span><span class="p">:</span> <span class="n">DigitalOutputChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>The docstring of <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.DigitalOutputChannel">DigitalOutputChannel</a> describes all the available properties.</p>
+<p>Multiple digital outputs can be attached to the same analog channel:</p>
+<div class="highlight"><pre><span></span><code><span class="n">analog_channel</span><span class="o">.</span><span class="n">digital_outputs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;dig_out1&quot;</span><span class="p">:</span> <span class="n">DigitalOutputChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="s2">&quot;dig_out2&quot;</span><span class="p">:</span> <span class="n">DigitalOutputChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In this case, any digital pulses will be played to all digital channels.</p>
+<h3 id="digital-only-channel">Digital-only Channel</h3>
+<p>It is also possible to create a digital-only channel, i.e. using digital ports without any analog ports.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">Channel</span><span class="p">,</span> <span class="n">DigitalOutputChannel</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">Channel</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
+    <span class="n">digital_outputs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="n">DigitalOutputChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))},</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="digital-pulses">Digital Pulses</h2>
+<p>Once a <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.DigitalOutputChannel">DigitalOutputChannel</a> is added to a <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.Channel">Channel</a>, digital waveforms can be played on it. This is done by attaching a digital waveform to a <a class="autorefs autorefs-internal" href="../../API_references/components/pulses/#quam.components.pulses.Pulse">Pulse</a> through the attribute <code>Pulse.digital_marker</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">pulses</span>
+
+<span class="n">pulse</span> <span class="o">=</span> <span class="n">pulses</span><span class="o">.</span><span class="n">SquarePulse</span><span class="p">(</span>
+    <span class="n">length</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">digital_marker</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">40</span><span class="p">)]</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>In the example above, the square pulse will also output digital waveform: "high" for 20 ns ⇨ "low" for 20 ns ⇨ "high" for 40 ns. This digital waveform will be played on all digital channels that are attached to the analog channel.</p>
+<h3 id="digital-only-pulses">Digital-only Pulses</h3>
+<p>A digital pulse can also be played without a corresponding analog pulse.
+This can be done by directly using the base <a class="autorefs autorefs-internal" title="Pulse" href="../../API_references/components/pulses/#quam.components.pulses.Pulse">pulses.Pulse</a> class:</p>
+<div class="highlight"><pre><span></span><code><span class="n">channel</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;digital&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pulses</span><span class="o">.</span><span class="n">Pulse</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">digital_marker</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)])</span>
+</code></pre></div>
+<h2 id="sticky-channels">Sticky channels</h2>
+<p>A channel can be set to be sticky, meaning that the voltage after a pulse will remain at the last value of the pulse.
+Details can be found in the <a href="https://docs.quantum-machines.co/latest/docs/Guides/features/#sticky-element">Sticky channel QUA documentation</a>.
+Any channel can be made sticky by adding the <a class="autorefs autorefs-internal" title="StickyChannelAddon" href="../../API_references/components/channels/#quam.components.channels.StickyChannelAddon">channels.StickyChannelAddon</a> to it:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.channels</span><span class="w"> </span><span class="kn">import</span> <span class="n">StickyChannelAddon</span>
+
+<span class="n">channel</span><span class="o">.</span><span class="n">sticky</span> <span class="o">=</span> <span class="n">StickyChannelAddon</span><span class="p">(</span><span class="n">duration</span><span class="o">=...</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="time-tagging">Time Tagging</h2>
+<p>Time tagging is a feature that allows for the measurement of the time of arrival of a signal.
+It is implemented as the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.TimeTaggingAddon">TimeTaggingAddon</a> to the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InSingleChannel">InSingleChannel</a>.</p>
+<p>To use the time tagging feature, the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.TimeTaggingAddon">TimeTaggingAddon</a> must be added to the <a class="autorefs autorefs-internal" href="../../API_references/components/channels/#quam.components.channels.InSingleChannel">InSingleChannel</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.channels</span><span class="w"> </span><span class="kn">import</span> <span class="n">InSingleChannel</span><span class="p">,</span> <span class="n">TimeTaggingAddon</span>
+
+<span class="n">channel</span> <span class="o">=</span> <span class="n">InSingleChannel</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
+    <span class="n">opx_input</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">time_tagging</span><span class="o">=</span><span class="n">TimeTaggingAddon</span><span class="p">(</span>
+        <span class="n">signal_threshold</span><span class="o">=</span><span class="mf">0.195</span><span class="p">,</span>  <span class="c1"># in units of V</span>
+        <span class="n">signal_polarity</span><span class="o">=</span><span class="s2">&quot;below&quot;</span><span class="p">,</span>
+        <span class="n">derivative_threshold</span><span class="o">=</span><span class="mf">0.073</span><span class="p">,</span>  <span class="c1"># in units of V/ns</span>
+        <span class="n">derivative_polarity</span><span class="o">=</span><span class="s2">&quot;below&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>All parameters are optional, and are by default set to the values shown above.</p>
+<p>Once the time tagging addon is added, the <a class="autorefs autorefs-internal" title="measure_time_tagging(pulse_name, size, max_time, qua_vars=None, stream=None, mode='analog')" href="../../API_references/components/channels/#quam.components.channels.InSingleChannel.measure_time_tagging">InSingleChannel.measure_time_tagging()</a> method can be used within a QUA program to measure the time of arrival of the signal:</p>
+<div class="highlight"><pre><span></span><code><span class="n">times</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">measure_time_tagging</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">max_duration</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>The <code>size</code> parameter specifies the maximum number of samples to collect.</li>
+<li>The <code>max_duration</code> parameter specifies the maximum duration to collect samples for.</li>
+</ul>
+<p>Two QUA variables are returned:</p>
+<ul>
+<li><code>times</code> is a QUA array containing the times of arrival of the signal.
+  It will contain at most <code>size</code> entries, though it may contain fewer if the maximum duration is reached first.</li>
+<li><code>counts</code> is a QUA integer containing the number of measured events, being at most equal to <code>size</code>.</li>
+</ul>
+<p>Additional information on time tagging can be found in the <a href="https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging">Time Tagging QUA documentation</a>.</p>
+<h2 id="migrating-from-channel-level-port-properties">Migrating from Channel-Level Port Properties</h2>
+<p>As of QUAM v0.5.0, port-related properties on channels are deprecated. This section provides guidance on migrating your code to use explicit Port objects instead.</p>
+<h3 id="why-migrate">Why Migrate?</h3>
+<p>Port properties such as <code>opx_output_offset</code>, <code>filter_fir_taps</code>, <code>shareable</code>, and <code>inverted</code> logically belong to ports, not channels. Using explicit Port objects:</p>
+<ul>
+<li><strong>Clarifies ownership</strong>: Properties are configured where they belong</li>
+<li><strong>Enables port sharing</strong>: Multiple channels can reference the same configured port</li>
+<li><strong>Centralizes configuration</strong>: Port containers provide unified port management</li>
+<li><strong>Prepares for future</strong>: Channel-level properties will be removed in a future version</li>
+</ul>
+<h3 id="migration-examples">Migration Examples</h3>
+<h4 id="dc-offsets">DC Offsets</h4>
+<p><strong>Before (Deprecated):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">opx_output_offset</span><span class="o">=</span><span class="mf">0.15</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>After (Recommended):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPXPlusAnalogOutputPort</span>
+
+<span class="n">port</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="filter-configuration">Filter Configuration</h4>
+<p><strong>Before (Deprecated):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">filter_fir_taps</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="n">filter_iir_taps</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>After (Recommended):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPXPlusAnalogOutputPort</span>
+
+<span class="n">port</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span>
+    <span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">feedforward_filter</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="n">feedback_filter</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="digital-channel-properties">Digital Channel Properties</h4>
+<p><strong>Before (Deprecated):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">digital_channel</span> <span class="o">=</span> <span class="n">DigitalOutputChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">shareable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>After (Recommended):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPXPlusDigitalOutputPort</span>
+
+<span class="n">port</span> <span class="o">=</span> <span class="n">OPXPlusDigitalOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shareable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">digital_channel</span> <span class="o">=</span> <span class="n">DigitalOutputChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="iq-channels-with-offsets">IQ Channels with Offsets</h4>
+<p><strong>Before (Deprecated):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">IQ_channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+    <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="n">opx_output_offset_I</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span>
+    <span class="n">opx_output_offset_Q</span><span class="o">=</span><span class="mf">0.12</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>After (Recommended):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPXPlusAnalogOutputPort</span>
+
+<span class="n">port_I</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.10</span><span class="p">)</span>
+<span class="n">port_Q</span> <span class="o">=</span> <span class="n">OPXPlusAnalogOutputPort</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.12</span><span class="p">)</span>
+<span class="n">IQ_channel</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span><span class="n">opx_output_I</span><span class="o">=</span><span class="n">port_I</span><span class="p">,</span> <span class="n">opx_output_Q</span><span class="o">=</span><span class="n">port_Q</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="using-port-containers-best-practice">Using Port Containers (Best Practice)</h3>
+<p>For complex systems with many ports, use a port container for centralized management:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicQuam</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">FEMPortsContainer</span>
+
+<span class="c1"># Set up port container</span>
+<span class="n">machine</span> <span class="o">=</span> <span class="n">BasicQuam</span><span class="p">(</span><span class="n">ports</span><span class="o">=</span><span class="n">FEMPortsContainer</span><span class="p">())</span>
+
+<span class="c1"># Create ports with properties</span>
+<span class="n">output_port</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">ports</span><span class="o">.</span><span class="n">get_analog_output</span><span class="p">(</span>
+    <span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># controller, fem_id, port_id</span>
+    <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+    <span class="n">shareable</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Reference port in channel</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;drive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span>
+    <span class="n">opx_output</span><span class="o">=</span><span class="n">output_port</span><span class="o">.</span><span class="n">get_reference</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>See the <a href="../channel-ports/">Channel Ports documentation</a> for more details on port containers and advanced port management.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Q.M Technologies Ltd.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.top", "toc.integrate", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotations", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2031 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="QM. Technologies Ltd.">
+      
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../components/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/qm_logo_white.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>QUAM Demonstration - The Quantum Abstract Machine - QUAM Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quam-demonstration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="The Quantum Abstract Machine - QUAM Documentation" class="md-header__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Quantum Abstract Machine - QUAM Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              QUAM Demonstration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to high contrast mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to high contrast mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-high-contrast" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18V6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="The Quantum Abstract Machine - QUAM Documentation" class="md-nav__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    The Quantum Abstract Machine - QUAM Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Demonstration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Demonstration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting Up
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initialization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#populating-the-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Populating the Machine
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-pulse-to-a-qubit-and-its-resonator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a Pulse to a Qubit and its Resonator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding a Pulse to a Qubit and its Resonator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#defining-and-attaching-the-pulses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defining and Attaching the Pulses
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Defining and Attaching the Pulses">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gaussian-pulse-for-qubit-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gaussian Pulse for Qubit Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readout-pulse-for-qubit-resonator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readout Pulse for Qubit Resonator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoking-the-pulses-in-a-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invoking the Pulses in a Function
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview-of-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview of Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saving-the-quam-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Saving the QUAM Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-the-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading the Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generating-a-qua-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating a QUA Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/quam-root/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Root
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/channels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/channel-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel Ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/pulses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pulses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/octave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Octave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/qubits-and-qubit-pairs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qubits and Qubit Pairs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components/custom-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serialization and State Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/gate-level-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gate-Level Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/quam-references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referencing Between Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migrating-to-quam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API References
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/channels_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Channels API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/pulses_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Pulses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/ports_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Ports API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/hardware_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Hardware API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/octave_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Octave API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/quantum_components_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Quantum Components API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/macro_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Macro API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/components/basic_quam_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BasicQUAM API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API_references/core/quam_classes_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Core Classes API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="quam-demonstration">QUAM Demonstration</h1>
+<h2 id="introduction">Introduction</h2>
+<p>Welcome to our QUAM tutorial! This guide will demonstrate setting up a basic superconducting quantum circuit with two transmon qubits and their resonators. We'll equip these qubits with control and readout pulses and generate a QUA configuration for interacting with quantum hardware.</p>
+<p>QUAM is not limited to any specific quantum hardware platform. It is designed to be adaptable and extensible for various quantum systems. You can customize components or expand the framework to add new functionalities as needed. For details on customization, visit <a href="/components/custom-components">Custom QUAM Components</a>.</p>
+<p>We will first demonstrate how to create a basic QUAM setup from scratch. This is typically done once at the beginning of a project. Then, we'll show how to modify the setup, save the changes, and generate a QUA configuration for running quantum programs.</p>
+<p>By the end of this tutorial, you'll know how to use QUAM effectively for setting up, controlling, and measuring quantum systems.</p>
+<h2 id="setting-up">Setting Up</h2>
+<p>Start by importing the necessary components for a superconducting quantum circuit from QUAM's library:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">quam.examples.superconducting_qubits</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transmon</span><span class="p">,</span> <span class="n">Quam</span>
+</code></pre></div>
+<p>As can be seen, we use transmon-specific components from <code>quam.examples.superconducting_qubits</code> to set up the quantum circuit.
+Users are recommended to create their own custom components for specialized needs.</p>
+<h2 id="initialization">Initialization</h2>
+<p>QUAM requires an initial setup where all components are instantiated. Create the root QUAM object, which acts as the top-level container for your quantum setup (see <a href="/components/quam-root">QUAM Root Documentation</a> for details):</p>
+<div class="highlight"><pre><span></span><code><span class="n">machine</span> <span class="o">=</span> <span class="n">Quam</span><span class="p">()</span> <span class="c1"># (1)</span>
+</code></pre></div>
+<ol>
+<li>The <code>Quam</code> instance is called <code>machine</code> instead of <code>quam</code> to avoid conflicts with the statement <code>import quam</code></li>
+</ol>
+<p>Initially, <code>machine</code> is an empty container. You'll populate it with quantum circuit components, specifically Transmon qubits and associated resonators.</p>
+<h2 id="populating-the-machine">Populating the Machine</h2>
+<p>Define the number of qubits and initialize them, along with their channels and resonators:</p>
+<div class="highlight"><pre><span></span><code><span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">):</span>
+    <span class="c1"># Create transmon qubit component</span>
+    <span class="n">transmon</span> <span class="o">=</span> <span class="n">Transmon</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+    <span class="n">machine</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="n">transmon</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">transmon</span>
+
+    <span class="c1"># Add xy drive line channel</span>
+    <span class="n">transmon</span><span class="o">.</span><span class="n">xy</span> <span class="o">=</span> <span class="n">IQChannel</span><span class="p">(</span>
+        <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="n">frequency_converter_up</span><span class="o">=</span><span class="n">FrequencyConverter</span><span class="p">(</span>
+            <span class="n">mixer</span><span class="o">=</span><span class="n">Mixer</span><span class="p">(),</span>
+            <span class="n">local_oscillator</span><span class="o">=</span><span class="n">LocalOscillator</span><span class="p">(</span><span class="n">power</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">6e9</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">intermediate_frequency</span><span class="o">=</span><span class="mf">100e6</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add transmon flux line channel</span>
+    <span class="n">transmon</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">SingleChannel</span><span class="p">(</span><span class="n">opx_output</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">5</span><span class="p">))</span>
+
+    <span class="c1"># Add resonator channel</span>
+    <span class="n">transmon</span><span class="o">.</span><span class="n">resonator</span> <span class="o">=</span> <span class="n">InOutIQChannel</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+        <span class="n">opx_output_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">opx_output_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">opx_input_I</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">opx_input_Q</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,),</span>
+        <span class="n">frequency_converter_up</span><span class="o">=</span><span class="n">FrequencyConverter</span><span class="p">(</span>
+            <span class="n">mixer</span><span class="o">=</span><span class="n">Mixer</span><span class="p">(),</span> <span class="n">local_oscillator</span><span class="o">=</span><span class="n">LocalOscillator</span><span class="p">(</span><span class="n">power</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">6e9</span><span class="p">)</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+</code></pre></div>
+<details>
+<summary>Autocomplete with IDEs</summary>
+<p>type: tip
+Code editors with Python language support (e.g., VS Code, PyCharm) are very useful here because they explain what attributes each class has, what the type should be, and docstrings. This makes it a breeze to create a QUAM from scratch.</p>
+</details>
+<p>This setup reflects QUAM's flexibility and the hierarchical structure of its component system where each component can be a parent or a child.</p>
+<h2 id="adding-a-pulse-to-a-qubit-and-its-resonator">Adding a Pulse to a Qubit and its Resonator</h2>
+<p>After configuring the qubits and resonators, you can further customize your setup by adding operational pulses. This example will show how to add a Gaussian pulse to the <code>xy</code> channel of a qubit and a <code>ReadoutPulse</code> to its resonator.</p>
+<h3 id="defining-and-attaching-the-pulses">Defining and Attaching the Pulses</h3>
+<h4 id="gaussian-pulse-for-qubit-control">Gaussian Pulse for Qubit Control</h4>
+<p>Define a basic Gaussian pulse for qubit manipulation and attach it to the <code>xy</code> channel of the first qubit:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.pulses</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianPulse</span>
+
+<span class="c1"># Create a Gaussian pulse</span>
+<span class="n">gaussian_pulse</span> <span class="o">=</span> <span class="n">GaussianPulse</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Attach the pulse to the XY channel of the first qubit</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="s2">&quot;q0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;X90&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gaussian_pulse</span>
+</code></pre></div>
+<h4 id="readout-pulse-for-qubit-resonator">Readout Pulse for Qubit Resonator</h4>
+<p>Similarly, define a <code>SquareReadoutPulse</code> (constant in readout amplitude) for the resonator associated with the same qubit to enable quantum state measurement:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">quam.components.pulses</span><span class="w"> </span><span class="kn">import</span> <span class="n">SquareReadoutPulse</span>
+
+<span class="c1"># Create a Readout pulse</span>
+<span class="n">readout_pulse</span> <span class="o">=</span> <span class="n">SquareReadoutPulse</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># Attach the pulse to the resonator of the first qubit</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="s2">&quot;q0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">resonator</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;readout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">readout_pulse</span>
+</code></pre></div>
+<h3 id="invoking-the-pulses-in-a-function">Invoking the Pulses in a Function</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">qm.qua</span><span class="w"> </span><span class="kn">import</span> <span class="n">program</span>
+
+<span class="k">with</span> <span class="n">program</span><span class="p">()</span> <span class="k">as</span> <span class="n">prog</span><span class="p">:</span>
+    <span class="n">qubit</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="s2">&quot;q0&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Apply the Gaussian pulse to the qubit</span>
+    <span class="n">qubit</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="s2">&quot;X90&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Perform readout on the qubit</span>
+    <span class="n">I</span><span class="p">,</span> <span class="n">Q</span> <span class="o">=</span> <span class="n">qubit</span><span class="o">.</span><span class="n">resonator</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="s2">&quot;readout&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="overview-of-configuration">Overview of Configuration</h2>
+<p>Display the current configuration of your QUAM setup:</p>
+<div class="highlight"><pre><span></span><code><span class="n">machine</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+</code></pre></div>
+<details>
+<summary><code>machine.print_summary()</code> output</summary>
+<div class="highlight"><pre><span></span><code><span class="err">QUAM</span><span class="p">:</span>
+<span class="w">  </span><span class="err">qubi</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span>
+<span class="w">    </span><span class="err">q</span><span class="mi">0</span><span class="p">:</span><span class="w"> </span><span class="err">Tra</span><span class="kc">ns</span><span class="err">mo</span><span class="kc">n</span>
+<span class="w">      </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">      </span><span class="err">xy</span><span class="p">:</span><span class="w"> </span><span class="err">IQCha</span><span class="kc">nnel</span>
+<span class="w">        </span><span class="err">opera</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span>
+<span class="w">          </span><span class="err">X</span><span class="mi">90</span><span class="p">:</span><span class="w"> </span><span class="err">Gaussia</span><span class="kc">n</span><span class="err">Pulse</span>
+<span class="w">            </span><span class="err">le</span><span class="kc">n</span><span class="err">g</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span>
+<span class="w">            </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_marker</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">ampli</span><span class="kc">tu</span><span class="err">de</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span>
+<span class="w">            </span><span class="err">sigma</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">            </span><span class="err">axis_a</span><span class="kc">n</span><span class="err">gle</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">sub</span><span class="kc">tra</span><span class="err">c</span><span class="kc">te</span><span class="err">d</span><span class="p">:</span><span class="w"> </span><span class="err">True</span>
+<span class="w">        </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy_co</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span><span class="err">_up</span><span class="p">:</span><span class="w"> </span><span class="err">Freque</span><span class="kc">n</span><span class="err">cyCo</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span>
+<span class="w">          </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="err">LocalOscilla</span><span class="kc">t</span><span class="err">or</span>
+<span class="w">            </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span>
+<span class="w">            </span><span class="err">power</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">          </span><span class="err">mixer</span><span class="p">:</span><span class="w"> </span><span class="err">Mixer</span>
+<span class="w">            </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../local_oscillator/frequency&quot;</span>
+<span class="w">            </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../../intermediate_frequency&quot;</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_phase</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="err">gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span>
+<span class="w">      </span><span class="err">z</span><span class="p">:</span><span class="w"> </span><span class="err">Si</span><span class="kc">n</span><span class="err">gleCha</span><span class="kc">nnel</span>
+<span class="w">        </span><span class="err">opera</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="err">)</span>
+<span class="w">        </span><span class="kc">f</span><span class="err">il</span><span class="kc">ter</span><span class="err">_</span><span class="kc">f</span><span class="err">ir_</span><span class="kc">ta</span><span class="err">ps</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">f</span><span class="err">il</span><span class="kc">ter</span><span class="err">_iir_</span><span class="kc">ta</span><span class="err">ps</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">      </span><span class="err">reso</span><span class="kc">nat</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="err">I</span><span class="kc">n</span><span class="err">Ou</span><span class="kc">t</span><span class="err">IQCha</span><span class="kc">nnel</span>
+<span class="w">        </span><span class="err">opera</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span>
+<span class="w">          </span><span class="err">readou</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="err">SquareReadou</span><span class="kc">t</span><span class="err">Pulse</span>
+<span class="w">            </span><span class="err">le</span><span class="kc">n</span><span class="err">g</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span>
+<span class="w">            </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_marker</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ON&quot;</span>
+<span class="w">            </span><span class="err">ampli</span><span class="kc">tu</span><span class="err">de</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span>
+<span class="w">            </span><span class="err">axis_a</span><span class="kc">n</span><span class="err">gle</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="kc">t</span><span class="err">hreshold</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">rus_exi</span><span class="kc">t</span><span class="err">_</span><span class="kc">t</span><span class="err">hreshold</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">i</span><span class="kc">nte</span><span class="err">gra</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_weigh</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">            </span><span class="err">i</span><span class="kc">nte</span><span class="err">gra</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_weigh</span><span class="kc">ts</span><span class="err">_a</span><span class="kc">n</span><span class="err">gle</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy_co</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span><span class="err">_up</span><span class="p">:</span><span class="w"> </span><span class="err">Freque</span><span class="kc">n</span><span class="err">cyCo</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span>
+<span class="w">          </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="err">LocalOscilla</span><span class="kc">t</span><span class="err">or</span>
+<span class="w">            </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span>
+<span class="w">            </span><span class="err">power</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">          </span><span class="err">mixer</span><span class="p">:</span><span class="w"> </span><span class="err">Mixer</span>
+<span class="w">            </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../local_oscillator/frequency&quot;</span>
+<span class="w">            </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../../intermediate_frequency&quot;</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_phase</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="err">gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span>
+<span class="w">        </span><span class="kc">t</span><span class="err">ime_o</span><span class="kc">f</span><span class="err">_</span><span class="kc">fl</span><span class="err">igh</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">140</span>
+<span class="w">        </span><span class="err">smeari</span><span class="kc">n</span><span class="err">g</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy_co</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span><span class="err">_dow</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">    </span><span class="err">q</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="err">Tra</span><span class="kc">ns</span><span class="err">mo</span><span class="kc">n</span>
+<span class="w">      </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">      </span><span class="err">xy</span><span class="p">:</span><span class="w"> </span><span class="err">IQCha</span><span class="kc">nnel</span>
+<span class="w">        </span><span class="err">opera</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy_co</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span><span class="err">_up</span><span class="p">:</span><span class="w"> </span><span class="err">Freque</span><span class="kc">n</span><span class="err">cyCo</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span>
+<span class="w">          </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="err">LocalOscilla</span><span class="kc">t</span><span class="err">or</span>
+<span class="w">            </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span>
+<span class="w">            </span><span class="err">power</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">          </span><span class="err">mixer</span><span class="p">:</span><span class="w"> </span><span class="err">Mixer</span>
+<span class="w">            </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../local_oscillator/frequency&quot;</span>
+<span class="w">            </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../../intermediate_frequency&quot;</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_phase</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="err">gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span>
+<span class="w">      </span><span class="err">z</span><span class="p">:</span><span class="w"> </span><span class="err">Si</span><span class="kc">n</span><span class="err">gleCha</span><span class="kc">nnel</span>
+<span class="w">        </span><span class="err">opera</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="err">)</span>
+<span class="w">        </span><span class="kc">f</span><span class="err">il</span><span class="kc">ter</span><span class="err">_</span><span class="kc">f</span><span class="err">ir_</span><span class="kc">ta</span><span class="err">ps</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">f</span><span class="err">il</span><span class="kc">ter</span><span class="err">_iir_</span><span class="kc">ta</span><span class="err">ps</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">      </span><span class="err">reso</span><span class="kc">nat</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="err">I</span><span class="kc">n</span><span class="err">Ou</span><span class="kc">t</span><span class="err">IQCha</span><span class="kc">nnel</span>
+<span class="w">        </span><span class="err">opera</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">id</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="err">digi</span><span class="kc">tal</span><span class="err">_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">ts</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy_co</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span><span class="err">_up</span><span class="p">:</span><span class="w"> </span><span class="err">Freque</span><span class="kc">n</span><span class="err">cyCo</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span>
+<span class="w">          </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="err">LocalOscilla</span><span class="kc">t</span><span class="err">or</span>
+<span class="w">            </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span>
+<span class="w">            </span><span class="err">power</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">          </span><span class="err">mixer</span><span class="p">:</span><span class="w"> </span><span class="err">Mixer</span>
+<span class="w">            </span><span class="err">local_oscilla</span><span class="kc">t</span><span class="err">or_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../local_oscillator/frequency&quot;</span>
+<span class="w">            </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#../../intermediate_frequency&quot;</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="err">correc</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_phase</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">          </span><span class="err">gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">nter</span><span class="err">media</span><span class="kc">te</span><span class="err">_</span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">(&#39;co</span><span class="kc">n</span><span class="mi">1</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span>
+<span class="w">        </span><span class="kc">t</span><span class="err">ime_o</span><span class="kc">f</span><span class="err">_</span><span class="kc">fl</span><span class="err">igh</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">140</span>
+<span class="w">        </span><span class="err">smeari</span><span class="kc">n</span><span class="err">g</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_I</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">opx_i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_o</span><span class="kc">ffset</span><span class="err">_Q</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_gai</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">        </span><span class="kc">fre</span><span class="err">que</span><span class="kc">n</span><span class="err">cy_co</span><span class="kc">n</span><span class="err">ver</span><span class="kc">ter</span><span class="err">_dow</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">No</span><span class="kc">ne</span>
+<span class="w">  </span><span class="err">wiri</span><span class="kc">n</span><span class="err">g</span><span class="p">:</span><span class="w"> </span><span class="err">QuamDic</span><span class="kc">t</span><span class="w"> </span><span class="err">Emp</span><span class="kc">t</span><span class="err">y</span>
+</code></pre></div>
+</details>
+<p>The output provides a detailed hierarchical view of the machine's configuration, illustrating the connectivity and settings of each component.</p>
+<h2 id="saving-the-quam-setup">Saving the QUAM Setup</h2>
+<p>Save the current state of your QUAM setup to a file for later use or inspection:</p>
+<div class="highlight"><pre><span></span><code><span class="n">machine</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;state.json&quot;</span><span class="p">)</span>
+</code></pre></div>
+<details>
+<summary>state.json</summary>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.examples.superconducting_qubits.components.Quam&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;qubits&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;q0&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;resonator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;frequency_converter_up&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.components.hardware.FrequencyConverter&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;local_oscillator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;power&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;readout&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.components.pulses.SquareReadoutPulse&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;amplitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;opx_input_I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_input_Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;frequency_converter_up&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.components.hardware.FrequencyConverter&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;local_oscillator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;power&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;X90&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.components.pulses.GaussianPulse&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;amplitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;sigma&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;opx_output&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;q1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;resonator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;frequency_converter_up&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.components.hardware.FrequencyConverter&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;local_oscillator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;power&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;opx_input_I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_input_Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;frequency_converter_up&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;__class__&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quam.components.hardware.FrequencyConverter&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;local_oscillator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;power&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;opx_output_Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;opx_output&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
+<p>The contents of <code>state.json</code> will mirror the structure and settings of your QUAM machine.</p>
+<h2 id="loading-the-configuration">Loading the Configuration</h2>
+<p>To resume work with a previously configured setup:</p>
+<div class="highlight"><pre><span></span><code><span class="n">loaded_machine</span> <span class="o">=</span> <span class="n">Quam</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;state.json&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="workflow">Workflow</h2>
+<p>Follow these steps for a typical execution flow in QUAM:</p>
+<ol>
+<li><strong>Initialize a New QUAM Setup</strong>: Start by generating a new QUAM configuration for your quantum system as demonstrated earlier, and save this initial setup to a file. This step sets the baseline for your system's configuration.</li>
+<li><strong>Modify and Save</strong>: Load the QUAM setup from the configuration file whenever you need to run new calibrations. After running your experiments and analyzing the results, you might need to adjust the configuration, such as updating pulse amplitudes based on your findings.</li>
+</ol>
+<p><strong>Example of Updating Pulse Amplitude</strong>: Suppose a calibration determines a new optimal pulse amplitude. You would update the pulse amplitude in your QUAM setup and save the changes back to the configuration file.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Load QUAM</span>
+<span class="n">machine</span> <span class="o">=</span> <span class="n">Quam</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;state.json&quot;</span><span class="p">)</span>
+
+<span class="c1"># Run QUA program and analyse results to extract the optimal pulse amplitude</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">some_qua_program</span><span class="p">()</span>
+<span class="n">pulse_amplitude</span> <span class="o">=</span> <span class="n">amplitude_analysis_function</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+<span class="c1"># Update the pulse amplitude for the relevant qubit</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="s2">&quot;q0&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">operations</span><span class="p">[</span><span class="s2">&quot;X90&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">=</span> <span class="n">pulse_amplitude</span>
+
+<span class="c1"># Save the updated QUAM configuration</span>
+<span class="n">machine</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;state.json&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>This workflow ensures your QUAM setup remains current with the latest experimental adjustments, allowing for iterative enhancements and refinements based on empirical data.</p>
+<h2 id="generating-a-qua-configuration">Generating a QUA Configuration</h2>
+<p>Generate a QUA configuration from the current QUAM setup. This is essential for interfacing with quantum hardware:</p>
+<div class="highlight"><pre><span></span><code><span class="n">qua_config</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">generate_config</span><span class="p">()</span>
+</code></pre></div>
+<details>
+<summary>qua_config</summary>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;controllers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;con1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;analog_inputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}},</span>
+<span class="w">            </span><span class="nt">&quot;analog_outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">3</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">4</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">5</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">6</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">7</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">                </span><span class="mi">8</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;digital_outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;digital_waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;ON&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;samples&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]]}},</span>
+<span class="w">    </span><span class="nt">&quot;elements&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;IQ0&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;mixInputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.mixer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;readout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.readout.pulse&quot;</span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;out1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;out2&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;smearing&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;time_of_flight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">140</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;IQ1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;mixInputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ1.mixer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">            </span><span class="nt">&quot;outputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;out1&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="err">)</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;out2&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="err">)</span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;smearing&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;time_of_flight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">140</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;q0.xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;mixInputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;q0.xy.mixer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;X90&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;q0.xy.X90.pulse&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;q0.z&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">&quot;singleInput&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="err">)</span><span class="p">}},</span>
+<span class="w">        </span><span class="nt">&quot;q1.xy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;mixInputs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="err">)</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;q1.xy.mixer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;q1.z&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;operations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w"> </span><span class="nt">&quot;singleInput&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">(</span><span class="s2">&quot;con1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="err">)</span><span class="p">}},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;integration_weights&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.readout.iw1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;cosine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="err">)</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;sine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">(</span><span class="mf">-0.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="err">)</span><span class="p">]},</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.readout.iw2&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;cosine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="err">)</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;sine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="err">)</span><span class="p">]},</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.readout.iw3&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;cosine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">(</span><span class="mf">-0.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="err">)</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;sine&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">(</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="err">)</span><span class="p">]},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;mixers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;correction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">                </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;IQ1.mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;correction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">                </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;q0.xy.mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;correction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">                </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;q1.xy.mixer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;correction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">                </span><span class="nt">&quot;intermediate_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;lo_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6000000000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;oscillators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">&quot;pulses&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.readout.pulse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;digital_marker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ON&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;integration_weights&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;iw1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.readout.iw1&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;iw2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.readout.iw2&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;iw3&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.readout.iw3&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;measurement&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.readout.wf.I&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IQ0.readout.wf.Q&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;const_pulse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;control&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;const_wf&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zero_wf&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;q0.xy.X90.pulse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;control&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;I&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;q0.xy.X90.wf.I&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;q0.xy.X90.wf.Q&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;waveforms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.readout.wf.I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;IQ0.readout.wf.Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;const_wf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;q0.xy.X90.wf.I&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;samples&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">array(</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0022836</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.00745838</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.01779789</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.03592509</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.06360149</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.09993812</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.14000065</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.17517038</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.19591242</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.19591242</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.17517038</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.14000065</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.09993812</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.06360149</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.03592509</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.01779789</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.00745838</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0022836</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="err">)</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arbitrary&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;q0.xy.X90.wf.Q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;samples&quot;</span><span class="p">:</span><span class="w"> </span><span class="err">array(</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="err">)</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arbitrary&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;zero_wf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;sample&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+</details>
+<p>The resulting configuration is ready for use with QUA scripts to control quantum experiments.</p>
+<div class="highlight"><pre><span></span><code><span class="n">qm</span> <span class="o">=</span> <span class="n">qmm</span><span class="o">.</span><span class="n">open_qm</span><span class="p">(</span><span class="n">qua_config</span><span class="p">)</span>  <span class="c1"># Open a quantum machine with the configuration</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Q.M Technologies Ltd.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "toc.integrate", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotations", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

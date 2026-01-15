@@ -1,0 +1,3578 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="QM. Technologies Ltd.">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/qm_logo_white.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Octave - The Quantum Abstract Machine - QUAM Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quam.components.octave" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="The Quantum Abstract Machine - QUAM Documentation" class="md-header__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            The Quantum Abstract Machine - QUAM Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Octave
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-bright" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to high contrast mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to high contrast mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-high-contrast" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18V6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="entropy-dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="The Quantum Abstract Machine - QUAM Documentation" class="md-nav__button md-logo" aria-label="The Quantum Abstract Machine - QUAM Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/qm_logo_white.svg" alt="logo">
+
+    </a>
+    The Quantum Abstract Machine - QUAM Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../demonstration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Demonstration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/quam-root/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Root
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/channels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/channel-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel Ports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/pulses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pulses
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/octave/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Octave
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/qubits-and-qubit-pairs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qubits and Qubit Pairs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../components/custom-components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/serialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Serialization and State Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/gate-level-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gate-Level Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/quam-references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referencing Between Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../migrating-to-quam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to QUAM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API References
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    QUAM Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../channels_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Channels API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pulses_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Pulses API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ports_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Ports API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Hardware API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../octave_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Octave API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quantum_components_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Quantum Components API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../macro_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Macro API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basic_quam_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BasicQUAM API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/quam_classes_API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    QUAM Core Classes API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Octave</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="quam.components.octave"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="quam.components.octave.Octave" class="doc doc-heading">
+            <code>Octave</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="QuamComponent (quam.core.QuamComponent)" href="../../core/quam_classes/#quam.core.quam_classes.QuamComponent">QuamComponent</a></code></p>
+
+
+
+        <p>QUAM component for the QM Octave.</p>
+<p>The QM Octave is a device that can be used to upconvert and downconvert signals. It
+has 5 RF outputs and 2 RF inputs. Each RF_output has an associated
+<code>OctaveUpConverter</code>, and similarly each RF_input has an <code>OctaveDownConverter</code>.</p>
+<p>In many cases the Octave is connected to a single OPX in the default configuration,
+i.e. OPX outputs are connected to the corresponding Octave I/Q input, and Octave IF
+outputs are connected to the corresponding OPX input. In this case you can configure
+the Octave with the correct <code>FrequencyConverter</code>s using
+<code>Octave.initialize_default_connectivity()</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the Octave. Must be unique</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>calibration_db_path</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The path to the calibration database. If not specified, the
+current working directory is used.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>RF_outputs</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary of <code>OctaveUpConverter</code> objects. The keys are the
+output numbers (1-5).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>RF_inputs</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary of <code>OctaveDownConverter</code> objects. The keys are the
+input numbers (1-2).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>loopbacks</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of loopback connections, for example to connect a local
+oscillator. See the QUA Octave documentation for details.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>quam/components/octave.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@quam_dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Octave</span><span class="p">(</span><span class="n">QuamComponent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QUAM component for the QM Octave.</span>
+
+<span class="sd">    The QM Octave is a device that can be used to upconvert and downconvert signals. It</span>
+<span class="sd">    has 5 RF outputs and 2 RF inputs. Each RF_output has an associated</span>
+<span class="sd">    `OctaveUpConverter`, and similarly each RF_input has an `OctaveDownConverter`.</span>
+
+<span class="sd">    In many cases the Octave is connected to a single OPX in the default configuration,</span>
+<span class="sd">    i.e. OPX outputs are connected to the corresponding Octave I/Q input, and Octave IF</span>
+<span class="sd">    outputs are connected to the corresponding OPX input. In this case you can configure</span>
+<span class="sd">    the Octave with the correct `FrequencyConverter`s using</span>
+<span class="sd">    `Octave.initialize_default_connectivity()`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: The name of the Octave. Must be unique</span>
+<span class="sd">        calibration_db_path: The path to the calibration database. If not specified, the</span>
+<span class="sd">            current working directory is used.</span>
+<span class="sd">        RF_outputs: A dictionary of `OctaveUpConverter` objects. The keys are the</span>
+<span class="sd">            output numbers (1-5).</span>
+<span class="sd">        RF_inputs: A dictionary of `OctaveDownConverter` objects. The keys are the</span>
+<span class="sd">            input numbers (1-2).</span>
+<span class="sd">        loopbacks: A list of loopback connections, for example to connect a local</span>
+<span class="sd">            oscillator. See the QUA Octave documentation for details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">calibration_db_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">RF_outputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;OctaveUpConverter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">RF_inputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;OctaveDownConverter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">loopbacks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_frequency_converters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Octave frequency converterswith default connectivity.</span>
+
+<span class="sd">        This method initializes the Octave with default connectivity, i.e. it connects</span>
+<span class="sd">        the Octave to a single OPX. It creates an `OctaveUpConverter` for each RF output</span>
+<span class="sd">        and an `OctaveDownConverter` for each RF input. The `OctaveUpConverter` objects</span>
+<span class="sd">        are added to `Octave.RF_outputs` and the `OctaveDownConverter` objects are added</span>
+<span class="sd">        to `Octave.RF_inputs`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the Octave already has RF_outputs or RF_inputs.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">RF_outputs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Error initializing Octave with default connectivity. &quot;</span>
+                <span class="s2">&quot;octave.RF_outputs is not empty&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">RF_inputs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Error initializing Octave with default connectivity. &quot;</span>
+                <span class="s2">&quot;octave.IF_outputs is not empty&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">RF_outputs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">OctaveUpConverter</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+                <span class="n">LO_frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO What should default be?</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">LO_source</span> <span class="o">=</span> <span class="s2">&quot;internal&quot;</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;external&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">RF_inputs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">OctaveDownConverter</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">LO_frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">LO_source</span><span class="o">=</span><span class="n">LO_source</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_octave_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QmOctaveConfig</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a QmOctaveConfig object with the current Octave configuration.&quot;&quot;&quot;</span>
+        <span class="n">octave_config</span> <span class="o">=</span> <span class="n">QmOctaveConfig</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration_db_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">octave_config</span><span class="o">.</span><span class="n">set_calibration_db</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calibration_db_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">octave_config</span><span class="o">.</span><span class="n">set_calibration_db</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">octave_config</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the Octave configuration to a config dictionary.</span>
+
+<span class="sd">        This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            KeyError: If the Octave is already in the config.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;octaves&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Error generating config: config[&quot;octaves&quot;] already contains an entry &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; for Octave &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;RF_outputs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;IF_outputs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;RF_inputs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;loopbacks&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loopbacks</span><span class="p">),</span>
+        <span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="quam.components.octave.Octave.apply_to_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add the Octave configuration to a config dictionary.</p>
+<p>This method is called by the <code>QuamComponent.generate_config</code> method.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="typing.Dict">Dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary representing a QUA config file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave is already in the config.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>quam/components/octave.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the Octave configuration to a config dictionary.</span>
+
+<span class="sd">    This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        KeyError: If the Octave is already in the config.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;octaves&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Error generating config: config[&quot;octaves&quot;] already contains an entry &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; for Octave &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;RF_outputs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;IF_outputs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;RF_inputs&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;loopbacks&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loopbacks</span><span class="p">),</span>
+    <span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="quam.components.octave.Octave.get_octave_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_octave_config</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a QmOctaveConfig object with the current Octave configuration.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>quam/components/octave.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_octave_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QmOctaveConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a QmOctaveConfig object with the current Octave configuration.&quot;&quot;&quot;</span>
+    <span class="n">octave_config</span> <span class="o">=</span> <span class="n">QmOctaveConfig</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration_db_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">octave_config</span><span class="o">.</span><span class="n">set_calibration_db</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calibration_db_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">octave_config</span><span class="o">.</span><span class="n">set_calibration_db</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">octave_config</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="quam.components.octave.Octave.initialize_frequency_converters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">initialize_frequency_converters</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize the Octave frequency converterswith default connectivity.</p>
+<p>This method initializes the Octave with default connectivity, i.e. it connects
+the Octave to a single OPX. It creates an <code>OctaveUpConverter</code> for each RF output
+and an <code>OctaveDownConverter</code> for each RF input. The <code>OctaveUpConverter</code> objects
+are added to <code>Octave.RF_outputs</code> and the <code>OctaveDownConverter</code> objects are added
+to <code>Octave.RF_inputs</code>.</p>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave already has RF_outputs or RF_inputs.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>quam/components/octave.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span>
+<span class="normal">99</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">initialize_frequency_converters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Octave frequency converterswith default connectivity.</span>
+
+<span class="sd">    This method initializes the Octave with default connectivity, i.e. it connects</span>
+<span class="sd">    the Octave to a single OPX. It creates an `OctaveUpConverter` for each RF output</span>
+<span class="sd">    and an `OctaveDownConverter` for each RF input. The `OctaveUpConverter` objects</span>
+<span class="sd">    are added to `Octave.RF_outputs` and the `OctaveDownConverter` objects are added</span>
+<span class="sd">    to `Octave.RF_inputs`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the Octave already has RF_outputs or RF_inputs.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">RF_outputs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Error initializing Octave with default connectivity. &quot;</span>
+            <span class="s2">&quot;octave.RF_outputs is not empty&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">RF_inputs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Error initializing Octave with default connectivity. &quot;</span>
+            <span class="s2">&quot;octave.IF_outputs is not empty&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RF_outputs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">OctaveUpConverter</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+            <span class="n">LO_frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO What should default be?</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="n">LO_source</span> <span class="o">=</span> <span class="s2">&quot;internal&quot;</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;external&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RF_inputs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">OctaveDownConverter</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">LO_frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">LO_source</span><span class="o">=</span><span class="n">LO_source</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="quam.components.octave.OctaveDownConverter" class="doc doc-heading">
+            <code>OctaveDownConverter</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="OctaveFrequencyConverter (quam.components.octave.OctaveFrequencyConverter)" href="#quam.components.octave.OctaveFrequencyConverter">OctaveFrequencyConverter</a></code></p>
+
+
+
+        <p>A frequency downconverter for the QM Octave.</p>
+<p>The OctaveDownConverter represents a frequency downconverter in the QM Octave. The
+OctaveDownConverter is usually connected to an InOutIQChannel, in which case the
+two OPX inputs are connected to the IF outputs of the OctaveDownConverter. The
+OPX inputs are specified in the <code>OctaveDownConverter.channel</code> attribute. The
+channel is either an InOutIQChannel or an InOutSingleChannel.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>id</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The RF input id, must be between 1-2.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>LO_frequency</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The local oscillator frequency in Hz, between 2 and 18 GHz.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>LO_source</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The local oscillator source, "internal" or "external.
+For down converter 1 "internal" is the default,
+for down converter 2 "external" is the default.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>IF_mode_I</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sets the mode of the I port of the IF Down Converter module as can be
+seen in the octave block diagram (see Octave page in QUA documentation).
+Can be "direct" / "envelope" / "mixer" / "off". The default is "direct".
+- "direct" - The signal bypasses the IF module.
+- "envelope" - The signal passes through an envelope detector.
+- "mixer" - The signal passes through a low-frequency mixer.
+- "off" - the signal doesn't pass to the output port.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>IF_mode_Q</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sets the mode of the Q port of the IF Down Converter module.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>IF_output_I</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The output port of the IF Down Converter module for the I port.
+Can be 1 or 2. The default is 1. This will be 2 if the IF outputs
+are connected to the opposite OPX inputs</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>IF_output_Q</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The output port of the IF Down Converter module for the Q port.
+Can be 1 or 2. The default is 2. This will be 1 if the IF outputs
+are connected to the opposite OPX inputs.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>quam/components/octave.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@quam_dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OctaveDownConverter</span><span class="p">(</span><span class="n">OctaveFrequencyConverter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A frequency downconverter for the QM Octave.</span>
+
+<span class="sd">    The OctaveDownConverter represents a frequency downconverter in the QM Octave. The</span>
+<span class="sd">    OctaveDownConverter is usually connected to an InOutIQChannel, in which case the</span>
+<span class="sd">    two OPX inputs are connected to the IF outputs of the OctaveDownConverter. The</span>
+<span class="sd">    OPX inputs are specified in the `OctaveDownConverter.channel` attribute. The</span>
+<span class="sd">    channel is either an InOutIQChannel or an InOutSingleChannel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        id: The RF input id, must be between 1-2.</span>
+<span class="sd">        LO_frequency: The local oscillator frequency in Hz, between 2 and 18 GHz.</span>
+<span class="sd">        LO_source: The local oscillator source, &quot;internal&quot; or &quot;external.</span>
+<span class="sd">            For down converter 1 &quot;internal&quot; is the default,</span>
+<span class="sd">            for down converter 2 &quot;external&quot; is the default.</span>
+<span class="sd">        IF_mode_I: Sets the mode of the I port of the IF Down Converter module as can be</span>
+<span class="sd">            seen in the octave block diagram (see Octave page in QUA documentation).</span>
+<span class="sd">            Can be &quot;direct&quot; / &quot;envelope&quot; / &quot;mixer&quot; / &quot;off&quot;. The default is &quot;direct&quot;.</span>
+<span class="sd">            - &quot;direct&quot; - The signal bypasses the IF module.</span>
+<span class="sd">            - &quot;envelope&quot; - The signal passes through an envelope detector.</span>
+<span class="sd">            - &quot;mixer&quot; - The signal passes through a low-frequency mixer.</span>
+<span class="sd">            - &quot;off&quot; - the signal doesn&#39;t pass to the output port.</span>
+<span class="sd">        IF_mode_Q: Sets the mode of the Q port of the IF Down Converter module.</span>
+<span class="sd">        IF_output_I: The output port of the IF Down Converter module for the I port.</span>
+<span class="sd">            Can be 1 or 2. The default is 1. This will be 2 if the IF outputs</span>
+<span class="sd">            are connected to the opposite OPX inputs</span>
+<span class="sd">        IF_output_Q: The output port of the IF Down Converter module for the Q port.</span>
+<span class="sd">            Can be 1 or 2. The default is 2. This will be 1 if the IF outputs</span>
+<span class="sd">            are connected to the opposite OPX inputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">LO_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">LO_source</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span> <span class="s2">&quot;external&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;internal&quot;</span>
+    <span class="n">IF_mode_I</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;direct&quot;</span><span class="p">,</span> <span class="s2">&quot;envelope&quot;</span><span class="p">,</span> <span class="s2">&quot;mixer&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;direct&quot;</span>
+    <span class="n">IF_mode_Q</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;direct&quot;</span><span class="p">,</span> <span class="s2">&quot;envelope&quot;</span><span class="p">,</span> <span class="s2">&quot;mixer&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;direct&quot;</span>
+    <span class="n">IF_output_I</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">IF_output_Q</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">config_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specifies that the converter will be added to the config after the Octave.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;after&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="p">]}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add information about the frequency down-converter to the QUA config</span>
+
+<span class="sd">        This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">        Nothing is added to the config if the `OctaveDownConverter.channel` is not</span>
+<span class="sd">        specified or if the `OctaveDownConverter.LO_frequency` is not specified.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the LO_frequency is not specified.</span>
+<span class="sd">            KeyError: If the Octave is not in the config, or if config[&quot;octaves&quot;] does</span>
+<span class="sd">                not exist.</span>
+<span class="sd">            KeyError: If the Octave already has an entry for the OctaveDownConverter.</span>
+<span class="sd">            ValueError: If the IF_output_I and IF_output_Q are already assigned to</span>
+<span class="sd">                other ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error generating config for Octave upconverter id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: &quot;</span>
+                    <span class="s2">&quot;LO_frequency must be specified.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_inputs&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error generating config: &quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;config[&quot;octaves&quot;][&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;][&quot;RF_inputs&quot;] &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;already has an entry for OctaveDownConverter with id &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_inputs&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;RF_source&quot;</span><span class="p">:</span> <span class="s2">&quot;RF_in&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LO_frequency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span>
+            <span class="s2">&quot;LO_source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_source</span><span class="p">,</span>
+            <span class="s2">&quot;IF_mode_I&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">IF_mode_I</span><span class="p">,</span>
+            <span class="s2">&quot;IF_mode_Q&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">IF_mode_Q</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">InOutIQChannel</span><span class="p">):</span>
+            <span class="n">IF_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">IF_output_I</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IF_output_Q</span><span class="p">]</span>
+            <span class="n">opx_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_input_I</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_input_Q</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">InOutSingleChannel</span><span class="p">):</span>
+            <span class="n">IF_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">IF_output_I</span><span class="p">]</span>
+            <span class="n">opx_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_input</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">IF_channels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">opx_channels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">opx_port_tuples</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">port_tuple</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">BasePort</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">opx_channels</span>
+        <span class="p">]</span>
+
+        <span class="n">IF_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;IF_outputs&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">IF_ch</span><span class="p">,</span> <span class="n">opx_port_tuples</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">IF_channels</span><span class="p">,</span> <span class="n">opx_port_tuples</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;IF_out</span><span class="si">{</span><span class="n">IF_ch</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">IF_config</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">opx_port_tuples</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">IF_config</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">opx_port_tuples</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error generating config for Octave downconverter id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unable to assign </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to  port </span><span class="si">{</span><span class="n">opx_port_tuples</span><span class="si">}</span><span class="s2"> because it is already &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;assigned to port </span><span class="si">{</span><span class="n">IF_config</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="quam.components.octave.OctaveDownConverter.config_settings" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config_settings</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Specifies that the converter will be added to the config after the Octave.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="quam.components.octave.OctaveDownConverter.apply_to_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add information about the frequency down-converter to the QUA config</p>
+<p>This method is called by the <code>QuamComponent.generate_config</code> method.</p>
+<p>Nothing is added to the config if the <code>OctaveDownConverter.channel</code> is not
+specified or if the <code>OctaveDownConverter.LO_frequency</code> is not specified.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="typing.Dict">Dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary representing a QUA config file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the LO_frequency is not specified.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave is not in the config, or if config["octaves"] does
+not exist.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave already has an entry for the OctaveDownConverter.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the IF_output_I and IF_output_Q are already assigned to
+other ports.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>quam/components/octave.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add information about the frequency down-converter to the QUA config</span>
+
+<span class="sd">    This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">    Nothing is added to the config if the `OctaveDownConverter.channel` is not</span>
+<span class="sd">    specified or if the `OctaveDownConverter.LO_frequency` is not specified.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the LO_frequency is not specified.</span>
+<span class="sd">        KeyError: If the Octave is not in the config, or if config[&quot;octaves&quot;] does</span>
+<span class="sd">            not exist.</span>
+<span class="sd">        KeyError: If the Octave already has an entry for the OctaveDownConverter.</span>
+<span class="sd">        ValueError: If the IF_output_I and IF_output_Q are already assigned to</span>
+<span class="sd">            other ports.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error generating config for Octave upconverter id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="s2">&quot;LO_frequency must be specified.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_inputs&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error generating config: &quot;</span>
+            <span class="sa">f</span><span class="s1">&#39;config[&quot;octaves&quot;][&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;][&quot;RF_inputs&quot;] &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;already has an entry for OctaveDownConverter with id &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_inputs&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;RF_source&quot;</span><span class="p">:</span> <span class="s2">&quot;RF_in&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;LO_frequency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span>
+        <span class="s2">&quot;LO_source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_source</span><span class="p">,</span>
+        <span class="s2">&quot;IF_mode_I&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">IF_mode_I</span><span class="p">,</span>
+        <span class="s2">&quot;IF_mode_Q&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">IF_mode_Q</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">InOutIQChannel</span><span class="p">):</span>
+        <span class="n">IF_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">IF_output_I</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IF_output_Q</span><span class="p">]</span>
+        <span class="n">opx_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_input_I</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_input_Q</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">InOutSingleChannel</span><span class="p">):</span>
+        <span class="n">IF_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">IF_output_I</span><span class="p">]</span>
+        <span class="n">opx_channels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_input</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">IF_channels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">opx_channels</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">opx_port_tuples</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">port_tuple</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">BasePort</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">opx_channels</span>
+    <span class="p">]</span>
+
+    <span class="n">IF_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;IF_outputs&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">IF_ch</span><span class="p">,</span> <span class="n">opx_port_tuples</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span><span class="n">IF_channels</span><span class="p">,</span> <span class="n">opx_port_tuples</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;IF_out</span><span class="si">{</span><span class="n">IF_ch</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">IF_config</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">opx_port_tuples</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">IF_config</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">opx_port_tuples</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error generating config for Octave downconverter id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to assign </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> to  port </span><span class="si">{</span><span class="n">opx_port_tuples</span><span class="si">}</span><span class="s2"> because it is already &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;assigned to port </span><span class="si">{</span><span class="n">IF_config</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="quam.components.octave.OctaveFrequencyConverter" class="doc doc-heading">
+            <code>OctaveFrequencyConverter</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="BaseFrequencyConverter (quam.components.hardware.BaseFrequencyConverter)" href="../hardware/#quam.components.hardware.BaseFrequencyConverter">BaseFrequencyConverter</a></code>, <code><span title="abc.ABC">ABC</span></code></p>
+
+
+
+        <p>Base class for OctaveUpConverter and OctaveDownConverter.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>id</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The id of the converter. Must be unique within the Octave.
+For OctaveUpConverter, the id is used as the RF output number.
+For OctaveDownConverter, the id is used as the RF input number.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>channel</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The channel that the converter is connected to.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>quam/components/octave.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@quam_dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OctaveFrequencyConverter</span><span class="p">(</span><span class="n">BaseFrequencyConverter</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for OctaveUpConverter and OctaveDownConverter.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        id: The id of the converter. Must be unique within the Octave.</span>
+<span class="sd">            For OctaveUpConverter, the id is used as the RF output number.</span>
+<span class="sd">            For OctaveDownConverter, the id is used as the RF input number.</span>
+<span class="sd">        channel: The channel that the converter is connected to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">channel</span><span class="p">:</span> <span class="n">Channel</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">octave</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Octave</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">parent_parent</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_parent</span><span class="p">,</span> <span class="n">Octave</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">parent_parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">config_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specifies that the converter will be added to the config after the Octave.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;after&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="p">]}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add information about the frequency converter to the QUA config</span>
+
+<span class="sd">        This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            KeyError: If the Octave is not in the config, or if config[&quot;octaves&quot;] does</span>
+<span class="sd">                not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;octaves&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Error generating config: &quot;octaves&quot; entry not found&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error generating config: OctaveConverter with id </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> does not &quot;</span>
+                <span class="s2">&quot;have an Octave parent&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s1">&#39;Error generating config: config[&quot;octaves&quot;] does not have Octave&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; entry config[&quot;octaves&quot;][&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
+            <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="quam.components.octave.OctaveFrequencyConverter.config_settings" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">config_settings</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Specifies that the converter will be added to the config after the Octave.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="quam.components.octave.OctaveFrequencyConverter.apply_to_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add information about the frequency converter to the QUA config</p>
+<p>This method is called by the <code>QuamComponent.generate_config</code> method.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="typing.Dict">Dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary representing a QUA config file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave is not in the config, or if config["octaves"] does
+not exist.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>quam/components/octave.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add information about the frequency converter to the QUA config</span>
+
+<span class="sd">    This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        KeyError: If the Octave is not in the config, or if config[&quot;octaves&quot;] does</span>
+<span class="sd">            not exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;octaves&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Error generating config: &quot;octaves&quot; entry not found&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error generating config: OctaveConverter with id </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> does not &quot;</span>
+            <span class="s2">&quot;have an Octave parent&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="s1">&#39;Error generating config: config[&quot;octaves&quot;] does not have Octave&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; entry config[&quot;octaves&quot;][&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;]&#39;</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="quam.components.octave.OctaveUpConverter" class="doc doc-heading">
+            <code>OctaveUpConverter</code>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="OctaveFrequencyConverter (quam.components.octave.OctaveFrequencyConverter)" href="#quam.components.octave.OctaveFrequencyConverter">OctaveFrequencyConverter</a></code></p>
+
+
+
+        <p>A frequency upconverter for the QM Octave.</p>
+<p>The OctaveUpConverter represents a frequency upconverter in the QM Octave. Usually
+an IQChannel is connected <code>OctaveUpconverter.channel</code>, in which case the two OPX
+outputs are connected to the I and Q inputs of the OctaveUpConverter.
+The OPX outputs are specified in the <code>OctaveUpConverter.channel</code> attribute.
+The channel is either an IQChannel or a SingleChannel.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>id</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The RF output id, must be between 1-5.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>LO_frequency</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The local oscillator frequency in Hz, between 2 and 18 GHz.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>LO_source</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The local oscillator source, "internal" (default) or "external".</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>gain</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The gain of the output, between -20 and 20 dB in steps of 0.5.
+Default is 0 dB.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>output_mode</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sets the fast switch's mode of the up converter module.
+Can be "always_on" / "always_off" / "triggered" / "triggered_reversed".
+The default is "always_off".
+- "always_on" - Output is always on
+- "always_off" - Output is always off
+- "triggered" - The output will play when rising edge is detected in the
+  octave's digital port.
+- "triggered_reversed" - The output will play when falling edge is detected
+  in the octave's digital port.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>input_attenuators</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether the I and Q ports have a 10 dB attenuator before
+entering the mixer. Off by default.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>quam/components/octave.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@quam_dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OctaveUpConverter</span><span class="p">(</span><span class="n">OctaveFrequencyConverter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A frequency upconverter for the QM Octave.</span>
+
+<span class="sd">    The OctaveUpConverter represents a frequency upconverter in the QM Octave. Usually</span>
+<span class="sd">    an IQChannel is connected `OctaveUpconverter.channel`, in which case the two OPX</span>
+<span class="sd">    outputs are connected to the I and Q inputs of the OctaveUpConverter.</span>
+<span class="sd">    The OPX outputs are specified in the `OctaveUpConverter.channel` attribute.</span>
+<span class="sd">    The channel is either an IQChannel or a SingleChannel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        id: The RF output id, must be between 1-5.</span>
+<span class="sd">        LO_frequency: The local oscillator frequency in Hz, between 2 and 18 GHz.</span>
+<span class="sd">        LO_source: The local oscillator source, &quot;internal&quot; (default) or &quot;external&quot;.</span>
+<span class="sd">        gain: The gain of the output, between -20 and 20 dB in steps of 0.5.</span>
+<span class="sd">            Default is 0 dB.</span>
+<span class="sd">        output_mode: Sets the fast switch&#39;s mode of the up converter module.</span>
+<span class="sd">            Can be &quot;always_on&quot; / &quot;always_off&quot; / &quot;triggered&quot; / &quot;triggered_reversed&quot;.</span>
+<span class="sd">            The default is &quot;always_off&quot;.</span>
+<span class="sd">            - &quot;always_on&quot; - Output is always on</span>
+<span class="sd">            - &quot;always_off&quot; - Output is always off</span>
+<span class="sd">            - &quot;triggered&quot; - The output will play when rising edge is detected in the</span>
+<span class="sd">              octave&#39;s digital port.</span>
+<span class="sd">            - &quot;triggered_reversed&quot; - The output will play when falling edge is detected</span>
+<span class="sd">              in the octave&#39;s digital port.</span>
+<span class="sd">        input_attenuators: Whether the I and Q ports have a 10 dB attenuator before</span>
+<span class="sd">            entering the mixer. Off by default.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">LO_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">LO_source</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span> <span class="s2">&quot;external&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;internal&quot;</span>
+    <span class="n">gain</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">output_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
+        <span class="s2">&quot;always_on&quot;</span><span class="p">,</span> <span class="s2">&quot;always_off&quot;</span><span class="p">,</span> <span class="s2">&quot;triggered&quot;</span><span class="p">,</span> <span class="s2">&quot;triggered_reversed&quot;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;always_off&quot;</span>
+    <span class="n">input_attenuators</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;off&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add information about the frequency up-converter to the QUA config</span>
+
+<span class="sd">        This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">        Nothing is added to the config if the `OctaveUpConverter.channel` is not</span>
+<span class="sd">        specified or if the `OctaveUpConverter.LO_frequency` is not specified.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the LO_frequency is not specified.</span>
+<span class="sd">            KeyError: If the Octave is not in the config, or if config[&quot;octaves&quot;] does</span>
+<span class="sd">                not exist.</span>
+<span class="sd">            KeyError: If the Octave already has an entry for the OctaveUpConverter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error generating config for Octave upconverter id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: &quot;</span>
+                    <span class="s2">&quot;LO_frequency must be specified.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_outputs&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error generating config: &quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;config[&quot;octaves&quot;][&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;][&quot;RF_outputs&quot;] &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;already has an entry for OctaveDownConverter with id &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">output_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_outputs&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;LO_frequency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span>
+            <span class="s2">&quot;LO_source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_source</span><span class="p">,</span>
+            <span class="s2">&quot;gain&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">,</span>
+            <span class="s2">&quot;output_mode&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span><span class="p">,</span>
+            <span class="s2">&quot;input_attenuators&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_attenuators</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">SingleChannel</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output</span><span class="p">,</span> <span class="n">LFAnalogOutputPort</span><span class="p">):</span>
+                <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output</span><span class="o">.</span><span class="n">port_tuple</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">IQChannel</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_I</span><span class="p">,</span> <span class="n">LFAnalogOutputPort</span><span class="p">):</span>
+                <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_I</span><span class="o">.</span><span class="n">port_tuple</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_I</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_Q</span><span class="p">,</span> <span class="n">LFAnalogOutputPort</span><span class="p">):</span>
+                <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;Q_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_Q</span><span class="o">.</span><span class="n">port_tuple</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;Q_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_Q</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="quam.components.octave.OctaveUpConverter.apply_to_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Add information about the frequency up-converter to the QUA config</p>
+<p>This method is called by the <code>QuamComponent.generate_config</code> method.</p>
+<p>Nothing is added to the config if the <code>OctaveUpConverter.channel</code> is not
+specified or if the <code>OctaveUpConverter.LO_frequency</code> is not specified.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="typing.Dict">Dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary representing a QUA config file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the LO_frequency is not specified.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave is not in the config, or if config["octaves"] does
+not exist.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="KeyError">KeyError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the Octave already has an entry for the OctaveUpConverter.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>quam/components/octave.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_to_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add information about the frequency up-converter to the QUA config</span>
+
+<span class="sd">    This method is called by the `QuamComponent.generate_config` method.</span>
+
+<span class="sd">    Nothing is added to the config if the `OctaveUpConverter.channel` is not</span>
+<span class="sd">    specified or if the `OctaveUpConverter.LO_frequency` is not specified.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config: A dictionary representing a QUA config file.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the LO_frequency is not specified.</span>
+<span class="sd">        KeyError: If the Octave is not in the config, or if config[&quot;octaves&quot;] does</span>
+<span class="sd">            not exist.</span>
+<span class="sd">        KeyError: If the Octave already has an entry for the OctaveUpConverter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Error generating config for Octave upconverter id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: &quot;</span>
+                <span class="s2">&quot;LO_frequency must be specified.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">apply_to_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_outputs&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error generating config: &quot;</span>
+            <span class="sa">f</span><span class="s1">&#39;config[&quot;octaves&quot;][&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;][&quot;RF_outputs&quot;] &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;already has an entry for OctaveDownConverter with id &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">output_config</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;octaves&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">octave</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;RF_outputs&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;LO_frequency&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_frequency</span><span class="p">,</span>
+        <span class="s2">&quot;LO_source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">LO_source</span><span class="p">,</span>
+        <span class="s2">&quot;gain&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="p">,</span>
+        <span class="s2">&quot;output_mode&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span><span class="p">,</span>
+        <span class="s2">&quot;input_attenuators&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_attenuators</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">SingleChannel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output</span><span class="p">,</span> <span class="n">LFAnalogOutputPort</span><span class="p">):</span>
+            <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output</span><span class="o">.</span><span class="n">port_tuple</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">IQChannel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_I</span><span class="p">,</span> <span class="n">LFAnalogOutputPort</span><span class="p">):</span>
+            <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_I</span><span class="o">.</span><span class="n">port_tuple</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;I_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_I</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_Q</span><span class="p">,</span> <span class="n">LFAnalogOutputPort</span><span class="p">):</span>
+            <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;Q_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_Q</span><span class="o">.</span><span class="n">port_tuple</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_config</span><span class="p">[</span><span class="s2">&quot;Q_connection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">opx_output_Q</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Q.M Technologies Ltd.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.top", "toc.integrate", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotations", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
