@@ -86,7 +86,7 @@ class Cavity(QuantumComponent):
         """Aligns the execution of all channels of this qubit and all other qubits"""
         quantum_components = [self]
 
-        if isinstance(other_qubits, Qubit):
+        if isinstance(other_qubits, Cavity):
             quantum_components.append(other_qubits)
         elif isinstance(other_qubits, Iterable):
             quantum_components.extend(other_qubits)
@@ -94,7 +94,7 @@ class Cavity(QuantumComponent):
             raise ValueError(f"Invalid type for other_qubits: {type(other_qubits)}")
 
         if args:
-            assert all(isinstance(arg, Qubit) for arg in args)
+            assert all(isinstance(arg, Cavity) for arg in args)
             quantum_components.extend(args)
 
         channel_names = {
