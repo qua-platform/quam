@@ -58,6 +58,8 @@ from qm.qua import (
     frame_rotation_2pi,
     time_tagging,
     reset_if_phase,
+    ramp as qua_ramp,
+    ramp_to_zero as qua_ramp_to_zero,
 )
 
 __all__ = [
@@ -453,7 +455,8 @@ class Channel(QuamComponent, ABC):
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
-                `self.operations`.
+                `self.operations`. Can also be a ``ramp(slope)`` object from
+                ``qm.qua``, in which case validation is skipped automatically.
             amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
                 Amplitude scale of the pulse. Can be either a (qua) float, or a list of
                 (qua) floats. If None, the pulse is played without amplitude scaling.
@@ -461,7 +464,7 @@ class Channel(QuamComponent, ABC):
                 clock cycle (4ns). If not provided, the default pulse duration will be
                 used. It is possible to dynamically change the duration of both constant
                 and arbitrary pulses. Arbitrary pulses can only be stretched, not
-                compressed
+                compressed. Required when ``pulse_name`` is a ``ramp(slope)`` object.
             chirp (Union[(list[int], str), (int, str)]): Allows to perform
                 piecewise linear sweep of the element's intermediate
                 frequency in time. Input should be a tuple, with the 1st
@@ -483,13 +486,30 @@ class Channel(QuamComponent, ABC):
                 handle can be retrieved with
                 `qm._results.JobResults.get` with the same ``label``.
             validate (bool): If True (default), validate that the pulse is registered
-                in Channel.operations
+                in Channel.operations. Automatically set to False when
+                ``pulse_name`` is a ``ramp(slope)`` object.
 
         Note:
             The `element` argument from `qm.qua.play()`is not needed, as it is
             automatically set to `self.name`.
 
         """
+        from qm.grpc.qua import QuaProgramRampPulse
+
+        if isinstance(pulse_name, QuaProgramRampPulse):
+            play(
+                pulse=pulse_name,
+                element=self.name,
+                duration=duration,
+                condition=condition,
+                chirp=chirp,
+                truncate=truncate,
+                timestamp_stream=timestamp_stream,
+                continue_chirp=continue_chirp,
+                target=target,
+            )
+            return
+
         if validate and pulse_name not in self.operations:
             raise KeyError(
                 f"Operation '{pulse_name}' not found in channel '{self.name}'"
@@ -513,6 +533,42 @@ class Channel(QuamComponent, ABC):
             continue_chirp=continue_chirp,
             target=target,
         )
+
+    def ramp(self, slope: ScalarFloat, duration: ScalarInt):
+        """Play a voltage ramp on this channel.
+
+        Generates a linear voltage ramp using QUA's ``ramp(slope)`` command.
+
+        Args:
+            slope (Scalar[float]): The ramp slope in V/ns.
+            duration (Scalar[int]): Duration of the ramp in units of the
+                clock cycle (4ns). Required.
+
+        Example:
+            ```python
+            with program() as prog:
+                channel.ramp(slope=0.0001, duration=1000)
+            ```
+
+        Note:
+            This is equivalent to ``play(ramp(slope), element, duration=duration)``
+            in QUA. The channel element is set automatically.
+        """
+        play(qua_ramp(slope), self.name, duration=duration)
+
+    def ramp_to_zero(self, duration: Optional[int] = None):
+        """Ramp the channel output gradually to zero from its last DC value.
+
+        Args:
+            duration (int, optional): Duration of the ramp in multiples of 4 ns.
+                Range: [4, 2^24]. If None, the duration is taken from the
+                element's sticky config (``StickyChannelAddon.duration``).
+
+        Note:
+            This does not protect against voltage jumps if the current output
+            value is outside the [-0.5, 0.5 - 2^-16] range.
+        """
+        qua_ramp_to_zero(self.name, duration=duration)
 
     def wait(self, duration: ScalarInt, *other_elements: Union[str, "Channel"]):
         """Wait for the given duration on all provided elements without outputting anything.
