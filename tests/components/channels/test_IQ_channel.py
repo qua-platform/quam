@@ -91,6 +91,179 @@ def test_IQ_channel_inferred_LO_frequency():
         channel.inferred_LO_frequency
 
 
+# --- inferred_RF_frequency error message tests ---
+
+
+def test_inferred_RF_frequency_error_LO_is_none():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        LO_frequency=None,
+        intermediate_frequency=100e6,
+    )
+    with pytest.raises(AttributeError, match="LO_frequency.*None"):
+        channel.inferred_RF_frequency
+
+
+def test_inferred_RF_frequency_error_IF_is_none():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        LO_frequency=5e9,
+        intermediate_frequency=None,
+    )
+    with pytest.raises(AttributeError, match="intermediate_frequency.*None"):
+        channel.inferred_RF_frequency
+
+
+def test_inferred_RF_frequency_error_LO_is_unresolved_reference():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        LO_frequency="#./nonexistent_attr",
+        intermediate_frequency=100e6,
+    )
+    with pytest.raises(AttributeError, match="LO_frequency.*unresolved reference"):
+        channel.inferred_RF_frequency
+
+
+def test_inferred_RF_frequency_error_IF_is_unresolved_reference():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        LO_frequency=5e9,
+        intermediate_frequency="#./nonexistent_attr",
+    )
+    with pytest.raises(AttributeError, match="intermediate_frequency.*unresolved reference"):
+        channel.inferred_RF_frequency
+
+
+# --- inferred_intermediate_frequency error message tests ---
+
+
+def test_inferred_intermediate_frequency_error_LO_is_none():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency="#./inferred_intermediate_frequency",
+        LO_frequency=None,
+        RF_frequency=5.2e9,
+    )
+    with pytest.raises(AttributeError, match="LO_frequency.*None"):
+        channel.inferred_intermediate_frequency
+
+
+def test_inferred_intermediate_frequency_error_RF_is_none():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency="#./inferred_intermediate_frequency",
+        LO_frequency=5.1e9,
+        RF_frequency=None,
+    )
+    with pytest.raises(AttributeError, match="RF_frequency.*None"):
+        channel.inferred_intermediate_frequency
+
+
+def test_inferred_intermediate_frequency_error_LO_is_unresolved_reference():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency="#./inferred_intermediate_frequency",
+        LO_frequency="#./nonexistent_attr",
+        RF_frequency=5.2e9,
+    )
+    with pytest.raises(AttributeError, match="LO_frequency.*unresolved reference"):
+        channel.inferred_intermediate_frequency
+
+
+def test_inferred_intermediate_frequency_error_RF_is_unresolved_reference():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency="#./inferred_intermediate_frequency",
+        LO_frequency=5.1e9,
+        RF_frequency="#./nonexistent_attr",
+    )
+    with pytest.raises(AttributeError, match="RF_frequency.*unresolved reference"):
+        channel.inferred_intermediate_frequency
+
+
+# --- inferred_LO_frequency error message tests ---
+
+
+def test_inferred_LO_frequency_error_RF_is_none():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency=100e6,
+        LO_frequency="#./inferred_LO_frequency",
+        RF_frequency=None,
+    )
+    with pytest.raises(AttributeError, match="RF_frequency.*None"):
+        channel.inferred_LO_frequency
+
+
+def test_inferred_LO_frequency_error_IF_is_none():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency=None,
+        LO_frequency="#./inferred_LO_frequency",
+        RF_frequency=5.2e9,
+    )
+    with pytest.raises(AttributeError, match="intermediate_frequency.*None"):
+        channel.inferred_LO_frequency
+
+
+def test_inferred_LO_frequency_error_RF_is_unresolved_reference():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency=100e6,
+        LO_frequency="#./inferred_LO_frequency",
+        RF_frequency="#./nonexistent_attr",
+    )
+    with pytest.raises(AttributeError, match="RF_frequency.*unresolved reference"):
+        channel.inferred_LO_frequency
+
+
+def test_inferred_LO_frequency_error_IF_is_unresolved_reference():
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        intermediate_frequency="#./nonexistent_attr",
+        LO_frequency="#./inferred_LO_frequency",
+        RF_frequency=5.2e9,
+    )
+    with pytest.raises(AttributeError, match="intermediate_frequency.*unresolved reference"):
+        channel.inferred_LO_frequency
+
+
 def test_generate_config(qua_config):
     channel = IQChannel(
         id="out_channel",
