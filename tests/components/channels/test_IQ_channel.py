@@ -91,6 +91,98 @@ def test_IQ_channel_inferred_LO_frequency():
         channel.inferred_LO_frequency
 
 
+@pytest.mark.parametrize(
+    "channel_kwargs, property_name, match",
+    [
+        # inferred_RF_frequency
+        pytest.param(
+            {"LO_frequency": None, "intermediate_frequency": 100e6},
+            "inferred_RF_frequency",
+            "LO_frequency.*None",
+            id="RF-LO_is_None",
+        ),
+        pytest.param(
+            {"LO_frequency": 5e9, "intermediate_frequency": None},
+            "inferred_RF_frequency",
+            "intermediate_frequency.*None",
+            id="RF-IF_is_None",
+        ),
+        pytest.param(
+            {"LO_frequency": "#./nonexistent_attr", "intermediate_frequency": 100e6},
+            "inferred_RF_frequency",
+            "LO_frequency.*unresolved reference",
+            id="RF-LO_is_unresolved_ref",
+        ),
+        pytest.param(
+            {"LO_frequency": 5e9, "intermediate_frequency": "#./nonexistent_attr"},
+            "inferred_RF_frequency",
+            "intermediate_frequency.*unresolved reference",
+            id="RF-IF_is_unresolved_ref",
+        ),
+        # inferred_intermediate_frequency
+        pytest.param(
+            {"LO_frequency": None, "RF_frequency": 5.2e9},
+            "inferred_intermediate_frequency",
+            "LO_frequency.*None",
+            id="IF-LO_is_None",
+        ),
+        pytest.param(
+            {"LO_frequency": 5.1e9, "RF_frequency": None},
+            "inferred_intermediate_frequency",
+            "RF_frequency.*None",
+            id="IF-RF_is_None",
+        ),
+        pytest.param(
+            {"LO_frequency": "#./nonexistent_attr", "RF_frequency": 5.2e9},
+            "inferred_intermediate_frequency",
+            "LO_frequency.*unresolved reference",
+            id="IF-LO_is_unresolved_ref",
+        ),
+        pytest.param(
+            {"LO_frequency": 5.1e9, "RF_frequency": "#./nonexistent_attr"},
+            "inferred_intermediate_frequency",
+            "RF_frequency.*unresolved reference",
+            id="IF-RF_is_unresolved_ref",
+        ),
+        # inferred_LO_frequency
+        pytest.param(
+            {"RF_frequency": None, "intermediate_frequency": 100e6},
+            "inferred_LO_frequency",
+            "RF_frequency.*None",
+            id="LO-RF_is_None",
+        ),
+        pytest.param(
+            {"RF_frequency": 5.2e9, "intermediate_frequency": None},
+            "inferred_LO_frequency",
+            "intermediate_frequency.*None",
+            id="LO-IF_is_None",
+        ),
+        pytest.param(
+            {"RF_frequency": "#./nonexistent_attr", "intermediate_frequency": 100e6},
+            "inferred_LO_frequency",
+            "RF_frequency.*unresolved reference",
+            id="LO-RF_is_unresolved_ref",
+        ),
+        pytest.param(
+            {"RF_frequency": 5.2e9, "intermediate_frequency": "#./nonexistent_attr"},
+            "inferred_LO_frequency",
+            "intermediate_frequency.*unresolved reference",
+            id="LO-IF_is_unresolved_ref",
+        ),
+    ],
+)
+def test_inferred_frequency_error_messages(channel_kwargs, property_name, match):
+    channel = IQChannel(
+        id="my_channel",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        frequency_converter_up=None,
+        **channel_kwargs,
+    )
+    with pytest.raises(AttributeError, match=match):
+        getattr(channel, property_name)
+
+
 def test_generate_config(qua_config):
     channel = IQChannel(
         id="out_channel",
