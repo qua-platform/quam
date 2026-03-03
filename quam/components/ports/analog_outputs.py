@@ -55,19 +55,38 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     upsampling_mode: Literal["mw", "pulse"] = "mw"
     exponential_filter: Optional[List[Tuple[float, float]]] = None
-    # high_pass_filter: Optional[float] = None  # Not yet supported
+    exponential_dc_gain: Optional[float] = None
+    high_pass_filter: Optional[float] = None
     output_mode: Literal["direct", "amplified"] = "direct"
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
+
+        if self.exponential_dc_gain is not None and self.high_pass_filter is not None:
+            raise ValueError(
+                "LFFEMAnalogOutputPort: 'exponential_dc_gain' and 'high_pass_filter' "
+                "are mutually exclusive. Please specify only one."
+            )
+
+        if self.exponential_filter is not None or self.high_pass_filter is not None:
+            if self.feedback_filter is not None:
+                raise ValueError(
+                    "LFFEMAnalogOutputPort: Please only specify 'exponential_filter' / "
+                    "'high_pass_filter' if QOP >=3.3.0, or 'feedback_filter' if "
+                    "QOP < 3.3.0, not both"
+                )
+
         if self.exponential_filter is not None:
             filter_properties = port_properties.setdefault("filter", {})
             filter_properties["exponential"] = list(self.exponential_filter)
-            if "feedback" in filter_properties:
-                raise ValueError(
-                    "LFFEMAnalogOutputPort: Please only specify 'exponential_filter' "
-                    "if QOP >=3.3.0, or 'feedback_filter' if QOP < 3.3.0, not both"
-                )
+
+        if self.exponential_dc_gain is not None:
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["exponential_dc_gain"] = self.exponential_dc_gain
+
+        if self.high_pass_filter is not None:
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["high_pass"] = self.high_pass_filter
 
         port_properties["sampling_rate"] = self.sampling_rate
         if self.sampling_rate == 1e9:

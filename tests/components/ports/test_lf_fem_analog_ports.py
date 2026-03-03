@@ -210,7 +210,7 @@ def test_lf_fem_analog_output_port_exponential_filter():
 
     # Adding feedback filter should raise ValueError due to QOP version compatibility
     port.feedback_filter = [0.3, 0.4, 0.5]
-    with pytest.raises(ValueError, match="Please only specify 'exponential_filter' "):
+    with pytest.raises(ValueError, match="'exponential_filter' / 'high_pass_filter'"):
         port.get_port_properties()
     # Remove exponential filter and verify feedback filter works
     port.exponential_filter = None
@@ -223,3 +223,64 @@ def test_lf_fem_analog_output_port_exponential_filter():
         "upsampling_mode": "mw",
         "filter": {"feedforward": [0.7, 0.2, 0.1], "feedback": [0.3, 0.4, 0.5]},
     }
+
+
+def test_lf_fem_analog_output_port_exponential_dc_gain():
+    port = LFFEMAnalogOutputPort("con1", 1, 2)
+    port.exponential_filter = [(10, 0.1), (20, 0.2)]
+    port.exponential_dc_gain = 0.5
+
+    assert port.get_port_properties() == {
+        "delay": 0,
+        "shareable": False,
+        "output_mode": "direct",
+        "sampling_rate": 1e9,
+        "upsampling_mode": "mw",
+        "filter": {
+            "exponential": [(10, 0.1), (20, 0.2)],
+            "exponential_dc_gain": 0.5,
+        },
+    }
+
+    # exponential_dc_gain without exponential_filter is also valid
+    port.exponential_filter = None
+    assert port.get_port_properties() == {
+        "delay": 0,
+        "shareable": False,
+        "output_mode": "direct",
+        "sampling_rate": 1e9,
+        "upsampling_mode": "mw",
+        "filter": {"exponential_dc_gain": 0.5},
+    }
+
+
+def test_lf_fem_analog_output_port_high_pass_filter():
+    port = LFFEMAnalogOutputPort("con1", 1, 2)
+    port.high_pass_filter = 1e-3
+
+    assert port.get_port_properties() == {
+        "delay": 0,
+        "shareable": False,
+        "output_mode": "direct",
+        "sampling_rate": 1e9,
+        "upsampling_mode": "mw",
+        "filter": {"high_pass": 1e-3},
+    }
+
+
+def test_lf_fem_analog_output_port_exponential_dc_gain_and_high_pass_mutually_exclusive():
+    port = LFFEMAnalogOutputPort("con1", 1, 2)
+    port.exponential_dc_gain = 0.5
+    port.high_pass_filter = 1e-3
+
+    with pytest.raises(ValueError, match="'exponential_dc_gain' and 'high_pass_filter'"):
+        port.get_port_properties()
+
+
+def test_lf_fem_analog_output_port_high_pass_and_feedback_mutually_exclusive():
+    port = LFFEMAnalogOutputPort("con1", 1, 2)
+    port.high_pass_filter = 1e-3
+    port.feedback_filter = [0.3, 0.4]
+
+    with pytest.raises(ValueError, match="'exponential_filter' / 'high_pass_filter'"):
+        port.get_port_properties()
