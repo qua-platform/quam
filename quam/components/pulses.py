@@ -868,8 +868,10 @@ class _FlatTopGaussianPulse(Pulse):
             return_part="all",
         )
 
-        zero_padding = np.zeros(self.length - len(waveform))
-        waveform = np.concatenate((waveform, zero_padding))
+        zero_pad_len = self.length - len(waveform)
+        left_pad = zero_pad_len // 2
+        right_pad = zero_pad_len - left_pad  # Add extra zero to right if odd
+        waveform = np.concatenate((np.zeros(left_pad), waveform, np.zeros(right_pad)))
 
         if self.axis_angle is not None:
             waveform = waveform * np.exp(1j * self.axis_angle)
