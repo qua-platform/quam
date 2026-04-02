@@ -1139,10 +1139,15 @@ class _CosineBipolarPulse(Pulse):
         seg_switch = A * cos_switch(switch_len)
         seg_flat_neg = -A * np.ones(flat_neg_len)
         seg_fall = -A * halfcos(fall_len)[::-1]
-        zero_padding = np.zeros(L - (self.smoothing_length + F))
+
+        zero_pad_len = L - (self.smoothing_length + F)
+        left_pad = zero_pad_len // 2
+        right_pad = zero_pad_len - left_pad  # Add extra zero to right if odd
+        zero_padding_left = np.zeros(left_pad)
+        zero_padding_right = np.zeros(right_pad)
 
         p = np.concatenate(
-            [seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding]
+            [zero_padding_left, seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding_right]
         )
 
         if self.axis_angle is not None:
