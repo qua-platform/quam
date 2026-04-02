@@ -829,6 +829,7 @@ class _FlatTopGaussianPulse(Pulse):
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
     length: int = "#./inferred_total_length"
+    sigma: float = 2.0
 
     @property
     def inferred_total_length(self) -> int:
@@ -863,6 +864,7 @@ class _FlatTopGaussianPulse(Pulse):
             amplitude=self.amplitude,
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
+            sigma=self.sigma,
             return_part="all",
         )
 
