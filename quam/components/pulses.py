@@ -1044,8 +1044,11 @@ class ErfSquarePulse(Pulse):
         phase: Phase offset in cycles (default 0).
         detuning: Frequency offset in Hz (default 0).
         positive_polarity: If False, the envelope is negated before modulation.
-        length: Total sample count; inferred via ``ceiling_with_epsilon`` from
-            ``duration * sample_rate`` (same as quil-rs).
+        post_zero_padding_length: Amount of zero padding to add after the pulse
+            in samples. Default is 0.
+        length: Total sample count; inferred from
+            ``(flat_length + risetime_samples + post_zero_padding_length)``
+            rounded up to a multiple of 4.
     """
 
     amplitude: float
@@ -1055,12 +1058,17 @@ class ErfSquarePulse(Pulse):
     phase: float = 0.0
     detuning: float = 0.0
     positive_polarity: bool = True
+    post_zero_padding_length: int = 0
     length: int = "#./inferred_length"  # pyright: ignore
 
     @property
     def inferred_length(self) -> int:
-        duration_s = (self.flat_length + self.risetime_samples) / self.sample_rate
-        return int(_ceiling_with_epsilon(duration_s * self.sample_rate))
+        return int(
+            np.ceil(
+                (self.flat_length + self.risetime_samples + self.post_zero_padding_length) / 4
+            )
+            * 4
+        )
 
     def waveform_function(self):
         if self.risetime_samples <= 0:
@@ -1083,6 +1091,11 @@ class ErfSquarePulse(Pulse):
         if not self.positive_polarity:
             env = -env
         env = self.amplitude * env
+
+        zero_pad_len = self.length - len(env)
+        left_pad = zero_pad_len // 2
+        right_pad = zero_pad_len - left_pad
+        env = np.concatenate((np.zeros(left_pad), env, np.zeros(right_pad)))
 
         if self.phase == 0.0 and self.detuning == 0.0:
             return env
