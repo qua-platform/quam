@@ -1,3 +1,4 @@
+import math
 import numbers
 import warnings
 from abc import ABC, abstractmethod
@@ -25,6 +26,7 @@ __all__ = [
     "DragGaussianPulse",
     "DragCosinePulse",
     "DragPulse",
+    "ErfSquarePulse",
     "SquarePulse",
     "SquareReadoutPulse",
     "GaussianPulse",
@@ -93,10 +95,7 @@ class Pulse(QuamComponent):
     @property
     def name(self):
         if self.channel is None:
-            raise AttributeError(
-                f"Cannot get full name of pulse '{self}' because it is not"
-                " attached to a channel"
-            )
+            raise AttributeError(f"Cannot get full name of pulse '{self}' because it is not" " attached to a channel")
 
         if self.id is not None:
             name = self.id
@@ -310,15 +309,9 @@ class Pulse(QuamComponent):
 
         # Add check that waveform type (single or IQ) matches parent
         if "single" in waveforms and not isinstance(self.channel, SingleChannel):
-            raise ValueError(
-                "Waveform type 'single' not allowed for (IQChannel, MWChannel)"
-                f" '{self.channel.name}'"
-            )
+            raise ValueError("Waveform type 'single' not allowed for (IQChannel, MWChannel)" f" '{self.channel.name}'")
         elif "I" in waveforms and not isinstance(self.channel, (IQChannel, MWChannel)):
-            raise ValueError(
-                "Waveform type 'IQ' not allowed for SingleChannel"
-                f" '{self.channel.name}'"
-            )
+            raise ValueError("Waveform type 'IQ' not allowed for SingleChannel" f" '{self.channel.name}'")
 
         for suffix, waveform in waveforms.items():
             waveform_name = self.waveform_name
@@ -347,16 +340,11 @@ class Pulse(QuamComponent):
         if isinstance(self.digital_marker, str):
             # Use a common config digital marker
             if self.digital_marker not in config["digital_waveforms"]:
-                raise KeyError(
-                    "{self.name}.digital_marker={self.digital_marker} not in"
-                    " config['digital_waveforms']"
-                )
+                raise KeyError("{self.name}.digital_marker={self.digital_marker} not in" " config['digital_waveforms']")
             digital_marker_name = self.digital_marker
         else:
             digital_marker_list = [tuple(t) for t in self.digital_marker]
-            config["digital_waveforms"][self.digital_marker_name] = {
-                "samples": digital_marker_list
-            }
+            config["digital_waveforms"][self.digital_marker_name] = {"samples": digital_marker_list}
             digital_marker_name = self.digital_marker_name
 
         config["pulses"][self.pulse_name]["digital_marker"] = digital_marker_name
@@ -468,9 +456,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             integration weights in radians.
     """
 
-    integration_weights: Union[List[float], List[Tuple[float, int]]] = (
-        "#./default_integration_weights"
-    )
+    integration_weights: Union[List[float], List[Tuple[float, int]]] = "#./default_integration_weights"
     integration_weights_angle: float = 0
 
     @property
@@ -531,9 +517,7 @@ class WaveformPulse(Pulse):
             return np.array(self.waveform_I)
         return np.array(self.waveform_I) + 1.0j * np.array(self.waveform_Q)
 
-    def to_dict(
-        self, follow_references: bool = False, include_defaults: bool = True
-    ) -> Dict[str, Any]:
+    def to_dict(self, follow_references: bool = False, include_defaults: bool = True) -> Dict[str, Any]:
         d = super().to_dict(follow_references, include_defaults)
         d.pop("length")
         return d
@@ -839,34 +823,26 @@ class _FlatTopGaussianPulse(Pulse):
             DeprecationWarning,
             stacklevel=2,
         )
-        return int(
-            np.ceil(
-                (
-                    self.flat_length
-                    + self.smoothing_length
-                    + self.post_zero_padding_length
-                )
-                / 4
-            )
-            * 4
-        )
+        return int(np.ceil((self.flat_length + self.smoothing_length + self.post_zero_padding_length) / 4) * 4)
 
     def waveform_function(self):
+        import inspect
+
         from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
 
         rise_fall_length = self.smoothing_length // 2
         if not self.smoothing_length % 2 == 0:
-            raise ValueError(
-                "FlatTopGaussianPulse rise_fall_length must be a multiple of 2"
-            )
+            raise ValueError("FlatTopGaussianPulse rise_fall_length must be a multiple of 2")
 
-        waveform = flattop_gaussian_waveform(
+        kwargs = dict(
             amplitude=self.amplitude,
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
-            sigma=self.sigma,
             return_part="all",
         )
+        if "sigma" in inspect.signature(flattop_gaussian_waveform).parameters:
+            kwargs["sigma"] = self.sigma
+        waveform = flattop_gaussian_waveform(**kwargs)
 
         zero_pad_len = self.length - len(waveform)
         left_pad = zero_pad_len // 2
@@ -967,8 +943,7 @@ class FlatTopCosinePulse(Pulse):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
-                "FlatTopCosinePulse requires (length - flat_length) to be even "
-                f"({self.length=} {self.flat_length=})"
+                "FlatTopCosinePulse requires (length - flat_length) to be even " f"({self.length=} {self.flat_length=})"
             )
 
         wf = flattop_cosine_waveform(
@@ -1004,8 +979,7 @@ class FlatTopTanhPulse(Pulse):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
-                "FlatTopTanhPulse requires (length - flat_length) to be even "
-                f"({self.length=} {self.flat_length=})"
+                "FlatTopTanhPulse requires (length - flat_length) to be even " f"({self.length=} {self.flat_length=})"
             )
 
         wf = flattop_tanh_waveform(
@@ -1018,6 +992,102 @@ class FlatTopTanhPulse(Pulse):
         if self.axis_angle is not None:
             wf = wf * np.exp(1j * self.axis_angle)
         return wf
+
+
+def _ceiling_with_epsilon(value: float) -> float:
+    """Match quil-rs `ceiling_with_epsilon` (waveform/templates.rs).
+
+    ``ceil((1 - 10*eps) * x)`` in effect: subtract a small term before ``ceil`` so
+    values just above an integer from floating-point drift still map to that integer.
+    """
+    eps = float(np.finfo(float).eps)
+    truncated = value - (value * 10.0 * eps)
+    return float(np.ceil(truncated))
+
+
+def _apply_phase_and_detuning_to_real_envelope(
+    envelope: np.ndarray,
+    phase: float,
+    detuning: float,
+    sample_rate: float,
+) -> np.ndarray:
+    """Match quil-rs `apply_phase_and_detuning_impl` for real envelopes (I only)."""
+    n = np.arange(len(envelope), dtype=np.float64)
+    rot = np.exp(2j * np.pi * (detuning * n / sample_rate + phase))
+    return envelope.astype(np.float64, copy=False) * rot
+
+
+_erf_vec = np.vectorize(math.erf, otypes=[float])
+
+
+@quam_dataclass
+class ErfSquarePulse(Pulse):
+    """Error-function (erf) edges with a flat top, matching Quil ``ErfSquare``.
+
+    Semantics follow `rigetti/quil-rs` ``ErfSquare`` in ``waveform/templates.rs`` and
+    https://docs.rs/quil-rs/latest/quil_rs/waveform/struct.ErfSquare.html
+
+    The envelope is ``0.5 * (erf((t - t1)/sigma) - erf((t - t2)/sigma))`` with
+    ``t1 = risetime/4``, ``t2 = duration - risetime/4`` (``fwhm = risetime/2``,
+    ``sigma = fwhm / (4*sqrt(ln 2))``), scaled by ``amplitude``. Sample count is
+    ``length = ceil_with_epsilon(duration * sample_rate)`` where
+    ``duration = (flat_length + risetime_samples) / sample_rate`` and
+    ``risetime = risetime_samples / sample_rate`` (Quil ``duration`` is plateau plus
+    ``risetime``). Phase is in cycles; ``detuning`` is in Hz.
+
+    Args:
+        amplitude: Peak envelope scale (Quil ``scale``).
+        flat_length: Plateau length in samples (between the two erf shoulders).
+        risetime_samples: Quil ``risetime`` in samples at ``sample_rate`` (2× FWHM of
+            each erf edge, in time ``risetime_samples / sample_rate``).
+        sample_rate: Samples per second (default 1e9).
+        phase: Phase offset in cycles (default 0).
+        detuning: Frequency offset in Hz (default 0).
+        positive_polarity: If False, the envelope is negated before modulation.
+        length: Total sample count; inferred via ``ceiling_with_epsilon`` from
+            ``duration * sample_rate`` (same as quil-rs).
+    """
+
+    amplitude: float
+    flat_length: int
+    risetime_samples: int
+    sample_rate: float = 1e9
+    phase: float = 0.0
+    detuning: float = 0.0
+    positive_polarity: bool = True
+    length: int = "#./inferred_length"  # pyright: ignore
+
+    @property
+    def inferred_length(self) -> int:
+        duration_s = (self.flat_length + self.risetime_samples) / self.sample_rate
+        return int(_ceiling_with_epsilon(duration_s * self.sample_rate))
+
+    def waveform_function(self):
+        if self.risetime_samples <= 0:
+            raise ValueError("ErfSquarePulse.risetime_samples must be positive")
+        if self.flat_length < 0:
+            raise ValueError("ErfSquarePulse.flat_length must be non-negative")
+
+        duration_s = (self.flat_length + self.risetime_samples) / self.sample_rate
+        risetime_s = self.risetime_samples / self.sample_rate
+
+        n_samples = int(_ceiling_with_epsilon(duration_s * self.sample_rate))
+        t = np.arange(n_samples, dtype=np.float64) / self.sample_rate
+
+        fwhm = 0.5 * risetime_s
+        t1 = fwhm
+        t2 = duration_s - fwhm
+        sigma = 0.5 * fwhm / (2.0 * math.log(2.0)) ** 0.5
+
+        env = 0.5 * (_erf_vec((t - t1) / sigma) - _erf_vec((t - t2) / sigma))
+        if not self.positive_polarity:
+            env = -env
+        env = self.amplitude * env
+
+        if self.phase == 0.0 and self.detuning == 0.0:
+            return env
+
+        return _apply_phase_and_detuning_to_real_envelope(env, self.phase, self.detuning, self.sample_rate)
 
 
 @quam_dataclass
@@ -1069,17 +1139,7 @@ class _CosineBipolarPulse(Pulse):
             DeprecationWarning,
             stacklevel=2,
         )
-        return int(
-            np.ceil(
-                (
-                    self.flat_length
-                    + self.smoothing_length
-                    + self.post_zero_padding_length
-                )
-                / 4
-            )
-            * 4
-        )
+        return int(np.ceil((self.flat_length + self.smoothing_length + self.post_zero_padding_length) / 4) * 4)
 
     def waveform_function(self):
         # Helper segment generators (length 0 returns empty array)
@@ -1098,21 +1158,16 @@ class _CosineBipolarPulse(Pulse):
                 return np.array([])
             k = np.arange(n, dtype=float)
             theta = (k + 0.5) * np.pi / n
-            return np.cos(
-                theta
-            )  # strictly between +1 and -1, antisymmetric -> net zero
+            return np.cos(theta)  # strictly between +1 and -1, antisymmetric -> net zero
 
         L = int(self.length)
         F = int(self.flat_length)
 
         if F > L:
-            raise ValueError(
-                f"CosineBipolarPulse.flat_length={F} cannot exceed total length={L}."
-            )
+            raise ValueError(f"CosineBipolarPulse.flat_length={F} cannot exceed total length={L}.")
         if F % 2 != 0:
             raise ValueError(
-                f"CosineBipolarPulse.flat_length={F} must be an even number to split "
-                "equally into + and - halves."
+                f"CosineBipolarPulse.flat_length={F} must be an even number to split " "equally into + and - halves."
             )
         if L - (self.smoothing_length + F) < 0:
             raise ValueError(
