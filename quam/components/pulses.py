@@ -760,9 +760,9 @@ class GaussianFilteredSquarePulse(Pulse):
         f_hz = self.gaussian_filter_frequency_mhz * 1e6
         sigma = self.sample_rate / (2.0 * np.pi * f_hz)
         env = gaussian_filter1d(env, sigma=sigma)
-        peak = float(np.max(env))
+        peak = float(np.max(np.abs(env)))
         if peak > 0:
-            env = env * (self.amplitude / peak)
+            env = env * (abs(self.amplitude) / peak)
         else:
             env = np.zeros(self.length, dtype=np.float64)
 

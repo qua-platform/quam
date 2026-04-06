@@ -345,6 +345,23 @@ def test_complex_arbitrary_waveform_iq_channel_list_conversion():
     assert q_waveform == [1.0, 2.0, 3.0, 4.0], "Q waveform should match imaginary part"
 
 
+def test_gaussian_filtered_square_negative_amplitude():
+    pulse = pulses.GaussianFilteredSquarePulse(
+        pulse_length=20,
+        post_zero_padding_length=20,
+        amplitude=-0.3,
+        gaussian_filter_frequency_mhz=100,
+    )
+    waveform = np.array(pulse.waveform_function())
+
+    assert len(waveform) == pulse.length
+    assert np.max(np.abs(waveform)) > 0
+    assert np.all(waveform <= 1e-12)
+    assert np.isclose(
+        np.max(np.abs(waveform)), abs(pulse.amplitude), atol=1e-12, rtol=0
+    )
+
+
 def test_cosinebipolarpulse():
     # Basic instantiation and property checks
     pulse = pulses._CosineBipolarPulse(
