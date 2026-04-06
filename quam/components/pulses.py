@@ -31,6 +31,7 @@ __all__ = [
     "SquareReadoutPulse",
     "GaussianPulse",
     "GaussianFilteredSquarePulse",
+    "GaussianFilteredSymmetricBipolarPulse",
     "FlatTopGaussianPulse",
     "ConstantReadoutPulse",
     "FlatTopBlackmanPulse",
@@ -760,6 +761,108 @@ class GaussianFilteredSquarePulse(Pulse):
         sigma = self.sample_rate / (2.0 * np.pi * f_hz)
         env = gaussian_filter1d(env, sigma=sigma)
         peak = float(np.max(env))
+        if peak > 0:
+            env = env * (self.amplitude / peak)
+        else:
+            env = np.zeros(self.length, dtype=np.float64)
+
+        if self.axis_angle is not None:
+            env = env * np.exp(1j * self.axis_angle)
+        return env
+
+
+@quam_dataclass
+class GaussianFilteredSymmetricBipolarPulse(Pulse):
+    """Symmetric bipolar square core with Gaussian filtering and peak renormalization.
+
+    The pre-filter layout over total ``length`` is
+    ``[zeros | +amplitude lobe | -amplitude lobe | zeros]`` where the two lobes are
+    equal length and opposite sign. ``gaussian_filter1d`` is then applied to the
+    entire array, the result is scaled so ``max(abs(waveform)) == amplitude``, and
+    optional ``axis_angle`` is applied.
+
+    Args:
+        pulse_length (int): Total samples in the bipolar core (sum of positive and
+            negative lobes). Must be positive and even.
+        post_zero_padding_length (int): Extra samples included in the total length
+            budget (default 0). Together with ``pulse_length``, total ``length`` is
+            ``ceil((pulse_length + post_zero_padding_length) / 4) * 4``. Remaining
+            samples are split symmetrically left/right as zeros before filtering.
+        digital_marker (str, list, optional): The digital marker to use for the pulse.
+        amplitude (float): Target peak magnitude in volts after filtering and
+            renormalization.
+        gaussian_filter_frequency_mhz (float): Frequency in MHz; filter width uses
+            sigma (samples) = sample_rate / (2 * pi * f_hz) with f_hz in Hz.
+        sample_rate (float): Sample rate in Hz used only for that sigma mapping
+            (default 1e9). Not used for IF modulation.
+        axis_angle (float, optional): IQ axis angle of the output pulse in radians.
+            If None (default), the pulse is meant for a single channel or the I port
+            of an IQ channel
+            If not None, the pulse is meant for an IQ channel (0 is X, pi/2 is Y).
+        length (int): Total waveform length in samples; inferred from
+            ``pulse_length + post_zero_padding_length`` rounded up to a multiple of 4.
+    """
+
+    pulse_length: int
+    post_zero_padding_length: int = 0
+    amplitude: float
+    gaussian_filter_frequency_mhz: float
+    sample_rate: float = 1e9
+    axis_angle: float = None
+    length: int = "#./inferred_length"  # pyright: ignore
+
+    @property
+    def inferred_length(self) -> int:
+        return int(
+            np.ceil((self.pulse_length + self.post_zero_padding_length) / 4) * 4
+        )
+
+    def waveform_function(self):
+        if self.pulse_length <= 0:
+            raise ValueError(
+                "GaussianFilteredSymmetricBipolarPulse.pulse_length must be positive"
+            )
+        if self.pulse_length % 2 != 0:
+            raise ValueError(
+                "GaussianFilteredSymmetricBipolarPulse.pulse_length must be even"
+            )
+        if self.post_zero_padding_length < 0:
+            raise ValueError(
+                "GaussianFilteredSymmetricBipolarPulse.post_zero_padding_length must be non-negative"
+            )
+        if self.gaussian_filter_frequency_mhz <= 0:
+            raise ValueError(
+                "GaussianFilteredSymmetricBipolarPulse.gaussian_filter_frequency_mhz must be positive (MHz)"
+            )
+        if self.sample_rate <= 0:
+            raise ValueError(
+                "GaussianFilteredSymmetricBipolarPulse.sample_rate must be positive (Hz)"
+            )
+
+        if self.amplitude == 0:
+            return np.zeros(self.length, dtype=np.float64)
+
+        from scipy.ndimage import gaussian_filter1d
+
+        zero_pad_len = self.length - self.pulse_length
+        left_pad = zero_pad_len // 2
+        right_pad = zero_pad_len - left_pad
+
+        half_len = self.pulse_length // 2
+        env = np.concatenate(
+            (
+                np.zeros(left_pad, dtype=np.float64),
+                self.amplitude * np.ones(half_len, dtype=np.float64),
+                -self.amplitude * np.ones(half_len, dtype=np.float64),
+                np.zeros(right_pad, dtype=np.float64),
+            )
+        )
+
+        f_hz = self.gaussian_filter_frequency_mhz * 1e6
+        sigma = self.sample_rate / (2.0 * np.pi * f_hz)
+        env = gaussian_filter1d(env, sigma=sigma)
+
+        peak = float(np.max(np.abs(env)))
         if peak > 0:
             env = env * (self.amplitude / peak)
         else:
