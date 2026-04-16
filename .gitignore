@@ -18,3 +18,4 @@ SOURCES.txt
 top_level.txt
 uv.lock
 .ai/
+.worktrees/
