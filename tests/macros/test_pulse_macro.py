@@ -61,13 +61,13 @@ def test_pulse_macro_pulse_string(test_qubit, mocker):
     with pytest.raises(NoScopeFoundException):
         test_qubit.apply("test_pulse")
 
-    mocker.patch("quam.components.channels.play")
+    mocker.patch("qm.qua.play")
 
     test_qubit.apply("test_pulse")
 
-    from quam.components.channels import play
+    import qm.qua
 
-    play.assert_called_once()
+    qm.qua.play.assert_called_once()
 
 
 def test_pulse_macro_pulse_object_error(test_qubit):
@@ -91,10 +91,10 @@ def test_pulse_macro_pulse_reference(test_qubit, mocker):
 
     test_qubit.macros["pulse_macro"] = pulse_macro
 
-    mocker.patch("quam.components.channels.play")
+    mocker.patch("qm.qua.play")
 
     test_qubit.apply("pulse_macro")
 
-    from quam.components.channels import play
+    import qm.qua
 
-    play.assert_called_once()
+    qm.qua.play.assert_called_once()
