@@ -441,8 +441,7 @@ class Channel(QuamComponent, ABC):
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
-                `self.operations`. Can also be a ``ramp(slope)`` object from
-                ``qm.qua``, in which case validation is skipped automatically.
+                `self.operations`.
             amplitude_scale (Optional[Union[ScalarFloat, Sequence[ScalarFloat]]]):
                 Amplitude scale of the pulse. Can be either a (qua) float, or a list of
                 (qua) floats. If None, the pulse is played without amplitude scaling.
@@ -450,7 +449,7 @@ class Channel(QuamComponent, ABC):
                 clock cycle (4ns). If not provided, the default pulse duration will be
                 used. It is possible to dynamically change the duration of both constant
                 and arbitrary pulses. Arbitrary pulses can only be stretched, not
-                compressed. Required when ``pulse_name`` is a ``ramp(slope)`` object.
+                compressed.
             chirp (Union[(list[int], str), (int, str)]): Allows to perform
                 piecewise linear sweep of the element's intermediate
                 frequency in time. Input should be a tuple, with the 1st
@@ -472,30 +471,13 @@ class Channel(QuamComponent, ABC):
                 handle can be retrieved with
                 `qm._results.JobResults.get` with the same ``label``.
             validate (bool): If True (default), validate that the pulse is registered
-                in Channel.operations. Automatically set to False when
-                ``pulse_name`` is a ``ramp(slope)`` object.
+                in Channel.operations.
 
         Note:
             The `element` argument from `qm.qua.play()`is not needed, as it is
             automatically set to `self.name`.
 
         """
-        from qm.grpc.qua import QuaProgramRampPulse
-
-        if isinstance(pulse_name, QuaProgramRampPulse):
-            qua.play(
-                pulse=pulse_name,
-                element=self.name,
-                duration=duration,
-                condition=condition,
-                chirp=chirp,
-                truncate=truncate,
-                timestamp_stream=timestamp_stream,
-                continue_chirp=continue_chirp,
-                target=target,
-            )
-            return
-
         if validate and pulse_name not in self.operations:
             raise KeyError(
                 f"Operation '{pulse_name}' not found in channel '{self.name}'"
