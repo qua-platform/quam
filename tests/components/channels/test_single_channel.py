@@ -125,14 +125,14 @@ def test_single_channel_offset_quam(qua_config):
 
 
 def test_single_channel_set_dc_offset(mocker):
-    mocker.patch("quam.components.channels.set_dc_offset")
+    mocker.patch("qm.qua.set_dc_offset")
 
     channel = SingleChannel(id="channel", opx_output=("con1", 1))
     channel.set_dc_offset(0.5)
 
-    from quam.components.channels import set_dc_offset
+    import qm.qua
 
-    set_dc_offset.assert_called_once_with(
+    qm.qua.set_dc_offset.assert_called_once_with(
         element="channel", element_input="single", offset=0.5
     )
 

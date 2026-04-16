@@ -242,7 +242,7 @@ def test_pulse_play(mocker):
     pulse = pulses.SquarePulse(length=60, amplitude=0)
     channel.operations["pulse"] = pulse
 
-    mock_play = mocker.patch("quam.components.channels.play")
+    mock_play = mocker.patch("qm.qua.play")
     channel.play("pulse", duration=100)
     mock_play.assert_called_once_with(
         pulse="pulse",

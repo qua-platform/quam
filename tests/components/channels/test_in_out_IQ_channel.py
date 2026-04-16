@@ -260,8 +260,8 @@ def test_channel_measure(mocker):
         amplitude=0.1, length=1000
     )
 
-    mocker.patch("quam.components.channels.declare", return_value=1)
-    mocker.patch("quam.components.channels.measure", return_value=1)
+    mocker.patch("qm.qua.declare", return_value=1)
+    mocker.patch("qm.qua.measure", return_value=1)
     result = readout_resonator.measure("readout")
     assert result == (1, 1)
 
