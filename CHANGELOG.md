@@ -2,13 +2,13 @@
 
 ### Added
 
-- Added `CosineBipolarPulse`
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
 - Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
 - Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
 - Added support for channels as quantum components via multiple inheritance, enabling channel-level macros and operations (e.g., `class HybridChannel(SingleChannel, Qubit)`). This allows macros to be attached directly to channels instead of requiring a parent qubit component.
+- Added `skip_save` field metadata support to exclude specific dataclass fields from serialization while keeping them accessible at runtime. Use `field(metadata={"skip_save": True})` to mark fields that should not be saved to JSON
 
 ### Changed
 

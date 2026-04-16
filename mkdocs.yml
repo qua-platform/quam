@@ -57,6 +57,7 @@ nav:
       - "components/custom-components.md"
   - "QUAM Features":
       - "features/index.md"
+      - "features/serialization.md"
       - "features/gate-level-operations.md"
       - "features/quam-references.md"
   - migrating-to-quam.md

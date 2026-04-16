@@ -486,6 +486,15 @@ class QuamBase(ReferenceClass):
         skip_attrs = getattr(self, "_skip_attrs", [])
         attr_names = [attr for attr in attr_names if attr not in skip_attrs]
 
+        # Apply skip_save metadata filter
+        if is_dataclass(self):
+            skip_save_attrs = [
+                field.name
+                for field in fields(self)
+                if field.metadata.get("skip_save", False)
+            ]
+            attr_names = [attr for attr in attr_names if attr not in skip_save_attrs]
+
         if not follow_references:
             attrs = {attr: self.get_raw_value(attr) for attr in attr_names}
         else:

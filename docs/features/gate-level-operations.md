@@ -372,36 +372,102 @@ from qm import qua
 class Transmon(Qubit):
     xy: MWChannel
     resonator: Optional[InOutMWChannel] = None
-    
+
     @QuantumComponent.register_macro
     def reset(self, threshold: float = 0.0):
         """Reset the qubit to ground state using active reset"""
         # Measure the qubit state
         I, Q = self.resonator.measure("readout")
-        
+
         # Apply a conditional π-pulse if qubit is in excited state
         with qua.if_(I > threshold):
             self.xy.play("x180")
-        
+
         # Add a wait time for relaxation
         self.xy.wait(100)
 ```
 
-The method macro automatically becomes available in the qubit's macro registry:
+**Key Requirements:**
+
+1. Any pulses referenced in a method macro (like `"readout"` and `"x180"`) must be registered in the appropriate channel's `operations` dictionary before the macro is called
+2. Method macros automatically become available via both `qubit.apply("method_name")` and direct method calls `qubit.method_name()`
+3. If a qubit doesn't have a specific channel (e.g., no `resonator`), calling that channel in a method macro will raise an `AttributeError`
+
+/// details | Complete working example with setup and usage
+
+Here's a full example showing how to set up qubits with channels, register pulses, and use the method macro:
 
 ```python
-# Create a Transmon instance
-q1 = Transmon(id="q1", xy=xy_channel, resonator=resonator_channel)
+from typing import Dict, Optional
+from dataclasses import field
 
-# The reset method is automatically available as a macro
+from quam.core import QuamRoot, quam_dataclass
+from quam.components.ports import FEMPortsContainer
+from quam.components.quantum_components import Qubit, QuantumComponent
+from quam.components import MWChannel, InOutMWChannel, pulses
+from qm import qua
+
+# Define the Transmon qubit class with a method macro for reset
+@quam_dataclass
+class Transmon(Qubit):
+    xy: MWChannel
+    resonator: Optional[InOutMWChannel] = None
+
+    @QuantumComponent.register_macro
+    def reset(self, threshold: float = 0.0):
+        """Reset the qubit to ground state using active reset"""
+        # Measure the qubit state
+        I, Q = self.resonator.measure("readout")
+
+        # Apply a conditional π-pulse if qubit is in excited state
+        with qua.if_(I > threshold):
+            self.xy.play("x180")
+
+        # Add a wait time for relaxation
+        self.xy.wait(100)
+
+# Set up the QUAM machine with a qubit
+@quam_dataclass
+class Quam(QuamRoot):
+    ports: FEMPortsContainer
+    qubits: Dict[str, Qubit] = field(default_factory=dict)
+
+
+machine = Quam(ports=FEMPortsContainer())
+
+# Create the qubit with XY and resonator channels
+q1_xy_port = machine.ports.get_mw_output("con1", 1, 1, create=True)
+q1_resonator_out_port = machine.ports.get_mw_output("con1", 1, 2, create=True)
+q1_resonator_in_port = machine.ports.get_mw_input("con1", 1, 2, create=True)
+
+q1 = Transmon(
+    id="q1",
+    xy=MWChannel(intermediate_frequency=100e6, opx_output=q1_xy_port.get_reference()),
+    resonator=InOutMWChannel(
+        intermediate_frequency=100e6,
+        opx_output=q1_resonator_out_port.get_reference(),
+        opx_input=q1_resonator_in_port.get_reference(),
+    ),
+)
+
+# Register the pulses required by the reset method macro
+q1.xy.operations["x180"] = pulses.SquarePulse(amplitude=0.2, length=100)
+q1.resonator.operations["readout"] = pulses.SquareReadoutPulse(
+    length=1000, amplitude=0.1, threshold=0.215
+)
+
+# Create a QUA program that uses the reset method macro
 with qua.program() as prog:
-    q1.apply("reset", threshold=0.1)  # Call via apply
-    # OR directly as a method:
+    # Call the reset method macro directly
     q1.reset(threshold=0.1)
+    # OR use the apply method to call the macro by name
+    q1.apply("reset", threshold=0.1)
 
 # Method macros appear in the macro registry
-print(q1.get_macros())  # {'reset': <MethodMacro 'reset'>, ...}
+print(q1.get_macros())  # {'reset': <MethodMacro 'reset'>, 'align': <MethodMacro 'align'>, ...}
 ```
+
+///
 
 Method macros provide better code organization by keeping qubit-specific logic within the qubit class itself, while still maintaining full compatibility with the QUAM macro system.
 
