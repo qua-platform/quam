@@ -12,7 +12,6 @@ def test_in_single_channel_attr_annotations():
         "sticky",
         "id",
         "digital_outputs",
-        "opx_input_offset",
         "time_of_flight",
         "smearing",
         "thread",

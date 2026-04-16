@@ -158,8 +158,6 @@ QUAM:
         digital_outputs: QuamDict Empty
         opx_output_I: ('con1', 3)
         opx_output_Q: ('con1', 4)
-        opx_output_offset_I: None
-        opx_output_offset_Q: None
         frequency_converter_up: FrequencyConverter
           local_oscillator: LocalOscillator
             frequency: 6000000000.0
@@ -176,9 +174,6 @@ QUAM:
         id: None
         digital_outputs: QuamDict Empty
         opx_output: ('con1', 5)
-        filter_fir_taps: None
-        filter_iir_taps: None
-        opx_output_offset: None
         intermediate_frequency: None
       resonator: InOutIQChannel
         operations: QuamDict
@@ -196,8 +191,6 @@ QUAM:
         digital_outputs: QuamDict Empty
         opx_output_I: ('con1', 1)
         opx_output_Q: ('con1', 2)
-        opx_output_offset_I: None
-        opx_output_offset_Q: None
         frequency_converter_up: FrequencyConverter
           local_oscillator: LocalOscillator
             frequency: 6000000000.0
@@ -213,8 +206,6 @@ QUAM:
         opx_input_Q: ('con1', 2)
         time_of_flight: 140
         smearing: 0
-        opx_input_offset_I: None
-        opx_input_offset_Q: None
         input_gain: None
         frequency_converter_down: None
     q1: Transmon
@@ -225,8 +216,6 @@ QUAM:
         digital_outputs: QuamDict Empty
         opx_output_I: ('con1', 6)
         opx_output_Q: ('con1', 7)
-        opx_output_offset_I: None
-        opx_output_offset_Q: None
         frequency_converter_up: FrequencyConverter
           local_oscillator: LocalOscillator
             frequency: 6000000000.0
@@ -243,9 +232,6 @@ QUAM:
         id: None
         digital_outputs: QuamDict Empty
         opx_output: ('con1', 8)
-        filter_fir_taps: None
-        filter_iir_taps: None
-        opx_output_offset: None
         intermediate_frequency: None
       resonator: InOutIQChannel
         operations: QuamDict Empty
@@ -253,8 +239,6 @@ QUAM:
         digital_outputs: QuamDict Empty
         opx_output_I: ('con1', 4)
         opx_output_Q: ('con1', 5)
-        opx_output_offset_I: None
-        opx_output_offset_Q: None
         frequency_converter_up: FrequencyConverter
           local_oscillator: LocalOscillator
             frequency: 6000000000.0
@@ -270,8 +254,6 @@ QUAM:
         opx_input_Q: ('con1', 2)
         time_of_flight: 140
         smearing: 0
-        opx_input_offset_I: None
-        opx_input_offset_Q: None
         input_gain: None
         frequency_converter_down: None
   wiring: QuamDict Empty
