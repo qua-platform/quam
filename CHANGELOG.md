@@ -2,6 +2,8 @@
 
 ### Added
 
+- Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
+- Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
 - Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
