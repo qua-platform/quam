@@ -122,7 +122,7 @@ def _create_port_property_deprecation_message(
     # Build migration message
     message = (
         f"{channel_class}.{property_name} is deprecated and will be removed "
-        f"in a future version. Port properties should be configured on "
+        f"in v0.6.0. Port properties should be configured on "
         f"dedicated Port objects.\n\n"
         f"Migration: Create an explicit port instead:\n"
         f"  from quam.components.ports import OPXPlusAnalogOutputPort\n"
@@ -153,11 +153,11 @@ class DigitalOutputChannel(QuamComponent):
             QM instances.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusDigitalOutputPort(shareable=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         inverted (bool, deprecated): If True, the digital output is inverted.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusDigitalOutputPort(inverted=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
     ."""
 
     opx_output: Union[Tuple[str, int], Tuple[str, int, int], DigitalOutputPort]
@@ -772,15 +772,15 @@ class SingleChannel(Channel):
         filter_fir_taps (List[float], deprecated): FIR filter taps for the output port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(feedforward_filter=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         filter_iir_taps (List[float], deprecated): IIR filter taps for the output port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(feedback_filter=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         opx_output_offset (float, deprecated): DC offset for the output port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(offset=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
     """
@@ -889,7 +889,7 @@ class InSingleChannel(Channel):
         opx_input_offset (float, deprecated): DC offset for the input port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogInputPort(offset=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of OPX input,
             default is None.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
@@ -1330,11 +1330,11 @@ class IQChannel(_OutComplexChannel):
         opx_output_offset_I (float, deprecated): The offset of the I channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(offset=...)` on the I port instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         opx_output_offset_Q (float, deprecated): The offset of the Q channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(offset=...)` on the Q port instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1369,7 +1369,9 @@ class IQChannel(_OutComplexChannel):
     @property
     def rf_frequency(self):
         warnings.warn(
-            "rf_frequency is deprecated, use RF_frequency instead", DeprecationWarning
+            "rf_frequency is deprecated and will be removed in v0.6.0, "
+            "use RF_frequency instead",
+            DeprecationWarning,
         )
         return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
@@ -1741,11 +1743,11 @@ class InIQChannel(_InComplexChannel):
         opx_input_offset_I (float, deprecated): The offset of the I channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogInputPort(offset=...)` on the I port instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         opx_input_offset_Q (float, deprecated): The offset of the Q channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogInputPort(offset=...)` on the Q port instead.
-            See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
             QUAM component for the IQ input port. Only needed for the old Octave.
         time_of_flight (int): Round-trip signal duration in nanoseconds.

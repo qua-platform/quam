@@ -30,11 +30,12 @@
 
 ### Deprecated
 
-- `SingleChannel.opx_output_offset` - Use `Port.offset` instead
-- `SingleChannel.filter_fir_taps` - Use `Port.feedforward_filter` instead
-- `SingleChannel.filter_iir_taps` - Use `Port.feedback_filter` instead
-- `DigitalOutputChannel.shareable` - Use `Port.shareable` instead
-- `DigitalOutputChannel.inverted` - Use `Port.inverted` instead
+- `SingleChannel.opx_output_offset` - Use `Port.offset` instead. Will be removed in v0.6.0.
+- `SingleChannel.filter_fir_taps` - Use `Port.feedforward_filter` instead. Will be removed in v0.6.0.
+- `SingleChannel.filter_iir_taps` - Use `Port.feedback_filter` instead. Will be removed in v0.6.0.
+- `DigitalOutputChannel.shareable` - Use `Port.shareable` instead. Will be removed in v0.6.0.
+- `DigitalOutputChannel.inverted` - Use `Port.inverted` instead. Will be removed in v0.6.0.
+- All channel-level port offset properties (`opx_output_offset_I/Q`, `opx_input_offset`, etc.) - Use `Port.offset` instead. Will be removed in v0.6.0.
 
 All deprecated properties now show migration guidance with code examples. See [Port documentation](https://qua-platform.github.io/quam/components/channel-ports/) for migration details.
 
