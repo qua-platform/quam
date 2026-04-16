@@ -4,7 +4,7 @@ from quam.components.ports.analog_outputs import OPXPlusAnalogOutputPort
 
 
 def test_IQ_channel_set_dc_offset(mocker):
-    mocker.patch("quam.components.channels.set_dc_offset")
+    mocker.patch("qm.qua.set_dc_offset")
 
     channel = IQChannel(
         id="channel",
@@ -21,9 +21,9 @@ def test_IQ_channel_set_dc_offset(mocker):
 
     channel.set_dc_offset(0.5, "I")
 
-    from quam.components.channels import set_dc_offset
+    import qm.qua
 
-    set_dc_offset.assert_called_once_with(
+    qm.qua.set_dc_offset.assert_called_once_with(
         element="channel", element_input="I", offset=0.5
     )
 

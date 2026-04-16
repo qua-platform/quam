@@ -4,15 +4,14 @@ from qm import qua
 from qm.qua import ramp
 from quam.components.channels import Channel, SingleChannel
 
-
 # ---------------------------------------------------------------------------
 # Channel.ramp()
 # ---------------------------------------------------------------------------
 
 
 def test_channel_ramp_calls_play(mocker):
-    mock_play = mocker.patch("quam.components.channels.play")
-    mock_qua_ramp = mocker.patch("quam.components.channels.qua_ramp")
+    mock_play = mocker.patch("qm.qua.play")
+    mock_qua_ramp = mocker.patch("qm.qua.ramp")
     mock_qua_ramp.return_value = "ramp_obj"
 
     channel = Channel(id="test_channel")
@@ -35,7 +34,7 @@ def test_channel_ramp_inside_program():
 
 
 def test_channel_ramp_to_zero_calls_qua(mocker):
-    mock_ramp_to_zero = mocker.patch("quam.components.channels.qua_ramp_to_zero")
+    mock_ramp_to_zero = mocker.patch("qm.qua.ramp_to_zero")
 
     channel = Channel(id="test_channel")
     channel.ramp_to_zero()
@@ -44,7 +43,7 @@ def test_channel_ramp_to_zero_calls_qua(mocker):
 
 
 def test_channel_ramp_to_zero_with_duration(mocker):
-    mock_ramp_to_zero = mocker.patch("quam.components.channels.qua_ramp_to_zero")
+    mock_ramp_to_zero = mocker.patch("qm.qua.ramp_to_zero")
 
     channel = Channel(id="test_channel")
     channel.ramp_to_zero(duration=500)
@@ -65,7 +64,7 @@ def test_channel_ramp_to_zero_inside_program():
 
 
 def test_play_with_ramp_object_skips_validation(mocker):
-    mock_play = mocker.patch("quam.components.channels.play")
+    mock_play = mocker.patch("qm.qua.play")
     ramp_obj = ramp(0.0001)
 
     channel = Channel(id="test_channel")
@@ -101,7 +100,7 @@ def test_play_with_string_still_validates():
 
 def test_play_with_ramp_object_no_validate_false_needed(mocker):
     """Previously required validate=False — now works without it."""
-    mock_play = mocker.patch("quam.components.channels.play")
+    mock_play = mocker.patch("qm.qua.play")
     ramp_obj = ramp(0.0005)
 
     channel = Channel(id="test_channel")
