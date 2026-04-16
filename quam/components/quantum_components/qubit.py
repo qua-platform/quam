@@ -48,13 +48,17 @@ class Qubit(QuantumComponent):
     @property
     def channels(self) -> Dict[str, Channel]:
         """Returns a dictionary of all channels of the qubit"""
-        return {
+        channels = {
             key: val
             for key, val in self.get_attrs(
                 follow_references=True, include_defaults=True
             ).items()
             if isinstance(val, Channel)
         }
+        # If the qubit itself is a Channel, include it in the channels dictionary.
+        if isinstance(self, Channel):
+            channels[self.name] = self
+        return channels
 
     def get_pulse(self, pulse_name: str) -> Pulse:
         """Returns the pulse with the given name

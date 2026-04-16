@@ -75,6 +75,40 @@ q1.align()  # Synchronizes all channels of q1
 q1.align(q2)  # Synchronizes all channels of q1 and q2
 ```
 
+### Channels as Quantum Components
+
+Channels can also be quantum components via multiple inheritance, enabling macros and operations to be attached directly at the channel level. This is useful when the channel itself is the natural abstraction for an operation, such as flattop pulse macros in spectroscopy experiments.
+
+```python
+from quam.components.channels import SingleChannel
+from quam.components.quantum_components import Qubit
+
+# Create a hybrid channel-qubit class
+@quam_dataclass
+class ChannelAsQubit(SingleChannel, Qubit):
+    """Channel that also acts as a quantum component with macros"""
+    pass
+
+# Use with channel operations and macros
+ch = ChannelAsQubit(id="spectroscopy", opx_output=("con1", 1))
+
+# Channel operations
+ch.play("readout_pulse")
+
+# Qubit operations (channels included in ch.channels)
+ch.align()
+
+# Macros attached directly to the channel
+@ch.register_macro
+def flattop(self):
+    """Flattop pulse macro for this channel"""
+    pass
+
+ch.apply("flattop")
+```
+
+When a channel inherits from `Qubit`, it automatically includes itself in its `channels` dictionary, enabling operations like `get_pulse()` and `align()` to work seamlessly with channel-level pulses and macros.
+
 ## Qubit Pairs
 
 The `QubitPair` class models the interaction between two qubits, managing:
