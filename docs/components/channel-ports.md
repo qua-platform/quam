@@ -256,7 +256,7 @@ Ports support crosstalk compensation, FIR/IIR filters (OPX+), and exponential fi
 
 - **Use port references**: Always use `port.get_reference()` instead of passing port objects directly
 - **Centralized management**: Create all ports before channels for better organization
-- **Configure properties on ports**: Set properties like `offset`, `shareable`, `inverted`, and filters directly on Port objects, not on channels. Channel-level port properties are deprecated and will be removed in a future version.
+- **Configure properties on ports**: Set properties like `offset`, `shareable`, `inverted`, and filters directly on Port objects, not on channels. Channel-level port properties are deprecated and will be removed in v0.6.0.
 - **Avoid deprecated channel properties**: Do not use `opx_output_offset`, `opx_input_offset`, `filter_fir_taps`, `filter_iir_taps`, `shareable`, or `inverted` on channel objects. These emit deprecation warnings and will be removed.
 - **Port sharing**: Set `shareable=True` when multiple channels use the same port
 - **Choose the right type**: MW-FEM for microwave/RF, LF-FEM for high-rate baseband/IF
@@ -265,7 +265,7 @@ Ports support crosstalk compensation, FIR/IIR filters (OPX+), and exponential fi
 
 /// details | Deprecated Channel Properties
 type: warning
-As of QUAM v0.5.0, setting port properties on channels is deprecated. Runtime warnings are emitted to help you migrate your code. See the [Channels Migration Guide](channels.md#migrating-from-channel-level-port-properties) for detailed examples.
+As of QUAM v0.5.0, setting port properties on channels is deprecated and will be removed in v0.6.0. Runtime warnings are emitted to help you migrate your code. See the [Channels Migration Guide](channels.md#migrating-from-channel-level-port-properties) for detailed examples.
 ///
 
 ### Quick Migration Guide
