@@ -1201,7 +1201,7 @@ class InSingleChannel(Channel):
 
 
 def _raise_inferred_freq_error(
-    freq_name: str, channel_name: str, field_name: str, value
+    freq_name: str, channel_name: str, field_name: str, value: Any
 ) -> None:
     """Raise an AttributeError with a clear message when a frequency field is invalid.
 
@@ -1211,13 +1211,15 @@ def _raise_inferred_freq_error(
         field_name: Name of the field that has the invalid value.
         value: The invalid value.
     """
-    prefix = f"Cannot infer {freq_name} for channel '{channel_name}': '{field_name}'"
+    prefix = f"Cannot infer {freq_name} for channel '{channel_name}'"
     if value is None:
-        raise AttributeError(f"{prefix}' is None")
+        raise AttributeError(f"{prefix}: '{field_name}' is None")
     if str_ref.is_reference(value):
-        raise AttributeError(f"{prefix}' is an unresolved reference: '{value}'")
+        raise AttributeError(
+            f"{prefix}: '{field_name}' is an unresolved reference: '{value}'"
+        )
     raise AttributeError(
-        f"{prefix}' has unexpected type {type(value).__name__}: {value!r}"
+        f"{prefix}: '{field_name}' has unexpected type {type(value).__name__}: {value!r}"
     )
 
 
