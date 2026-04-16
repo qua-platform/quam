@@ -1224,6 +1224,29 @@ class InSingleChannel(Channel):
         return times, counts
 
 
+def _raise_inferred_freq_error(
+    freq_name: str, channel_name: str, field_name: str, value: Any
+) -> None:
+    """Raise an AttributeError with a clear message when a frequency field is invalid.
+
+    Args:
+        freq_name: Name of the frequency being inferred (e.g. "RF frequency").
+        channel_name: Name of the channel for context.
+        field_name: Name of the field that has the invalid value.
+        value: The invalid value.
+    """
+    prefix = f"Cannot infer {freq_name} for channel '{channel_name}'"
+    if value is None:
+        raise AttributeError(f"{prefix}: '{field_name}' is None")
+    if str_ref.is_reference(value):
+        raise AttributeError(
+            f"{prefix}: '{field_name}' is an unresolved reference: '{value}'"
+        )
+    raise AttributeError(
+        f"{prefix}: '{field_name}' has unexpected type {type(value).__name__}: {value!r}"
+    )
+
+
 @quam_dataclass
 class _OutComplexChannel(Channel, ABC):
     """Base class for IQ and MW output channels."""
@@ -1241,14 +1264,10 @@ class _OutComplexChannel(Channel, ABC):
         """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
-            raise AttributeError(
-                f"Error inferring RF frequency for channel {name}: "
-                f"LO_frequency is not a number: {self.LO_frequency}"
-            )
+            _raise_inferred_freq_error("RF frequency", name, "LO_frequency", self.LO_frequency)
         if not isinstance(self.intermediate_frequency, (float, int)):
-            raise AttributeError(
-                f"Error inferring RF frequency for channel {name}: "
-                f"intermediate_frequency is not a number: {self.intermediate_frequency}"
+            _raise_inferred_freq_error(
+                "RF frequency", name, "intermediate_frequency", self.intermediate_frequency
             )
         return self.LO_frequency + self.intermediate_frequency
 
@@ -1264,14 +1283,12 @@ class _OutComplexChannel(Channel, ABC):
         """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
-            raise AttributeError(
-                f"Error inferring intermediate frequency for channel {name}: "
-                f"LO_frequency is not a number: {self.LO_frequency}"
+            _raise_inferred_freq_error(
+                "intermediate frequency", name, "LO_frequency", self.LO_frequency
             )
         if not isinstance(self.RF_frequency, (float, int)):
-            raise AttributeError(
-                f"Error inferring intermediate frequency for channel {name}: "
-                f"RF_frequency is not a number: {self.RF_frequency}"
+            _raise_inferred_freq_error(
+                "intermediate frequency", name, "RF_frequency", self.RF_frequency
             )
         return self.RF_frequency - self.LO_frequency
 
@@ -1286,14 +1303,12 @@ class _OutComplexChannel(Channel, ABC):
         """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.RF_frequency, (float, int)):
-            raise AttributeError(
-                f"Error inferring LO frequency for channel {name}: "
-                f"RF_frequency is not a number: {self.RF_frequency}"
+            _raise_inferred_freq_error(
+                "LO frequency", name, "RF_frequency", self.RF_frequency
             )
         if not isinstance(self.intermediate_frequency, (float, int)):
-            raise AttributeError(
-                f"Error inferring LO frequency for channel {name}: "
-                f"intermediate_frequency is not a number: {self.intermediate_frequency}"
+            _raise_inferred_freq_error(
+                "LO frequency", name, "intermediate_frequency", self.intermediate_frequency
             )
         return self.RF_frequency - self.intermediate_frequency
 
