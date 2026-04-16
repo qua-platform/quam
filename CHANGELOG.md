@@ -1,12 +1,15 @@
 ## [Unreleased]
 
+### Removed
+
+- Removed deprecated channel-level port properties: `SingleChannel.opx_output_offset`, `SingleChannel.filter_fir_taps`, `SingleChannel.filter_iir_taps`, `InSingleChannel.opx_input_offset`, `IQChannel.opx_output_offset_I/Q`, `InIQChannel.opx_input_offset_I/Q`, `DigitalOutputChannel.shareable`, `DigitalOutputChannel.inverted`, and `IQChannel.rf_frequency`. Configure these on explicit Port objects instead.
+
 ### Added
 
 - Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
 - Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
 - Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
-- Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
 - Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
 - Added support for channels as quantum components via multiple inheritance, enabling channel-level macros and operations (e.g., `class HybridChannel(SingleChannel, Qubit)`). This allows macros to be attached directly to channels instead of requiring a parent qubit component.
@@ -23,7 +26,6 @@
   2. `JSONSerialiser` instance value
   3. Config setting `quam.serialization.include_defaults`
   4. Fallback to `True` (default behavior)
-- Enhanced deprecation warnings for channel-level port properties to include migration examples with code snippets
 - Improved docstring return type formatting in serialization (`quam/serialisation/json.py`) and utility modules (`quam/utils/string_reference.py`)
 - Expanded documentation for channel-ports.md with comprehensive examples of port container usage
 - Removed `version` field from qua config template

@@ -46,52 +46,6 @@ def test_single_channel_offset(bare_cfg):
     }
     assert cfg == expected_cfg
 
-    cfg = deepcopy(bare_cfg)
-    channel.opx_output_offset = 0.1
-    expected_cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.1
-    channel.apply_to_config(cfg)
-    assert cfg == expected_cfg
-
-
-def test_single_channel_differing_offsets(bare_cfg):
-    channel1 = SingleChannel(id="channel", opx_output=("con1", 1))
-    channel2 = SingleChannel(id="channel2", opx_output=("con1", 1))
-
-    cfg = deepcopy(bare_cfg)
-    channel1.apply_to_config(cfg)
-    channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1] == {
-        "delay": 0,
-        "shareable": False,
-    }
-
-    channel1.opx_output_offset = 0.1
-
-    cfg = deepcopy(bare_cfg)
-    channel1.apply_to_config(cfg)
-    channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] == 0.1
-
-    channel2.opx_output_offset = 0.1
-
-    cfg = deepcopy(bare_cfg)
-    channel1.apply_to_config(cfg)
-    channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] == 0.1
-
-    channel2.opx_output_offset = 0.2
-
-    cfg = deepcopy(bare_cfg)
-    channel1.apply_to_config(cfg)
-    with pytest.warns(UserWarning):
-        channel2.apply_to_config(cfg)
-
-    cfg = deepcopy(bare_cfg)
-    channel1.apply_to_config(cfg)
-    channel2.opx_output_offset = 0.1 + 0.5e-4
-    channel2.apply_to_config(cfg)
-    assert cfg["controllers"]["con1"]["analog_outputs"][1]["offset"] == 0.1 + 0.5e-4
-
 
 def test_single_channel_offset_quam(qua_config):
     @quam_dataclass
@@ -115,12 +69,6 @@ def test_single_channel_offset_quam(qua_config):
         }
     }
 
-    assert cfg == qua_config
-
-    channel.opx_output_offset = 0.1
-
-    cfg = machine.generate_config()
-    qua_config["controllers"]["con1"]["analog_outputs"][1]["offset"] = 0.1
     assert cfg == qua_config
 
 

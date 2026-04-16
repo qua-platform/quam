@@ -78,62 +78,6 @@ LF_input_port_types = Union[
 ]
 
 
-def _create_port_property_deprecation_message(
-    channel_class: str,
-    property_name: str,
-    property_value: Any,
-    port_reference: Any,
-    port_property_name: Optional[str] = None,
-) -> str:
-    """Helper function to create deprecation warning message for port properties.
-
-    Args:
-        channel_class: Name of the channel class (e.g., "SingleChannel")
-        property_name: Name of the deprecated channel property
-        property_value: Value of the deprecated property
-        port_reference: Port tuple or object being referenced
-        port_property_name: Name of the port property (if different from
-            channel property). Defaults to inferring from property_name.
-
-    Returns:
-        Formatted deprecation warning message string
-    """
-    # Infer port property name if not provided
-    if port_property_name is None:
-        if (
-            property_name.endswith("_offset")
-            or property_name.endswith("_offset_I")
-            or property_name.endswith("_offset_Q")
-        ):
-            port_property_name = "offset"
-        elif property_name == "filter_fir_taps":
-            port_property_name = "feedforward_filter"
-        elif property_name == "filter_iir_taps":
-            port_property_name = "feedback_filter"
-        else:
-            port_property_name = property_name  # shareable, inverted, etc.
-
-    # Format port reference for migration example
-    if isinstance(port_reference, tuple):
-        port_ref_str = repr(port_reference)
-    else:
-        port_ref_str = f"{port_reference.__class__.__name__}(...)"
-
-    # Build migration message
-    message = (
-        f"{channel_class}.{property_name} is deprecated and will be removed "
-        f"in a future version. Port properties should be configured on "
-        f"dedicated Port objects.\n\n"
-        f"Migration: Create an explicit port instead:\n"
-        f"  from quam.components.ports import OPXPlusAnalogOutputPort\n"
-        f"  port = OPXPlusAnalogOutputPort(*{port_ref_str}, "
-        f"{port_property_name}={property_value})\n"
-        f"  channel = {channel_class}(opx_output=port)\n\n"
-        f"See: https://qua-platform.github.io/quam/components/channel-ports/"
-    )
-
-    return message
-
 
 @quam_dataclass
 class DigitalOutputChannel(QuamComponent):
@@ -149,23 +93,11 @@ class DigitalOutputChannel(QuamComponent):
             136 ns exists by default.
         buffer (int, optional): Digital pulses played to this element will be convolved
             with a digital pulse of value 1 with this length [ns].
-        shareable (bool, deprecated): If True, the digital output can be shared with other
-            QM instances.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusDigitalOutputPort(shareable=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
-        inverted (bool, deprecated): If True, the digital output is inverted.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusDigitalOutputPort(inverted=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
     ."""
 
     opx_output: Union[Tuple[str, int], Tuple[str, int, int], DigitalOutputPort]
     delay: int = None
     buffer: int = None
-
-    shareable: bool = None
-    inverted: bool = None
 
     def generate_element_config(self) -> Dict[str, int]:
         """Generates the config entry for a digital channel in the QUA config.
@@ -193,59 +125,18 @@ class DigitalOutputChannel(QuamComponent):
         """Adds this DigitalOutputChannel to the QUA configuration.
 
         config.controllers.<controller_name>.digital_outputs.<port> will be updated
-        with the shareable and inverted settings of this channel if specified.
+        with the default settings for this channel.
 
         See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         if isinstance(self.opx_output, DigitalOutputPort):
-            if self.shareable is not None:
-                msg = _create_port_property_deprecation_message(
-                    "DigitalOutputChannel",
-                    "shareable",
-                    self.shareable,
-                    self.opx_output,
-                )
-                warnings.warn(msg, DeprecationWarning, stacklevel=2)
-            if self.inverted is not None:
-                msg = _create_port_property_deprecation_message(
-                    "DigitalOutputChannel",
-                    "inverted",
-                    self.inverted,
-                    self.opx_output,
-                )
-                warnings.warn(msg, DeprecationWarning, stacklevel=2)
             return
 
-        # Warn about deprecated port properties when using tuple notation
-        if self.shareable is not None:
-            msg = _create_port_property_deprecation_message(
-                "DigitalOutputChannel",
-                "shareable",
-                self.shareable,
-                self.opx_output,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
-        if self.inverted is not None:
-            msg = _create_port_property_deprecation_message(
-                "DigitalOutputChannel",
-                "inverted",
-                self.inverted,
-                self.opx_output,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
-        shareable = self.shareable if self.shareable is not None else False
-        inverted = self.inverted if self.inverted is not None else False
         if len(self.opx_output) == 2:
-            digital_output_port = OPXPlusDigitalOutputPort(
-                *self.opx_output, shareable=shareable, inverted=inverted
-            )
+            digital_output_port = OPXPlusDigitalOutputPort(*self.opx_output)
         else:
-            digital_output_port = FEMDigitalOutputPort(
-                *self.opx_output, shareable=shareable, inverted=inverted
-            )
+            digital_output_port = FEMDigitalOutputPort(*self.opx_output)
         digital_output_port.apply_to_config(config)
 
 
@@ -769,27 +660,11 @@ class SingleChannel(Channel):
             `Channel._default_label`.
         opx_output (LF_output_port_types): Channel output port from the OPX perspective,
             E.g. LFFEMAnalogOutputPort("con1", 1, 2)
-        filter_fir_taps (List[float], deprecated): FIR filter taps for the output port.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogOutputPort(feedforward_filter=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
-        filter_iir_taps (List[float], deprecated): IIR filter taps for the output port.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogOutputPort(feedback_filter=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
-        opx_output_offset (float, deprecated): DC offset for the output port.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogOutputPort(offset=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
     """
 
     opx_output: LF_output_port_types
-    filter_fir_taps: List[float] = None
-    filter_iir_taps: List[float] = None
-
-    opx_output_offset: float = None
 
     def set_dc_offset(self, offset: ScalarFloat):
         """Set the DC offset of an element's input to the given value.
@@ -821,54 +696,13 @@ class SingleChannel(Channel):
 
         element_config = config["elements"][self.name]
 
-        # Check for deprecated port properties on channel
-        if self.opx_output_offset is not None:
-            msg = _create_port_property_deprecation_message(
-                "SingleChannel",
-                "opx_output_offset",
-                self.opx_output_offset,
-                self.opx_output,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
-        filter_fir_taps = self.filter_fir_taps
-        if filter_fir_taps is not None:
-            msg = _create_port_property_deprecation_message(
-                "SingleChannel",
-                "filter_fir_taps",
-                filter_fir_taps,
-                self.opx_output,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-            filter_fir_taps = list(filter_fir_taps)
-        filter_iir_taps = self.filter_iir_taps
-        if filter_iir_taps is not None:
-            msg = _create_port_property_deprecation_message(
-                "SingleChannel",
-                "filter_iir_taps",
-                filter_iir_taps,
-                self.opx_output,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-            filter_iir_taps = list(filter_iir_taps)
-
         if isinstance(self.opx_output, LFAnalogOutputPort):
             opx_port = self.opx_output
         elif len(self.opx_output) == 2:
-            opx_port = OPXPlusAnalogOutputPort(
-                *self.opx_output,
-                offset=self.opx_output_offset,
-                feedforward_filter=filter_fir_taps,
-                feedback_filter=filter_iir_taps,
-            )
+            opx_port = OPXPlusAnalogOutputPort(*self.opx_output)
             opx_port.apply_to_config(config)
         else:
-            opx_port = LFFEMAnalogOutputPort(
-                *self.opx_output,
-                offset=self.opx_output_offset,
-                feedforward_filter=filter_fir_taps,
-                feedback_filter=filter_iir_taps,
-            )
+            opx_port = LFFEMAnalogOutputPort(*self.opx_output)
             opx_port.apply_to_config(config)
 
         element_config["singleInput"] = {"port": opx_port.port_tuple}
@@ -886,10 +720,6 @@ class InSingleChannel(Channel):
             `Channel._default_label`.
         opx_input (LF_input_port_types): Channel input port from OPX perspective,
             E.g. LFFEMAnalogInputPort("con1", 1, 2)
-        opx_input_offset (float, deprecated): DC offset for the input port.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogInputPort(offset=...)` instead.
-            See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of OPX input,
             default is None.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
@@ -898,7 +728,6 @@ class InSingleChannel(Channel):
     """
 
     opx_input: LF_input_port_types
-    opx_input_offset: float = None
 
     time_of_flight: int = 140
     smearing: int = 0
@@ -919,27 +748,13 @@ class InSingleChannel(Channel):
         element_config["smearing"] = self.smearing
         element_config["time_of_flight"] = self.time_of_flight
 
-        # Check for deprecated port properties on channel
-        if self.opx_input_offset is not None:
-            msg = _create_port_property_deprecation_message(
-                "InSingleChannel",
-                "opx_input_offset",
-                self.opx_input_offset,
-                self.opx_input,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
         if isinstance(self.opx_input, LFAnalogInputPort):
             opx_port = self.opx_input
         elif len(self.opx_input) == 2:
-            opx_port = OPXPlusAnalogInputPort(
-                *self.opx_input, offset=self.opx_input_offset
-            )
+            opx_port = OPXPlusAnalogInputPort(*self.opx_input)
             opx_port.apply_to_config(config)
         else:
-            opx_port = LFFEMAnalogInputPort(
-                *self.opx_input, offset=self.opx_input_offset
-            )
+            opx_port = LFFEMAnalogInputPort(*self.opx_input)
             opx_port.apply_to_config(config)
 
         element_config["outputs"] = {"out1": opx_port.port_tuple}
@@ -1312,14 +1127,6 @@ class IQChannel(_OutComplexChannel):
             perspective, E.g. LFFEMAnalogOutputPort("con1", 1, 1)
         opx_output_Q (LF_output_port_types): Channel Q output port from the OPX
             perspective, E.g. LFFEMAnalogOutputPort("con1", 1, 2)
-        opx_output_offset_I (float, deprecated): The offset of the I channel.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogOutputPort(offset=...)` on the I port instead.
-            See [Port documentation](channel-ports.md) for details.
-        opx_output_offset_Q (float, deprecated): The offset of the Q channel.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogOutputPort(offset=...)` on the Q port instead.
-            See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1332,9 +1139,6 @@ class IQChannel(_OutComplexChannel):
 
     opx_output_I: LF_output_port_types
     opx_output_Q: LF_output_port_types
-
-    opx_output_offset_I: float = None
-    opx_output_offset_Q: float = None
 
     frequency_converter_up: BaseFrequencyConverter
 
@@ -1350,13 +1154,6 @@ class IQChannel(_OutComplexChannel):
     @property
     def mixer(self) -> Optional[Mixer]:
         return getattr(self.frequency_converter_up, "mixer", None)
-
-    @property
-    def rf_frequency(self):
-        warnings.warn(
-            "rf_frequency is deprecated, use RF_frequency instead", DeprecationWarning
-        )
-        return self.frequency_converter_up.LO_frequency + self.intermediate_frequency
 
     def set_dc_offset(self, offset: ScalarFloat, element_input: Literal["I", "Q"]):
         """Set the DC offset of an element's input to the given value.
@@ -1396,25 +1193,6 @@ class IQChannel(_OutComplexChannel):
 
         element_config = config["elements"][self.name]
 
-        # Check for deprecated port properties on channel
-        if self.opx_output_offset_I is not None:
-            msg = _create_port_property_deprecation_message(
-                "IQChannel",
-                "opx_output_offset_I",
-                self.opx_output_offset_I,
-                self.opx_output_I,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
-        if self.opx_output_offset_Q is not None:
-            msg = _create_port_property_deprecation_message(
-                "IQChannel",
-                "opx_output_offset_Q",
-                self.opx_output_offset_Q,
-                self.opx_output_Q,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
         from quam.components.octave import OctaveUpConverter
 
         if isinstance(self.frequency_converter_up, OctaveUpConverter):
@@ -1443,16 +1221,14 @@ class IQChannel(_OutComplexChannel):
                     "lo_frequency"
                 ] = self.local_oscillator.frequency
 
-        opx_outputs = [self.opx_output_I, self.opx_output_Q]
-        offsets = [self.opx_output_offset_I, self.opx_output_offset_Q]
-        for I_or_Q, opx_output, offset in zip("IQ", opx_outputs, offsets):
+        for I_or_Q, opx_output in zip("IQ", [self.opx_output_I, self.opx_output_Q]):
             if isinstance(opx_output, LFAnalogOutputPort):
                 opx_port = opx_output
             elif len(opx_output) == 2:
-                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)
+                opx_port = OPXPlusAnalogOutputPort(*opx_output)
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
+                opx_port = LFFEMAnalogOutputPort(*opx_output)
                 opx_port.apply_to_config(config)
 
             if "mixInputs" in element_config:
@@ -1723,14 +1499,6 @@ class InIQChannel(_InComplexChannel):
             perspective, e.g. LFFEMAnalogInputPort("con1", 1, 1)
         opx_input_Q (LF_input_port_types): Channel Q input port from the OPX
             perspective, e.g. LFFEMAnalogInputPort("con1", 1, 2)
-        opx_input_offset_I (float, deprecated): The offset of the I channel.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogInputPort(offset=...)` on the I port instead.
-            See [Port documentation](channel-ports.md) for details.
-        opx_input_offset_Q (float, deprecated): The offset of the Q channel.
-            **Deprecated**: This property has been moved to Port objects. Use
-            `OPXPlusAnalogInputPort(offset=...)` on the Q port instead.
-            See [Port documentation](channel-ports.md) for details.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
             QUAM component for the IQ input port. Only needed for the old Octave.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
@@ -1744,9 +1512,6 @@ class InIQChannel(_InComplexChannel):
 
     time_of_flight: int = 140
     smearing: int = 0
-
-    opx_input_offset_I: float = None
-    opx_input_offset_Q: float = None
 
     input_gain: Optional[int] = None
 
@@ -1790,40 +1555,15 @@ class InIQChannel(_InComplexChannel):
             # To be filled in next section
             element_config["outputs"] = {}
 
-        # Check for deprecated port properties on channel
-        if self.opx_input_offset_I is not None:
-            msg = _create_port_property_deprecation_message(
-                "InIQChannel",
-                "opx_input_offset_I",
-                self.opx_input_offset_I,
-                self.opx_input_I,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
-        if self.opx_input_offset_Q is not None:
-            msg = _create_port_property_deprecation_message(
-                "InIQChannel",
-                "opx_input_offset_Q",
-                self.opx_input_offset_Q,
-                self.opx_input_Q,
-            )
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
-
-        opx_inputs = [self.opx_input_I, self.opx_input_Q]
-        offsets = [self.opx_input_offset_I, self.opx_input_offset_Q]
         input_gain = int(self.input_gain if self.input_gain is not None else 0)
-        for k, (opx_input, offset) in enumerate(zip(opx_inputs, offsets), start=1):
+        for k, opx_input in enumerate([self.opx_input_I, self.opx_input_Q], start=1):
             if isinstance(opx_input, LFAnalogInputPort):
                 opx_port = opx_input
             elif len(opx_input) == 2:
-                opx_port = OPXPlusAnalogInputPort(
-                    *opx_input, offset=offset, gain_db=input_gain
-                )
+                opx_port = OPXPlusAnalogInputPort(*opx_input, gain_db=input_gain)
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogInputPort(
-                    *opx_input, offset=offset, gain_db=input_gain
-                )
+                opx_port = LFFEMAnalogInputPort(*opx_input, gain_db=input_gain)
                 opx_port.apply_to_config(config)
             if not isinstance(self.frequency_converter_down, OctaveDownConverter):
                 element_config["outputs"][f"out{k}"] = opx_port.port_tuple
@@ -1841,12 +1581,8 @@ class InOutSingleChannel(SingleChannel, InSingleChannel):
             `Channel._default_label`.
         opx_output (LF_output_port_types): Channel output port from the OPX
             perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 2)
-        opx_output_offset (float): DC offset for the output port.
         opx_input (LF_input_port_types): Channel input port from OPX perspective,
             e.g. LFFEMAnalogInputPort("con1", 1, 2)
-        opx_input_offset (float): DC offset for the input port.
-        filter_fir_taps (List[float]): FIR filter taps for the output port.
-        filter_iir_taps (List[float]): IIR filter taps for the output port.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
@@ -1875,14 +1611,10 @@ class InOutIQChannel(IQChannel, InIQChannel):
             perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 1)
         opx_output_Q (LF_output_port_types): Channel Q output port from the OPX
             perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 2)
-        opx_output_offset_I (float): The offset of the I channel. Default is 0.
-        opx_output_offset_Q (float): The offset of the Q channel. Default is 0.
         opx_input_I (LF_input_port_types): Channel I input port from the OPX
             perspective, e.g. LFFEMAnalogInputPort("con1", 1, 1)
         opx_input_Q (LF_input_port_types): Channel Q input port from the OPX
             perspective, e.g. LFFEMAnalogInputPort("con1", 1, 2)
-        opx_input_offset_I (float): The offset of the I channel. Default is 0.
-        opx_input_offset_Q (float): The offset of the Q channel. Default is 0.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1916,11 +1648,8 @@ class InSingleOutIQChannel(IQChannel, InSingleChannel):
             perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 1)
         opx_output_Q (LF_output_port_types): Channel Q output port from the OPX
             perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 2)
-        opx_output_offset_I (float): The offset of the I channel. Default is 0.
-        opx_output_offset_Q (float): The offset of the Q channel. Default is 0.
         opx_input (LF_input_port_types): Channel input port from OPX perspective,
             e.g. LFFEMAnalogInputPort("con1", 1, 1)
-        opx_input_offset (float): DC offset for the input port.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1950,15 +1679,10 @@ class InIQOutSingleChannel(SingleChannel, InIQChannel):
             `Channel._default_label`.
         opx_output (LF_output_port_types): Channel output port from the OPX
             perspective, e.g. LFFEMAnalogOutputPort("con1", 1, 1)
-        opx_output_offset (float): DC offset for the output port.
         opx_input_I (LF_input_port_types): Channel I input port from the OPX
             perspective, e.g. LFFEMAnalogInputPort("con1", 1, 1)
         opx_input_Q (LF_input_port_types): Channel Q input port from the OPX
             perspective, e.g. LFFEMAnalogInputPort("con1", 1, 2)
-        opx_input_offset_I (float): The offset of the I channel. Default is 0.
-        opx_input_offset_Q (float): The offset of the Q channel. Default is 0.
-        filter_fir_taps (List[float]): FIR filter taps for the output port.
-        filter_iir_taps (List[float]): IIR filter taps for the output port.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
