@@ -4,7 +4,7 @@
 
 Welcome to our QUAM tutorial! This guide will demonstrate setting up a basic superconducting quantum circuit with two transmon qubits and their resonators. We'll equip these qubits with control and readout pulses and generate a QUA configuration for interacting with quantum hardware.
 
-QUAM is not limited to any specific quantum hardware platform. It is designed to be adaptable and extensible for various quantum systems. You can customize components or expand the framework to add new functionalities as needed. For details on customization, visit [Custom QUAM Components](/components/custom-components).
+QUAM is not limited to any specific quantum hardware platform. It is designed to be adaptable and extensible for various quantum systems. You can customize components or expand the framework to add new functionalities as needed. For details on customization, visit [Custom QUAM Components](components/custom-components.md).
 
 We will first demonstrate how to create a basic QUAM setup from scratch. This is typically done once at the beginning of a project. Then, we'll show how to modify the setup, save the changes, and generate a QUA configuration for running quantum programs.
 
@@ -24,7 +24,7 @@ Users are recommended to create their own custom components for specialized need
 
 ## Initialization
 
-QUAM requires an initial setup where all components are instantiated. Create the root QUAM object, which acts as the top-level container for your quantum setup (see [QUAM Root Documentation](/components/quam-root) for details):
+QUAM requires an initial setup where all components are instantiated. Create the root QUAM object, which acts as the top-level container for your quantum setup (see [QUAM Root Documentation](components/quam-root.md) for details):
 
 ```python
 machine = Quam() # (1)
