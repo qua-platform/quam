@@ -3,12 +3,19 @@ from quam.core import *
 from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
 
+try:
+    from qm.exceptions import NoScopeFoundException
+except ImportError:
+    NoScopeFoundException = IndexError
+
 
 def test_channel():
     channel = Channel()
-    d = channel.to_dict()
+    d = channel.to_dict(include_defaults=False)
 
-    assert d == {}
+    assert d == {
+        "__class__": "quam.components.channels.Channel",
+    }
 
 
 def test_IQ_channel():
@@ -20,15 +27,18 @@ def test_IQ_channel():
             mixer=Mixer(), local_oscillator=LocalOscillator()
         ),
     )
-    d = IQ_channel.to_dict()
+    d = IQ_channel.to_dict(include_defaults=False)
     assert d == {
+        "__class__": "quam.components.channels.IQChannel",
         "opx_output_I": 0,
         "opx_output_Q": 1,
         "intermediate_frequency": 100e6,
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
     }
 
@@ -89,7 +99,7 @@ def test_IQ_pulse_play_validate():
     with pytest.raises(KeyError):
         single_channel.play("X180")
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         single_channel.play("X180", validate=False)
 
     single_channel.operations["X180"] = pulses.DragPulse(
@@ -101,7 +111,7 @@ def test_IQ_pulse_play_validate():
         anharmonicity=200e6,
     )
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         single_channel.play("X180")
 
 
