@@ -1,4 +1,6 @@
+import difflib
 import importlib
+import inspect
 import warnings
 from inspect import isclass
 from typing import Any, Union
@@ -112,5 +114,20 @@ def get_class_from_path(class_str) -> type:
             f"class_str: '{class_str}'"
         ) from e
     module = importlib.import_module(module_path)
-    quam_class = getattr(module, class_name)
-    return quam_class
+    if not hasattr(module, class_name):
+        all_classes = [
+            name
+            for name, obj in inspect.getmembers(module, isclass)
+            if not name.startswith("_")
+        ]
+        close_matches = difflib.get_close_matches(class_name, all_classes, n=3, cutoff=0.6)
+        if close_matches:
+            raise AttributeError(
+                f"Class '{class_name}' not found in module '{module_path}'.\n"
+                f"  Did you mean: {close_matches}?"
+            )
+        raise AttributeError(
+            f"Class '{class_name}' not found in module '{module_path}'.\n"
+            f"  Available classes in module: {sorted(all_classes)}"
+        )
+    return getattr(module, class_name)

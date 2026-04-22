@@ -19,6 +19,7 @@
 
 ### Changed
 
+- Improved error messages during QUAM state loading. Unexpected attributes now list all valid required and optional attributes and suggest close matches for typos. Missing required attributes now show the expected type and what was actually provided, with typo suggestions. Class-not-found errors from `__class__` entries now report the failing module/class name and suggest close matches. All loading errors from `QuamRoot.load()` now include the source file path.
 - Improved error messages in `OPXPlusPortsContainer` and `FEMPortsContainer`: invalid port types now raise `ValueError` immediately, and malformed port reference strings raise `ValueError` with a descriptive message instead of a cryptic unpacking error.
 - **Breaking Change**: `set_at_reference()` method now defaults to `allow_non_reference=True` instead of `False`. This aligns with real-world usage patterns and improves developer experience. Users requiring error-by-default can explicitly pass `allow_non_reference=False`.
 - **Breaking Change**: Default serialization behavior changed from excluding defaults to including them for more explicit state representation

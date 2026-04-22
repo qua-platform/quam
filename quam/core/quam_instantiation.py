@@ -1,9 +1,10 @@
 from __future__ import annotations
 from collections import UserDict, UserList
+import difflib
 import sys
 import types
 import typing
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING, Dict, Any, Optional, Type
 from inspect import isclass
 import warnings
 
@@ -269,6 +270,7 @@ def instantiate_attrs(
     fix_attrs: bool = True,
     validate_type: bool = True,
     str_repr: str = "",
+    quam_class: Optional[Type] = None,
 ) -> Dict[str, Any]:
     """Instantiate attributes if they are or contain QuamComponents
 
@@ -284,6 +286,7 @@ def instantiate_attrs(
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
         str_repr: A string representation of the object, used for error messages.
+        quam_class: The QuamBase class being instantiated, used for richer error messages.
 
     Returns:
         A dictionary where each element has been instantiated if it is a QuamComponent
@@ -296,9 +299,27 @@ def instantiate_attrs(
             if not fix_attrs:
                 instantiated_attrs["extra"][attr_name] = attr_val
                 continue
-            raise AttributeError(
-                f"Attribute {attr_name} is not a valid attr of {str_repr}"
+            allowed = sorted(attr_annotations["allowed"].keys())
+            required = sorted(attr_annotations["required"].keys())
+            optional = sorted(attr_annotations["optional"].keys())
+            class_info = (
+                f" ({quam_class.__module__}.{quam_class.__qualname__})"
+                if quam_class is not None
+                else ""
             )
+            lines = [
+                f"Unexpected attribute '{attr_name}' in {str_repr}{class_info}."
+            ]
+            if required:
+                lines.append(f"  Required attributes: {required}")
+            if optional:
+                lines.append(f"  Optional attributes: {optional}")
+            close_matches = difflib.get_close_matches(
+                attr_name, allowed, n=3, cutoff=0.6
+            )
+            if close_matches:
+                lines.append(f"  Did you mean: '{close_matches[0]}'?")
+            raise AttributeError("\n".join(lines))
 
         if isinstance(attr_val, dict) and "__class__" in attr_val:
             expected_type = get_class_from_path(attr_val["__class__"])
@@ -323,7 +344,25 @@ def instantiate_attrs(
         instantiated_attrs["required"]
     )
     if missing_attrs:
-        raise AttributeError(f"Missing required attrs {missing_attrs} for {str_repr}")
+        provided = sorted(k for k in contents if k != "__class__")
+        class_info = (
+            f" ({quam_class.__module__}.{quam_class.__qualname__})"
+            if quam_class is not None
+            else ""
+        )
+        lines = [f"Missing required attribute(s) for {str_repr}{class_info}:"]
+        for attr in sorted(missing_attrs):
+            attr_type = attr_annotations["required"][attr]
+            lines.append(f"  - '{attr}' (expected type: {attr_type})")
+        lines.append(f"  Attributes provided: {provided}")
+        for attr in sorted(missing_attrs):
+            matches = difflib.get_close_matches(attr, provided, n=1, cutoff=0.6)
+            if matches:
+                lines.append(
+                    f"  Note: '{attr}' is similar to '{matches[0]}' in the provided"
+                    " attributes - possible typo?"
+                )
+        raise AttributeError("\n".join(lines))
 
     return instantiated_attrs
 
@@ -366,10 +405,10 @@ def instantiate_quam_class(
     if "__class__" in contents:
         try:
             quam_class = get_class_from_path(contents["__class__"])
-        except ModuleNotFoundError:
+        except (ModuleNotFoundError, AttributeError) as e:
             warnings.warn(
-                f"Could not instantiate {str_repr} with class {contents['__class__']}, "
-                f"falling back to {quam_class.__name__}"
+                f"Could not load class '{contents['__class__']}' for {str_repr}: {e}. "
+                f"Falling back to {quam_class.__name__}."
             )
 
     if not isinstance(contents, dict):
@@ -386,6 +425,7 @@ def instantiate_quam_class(
         fix_attrs=fix_attrs,
         validate_type=validate_type,
         str_repr=str_repr,
+        quam_class=quam_class,
     )
 
     quam_component = quam_class(

@@ -929,12 +929,21 @@ class QuamRoot(QuamBase):
             serialiser = cls.get_serialiser()
             contents, _ = serialiser.load(filepath_or_dict)
 
-        return instantiate_quam_class(
-            quam_class=cls,
-            contents=contents,
-            fix_attrs=fix_attrs,
-            validate_type=validate_type,
-        )
+        try:
+            return instantiate_quam_class(
+                quam_class=cls,
+                contents=contents,
+                fix_attrs=fix_attrs,
+                validate_type=validate_type,
+            )
+        except (AttributeError, TypeError, ValueError) as e:
+            if not isinstance(filepath_or_dict, dict) and filepath_or_dict is not None:
+                e.args = (
+                    f"Failed to load QUAM state from '{filepath_or_dict}':\n"
+                    + (e.args[0] if e.args else ""),
+                    *e.args[1:],
+                )
+            raise
 
     def generate_config(self) -> DictQuaConfig:
         """Generate the QUA configuration from the QUAM object.
