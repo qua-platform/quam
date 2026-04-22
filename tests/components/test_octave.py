@@ -248,6 +248,59 @@ def test_frequency_down_converter_with_single_channel_apply_to_config(octave):
     assert cfg == expected_cfg
 
 
+def test_frequency_down_converter_channel_no_lo_adds_if_outputs(octave):
+    """Channel connected without LO_frequency should still add IF_outputs for calibration."""
+    channel = InOutIQChannel(
+        opx_output_I=("con1", 3),
+        opx_output_Q=("con1", 4),
+        opx_input_I=("con1", 1),
+        opx_input_Q=("con1", 2),
+        frequency_converter_up=None,
+        frequency_converter_down=None,
+    )
+    converter = octave.RF_inputs[1] = OctaveDownConverter(
+        id=1, LO_frequency=None, channel=channel
+    )
+    cfg = {}
+    octave.apply_to_config(config=cfg)
+    converter.apply_to_config(cfg)
+
+    expected_cfg = {
+        "octaves": {
+            "octave1": {
+                "RF_outputs": {},
+                "RF_inputs": {},
+                "IF_outputs": {
+                    "IF_out1": {"port": ("con1", 1), "name": "out1"},
+                    "IF_out2": {"port": ("con1", 2), "name": "out2"},
+                },
+                "loopbacks": [],
+            }
+        }
+    }
+    assert cfg == expected_cfg
+
+
+def test_frequency_down_converter_no_channel_no_lo_adds_nothing(octave):
+    """No channel and no LO_frequency: nothing should be added to the config."""
+    converter = octave.RF_inputs[1] = OctaveDownConverter(id=1, LO_frequency=None)
+    cfg = {}
+    octave.apply_to_config(config=cfg)
+    converter.apply_to_config(cfg)
+
+    expected_cfg = {
+        "octaves": {
+            "octave1": {
+                "RF_outputs": {},
+                "RF_inputs": {},
+                "IF_outputs": {},
+                "loopbacks": [],
+            }
+        }
+    }
+    assert cfg == expected_cfg
+
+
 def test_instantiate_octave_default_connectivity(octave):
     octave.initialize_frequency_converters()
 

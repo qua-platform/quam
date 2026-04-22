@@ -2,11 +2,14 @@
 
 ### Added
 
+- Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
+- Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
 - Added `BasicFEMQuam` and `BasicOPXPlusQuam` classes with integrated port containers
 - Added helper function `_create_port_property_deprecation_message()` to provide detailed migration guidance in deprecation warnings
 - Added `quam.serialization.include_defaults` config field to control whether default values are included in serialized JSON (defaults to `True`)
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
+- Added support for channels as quantum components via multiple inheritance, enabling channel-level macros and operations (e.g., `class HybridChannel(SingleChannel, Qubit)`). This allows macros to be attached directly to channels instead of requiring a parent qubit component.
 - Added `skip_save` field metadata support to exclude specific dataclass fields from serialization while keeping them accessible at runtime. Use `field(metadata={"skip_save": True})` to mark fields that should not be saved to JSON
 
 ### Changed
@@ -27,17 +30,20 @@
 
 ### Deprecated
 
-- `SingleChannel.opx_output_offset` - Use `Port.offset` instead
-- `SingleChannel.filter_fir_taps` - Use `Port.feedforward_filter` instead
-- `SingleChannel.filter_iir_taps` - Use `Port.feedback_filter` instead
-- `DigitalOutputChannel.shareable` - Use `Port.shareable` instead
-- `DigitalOutputChannel.inverted` - Use `Port.inverted` instead
+- `SingleChannel.opx_output_offset` - Use `Port.offset` instead. Will be removed in v0.6.0.
+- `SingleChannel.filter_fir_taps` - Use `Port.feedforward_filter` instead. Will be removed in v0.6.0.
+- `SingleChannel.filter_iir_taps` - Use `Port.feedback_filter` instead. Will be removed in v0.6.0.
+- `DigitalOutputChannel.shareable` - Use `Port.shareable` instead. Will be removed in v0.6.0.
+- `DigitalOutputChannel.inverted` - Use `Port.inverted` instead. Will be removed in v0.6.0.
+- All channel-level port offset properties (`opx_output_offset_I/Q`, `opx_input_offset`, etc.) - Use `Port.offset` instead. Will be removed in v0.6.0.
 
 All deprecated properties now show migration guidance with code examples. See [Port documentation](https://qua-platform.github.io/quam/components/channel-ports/) for migration details.
 
 ### Fixed
 
 - Added `exponential_dc_gain` and `high_pass_filter` fields to `LFFEMAnalogOutputPort` for QOP 3.5+ filter support; fixed validation so the two fields can coexist and `exponential_dc_gain` alone conflicts with `feedback_filter`
+- Clarified in documentation how kwargs and attributes differ for method macros: kwargs are per-call overrides, attributes are persistent calibrated values that are saved with the QUAM state
+- Improved error messages for inferred frequency properties (`inferred_RF_frequency`, `inferred_intermediate_frequency`, `inferred_LO_frequency`) in `_OutComplexChannel` (`IQChannel` and `MWChannel`): errors now clearly identify the specific field and whether it is `None` or an unresolved reference
 - Fixed config version mismatch error handling:
   - Separated error handling for config-too-old vs package-too-old scenarios
   - Original version mismatch error was being masked by `ModuleNotFoundError` during migration
@@ -53,6 +59,7 @@ All deprecated properties now show migration guidance with code examples. See [P
   - Improved error handling in `QuamList.__getitem__` and `QuamDict.__getitem__` for chain resolution failures
 - Fixed passing follow_references and include_defaults kwar
 - Fixed project-specific config not recognizing QUAM state path if the main config doesn't have a QUAM state path
+- Fixed `OctaveDownConverter.apply_to_config` to always add `IF_outputs` (physical port wiring) to the QUA config whenever a channel is connected, regardless of whether `LO_frequency` is set. This resolves a bug where `qm.calibrate_element()` failed silently because the calibration connections could not be found in the config.
 
 ## [0.4.2]
 

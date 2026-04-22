@@ -48,7 +48,7 @@ IQ_channel = IQChannel(
 type: warning
 Some properties such as `opx_output_offset`, `opx_input_offset`, `filter_fir_taps`, `filter_iir_taps`, `shareable`, and `inverted` are currently available as channel attributes for backwards compatibility. However, these properties belong to ports and should be configured through explicit [Port][quam.components.ports.BasePort] objects.
 
-**These properties are deprecated and will be removed in a future version.** Runtime deprecation warnings are now emitted when these properties are used, providing migration guidance. See the [Migration Guide](#migrating-from-channel-level-port-properties) below for details on how to update your code.
+**These properties are deprecated and will be removed in v0.6.0.** Runtime deprecation warnings are now emitted when these properties are used, providing migration guidance. See the [Migration Guide](#migrating-from-channel-level-port-properties) below for details on how to update your code.
 ///
 
 For more advanced port management, including port containers, port references, and hardware-specific configurations (LF-FEM, MW-FEM, OPX+), see the [Channel Ports](channel-ports.md) documentation.
@@ -103,7 +103,7 @@ IQ_channel = IQChannel(opx_output_I=port_I, opx_output_Q=port_Q)
 **Deprecated Approach** - Setting offset on channel (emits deprecation warning):
 
 ```python
-# Still works but will be removed in a future version
+# Still works but will be removed in v0.6.0
 channel = SingleChannel(opx_output=("con1", 1), opx_output_offset=0.15)
 IQ_channel = IQChannel(
     opx_output_I=("con1", 2),
@@ -342,7 +342,7 @@ Additional information on time tagging can be found in the [Time Tagging QUA doc
 
 ## Migrating from Channel-Level Port Properties
 
-As of QUAM v0.5.0, port-related properties on channels are deprecated. This section provides guidance on migrating your code to use explicit Port objects instead.
+As of QUAM v0.5.0, port-related properties on channels are deprecated and will be removed in v0.6.0. This section provides guidance on migrating your code to use explicit Port objects instead.
 
 ### Why Migrate?
 
@@ -351,7 +351,7 @@ Port properties such as `opx_output_offset`, `filter_fir_taps`, `shareable`, and
 - **Clarifies ownership**: Properties are configured where they belong
 - **Enables port sharing**: Multiple channels can reference the same configured port
 - **Centralizes configuration**: Port containers provide unified port management
-- **Prepares for future**: Channel-level properties will be removed in a future version
+- **Prepares for future**: Channel-level properties will be removed in v0.6.0
 
 ### Migration Examples
 
