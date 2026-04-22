@@ -56,12 +56,12 @@ class OPXPlusPortsContainer(QuamComponent):
         create: bool = False,
         **kwargs,
     ):
-        if port_type not in [
+        if port_type not in {
             "analog_output",
             "analog_input",
             "digital_output",
             "digital_input",
-        ]:
+        }:
             raise ValueError(f"Invalid port type: {port_type}")
 
         controllers = getattr(self, f"{port_type}s")
@@ -86,8 +86,6 @@ class OPXPlusPortsContainer(QuamComponent):
             ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)
         elif port_type == "digital_input":
             ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)
-        else:
-            raise ValueError(f"Invalid port type: {port_type}")
 
         return ports[port_id]
 
@@ -191,13 +189,13 @@ class FEMPortsContainer(QuamComponent):
         create: bool = False,
         **kwargs,
     ):
-        if port_type not in [
+        if port_type not in {
             "analog_output",
             "analog_input",
             "mw_output",
             "mw_input",
             "digital_output",
-        ]:
+        }:
             raise ValueError(f"Invalid port type: {port_type}")
 
         controllers = getattr(self, f"{port_type}s")
@@ -251,8 +249,6 @@ class FEMPortsContainer(QuamComponent):
             ports[port_id] = FEMDigitalOutputPort(
                 controller_id, fem_id, port_id, **kwargs
             )
-        else:
-            raise ValueError(f"Invalid port type: {port_type}")
 
         return ports[port_id]
 
