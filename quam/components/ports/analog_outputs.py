@@ -62,17 +62,15 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
 
-        if self.exponential_dc_gain is not None and self.high_pass_filter is not None:
-            raise ValueError(
-                "LFFEMAnalogOutputPort: 'exponential_dc_gain' and 'high_pass_filter' "
-                "are mutually exclusive. Please specify only one."
-            )
-
-        if self.exponential_filter is not None or self.high_pass_filter is not None:
+        if (
+            self.exponential_filter is not None
+            or self.high_pass_filter is not None
+            or self.exponential_dc_gain is not None
+        ):
             if self.feedback_filter is not None:
                 raise ValueError(
                     "LFFEMAnalogOutputPort: Please only specify 'exponential_filter' / "
-                    "'high_pass_filter' if QOP >=3.3.0, or 'feedback_filter' if "
+                    "'high_pass_filter' / 'exponential_dc_gain' if QOP >=3.3.0, or 'feedback_filter' if "
                     "QOP < 3.3.0, not both"
                 )
 

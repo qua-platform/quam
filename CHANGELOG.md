@@ -37,6 +37,7 @@ All deprecated properties now show migration guidance with code examples. See [P
 
 ### Fixed
 
+- Added `exponential_dc_gain` and `high_pass_filter` fields to `LFFEMAnalogOutputPort` for QOP 3.5+ filter support; fixed validation so the two fields can coexist and `exponential_dc_gain` alone conflicts with `feedback_filter`
 - Fixed config version mismatch error handling:
   - Separated error handling for config-too-old vs package-too-old scenarios
   - Original version mismatch error was being masked by `ModuleNotFoundError` during migration
