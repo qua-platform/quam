@@ -57,6 +57,7 @@ All deprecated properties now show migration guidance with code examples. See [P
   - Improved error handling in `QuamList.__getitem__` and `QuamDict.__getitem__` for chain resolution failures
 - Fixed passing follow_references and include_defaults kwar
 - Fixed project-specific config not recognizing QUAM state path if the main config doesn't have a QUAM state path
+- Fixed `OctaveDownConverter.apply_to_config` to always add `IF_outputs` (physical port wiring) to the QUA config whenever a channel is connected, regardless of whether `LO_frequency` is set. This resolves a bug where `qm.calibrate_element()` failed silently because the calibration connections could not be found in the config.
 
 ## [0.4.2]
 
