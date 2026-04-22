@@ -383,13 +383,15 @@ class OctaveDownConverter(OctaveFrequencyConverter):
                 zip(IF_channels, opx_port_tuples), start=1
             ):
                 label = f"IF_out{IF_ch}"
-                IF_config.setdefault(label, {"port": opx_port_tuple, "name": f"out{k}"})
-                if IF_config[label]["port"] != opx_port_tuple:
+                entry = IF_config.setdefault(
+                    label, {"port": opx_port_tuple, "name": f"out{k}"}
+                )
+                if entry["port"] != opx_port_tuple:
                     raise ValueError(
                         f"Error generating config for Octave downconverter "
                         f"id={self.id}: Unable to assign {label} to port "
                         f"{opx_port_tuple} because it is already assigned to "
-                        f"port {IF_config[label]['port']} "
+                        f"port {entry['port']}"
                     )
 
         # RF_inputs entry requires LO_frequency — skip if not yet configured
