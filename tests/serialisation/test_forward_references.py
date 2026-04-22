@@ -3,14 +3,14 @@
 Covers the case where components use `from __future__ import annotations` +
 `TYPE_CHECKING`-only imports to avoid circular imports (GitHub issue #90).
 
-The Qubit / Resonator helpers in quam/components/helper_files/ simulate two
-real-world component modules that circularly reference each other — a common
-pattern when building modular multi-file QuAM setups.
+The Qubit / Resonator helpers in tests/serialisation/forward_ref_helpers/
+simulate two real-world component modules that circularly reference each
+other — a common pattern when building modular multi-file QuAM setups.
 """
 import pytest
 from quam import QuamRoot, quam_dataclass
-from quam.components.helper_files.qubit import Qubit
-from quam.components.helper_files.resonator import Resonator
+from tests.serialisation.forward_ref_helpers.qubit import Qubit
+from tests.serialisation.forward_ref_helpers.resonator import Resonator
 
 
 @quam_dataclass
@@ -49,9 +49,9 @@ class TestForwardRefLoading:
             "qubit": {
                 "resonator": {
                     "qubit": "#../../",
-                    "__class__": "quam.components.helper_files.resonator.Resonator",
+                    "__class__": "tests.serialisation.forward_ref_helpers.resonator.Resonator",
                 },
-                "__class__": "quam.components.helper_files.qubit.Qubit",
+                "__class__": "tests.serialisation.forward_ref_helpers.qubit.Qubit",
             },
             "resonator": "#./qubit/resonator",
         }
@@ -64,9 +64,9 @@ class TestForwardRefLoading:
             "qubit": {
                 "resonator": {
                     "qubit": "#../../",
-                    "__class__": "quam.components.helper_files.resonator.Resonator",
+                    "__class__": "tests.serialisation.forward_ref_helpers.resonator.Resonator",
                 },
-                "__class__": "quam.components.helper_files.qubit.Qubit",
+                "__class__": "tests.serialisation.forward_ref_helpers.qubit.Qubit",
             },
             "resonator": "#./qubit/resonator",
         }
@@ -88,4 +88,46 @@ class TestForwardRefRoundtrip:
     def test_roundtrip_dict_equals_original(self, root):
         d = root.to_dict()
         loaded = Root.load(d)
+        assert loaded.to_dict() == d
+
+
+class TestForwardRefCollections:
+    """Dict[str, ForwardRef] and List[ForwardRef] roundtrips."""
+
+    def test_dict_of_forward_ref_roundtrip(self):
+        from tests.serialisation.forward_ref_helpers.qubit_collection import (
+            QubitCollection,
+        )
+
+        @quam_dataclass
+        class CollectionRoot(QuamRoot):
+            collection: QubitCollection
+
+        obj = CollectionRoot(
+            collection=QubitCollection(
+                resonator_dict={"r1": Resonator(qubit="#../../../")}
+            )
+        )
+        d = obj.to_dict()
+        loaded = CollectionRoot.load(d)
+        assert isinstance(loaded.collection.resonator_dict["r1"], Resonator)
+        assert loaded.to_dict() == d
+
+    def test_list_of_forward_ref_roundtrip(self):
+        from tests.serialisation.forward_ref_helpers.qubit_collection import (
+            QubitCollection,
+        )
+
+        @quam_dataclass
+        class CollectionRoot(QuamRoot):
+            collection: QubitCollection
+
+        obj = CollectionRoot(
+            collection=QubitCollection(
+                resonator_list=[Resonator(qubit="#../../../")]
+            )
+        )
+        d = obj.to_dict()
+        loaded = CollectionRoot.load(d)
+        assert isinstance(loaded.collection.resonator_list[0], Resonator)
         assert loaded.to_dict() == d
