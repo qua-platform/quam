@@ -14,7 +14,8 @@ class REQUIRED:
     ...
 
 
-def _get_type_hints_with_fallback(cls_or_obj: Union[type, object]) -> Dict[str, type]:
+@functools.lru_cache(maxsize=None)
+def _get_type_hints_with_fallback(cls: type) -> Dict[str, type]:
     """Resolve type hints per-annotation, using Any for unresolvable forward refs.
 
     Called when get_type_hints() raises NameError — typically because a class uses
@@ -23,10 +24,10 @@ def _get_type_hints_with_fallback(cls_or_obj: Union[type, object]) -> Dict[str, 
     the defining module's global namespace, ``typing.Any`` is substituted so that
     the rest of the loading logic can still operate (relying on ``__class__`` keys
     in the serialised dict to determine the concrete type at runtime).
-    """
-    cls = cls_or_obj if isinstance(cls_or_obj, type) else type(cls_or_obj)
 
-    # Collect annotations from all bases (most-derived class last → wins on conflict)
+    Results are cached per class since annotation resolution is pure and expensive
+    relative to the number of times a class is instantiated during loading.
+    """
     all_annotations: Dict[str, Any] = {}
     for base in reversed(cls.__mro__):
         all_annotations.update(getattr(base, "__annotations__", {}))
@@ -66,7 +67,8 @@ def get_dataclass_attr_annotations(
     try:
         annotated_attrs = get_type_hints(cls_or_obj)
     except NameError:
-        annotated_attrs = _get_type_hints_with_fallback(cls_or_obj)
+        cls = cls_or_obj if isinstance(cls_or_obj, type) else type(cls_or_obj)
+        annotated_attrs = _get_type_hints_with_fallback(cls)
 
     annotated_attrs.pop("_root", None)
     annotated_attrs.pop("_references", None)

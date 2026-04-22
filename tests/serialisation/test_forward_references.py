@@ -7,6 +7,7 @@ The Qubit / Resonator helpers in quam/components/helper_files/ simulate two
 real-world component modules that circularly reference each other — a common
 pattern when building modular multi-file QuAM setups.
 """
+import pytest
 from quam import QuamRoot, quam_dataclass
 from quam.components.helper_files.qubit import Qubit
 from quam.components.helper_files.resonator import Resonator
@@ -18,23 +19,23 @@ class Root(QuamRoot):
     resonator: Resonator
 
 
+@pytest.fixture
+def root():
+    return Root(
+        qubit=Qubit(resonator=Resonator(qubit="#../../")),
+        resonator="#./qubit/resonator",
+    )
+
+
 class TestForwardRefSaving:
     """Saving should work regardless — these document the baseline."""
 
-    def test_to_dict_does_not_raise(self):
-        root = Root(
-            qubit=Qubit(resonator=Resonator(qubit="#../../")),
-            resonator="#./qubit/resonator",
-        )
+    def test_to_dict_does_not_raise(self, root):
         d = root.to_dict()
         assert "qubit" in d
         assert "resonator" in d
 
-    def test_to_dict_nested_class_keys_present(self):
-        root = Root(
-            qubit=Qubit(resonator=Resonator(qubit="#../../")),
-            resonator="#./qubit/resonator",
-        )
+    def test_to_dict_nested_class_keys_present(self, root):
         d = root.to_dict()
         assert d["qubit"]["__class__"].endswith("Qubit")
         assert d["qubit"]["resonator"]["__class__"].endswith("Resonator")
@@ -77,22 +78,14 @@ class TestForwardRefLoading:
 class TestForwardRefRoundtrip:
     """Full save → load roundtrip for circularly-referencing components."""
 
-    def test_roundtrip_instances(self):
-        original = Root(
-            qubit=Qubit(resonator=Resonator(qubit="#../../")),
-            resonator="#./qubit/resonator",
-        )
-        d = original.to_dict()
+    def test_roundtrip_instances(self, root):
+        d = root.to_dict()
         loaded = Root.load(d)
 
         assert isinstance(loaded.qubit, Qubit)
         assert isinstance(loaded.qubit.resonator, Resonator)
 
-    def test_roundtrip_dict_equals_original(self):
-        original = Root(
-            qubit=Qubit(resonator=Resonator(qubit="#../../")),
-            resonator="#./qubit/resonator",
-        )
-        d = original.to_dict()
+    def test_roundtrip_dict_equals_original(self, root):
+        d = root.to_dict()
         loaded = Root.load(d)
         assert loaded.to_dict() == d
