@@ -3,7 +3,7 @@
 # creation wheel and sdist package archives. Then the draft GitHub release is
 # created with attached built python package archives.
 
-name: Create release
+name: Create GitHub draft release
 
 on:
   push:

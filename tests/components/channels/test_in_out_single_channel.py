@@ -42,7 +42,7 @@ def test_in_out_single_channel():
                 "outputs": {"out1": ("con1", 2)},
                 "singleInput": {"port": ("con1", 1)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
             }
         },
     }
@@ -76,7 +76,7 @@ def test_in_out_single_channel_ports():
                 "outputs": {"out1": ("con1", 2)},
                 "singleInput": {"port": ("con1", 1)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
             }
         },
     }

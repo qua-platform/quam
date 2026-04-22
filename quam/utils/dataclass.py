@@ -5,7 +5,6 @@ import sys
 import warnings
 from typing import Dict, Union, ClassVar, get_type_hints
 
-
 __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
 
 
@@ -122,7 +121,7 @@ def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
     - the child dataclass has a required arg
 
     From Python 3.10, this was fixed by including the flag @dataclass(kw_only=True).
-    To ensure QuAM remains compatible with Python <3.10, we include a method to patch
+    To ensure QUAM remains compatible with Python <3.10, we include a method to patch
     the dataclass such that it still works in the case described above.
 
     We achieve this by first checking if the above condition is met. If so, all the
@@ -149,7 +148,12 @@ def _quam_patched_dataclass(cls=None, kw_only: bool = False, eq: bool = True):
                         message="^Could not get reference*",
                         category=UserWarning,
                     )
-                    attr_val = getattr(self, f.name, None)
+                    from quam.utils.exceptions import InvalidReferenceError
+
+                    try:
+                        attr_val = getattr(self, f.name, None)
+                    except InvalidReferenceError:
+                        attr_val = None
                 if attr_val is REQUIRED:
                     raise TypeError(
                         f"Please provide {cls.__name__}.{f.name} as it is a"
@@ -184,7 +188,7 @@ def patch_dataclass(module_name):
     - the child dataclass has a required arg
 
     From Python 3.10, this was fixed by including the flag @dataclass(kw_only=True).
-    To ensure QuAM remains compatible with Python <3.10, we include a method to patch
+    To ensure QUAM remains compatible with Python <3.10, we include a method to patch
     the dataclass such that it still works in the case described above.
 
     We achieve this by first checking if the above condition is met. If so, all the
@@ -199,7 +203,7 @@ def patch_dataclass(module_name):
         no longer recognize the dataclass as a dataclass.
     """
     DeprecationWarning(
-        "patch_dataclass is deprecated and will be removed in QuAM v1.0. "
+        "patch_dataclass is deprecated and will be removed in QUAM v1.0. "
         "Please use 'from quam.core import quam_dataclass' as a decorator instead of "
         "the regular Python dataclass."
     )

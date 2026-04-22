@@ -12,6 +12,7 @@ def test_in_single_channel_attr_annotations():
         "opx_input_Q",
     }
     assert set(attr_annotations["optional"]) == {
+        "sticky",
         "operations",
         "filter_fir_taps",
         "filter_iir_taps",
@@ -25,6 +26,8 @@ def test_in_single_channel_attr_annotations():
         "opx_input_offset_I",
         "opx_input_offset_Q",
         "frequency_converter_down",
+        "thread",
+        "core",
     }
 
 
@@ -55,7 +58,7 @@ def test_generate_config(qua_config):
             "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
             "singleInput": {"port": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }
 
@@ -82,7 +85,7 @@ def test_generate_config_ports(qua_config):
             },
             "analog_outputs": {1: {"delay": 0, "shareable": False}},
         }
-    }    
+    }
 
     assert qua_config["elements"] == {
         "in_out_channel": {
@@ -90,6 +93,6 @@ def test_generate_config_ports(qua_config):
             "outputs": {"out1": ("con1", 1), "out2": ("con1", 2)},
             "singleInput": {"port": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }

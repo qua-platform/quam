@@ -81,7 +81,7 @@
         "lo_frequency": 6000000000.0
       },
       "smearing": 0,
-      "time_of_flight": 24,
+      "time_of_flight": 140,
       "outputs": {
         "out1": [
           "con1",
@@ -134,7 +134,7 @@
         "lo_frequency": 6000000000.0
       },
       "smearing": 0,
-      "time_of_flight": 24,
+      "time_of_flight": 140,
       "outputs": {
         "out1": [
           "con1",

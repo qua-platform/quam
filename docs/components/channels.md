@@ -1,6 +1,6 @@
 # Channels
 
-In the QuAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the [quam.components.channels][quam.components.channels] module.
+In the QUAM library, channels are a fundamental concept that represent the physical connections to the quantum hardware. They are defined in the [quam.components.channels][quam.components.channels] module.
 
 We distinguish between the following channel types, where the terms "output" and "input" are always from the perspective of the OPX hardware:
 
@@ -14,19 +14,17 @@ We distinguish between the following channel types, where the terms "output" and
 - [InOutSingleChannel][quam.components.channels.InOutSingleChannel]: Represents a single OPX output + input channel.
 - [InOutIQChannel][quam.components.channels.InOutIQChannel]: Represents an IQ OPX output + input channel.
 
-**3. Digital channels**  
+**3. Digital channels**
 
 - [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel]: Represents a digital output channel.
 
 Each analog [Channel][quam.components.channels.Channel] corresponds to an element in QUA, whereas the digital channel is part of an analog channel.
 
-These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QuAM release. If you need such channels, please create a [Github issue](https://github.com/qua-platform/quam/issues).
-
+These channel combinations cover most use cases, although there are exceptions (input-only channels and single-output, IQ-input channels) which will be implemented in a subsequent QUAM release. If you need such channels, please create a [Github issue](https://github.com/qua-platform/quam/issues).
 
 ## Analog Output Channels
 
-Analog output channels are the primary means of controlling the quantum hardware. They can be used to send various types of signals, such as microwave or RF signals, to control the quantum system. The two types of analog output channels are the [SingleChannel][quam.components.channels.SingleChannel] and the [IQChannel][quam.components.channels.IQChannel]. 
-
+Analog output channels are the primary means of controlling the quantum hardware. They can be used to send various types of signals, such as microwave or RF signals, to control the quantum system. The two types of analog output channels are the [SingleChannel][quam.components.channels.SingleChannel] and the [IQChannel][quam.components.channels.IQChannel].
 
 ### Analog Channel Ports
 
@@ -46,15 +44,80 @@ IQ_channel = IQChannel(
 )
 ```
 
+/// details | Port Properties in Channels (Deprecated)
+type: warning
+Some properties such as `opx_output_offset`, `opx_input_offset`, `filter_fir_taps`, `filter_iir_taps`, `shareable`, and `inverted` are currently available as channel attributes for backwards compatibility. However, these properties belong to ports and should be configured through explicit [Port][quam.components.ports.BasePort] objects.
+
+**These properties are deprecated and will be removed in v0.6.0.** Runtime deprecation warnings are now emitted when these properties are used, providing migration guidance. See the [Migration Guide](#migrating-from-channel-level-port-properties) below for details on how to update your code.
+///
+
+For more advanced port management, including port containers, port references, and hardware-specific configurations (LF-FEM, MW-FEM, OPX+), see the [Channel Ports](channel-ports.md) documentation.
+
+#### Using Explicit Ports (Recommended)
+
+For advanced control over port properties, define ports explicitly and reference them from channels:
+
+```python
+from quam.components import BasicQuam, SingleChannel
+from quam.components.ports import FEMPortsContainer
+
+# Create QUAM instance with port container
+machine = BasicQuam(ports=FEMPortsContainer())
+
+# Define port with its properties
+port = machine.ports.get_analog_output(
+    "con1", 1, 2,  # controller, fem_id, port_id
+    create=True,
+    offset=0.15,  # DC offset configured on port
+    shareable=True,  # Port sharing configured on port
+    sampling_rate=2e9,
+)
+
+# Create channel that references the port
+machine.channels["drive"] = SingleChannel(
+    opx_output=port.get_reference()  # Reference to configured port
+)
+```
+
+This approach ensures centralized port configuration and enables port sharing across channels. See [Channel Ports](channel-ports.md) for complete documentation.
 
 ### DC Offset
+
 Each analog channel can have a specified DC offset that remains for the duration of the QUA program.
-This can be set through `SingleChannel.opx_output_offset` for the [SingleChannel][quam.components.channels.SingleChannel], and through `IQChannel.opx_output_offset_I` and `IQChannel.opx_output_offset_Q` for the [IQChannel][quam.components.channels.IQChannel].
+
+**Recommended Approach** - Configure DC offset on the port:
+
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+# For single channels
+port = OPXPlusAnalogOutputPort("con1", 1, offset=0.15)
+channel = SingleChannel(opx_output=port)
+
+# For IQ channels with different I/Q offsets
+port_I = OPXPlusAnalogOutputPort("con1", 2, offset=0.10)
+port_Q = OPXPlusAnalogOutputPort("con1", 3, offset=0.12)
+IQ_channel = IQChannel(opx_output_I=port_I, opx_output_Q=port_Q)
+```
+
+**Deprecated Approach** - Setting offset on channel (emits deprecation warning):
+
+```python
+# Still works but will be removed in v0.6.0
+channel = SingleChannel(opx_output=("con1", 1), opx_output_offset=0.15)
+IQ_channel = IQChannel(
+    opx_output_I=("con1", 2),
+    opx_output_Q=("con1", 3),
+    opx_output_offset_I=0.10,
+    opx_output_offset_Q=0.12
+)
+```
 
 Note that if multiple channels are attached to the same OPX output port(s), they may not have different output offsets.
-This raises a warning and chooses the DC offset of the last channel. 
+This raises a warning and chooses the DC offset of the last channel.
 
 The DC offset can also be modified while a QUA program is running:
+
 ```python
 from qm.qua import program
 
@@ -62,13 +125,14 @@ with program() as prog:
     single_channel.set_dc_offset(offset=0.1)
     IQ_channel.set_dc_offset(offset=0.25, element_input="I")  # Set offset of port I
 ```
+
 The offsets can also be QUA variables.
 [Channel.set_dc_offset()][quam.components.channels.SingleChannel.set_dc_offset] is a light wrapper around `qm.qua.set_dc_offset` to attach it to the channel.
 
-
 ### Frequency Converters
+
 The `IQChannel` is usually connected to a mixer to upconvert the signal using a local oscillator.
-This frequency upconversion is represented in QuAM by a [FrequencyConverter][quam.components.hardware.FrequencyConverter]
+This frequency upconversion is represented in QUAM by a [FrequencyConverter][quam.components.hardware.FrequencyConverter]
 
 ```python
 from quam.components.hardware import FrequencyConverter, LocalOscillator, Mixer
@@ -86,11 +150,11 @@ IQ_channel = IQChannel(
 
 Integrated frequency conversion systems such as [QM's Octave](https://docs.quantum-machines.co/1.1.7/qm-qua-sdk/docs/Hardware/octave/) usually have additional features such as auto-calibration.
 For this reason they have a specialized frequency converter such as the [OctaveUpConverter][quam.components.octave.OctaveUpConverter].
-See the [QuAM Octave Documentation][octave] documentation for details.
-
+See the [QUAM Octave Documentation][octave] documentation for details.
 
 ### Analog Pulses
-QuAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
+
+QUAM has a range of standard [Pulse][quam.components.pulses.Pulse] components in [quam.components.pulses][quam.components.pulses].
 These pulses can be registered as part of the analog channel via `Channel.operations` such that the channel can output the associated pulse waveforms:
 
 ```python
@@ -108,13 +172,15 @@ Once a pulse has been registered in a channel, it can be played within a QUA pro
 with program() as prog:
     channel.play("X180")
 ```
+
 [Channel.play()][quam.components.channels.Channel.play] is a light wrapper around [qm.qua.play()](https://docs.quantum-machines.co/latest/qm-qua-sdk/docs/Introduction/qua_overview/?h=play#play-statement) to attach it to the channel.
 
-Details on pulses in QuAM can be found at the [Pulses Documentation][pulses].
+Details on pulses in QUAM can be found at the [Pulses Documentation][pulses].
 
 ## Analog Output + Input Channels
+
 Aside from sending signals to the quantum hardware, data is usually also received back, and subsequently read out through the hardware's input ports.
-In QuAM, this is represented using the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel].
+In QUAM, this is represented using the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel].
 These channels don't only have associated output port(s) but also input port(s):
 
 ```python
@@ -139,8 +205,8 @@ These are extensions of the [SingleChannel][quam.components.channels.SingleChann
 Both the [InOutSingleChannel][quam.components.channels.InOutSingleChannel] and the [InOutIQChannel][quam.components.channels.InOutIQChannel] combine output + input as in most cases a signal is also sent to probe the quantum hardware.
 Support for input-only analog channels is planned for a future release.
 
-
 ### Readout Pulses
+
 Channels that have input ports can also have readout pulses:
 
 ```python
@@ -151,12 +217,13 @@ io_channel.operations["readout"] = pulses.SquareReadoutPulse(
     integration_weights_angle=0.0,  # rad, optional rotation of readout signal
 )
 ```
+
 As can be seen, the readout pulse (in this case [SquareReadoutPulse][quam.components.pulses.SquareReadoutPulse]) is similar to the regular pulses, but with additional parameters for readout.
 Specifically, it contains the attributes `integration_weights_angle` and `integration_weights` to specify how the readout signal should be integrated.
 
-
 ## Digital Channels
-QuAM supports digital output channels (output from the OPX perspective) through the component [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel].
+
+QUAM supports digital output channels (output from the OPX perspective) through the component [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel].
 These can be added to any analog channel through the attribute `Channel.digital_outputs`. As an example:
 
 ```python
@@ -169,20 +236,24 @@ analog_channel = SingleChannel(
     }
 )
 ```
+
 The docstring of [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel] describes all the available properties.
 
 Multiple digital outputs can be attached to the same analog channel:
+
 ```python
 analog_channel.digital_outputs = {
     "dig_out1": DigitalOutputChannel(opx_output=("con1", 1)),
     "dig_out2": DigitalOutputChannel(opx_output=("con1", 2)),
 }
 ```
+
 In this case, any digital pulses will be played to all digital channels.
 
-
 ### Digital-only Channel
+
 It is also possible to create a digital-only channel, i.e. using digital ports without any analog ports.
+
 ```python
 from quam.components import Channel, DigitalOutputChannel
 channel = Channel(
@@ -191,8 +262,8 @@ channel = Channel(
 )
 ```
 
-
 ## Digital Pulses
+
 Once a [DigitalOutputChannel][quam.components.channels.DigitalOutputChannel] is added to a [Channel][quam.components.channels.Channel], digital waveforms can be played on it. This is done by attaching a digital waveform to a [Pulse][quam.components.pulses.Pulse] through the attribute `Pulse.digital_marker`:
 
 ```python
@@ -204,12 +275,198 @@ pulse = pulses.SquarePulse(
     digital_marker=[(1, 20), (0, 20), (1, 40)]
 )
 ```
+
 In the example above, the square pulse will also output digital waveform: "high" for 20 ns ⇨ "low" for 20 ns ⇨ "high" for 40 ns. This digital waveform will be played on all digital channels that are attached to the analog channel.
 
-
 ### Digital-only Pulses
+
 A digital pulse can also be played without a corresponding analog pulse.
 This can be done by directly using the base [pulses.Pulse][quam.components.pulses.Pulse] class:
+
 ```python
 channel.operations["digital"] = pulses.Pulse(length=100, digital_marker=[(1, 20, 0, 10)])
 ```
+
+## Sticky channels
+
+A channel can be set to be sticky, meaning that the voltage after a pulse will remain at the last value of the pulse.
+Details can be found in the [Sticky channel QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#sticky-element).
+Any channel can be made sticky by adding the [channels.StickyChannelAddon][quam.components.channels.StickyChannelAddon] to it:
+
+```python
+from quam.components.channels import StickyChannelAddon
+
+channel.sticky = StickyChannelAddon(duration=...)
+```
+
+## Time Tagging
+
+Time tagging is a feature that allows for the measurement of the time of arrival of a signal.
+It is implemented as the [TimeTaggingAddon][quam.components.channels.TimeTaggingAddon] to the [InSingleChannel][quam.components.channels.InSingleChannel].
+
+To use the time tagging feature, the [TimeTaggingAddon][quam.components.channels.TimeTaggingAddon] must be added to the [InSingleChannel][quam.components.channels.InSingleChannel]:
+
+```python
+from quam.components.channels import InSingleChannel, TimeTaggingAddon
+
+channel = InSingleChannel(
+    id="channel",
+    opx_input=("con1", 1),
+    time_tagging=TimeTaggingAddon(
+        signal_threshold=0.195,  # in units of V
+        signal_polarity="below",
+        derivative_threshold=0.073,  # in units of V/ns
+        derivative_polarity="below",
+    )
+)
+```
+
+All parameters are optional, and are by default set to the values shown above.
+
+Once the time tagging addon is added, the [InSingleChannel.measure_time_tagging()][quam.components.channels.InSingleChannel.measure_time_tagging] method can be used within a QUA program to measure the time of arrival of the signal:
+
+```python
+times, counts = channel.measure_time_tagging(size=1000, max_duration=3000)
+```
+
+- The `size` parameter specifies the maximum number of samples to collect.
+- The `max_duration` parameter specifies the maximum duration to collect samples for.
+
+Two QUA variables are returned:
+
+- `times` is a QUA array containing the times of arrival of the signal.
+  It will contain at most `size` entries, though it may contain fewer if the maximum duration is reached first.
+- `counts` is a QUA integer containing the number of measured events, being at most equal to `size`.
+
+Additional information on time tagging can be found in the [Time Tagging QUA documentation](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging).
+
+## Migrating from Channel-Level Port Properties
+
+As of QUAM v0.5.0, port-related properties on channels are deprecated and will be removed in v0.6.0. This section provides guidance on migrating your code to use explicit Port objects instead.
+
+### Why Migrate?
+
+Port properties such as `opx_output_offset`, `filter_fir_taps`, `shareable`, and `inverted` logically belong to ports, not channels. Using explicit Port objects:
+
+- **Clarifies ownership**: Properties are configured where they belong
+- **Enables port sharing**: Multiple channels can reference the same configured port
+- **Centralizes configuration**: Port containers provide unified port management
+- **Prepares for future**: Channel-level properties will be removed in v0.6.0
+
+### Migration Examples
+
+#### DC Offsets
+
+**Before (Deprecated):**
+
+```python
+channel = SingleChannel(
+    opx_output=("con1", 1),
+    opx_output_offset=0.15
+)
+```
+
+**After (Recommended):**
+
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+port = OPXPlusAnalogOutputPort("con1", 1, offset=0.15)
+channel = SingleChannel(opx_output=port)
+```
+
+#### Filter Configuration
+
+**Before (Deprecated):**
+
+```python
+channel = SingleChannel(
+    opx_output=("con1", 1),
+    filter_fir_taps=[0.1, 0.2, 0.3],
+    filter_iir_taps=[0.5, 0.6]
+)
+```
+
+**After (Recommended):**
+
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+port = OPXPlusAnalogOutputPort(
+    "con1", 1,
+    feedforward_filter=[0.1, 0.2, 0.3],
+    feedback_filter=[0.5, 0.6]
+)
+channel = SingleChannel(opx_output=port)
+```
+
+#### Digital Channel Properties
+
+**Before (Deprecated):**
+
+```python
+digital_channel = DigitalOutputChannel(
+    opx_output=("con1", 1),
+    shareable=True,
+    inverted=True
+)
+```
+
+**After (Recommended):**
+
+```python
+from quam.components.ports import OPXPlusDigitalOutputPort
+
+port = OPXPlusDigitalOutputPort("con1", 1, shareable=True, inverted=True)
+digital_channel = DigitalOutputChannel(opx_output=port)
+```
+
+#### IQ Channels with Offsets
+
+**Before (Deprecated):**
+
+```python
+IQ_channel = IQChannel(
+    opx_output_I=("con1", 2),
+    opx_output_Q=("con1", 3),
+    opx_output_offset_I=0.10,
+    opx_output_offset_Q=0.12
+)
+```
+
+**After (Recommended):**
+
+```python
+from quam.components.ports import OPXPlusAnalogOutputPort
+
+port_I = OPXPlusAnalogOutputPort("con1", 2, offset=0.10)
+port_Q = OPXPlusAnalogOutputPort("con1", 3, offset=0.12)
+IQ_channel = IQChannel(opx_output_I=port_I, opx_output_Q=port_Q)
+```
+
+### Using Port Containers (Best Practice)
+
+For complex systems with many ports, use a port container for centralized management:
+
+```python
+from quam.components import BasicQuam
+from quam.components.ports import FEMPortsContainer
+
+# Set up port container
+machine = BasicQuam(ports=FEMPortsContainer())
+
+# Create ports with properties
+output_port = machine.ports.get_analog_output(
+    "con1", 1, 2,  # controller, fem_id, port_id
+    create=True,
+    offset=0.15,
+    shareable=True
+)
+
+# Reference port in channel
+machine.channels["drive"] = SingleChannel(
+    opx_output=output_port.get_reference()
+)
+```
+
+See the [Channel Ports documentation](channel-ports.md) for more details on port containers and advanced port management.

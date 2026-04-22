@@ -1,43 +1,21 @@
-import numpy as np
 import pytest
-
 from quam.core import *
 from quam.components import *
 from quam.components.channels import Channel, IQChannel, SingleChannel
-from quam.utils.dataclass import get_dataclass_attr_annotations
 
-
-def test_drag_pulse():
-    drag_pulse = pulses.DragPulse(
-        amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
-    )
-
-    assert drag_pulse.operation == "control"
-    assert drag_pulse.length == 20
-    assert drag_pulse.get_attrs() == {
-        "id": None,
-        "length": 20,
-        "axis_angle": 0.0,
-        "digital_marker": None,
-        "amplitude": 1,
-        "sigma": 4,
-        "alpha": 2,
-        "anharmonicity": 200000000.0,
-        "detuning": 0.0,
-        "subtracted": True,
-    }
-
-    waveform = drag_pulse.calculate_waveform()
-    assert len(waveform) == 20
-    assert isinstance(waveform, np.ndarray)
-    assert np.iscomplexobj(waveform)
+try:
+    from qm.exceptions import NoScopeFoundException
+except ImportError:
+    NoScopeFoundException = IndexError
 
 
 def test_channel():
     channel = Channel()
-    d = channel.to_dict()
+    d = channel.to_dict(include_defaults=False)
 
-    assert d == {}
+    assert d == {
+        "__class__": "quam.components.channels.Channel",
+    }
 
 
 def test_IQ_channel():
@@ -49,15 +27,18 @@ def test_IQ_channel():
             mixer=Mixer(), local_oscillator=LocalOscillator()
         ),
     )
-    d = IQ_channel.to_dict()
+    d = IQ_channel.to_dict(include_defaults=False)
     assert d == {
+        "__class__": "quam.components.channels.IQChannel",
         "opx_output_I": 0,
         "opx_output_Q": 1,
         "intermediate_frequency": 100e6,
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
     }
 
@@ -118,7 +99,7 @@ def test_IQ_pulse_play_validate():
     with pytest.raises(KeyError):
         single_channel.play("X180")
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         single_channel.play("X180", validate=False)
 
     single_channel.operations["X180"] = pulses.DragPulse(
@@ -130,7 +111,7 @@ def test_IQ_pulse_play_validate():
         anharmonicity=200e6,
     )
 
-    with pytest.raises(IndexError):
+    with pytest.raises(NoScopeFoundException):
         single_channel.play("X180")
 
 
@@ -153,42 +134,70 @@ def test_pulse_parent_parent_channel():
     assert pulse.channel is channel
 
 
-@quam_dataclass
-class QuAMTestPulseReferenced(QuamRoot):
-    channel: SingleChannel
-
-
-def test_pulses_referenced():
-
-    channel = SingleChannel(id="single", opx_output=("con1", 1))
-    machine = QuAMTestPulseReferenced(channel=channel)
-
-    pulse = pulses.SquarePulse(length=60, amplitude=0)
-    channel.operations["pulse"] = pulse
-    channel.operations["pulse_referenced"] = "#./pulse"
-
-    assert (
-        channel.operations["pulse_referenced"] == channel.operations["pulse"] == pulse
+def test_arbitrary_waveform_iq_channel_list_conversion():
+    """Test that arbitrary waveforms on IQ channels convert both I and Q to lists"""
+    IQ_channel = IQChannel(
+        id="IQ",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
     )
 
-    state = machine.to_dict()
+    gaussian_pulse = pulses.GaussianPulse(
+        length=16, amplitude=1.0, sigma=4.0, axis_angle=None
+    )
+    IQ_channel.operations["gaussian"] = gaussian_pulse
 
-    machine_loaded = QuAMTestPulseReferenced.load(state)
+    cfg = {"pulses": {}, "waveforms": {}}
+    gaussian_pulse.apply_to_config(cfg)
 
-    pulse_loaded = machine_loaded.channel.operations["pulse"]
-    assert isinstance(pulse_loaded, pulses.SquarePulse)
-    assert pulse_loaded.to_dict() == pulse.to_dict()
+    pulse_config = cfg["pulses"][gaussian_pulse.pulse_name]
+    i_waveform_name = pulse_config["waveforms"]["I"]
+    q_waveform_name = pulse_config["waveforms"]["Q"]
 
-    assert machine_loaded.channel.operations["pulse_referenced"] == pulse_loaded
-    assert (
-        machine_loaded.channel.operations.get_unreferenced_value("pulse_referenced")
-        == "#./pulse"
+    i_waveform = cfg["waveforms"][i_waveform_name]["samples"]
+    q_waveform = cfg["waveforms"][q_waveform_name]["samples"]
+
+    assert isinstance(i_waveform, list), "I waveform should be a list"
+    assert isinstance(q_waveform, list), "Q waveform should be a list"
+
+
+def test_complex_arbitrary_waveform_iq_channel_list_conversion():
+    """Test that complex arbitrary waveforms on IQ channels convert both I and Q to lists"""
+    import numpy as np
+
+    IQ_channel = IQChannel(
+        id="IQ",
+        opx_output_I=("con1", 1),
+        opx_output_Q=("con1", 2),
+        intermediate_frequency=100e6,
+        frequency_converter_up=FrequencyConverter(
+            mixer=Mixer(), local_oscillator=LocalOscillator()
+        ),
     )
 
+    @quam_dataclass
+    class CustomComplexPulse(pulses.Pulse):
+        amplitude: float = 1.0
 
-def test_pulse_attr_annotations():
-    from quam.components import pulses
+        def waveform_function(self):
+            return np.array([1 + 1j, 2 + 2j, 3 + 3j, 4 + 4j])
 
-    attr_annotations = get_dataclass_attr_annotations(pulses.SquareReadoutPulse)
+    complex_pulse = CustomComplexPulse(length=4)
+    IQ_channel.operations["complex"] = complex_pulse
 
-    assert list(attr_annotations["required"]) == ["length", "amplitude"]
+    cfg = {"pulses": {}, "waveforms": {}}
+    complex_pulse.apply_to_config(cfg)
+
+    pulse_config = cfg["pulses"][complex_pulse.pulse_name]
+    i_waveform_name = pulse_config["waveforms"]["I"]
+    q_waveform_name = pulse_config["waveforms"]["Q"]
+
+    i_waveform = cfg["waveforms"][i_waveform_name]["samples"]
+    q_waveform = cfg["waveforms"][q_waveform_name]["samples"]
+
+    assert isinstance(i_waveform, list), "I waveform should be a list"
+    assert isinstance(q_waveform, list), "Q waveform should be a list"

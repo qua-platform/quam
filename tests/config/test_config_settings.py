@@ -72,7 +72,7 @@ def test_generate_after_property():
 
         @property
         def config_settings(self):
-            return {"after": [self._root.second_component]}
+            return {"after": [self.get_root().second_component]}
 
     root = Root(
         first_component=ComponentProperty(name="first"),

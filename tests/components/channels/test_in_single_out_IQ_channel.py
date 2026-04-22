@@ -14,6 +14,7 @@ def test_in_single_channel_attr_annotations():
     }
     assert set(attr_annotations["optional"]) == {
         "operations",
+        "sticky",
         "intermediate_frequency",
         "LO_frequency",
         "RF_frequency",
@@ -24,6 +25,9 @@ def test_in_single_channel_attr_annotations():
         "opx_input_offset",
         "time_of_flight",
         "smearing",
+        "thread",
+        "core",
+        "time_tagging",
     }
 
 
@@ -60,7 +64,7 @@ def test_generate_config(qua_config):
             "operations": {},
             "outputs": {"out1": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }
 
@@ -93,7 +97,6 @@ def test_generate_config(qua_config):
 
     assert qua_config["elements"] == {
         "in_out_channel": {
-            "intermediate_frequency": 0.0,
             "mixInputs": {
                 "I": ("con1", 1),
                 "Q": ("con1", 2),
@@ -101,6 +104,6 @@ def test_generate_config(qua_config):
             "operations": {},
             "outputs": {"out1": ("con1", 1)},
             "smearing": 0,
-            "time_of_flight": 24,
+            "time_of_flight": 140,
         }
     }

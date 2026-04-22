@@ -163,17 +163,22 @@ def test_transmon_add_pulse():
         amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20, axis_angle=0
     )
 
-    quam_dict = transmon.to_dict()
+    quam_dict = transmon.to_dict(include_defaults=False)
     expected_quam_dict = {
+        "__class__": "quam.examples.superconducting_qubits.components.Transmon",
         "id": 1,
         "xy": {
+            "__class__": "quam.components.channels.IQChannel",
             "intermediate_frequency": 100000000.0,
             "opx_output_I": ("con1", 1),
             "opx_output_Q": ("con1", 2),
             "frequency_converter_up": {
                 "__class__": "quam.components.hardware.FrequencyConverter",
-                "mixer": {},
-                "local_oscillator": {"frequency": 5000000000.0},
+                "mixer": {"__class__": "quam.components.hardware.Mixer"},
+                "local_oscillator": {
+                    "frequency": 5000000000.0,
+                    "__class__": "quam.components.hardware.LocalOscillator",
+                },
             },
             "operations": {
                 "X180": {
@@ -281,7 +286,7 @@ def test_instantiation_single_element():
     assert quam.qubit.id == 0
     assert quam.qubit.xy is None
 
-    assert quam.qubit._root is quam
+    assert quam.qubit.get_root() is quam
 
 
 def test_instantiation_single_nested_element():
@@ -290,6 +295,6 @@ def test_instantiation_single_nested_element():
     assert quam.qubit.xy.mixer.name == "q0.xy.mixer"
     assert quam.qubit.xy.mixer.local_oscillator_frequency == 6e9
 
-    assert quam.qubit._root is quam
-    assert quam.qubit.xy._root is quam
-    assert quam.qubit.xy.mixer._root is quam
+    assert quam.qubit.get_root() is quam
+    assert quam.qubit.xy.get_root() is quam
+    assert quam.qubit.xy.mixer.get_root() is quam

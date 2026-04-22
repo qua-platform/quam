@@ -1,9 +1,11 @@
 from __future__ import annotations
+from collections import UserDict, UserList
 import sys
 import types
 import typing
 from typing import TYPE_CHECKING, Dict, Any
 from inspect import isclass
+import warnings
 
 from quam.utils import (
     string_reference,
@@ -57,6 +59,12 @@ def instantiate_attrs_from_dict(
     else:
         required_subtype = None
 
+    if not isinstance(attr_dict, (dict, UserDict)):
+        raise TypeError(
+            f"Failed instantiating QUAM attribute '{str_repr}'. "
+            f"Expected dict or UserDict, got {type(attr_dict)}: {attr_dict}"
+        )
+
     instantiated_attr_dict = {}
     for attr_name, attr_val in attr_dict.items():
         instantiated_attr_dict[attr_name] = instantiate_attr(
@@ -102,6 +110,12 @@ def instantiate_attrs_from_list(
         required_subtype = typing.get_args(required_type)[0]
     else:
         required_subtype = None
+
+    if not isinstance(attr_list, (list, UserList)):
+        raise TypeError(
+            f"Failed instantiating QUAM attribute '{str_repr}'. "
+            f"Expected list or UserList, got {type(attr_list)}: {attr_list}"
+        )
 
     instantiated_attr_list = []
     for k, attr_val in enumerate(attr_list):
@@ -235,6 +249,10 @@ def instantiate_attr(
         instantiated_attr = attr_val
 
     if validate_type:
+        # Handle specific case: float-to-int coercion for saved state compatibility
+        if expected_type == int and isinstance(instantiated_attr, float):
+            instantiated_attr = int(instantiated_attr)
+        
         # TODO Add logic that required attributes cannot be None
         validate_obj_type(
             elem=instantiated_attr,
@@ -346,7 +364,13 @@ def instantiate_quam_class(
     # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
 
     if "__class__" in contents:
-        quam_class = get_class_from_path(contents["__class__"])
+        try:
+            quam_class = get_class_from_path(contents["__class__"])
+        except ModuleNotFoundError:
+            warnings.warn(
+                f"Could not instantiate {str_repr} with class {contents['__class__']}, "
+                f"falling back to {quam_class.__name__}"
+            )
 
     if not isinstance(contents, dict):
         raise TypeError(

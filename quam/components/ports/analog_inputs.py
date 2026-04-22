@@ -54,13 +54,17 @@ class MWFEMAnalogInputPort(FEMPort):
 
     band: int
     downconverter_frequency: float
+    gain_db: Optional[int] = None
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     shareable: bool = False
 
     def get_port_properties(self) -> Dict[str, Any]:
-        return {
+        port_properties = {
             "band": self.band,
             "downconverter_frequency": self.downconverter_frequency,
             "sampling_rate": self.sampling_rate,
             "shareable": self.shareable,
         }
+        if self.gain_db is not None:
+            port_properties["gain_db"] = self.gain_db
+        return port_properties

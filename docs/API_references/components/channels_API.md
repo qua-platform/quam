@@ -1,3 +1,3 @@
-# QuAM Channels API
+# QUAM Channels API
 
 ::: quam.components.channels

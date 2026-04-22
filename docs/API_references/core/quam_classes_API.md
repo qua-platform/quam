@@ -1,4 +1,4 @@
-# QuAM Classes API
+# QUAM Classes API
 
 ::: quam.core.quam_classes
     handler: python

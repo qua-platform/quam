@@ -39,12 +39,15 @@ def test_empty_in_out_IQ_channel():
 
     readout_resonator.id = 1
 
-    d = readout_resonator.to_dict()
+    d = readout_resonator.to_dict(include_defaults=False)
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {"frequency": 5000000000.0},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "frequency": 5000000000.0,
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
@@ -52,6 +55,7 @@ def test_empty_in_out_IQ_channel():
         "opx_input_Q": ("con1", 4),
         "intermediate_frequency": 100000000.0,
         "id": 1,
+        "__class__": "quam.components.channels.InOutIQChannel",
     }
 
     bare_cfg = {
@@ -87,7 +91,7 @@ def test_empty_in_out_IQ_channel():
                 "operations": {},
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
             }
         },
         "pulses": {},
@@ -126,12 +130,15 @@ def test_readout_resonator_with_readout():
         amplitude=0.1, length=1000
     )
 
-    d = readout_resonator.to_dict()
+    d = readout_resonator.to_dict(include_defaults=False)
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {"frequency": 5000000000.0},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "frequency": 5000000000.0,
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
         "opx_output_I": ("con1", 1),
         "opx_output_Q": ("con1", 2),
@@ -146,6 +153,7 @@ def test_readout_resonator_with_readout():
                 "length": 1000,
             }
         },
+        "__class__": "quam.components.channels.InOutIQChannel",
     }
 
     cfg = {
@@ -180,7 +188,7 @@ def test_readout_resonator_with_readout():
                 },
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
                 "operations": {"readout": "IQ1.readout.pulse"},
             }
         },
@@ -252,8 +260,8 @@ def test_channel_measure(mocker):
         amplitude=0.1, length=1000
     )
 
-    mocker.patch("quam.components.channels.declare", return_value=1)
-    mocker.patch("quam.components.channels.measure", return_value=1)
+    mocker.patch("qm.qua.declare", return_value=1)
+    mocker.patch("qm.qua.measure", return_value=1)
     result = readout_resonator.measure("readout")
     assert result == (1, 1)
 
@@ -293,12 +301,15 @@ def test_empty_in_out_IQ_channel_ports():
 
     readout_resonator.id = 1
 
-    d = readout_resonator.to_dict()
+    d = readout_resonator.to_dict(include_defaults=False)
     assert d == {
         "frequency_converter_up": {
             "__class__": "quam.components.hardware.FrequencyConverter",
-            "mixer": {},
-            "local_oscillator": {"frequency": 5000000000.0},
+            "mixer": {"__class__": "quam.components.hardware.Mixer"},
+            "local_oscillator": {
+                "frequency": 5000000000.0,
+                "__class__": "quam.components.hardware.LocalOscillator",
+            },
         },
         "opx_output_I": {
             "controller_id": "con1",
@@ -322,6 +333,7 @@ def test_empty_in_out_IQ_channel_ports():
         },
         "intermediate_frequency": 100000000.0,
         "id": 1,
+        "__class__": "quam.components.channels.InOutIQChannel",
     }
 
     bare_cfg = {
@@ -357,7 +369,7 @@ def test_empty_in_out_IQ_channel_ports():
                 "operations": {},
                 "outputs": {"out1": ("con1", 3), "out2": ("con1", 4)},
                 "smearing": 0,
-                "time_of_flight": 24,
+                "time_of_flight": 140,
             }
         },
         "pulses": {},

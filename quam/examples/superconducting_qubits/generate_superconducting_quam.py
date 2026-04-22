@@ -3,20 +3,20 @@ import json
 
 from quam.components import *
 from quam.components.channels import IQChannel, InOutIQChannel, SingleChannel
-from quam.examples.superconducting_qubits.components import Transmon, QuAM
+from quam.examples.superconducting_qubits.components import Transmon, Quam
 from quam.core import QuamRoot
 
 
 def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
-    """Create a QuAM with a number of qubits.
+    """Create a QUAM with a number of qubits.
 
     Args:
         num_qubits (int): Number of qubits to create.
 
     Returns:
-        QuamRoot: A QuAM with the specified number of qubits.
+        QuamRoot: A QUAM with the specified number of qubits.
     """
-    machine = QuAM()
+    machine = Quam()
     machine.wiring = {
         "qubits": {
             f"q{idx}": {
@@ -59,7 +59,7 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
             opx_input_Q="#/wiring/feedline/opx_input_Q",
             frequency_converter_up=FrequencyConverter(
                 mixer=Mixer(), local_oscillator=LocalOscillator(power=10, frequency=6e9)
-            )
+            ),
         )
     return machine
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     qua_config = quam.generate_config()
     json.dump(qua_config, qua_file.open("w"), indent=4)
 
-    quam_loaded = QuAM.load(folder / "quam")
+    quam_loaded = Quam.load(folder / "quam")
 
     qua_file = folder / "qua_config2.json"
     qua_config = quam.generate_config()

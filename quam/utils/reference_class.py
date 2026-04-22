@@ -1,5 +1,7 @@
 from typing import Any, ClassVar
+import warnings
 
+from quam.utils.exceptions import InvalidReferenceError
 
 __all__ = ["ReferenceClass"]
 
@@ -27,9 +29,20 @@ class ReferenceClass:
         """
         raise NotImplementedError
 
-    def get_unreferenced_value(self, attr: str) -> bool:
-        """Check if an attribute is a reference"""
+    def get_raw_value(self, attr: str) -> Any:
+        """Get the value of an attribute without following references.
+
+        If the value is a reference, the reference string is returned
+        """
         return super().__getattribute__(attr)
+
+    def get_unreferenced_value(self, attr: str) -> Any:
+        """Deprecated method. Use `get_raw_value` instead."""
+        warnings.warn(
+            "get_unreferenced_value is deprecated. Use get_raw_value instead.",
+            DeprecationWarning,
+        )
+        return self.get_raw_value(attr)
 
     def __getattribute__(self, attr: str) -> Any:
         attr_val = super().__getattribute__(attr)
@@ -41,7 +54,12 @@ class ReferenceClass:
             if self._is_reference(attr_val):
                 return self._get_referenced_value(attr_val)
             return attr_val
-        except Exception:
+        except InvalidReferenceError as e:
+            raise e
+        except Exception as e:
+            error_msg = str(e)
+            if "is not a valid reference" in error_msg:
+                raise e
             return attr_val
 
     def _is_valid_setattr(
@@ -76,7 +94,7 @@ class ReferenceClass:
             return True
 
         try:
-            original_value = self.get_unreferenced_value(attr)
+            original_value = self.get_raw_value(attr)
         except AttributeError:
             return True
 
