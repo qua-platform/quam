@@ -101,7 +101,7 @@ class Pulse(QuamComponent):
         if self.id is not None:
             name = self.id
         else:
-            name = self.parent.get_attr_name(self)
+            name = self.inferred_id
 
         return f"{self.channel.name}{str_ref.DELIMITER}{name}"
 

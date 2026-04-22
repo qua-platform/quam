@@ -2,6 +2,7 @@
 
 ### Added
 
+- `QuamBase.inferred_id` property: returns the explicit `id` field value if set, otherwise returns the attribute name or key under which the component is stored in its parent. Equivalent to `self.parent.get_attr_name(self)`. Resolves #53.
 - Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
 - Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
