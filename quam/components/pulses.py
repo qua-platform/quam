@@ -117,6 +117,23 @@ class Pulse(QuamComponent):
     def digital_marker_name(self):
         return f"{self.name}{str_ref.DELIMITER}dm"
 
+    def _get_sampling_rate(self) -> float:
+        """Get the sampling rate of the port that the pulse is attached to.
+
+        Returns:
+            The sampling rate of the pulse in Hz, either 1e9 or 2e9.
+
+        If the pulse is not attached to a channel, a warning is raised and the default
+        sampling rate of 1 GHz is returned.
+        """
+        if self.channel is None:
+            warnings.warn(
+                "Pulse is not attached to a channel, cannot determine sampling rate. "
+                "Using default sampling rate of 1 GHz."
+            )
+            return 1e9
+        return self.channel.sampling_rate
+
     def calculate_waveform(
         self,
     ) -> Union[float, complex, Sequence[float], Sequence[complex]]:
@@ -589,6 +606,7 @@ class DragGaussianPulse(Pulse):
             anharmonicity=self.anharmonicity,
             detuning=self.detuning,
             subtracted=self.subtracted,
+            sampling_rate=self._get_sampling_rate(),
         )
         I, Q = np.array(I), np.array(Q)
 
@@ -649,6 +667,7 @@ class DragCosinePulse(Pulse):
             alpha=self.alpha,
             anharmonicity=self.anharmonicity,
             detuning=self.detuning,
+            sampling_rate=self._get_sampling_rate(),
         )
         I, Q = np.array(I), np.array(Q)
 
@@ -724,8 +743,8 @@ class GaussianPulse(Pulse):
 
     Args:
         amplitude (float): The amplitude of the pulse in volts.
-        length (int): The length of the pulse in samples.
-        sigma (float): The standard deviation of the gaussian pulse.
+        length (int): The length of the pulse in ns.
+        sigma (float): The standard deviation of the gaussian in ns.
             Should generally be less than half the length of the pulse.
         axis_angle (float, optional): IQ axis angle of the output pulse in radians.
             If None (default), the pulse is meant for a single channel or the I port
@@ -743,8 +762,11 @@ class GaussianPulse(Pulse):
     subtracted: bool = True
 
     def waveform_function(self):
-        t = np.arange(self.length, dtype=int)
-        center = (self.length - 1) / 2
+        sampling_rate = self._get_sampling_rate()
+        dt = 1e9 / sampling_rate  # time step in ns
+        num_samples = round(self.length / dt)
+        t = np.arange(num_samples) * dt  # time axis in ns
+        center = (self.length - dt) / 2
         waveform = self.amplitude * np.exp(-((t - center) ** 2) / (2 * self.sigma**2))
 
         if self.subtracted:
@@ -792,6 +814,7 @@ class FlatTopGaussianPulse(Pulse):
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
             return_part="all",
+            sampling_rate=self._get_sampling_rate(),
         )
         waveform = np.array(waveform)
 
@@ -864,6 +887,7 @@ class _FlatTopGaussianPulse(Pulse):
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
             return_part="all",
+            sampling_rate=self._get_sampling_rate(),
         )
 
         zero_padding = np.zeros(self.length - len(waveform))
@@ -905,6 +929,7 @@ class FlatTopBlackmanPulse(Pulse):
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
             return_part="all",
+            sampling_rate=self._get_sampling_rate(),
         )
         wf = np.array(wf)
         if self.axis_angle is not None:
@@ -935,6 +960,7 @@ class BlackmanIntegralPulse(Pulse):
             pulse_length=self.length,
             v_start=self.v_start,
             v_end=self.v_end,
+            sampling_rate=self._get_sampling_rate(),
         )
         wf = np.array(wf)
         if self.axis_angle is not None:
@@ -972,6 +998,7 @@ class FlatTopCosinePulse(Pulse):
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
             return_part="all",
+            sampling_rate=self._get_sampling_rate(),
         )
         wf = np.array(wf)
         if self.axis_angle is not None:
@@ -1009,6 +1036,7 @@ class FlatTopTanhPulse(Pulse):
             flat_length=self.flat_length,
             rise_fall_length=rise_fall_length,
             return_part="all",
+            sampling_rate=self._get_sampling_rate(),
         )
         wf = np.array(wf)
         if self.axis_angle is not None:
