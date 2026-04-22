@@ -471,6 +471,63 @@ print(q1.get_macros())  # {'reset': <MethodMacro 'reset'>, 'align': <MethodMacro
 
 Method macros provide better code organization by keeping qubit-specific logic within the qubit class itself, while still maintaining full compatibility with the QUAM macro system.
 
+### Kwargs vs. attributes in method macros
+
+A common question when writing method macros is: should a parameter like `threshold` be a **keyword argument** on the method, or an **attribute** on the qubit (or `QuamMacro` subclass)?
+
+The rule is straightforward:
+
+- **Attributes** are *persistent calibrated values*. They are stored in the QUAM state, saved to disk, and loaded back when you restore a session. Use these for parameters that come from a calibration and should remain consistent across many experiments.
+- **Kwargs** are *one-time per-call overrides*. They are not stored anywhere and disappear after the call returns. Use these when you need to deviate from the calibrated value for a single program or experiment.
+
+**Example: threshold as an attribute**
+
+```python
+@quam_dataclass
+class Transmon(Qubit):
+    xy: MWChannel
+    resonator: Optional[InOutMWChannel] = None
+    reset_threshold: float = 0.0  # calibrated value — persisted in state
+
+    @QuantumComponent.register_macro
+    def reset(self, threshold: float = None):
+        # Use the per-call override if provided, otherwise fall back to the calibrated value.
+        t = threshold if threshold is not None else self.reset_threshold
+        I, Q = self.resonator.measure("readout")
+        with qua.if_(I > t):
+            self.xy.play("x180")
+        self.xy.wait(100)
+```
+
+After calibration you store the result once:
+
+```python
+q1.reset_threshold = 0.05   # persists across sessions when you call machine.save(...)
+```
+
+In the QUA program you just call the macro without any arguments — the calibrated value is used automatically:
+
+```python
+with qua.program() as prog:
+    q1.apply("reset")          # uses q1.reset_threshold = 0.05
+```
+
+You can still override it for a single call when needed:
+
+```python
+with qua.program() as prog:
+    q1.apply("reset", threshold=0.10)   # one-time override; q1.reset_threshold is unchanged
+```
+
+The same pattern applies to `QuamMacro` subclasses stored in `qubit.macros`. For example, `MeasureMacro` stores `threshold` as a dataclass field (attribute), not as a keyword argument, because the threshold comes from readout calibration and must be saved with the state.
+
+**Summary**
+
+| Use case | Mechanism | Persisted? |
+|----------|-----------|------------|
+| Calibrated parameter | dataclass field / attribute | Yes — saved with QUAM state |
+| Single-experiment override | keyword argument at call site | No — discarded after the call |
+
 ### Clifford macro
 
 Next, we define a single-qubit "CliffordMacro". For illustration, we will define a few pulses
