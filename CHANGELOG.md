@@ -2,6 +2,11 @@
 
 ### Added
 
+- Added `Channel.sampling_rate` property that reads the sampling rate from the channel's output port, defaulting to 1 GHz. Overridden in `SingleChannel`, `IQChannel`, and `MWChannel` to read from their respective ports.
+- Added `Pulse._get_sampling_rate()` method for pulses to retrieve the sampling rate of their attached channel.
+- Updated `GaussianPulse`, `DragGaussianPulse`, `DragCosinePulse`, `FlatTopGaussianPulse`, `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopCosinePulse`, and `FlatTopTanhPulse` to use the channel's sampling rate when generating waveforms. This enables correct waveform generation at 2 GS/s (e.g., on OPX1000 with LF-FEM or MW-FEM).
+- Added `OPXPlusAnalogOutputPort.sampling_rate` class variable set to 1e9 Hz.
+
 - Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
 - Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
@@ -42,6 +47,8 @@ All deprecated properties now show migration guidance with code examples. See [P
 ### Fixed
 
 - Fixed `QuamRoot.load()` raising `NameError` when component classes use `from __future__ import annotations` together with `TYPE_CHECKING`-only imports to avoid circular dependencies. Annotation resolution now falls back to per-field evaluation with `typing.Any` for unresolvable references, allowing loading to rely on the `__class__` key already present in every serialised QuAM dict.
+- Added `exponential_dc_gain` and `high_pass_filter` fields to `LFFEMAnalogOutputPort` for QOP 3.5+ filter support; fixed validation so the two fields can coexist and `exponential_dc_gain` alone conflicts with `feedback_filter`
+- Clarified in documentation how kwargs and attributes differ for method macros: kwargs are per-call overrides, attributes are persistent calibrated values that are saved with the QUAM state
 - Improved error messages for inferred frequency properties (`inferred_RF_frequency`, `inferred_intermediate_frequency`, `inferred_LO_frequency`) in `_OutComplexChannel` (`IQChannel` and `MWChannel`): errors now clearly identify the specific field and whether it is `None` or an unresolved reference
 - Fixed config version mismatch error handling:
   - Separated error handling for config-too-old vs package-too-old scenarios
@@ -58,6 +65,7 @@ All deprecated properties now show migration guidance with code examples. See [P
   - Improved error handling in `QuamList.__getitem__` and `QuamDict.__getitem__` for chain resolution failures
 - Fixed passing follow_references and include_defaults kwar
 - Fixed project-specific config not recognizing QUAM state path if the main config doesn't have a QUAM state path
+- Fixed `OctaveDownConverter.apply_to_config` to always add `IF_outputs` (physical port wiring) to the QUA config whenever a channel is connected, regardless of whether `LO_frequency` is set. This resolves a bug where `qm.calibrate_element()` failed silently because the calibration connections could not be found in the config.
 
 ## [0.4.2]
 

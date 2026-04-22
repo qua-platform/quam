@@ -424,6 +424,15 @@ class Channel(QuamComponent, ABC):
     def pulse_mapping(self):
         return {label: pulse.pulse_name for label, pulse in self.operations.items()}
 
+    @property
+    def sampling_rate(self) -> float:
+        """Sampling rate of the channel's output port in samples per second.
+
+        Defaults to 1 GHz. Subclasses with output ports override this to read the
+        sampling rate directly from the port.
+        """
+        return 1e9
+
     def play(
         self,
         pulse_name: str,
@@ -790,6 +799,13 @@ class SingleChannel(Channel):
     filter_iir_taps: List[float] = None
 
     opx_output_offset: float = None
+
+    @property
+    def sampling_rate(self) -> float:
+        """Sampling rate from the output port, defaulting to 1 GHz."""
+        if hasattr(self.opx_output, "sampling_rate"):
+            return self.opx_output.sampling_rate
+        return 1e9
 
     def set_dc_offset(self, offset: ScalarFloat):
         """Set the DC offset of an element's input to the given value.
@@ -1357,6 +1373,13 @@ class IQChannel(_OutComplexChannel):
     RF_frequency: float = "#./inferred_RF_frequency"
 
     _default_label: ClassVar[str] = "IQ"
+
+    @property
+    def sampling_rate(self) -> float:
+        """Sampling rate from the I output port, defaulting to 1 GHz."""
+        if hasattr(self.opx_output_I, "sampling_rate"):
+            return self.opx_output_I.sampling_rate
+        return 1e9
 
     @property
     def local_oscillator(self) -> Optional[LocalOscillator]:
@@ -2010,6 +2033,11 @@ class MWChannel(_OutComplexChannel):
 
     LO_frequency: float = "#./upconverter_frequency"
     RF_frequency: float = "#./inferred_RF_frequency"
+
+    @property
+    def sampling_rate(self) -> float:
+        """Sampling rate from the MW output port."""
+        return self.opx_output.sampling_rate
 
     def apply_to_config(self, config: Dict) -> None:
         super().apply_to_config(config)
