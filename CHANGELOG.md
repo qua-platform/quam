@@ -41,6 +41,8 @@ All deprecated properties now show migration guidance with code examples. See [P
 
 ### Fixed
 
+- Clarified in documentation how kwargs and attributes differ for method macros: kwargs are per-call overrides, attributes are persistent calibrated values that are saved with the QUAM state
+
 - Improved error messages for inferred frequency properties (`inferred_RF_frequency`, `inferred_intermediate_frequency`, `inferred_LO_frequency`) in `_OutComplexChannel` (`IQChannel` and `MWChannel`): errors now clearly identify the specific field and whether it is `None` or an unresolved reference
 - Fixed config version mismatch error handling:
   - Separated error handling for config-too-old vs package-too-old scenarios
