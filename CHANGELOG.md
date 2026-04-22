@@ -2,6 +2,11 @@
 
 ### Added
 
+- Added `Channel.sampling_rate` property that reads the sampling rate from the channel's output port, defaulting to 1 GHz. Overridden in `SingleChannel`, `IQChannel`, and `MWChannel` to read from their respective ports.
+- Added `Pulse._get_sampling_rate()` method for pulses to retrieve the sampling rate of their attached channel.
+- Updated `GaussianPulse`, `DragGaussianPulse`, `DragCosinePulse`, `FlatTopGaussianPulse`, `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopCosinePulse`, and `FlatTopTanhPulse` to use the channel's sampling rate when generating waveforms. This enables correct waveform generation at 2 GS/s (e.g., on OPX1000 with LF-FEM or MW-FEM).
+- Added `OPXPlusAnalogOutputPort.sampling_rate` class variable set to 1e9 Hz.
+
 - Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
 - Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management

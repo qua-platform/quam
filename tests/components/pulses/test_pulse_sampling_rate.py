@@ -30,7 +30,7 @@ def test_pulse_sampling_rate_lf_fem_port(pulse):
 
 def test_pulse_sampling_rate_mw_fem_port(pulse):
     port = ports.MWFEMAnalogOutputPort(
-        controller_id="con1", fem_id=1, port_id=1, band=1
+        controller_id="con1", fem_id=1, port_id=1, band=1, upconverter_frequency=5e9
     )
     channel = channels.SingleChannel(opx_output=port, operations={"pulse": pulse})
 
