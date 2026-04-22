@@ -29,18 +29,6 @@ class Qubit(QuantumComponent):
     macros: Dict[str, MacroType] = field(default_factory=dict)
 
     @property
-    def inferred_id(self) -> Union[str, int]:
-        if not str_ref.is_reference(self.get_raw_value("id")):
-            return self.id
-        elif self.parent is not None:
-            name = self.parent.get_attr_name(self)
-            return name
-        else:
-            raise AttributeError(
-                f"Cannot infer id of {self} because it is not attached to a parent"
-            )
-
-    @property
     def name(self) -> str:
         """Returns the name of the qubit"""
         return self.id if isinstance(self.id, str) else f"q{self.id}"

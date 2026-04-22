@@ -14,18 +14,6 @@ class QuamMacro(QuamComponent, BaseMacro, ABC):
     duration: Optional[float] = "#./inferred_duration"
 
     @property
-    def inferred_id(self):
-        if not str_ref.is_reference(self.get_raw_value("id")):
-            return self.id
-        elif self.parent is not None:
-            name = self.parent.get_attr_name(self)
-            return name
-        else:
-            raise AttributeError(
-                f"Cannot infer id of {self} because it is not attached to a parent"
-            )
-        
-    @property
     def inferred_duration(self) -> Optional[float]:
         """
         This property is used to get the duration of the macro (in seconds).

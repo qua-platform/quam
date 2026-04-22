@@ -278,3 +278,92 @@ def test_quam_dict_get_attr_name_with_reference():
 
     assert d.a is d.b
     assert d.get_attr_name(d.b) == "b"
+
+
+# Tests for QuamBase.inferred_id
+
+
+def test_inferred_id_no_id_field_returns_attr_name():
+    @quam_dataclass
+    class Parent(QuamComponent):
+        child: QuamComponent
+
+    child = BareQuamComponent()
+    Parent(child=child)
+    assert child.inferred_id == "child"
+
+
+def test_inferred_id_no_parent_raises():
+    component = BareQuamComponent()
+    with pytest.raises(AttributeError, match="no parent"):
+        _ = component.inferred_id
+
+
+def test_inferred_id_explicit_str_id():
+    @quam_dataclass
+    class ComponentWithId(QuamComponent):
+        id: str = "default"
+
+    @quam_dataclass
+    class Parent(QuamComponent):
+        child: QuamComponent
+
+    child = ComponentWithId(id="my_id")
+    Parent(child=child)
+    assert child.inferred_id == "my_id"
+
+
+def test_inferred_id_explicit_int_id():
+    @quam_dataclass
+    class ComponentWithId(QuamComponent):
+        id: int = 0
+
+    @quam_dataclass
+    class Parent(QuamComponent):
+        child: QuamComponent
+
+    child = ComponentWithId(id=3)
+    Parent(child=child)
+    assert child.inferred_id == 3
+
+
+def test_inferred_id_none_id_falls_through_to_parent():
+    @quam_dataclass
+    class ComponentWithId(QuamComponent):
+        id: str = None
+
+    @quam_dataclass
+    class Parent(QuamComponent):
+        child: QuamComponent
+
+    child = ComponentWithId(id=None)
+    Parent(child=child)
+    assert child.inferred_id == "child"
+
+
+def test_inferred_id_reference_id_falls_through_to_parent():
+    @quam_dataclass
+    class ComponentWithId(QuamComponent):
+        id: str = "#./inferred_id"
+
+    @quam_dataclass
+    class Parent(QuamComponent):
+        child: QuamComponent
+
+    child = ComponentWithId()
+    Parent(child=child)
+    assert child.inferred_id == "child"
+
+
+def test_inferred_id_quam_dict_parent():
+    child = BareQuamComponent()
+    d = QuamDict({"my_key": child})
+    assert child.inferred_id == "my_key"
+
+
+def test_inferred_id_quam_list_parent():
+    from quam.core import QuamList
+
+    child = BareQuamComponent()
+    lst = QuamList([child])
+    assert child.inferred_id == "0"
