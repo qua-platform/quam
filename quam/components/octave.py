@@ -339,29 +339,62 @@ class OctaveDownConverter(OctaveFrequencyConverter):
         This method is called by the `QuamComponent.generate_config` method.
 
         Nothing is added to the config if the `OctaveDownConverter.channel` is not
-        specified or if the `OctaveDownConverter.LO_frequency` is not specified.
+        specified. If `channel` is specified but `LO_frequency` is not, the
+        `IF_outputs` (physical port wiring) are still added to enable element
+        calibration, but the `RF_inputs` logical config entry is omitted.
 
         Args:
             config: A dictionary representing a QUA config file.
 
         Raises:
-            ValueError: If the LO_frequency is not specified.
             KeyError: If the Octave is not in the config, or if config["octaves"] does
                 not exist.
             KeyError: If the Octave already has an entry for the OctaveDownConverter.
             ValueError: If the IF_output_I and IF_output_Q are already assigned to
                 other ports.
         """
-        if not isinstance(self.LO_frequency, (int, float)):
-            if self.channel is None:
-                return
-            else:
-                raise ValueError(
-                    f"Error generating config for Octave upconverter id={self.id}: "
-                    "LO_frequency must be specified."
-                )
+        # Nothing to add if neither channel nor LO_frequency is configured
+        if self.channel is None and not isinstance(self.LO_frequency, (int, float)):
+            return
 
         super().apply_to_config(config)
+
+        # Add IF_outputs (physical wiring) whenever channel is connected.
+        # This is required for qm.calibrate_element() to find calibration connections,
+        # independent of whether LO_frequency has been configured.
+        if self.channel is not None:
+            if isinstance(self.channel, InOutIQChannel):
+                IF_channels = [self.IF_output_I, self.IF_output_Q]
+                opx_channels = [self.channel.opx_input_I, self.channel.opx_input_Q]
+            elif isinstance(self.channel, InOutSingleChannel):
+                IF_channels = [self.IF_output_I]
+                opx_channels = [self.channel.opx_input]
+            else:
+                IF_channels = []
+                opx_channels = []
+
+            opx_port_tuples = [
+                p.port_tuple if isinstance(p, BasePort) else tuple(p)
+                for p in opx_channels
+            ]
+
+            IF_config = config["octaves"][self.octave.name]["IF_outputs"]
+            for k, (IF_ch, opx_port_tuple) in enumerate(
+                zip(IF_channels, opx_port_tuples), start=1
+            ):
+                label = f"IF_out{IF_ch}"
+                IF_config.setdefault(label, {"port": opx_port_tuple, "name": f"out{k}"})
+                if IF_config[label]["port"] != opx_port_tuple:
+                    raise ValueError(
+                        f"Error generating config for Octave downconverter "
+                        f"id={self.id}: Unable to assign {label} to port "
+                        f"{opx_port_tuple} because it is already assigned to "
+                        f"port {IF_config[label]['port']} "
+                    )
+
+        # RF_inputs entry requires LO_frequency — skip if not yet configured
+        if not isinstance(self.LO_frequency, (int, float)):
+            return
 
         if self.id in config["octaves"][self.octave.name]["RF_inputs"]:
             raise KeyError(
@@ -377,33 +410,6 @@ class OctaveDownConverter(OctaveFrequencyConverter):
             "IF_mode_I": self.IF_mode_I,
             "IF_mode_Q": self.IF_mode_Q,
         }
-
-        if isinstance(self.channel, InOutIQChannel):
-            IF_channels = [self.IF_output_I, self.IF_output_Q]
-            opx_channels = [self.channel.opx_input_I, self.channel.opx_input_Q]
-        elif isinstance(self.channel, InOutSingleChannel):
-            IF_channels = [self.IF_output_I]
-            opx_channels = [self.channel.opx_input]
-        else:
-            IF_channels = []
-            opx_channels = []
-
-        opx_port_tuples = [
-            p.port_tuple if isinstance(p, BasePort) else tuple(p) for p in opx_channels
-        ]
-
-        IF_config = config["octaves"][self.octave.name]["IF_outputs"]
-        for k, (IF_ch, opx_port_tuples) in enumerate(
-            zip(IF_channels, opx_port_tuples), start=1
-        ):
-            label = f"IF_out{IF_ch}"
-            IF_config.setdefault(label, {"port": opx_port_tuples, "name": f"out{k}"})
-            if IF_config[label]["port"] != opx_port_tuples:
-                raise ValueError(
-                    f"Error generating config for Octave downconverter id={self.id}: "
-                    f"Unable to assign {label} to  port {opx_port_tuples} because it is already "
-                    f"assigned to port {IF_config[label]['port']} "
-                )
 
 
 @quam_dataclass

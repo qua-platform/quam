@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `OctaveDownConverter.apply_to_config` to always add `IF_outputs` (physical port wiring) to the QUA config whenever a channel is connected, regardless of whether `LO_frequency` is set. This resolves a bug where `qm.calibrate_element()` failed silently because the calibration connections could not be found in the config.
+
 ### Added
 
 - Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
