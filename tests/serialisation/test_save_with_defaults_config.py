@@ -120,7 +120,7 @@ def test_quamroot_load_old_state_without_defaults():
     old_state = {
         "component": {
             "required_val": 1,
-            "__class__": "test_save_with_defaults_config.SimpleComponent",
+            "__class__": "tests.serialisation.test_save_with_defaults_config.SimpleComponent",
         }
     }
 
@@ -147,7 +147,7 @@ def test_quamroot_load_new_state_with_all_defaults():
             "optional_val": 42,
             "optional_str": "default_string",
             "optional_list": [],
-            "__class__": "test_save_with_defaults_config.SimpleComponent",
+            "__class__": "tests.serialisation.test_save_with_defaults_config.SimpleComponent",
         }
     }
 
