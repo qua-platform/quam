@@ -111,12 +111,12 @@ class OPXPlusPortsContainer(QuamComponent):
             if controller_id.isdigit():
                 controller_id = int(controller_id)
             port_id = int(port_id)
-
-            return self._get_port(controller_id, port_id, port_type, create=create)
         except Exception as e:
             raise ValueError(
                 f"Unable to parse port reference for OPX+: {port_reference}"
             ) from e
+
+        return self._get_port(controller_id, port_id, port_type, create=create)
 
     def get_analog_output(
         self,
@@ -277,14 +277,14 @@ class FEMPortsContainer(QuamComponent):
                 controller_id = int(controller_id)
             fem_id = int(fem_id)
             port_id = int(port_id)
-
-            return self._get_port(
-                controller_id, fem_id, port_id, port_type, create=create
-            )
         except Exception as e:
             raise ValueError(
                 f"Unable to parse port reference for OPX1000 FEM: {port_reference}"
             ) from e
+
+        return self._get_port(
+            controller_id, fem_id, port_id, port_type, create=create
+        )
 
     def get_analog_output(
         self,
