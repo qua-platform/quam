@@ -100,6 +100,6 @@ def test_qubit_inferred_id_no_parent():
     """Test inferred_id when id is a reference but qubit has no parent"""
     qubit = Qubit(id="#./inferred_id")
     with pytest.raises(
-        AttributeError, match="Cannot infer id .* not attached to a parent"
+        AttributeError, match="Cannot infer id of Qubit because it has no parent"
     ):
         _ = qubit.inferred_id

@@ -321,6 +321,30 @@ class QuamBase(ReferenceClass):
                 f"obj: {self}"
             )
 
+    @property
+    def inferred_id(self) -> Union[str, int]:
+        """Get the id of this object inferred from its ``id`` field or parent position.
+
+        If this object has a dataclass field named ``id`` with a concrete (non-reference,
+        non-None) value, that value is returned. Otherwise the attribute name or key under
+        which this object is stored in its parent is returned.
+
+        Returns:
+            The explicit id if set, or the attribute name / key in the parent as a string.
+
+        Raises:
+            AttributeError: If no explicit id is set and this object has no parent.
+        """
+        if "id" in self._get_attr_names():
+            raw_id = self.get_raw_value("id")
+            if raw_id is not None and not string_reference.is_reference(raw_id):
+                return self.id
+        if self.parent is None:
+            raise AttributeError(
+                f"Cannot infer id of {self.__class__.__name__} because it has no parent."
+            )
+        return str(self.parent.get_attr_name(self))
+
     def _attr_val_is_default(self, attr: str, val: Any) -> bool:
         """Check whether the value of an attribute is the default value.
 

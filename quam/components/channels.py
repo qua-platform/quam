@@ -410,7 +410,7 @@ class Channel(QuamComponent, ABC):
                 "a name."
             )
         if isinstance(self.parent, QuamDict):
-            return self.parent.get_attr_name(self)
+            return self.inferred_id
         if not hasattr(self.parent, "name"):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
@@ -418,7 +418,7 @@ class Channel(QuamComponent, ABC):
                 f"or {cls_name} should be an attribute of another QUAM component with "
                 "a name."
             )
-        return f"{self.parent.name}{str_ref.DELIMITER}{self.parent.get_attr_name(self)}"
+        return f"{self.parent.name}{str_ref.DELIMITER}{self.inferred_id}"
 
     @property
     def pulse_mapping(self):

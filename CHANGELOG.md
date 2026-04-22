@@ -2,11 +2,11 @@
 
 ### Added
 
+- `QuamBase.inferred_id` property: returns the explicit `id` field value if set, otherwise returns the attribute name or key under which the component is stored in its parent. Equivalent to `self.parent.get_attr_name(self)`. Resolves #53.
 - Added `Channel.sampling_rate` property that reads the sampling rate from the channel's output port, defaulting to 1 GHz. Overridden in `SingleChannel`, `IQChannel`, and `MWChannel` to read from their respective ports.
 - Added `Pulse._get_sampling_rate()` method for pulses to retrieve the sampling rate of their attached channel.
 - Updated `GaussianPulse`, `DragGaussianPulse`, `DragCosinePulse`, `FlatTopGaussianPulse`, `FlatTopBlackmanPulse`, `BlackmanIntegralPulse`, `FlatTopCosinePulse`, and `FlatTopTanhPulse` to use the channel's sampling rate when generating waveforms. This enables correct waveform generation at 2 GS/s (e.g., on OPX1000 with LF-FEM or MW-FEM).
 - Added `OPXPlusAnalogOutputPort.sampling_rate` class variable set to 1e9 Hz.
-
 - Added `Channel.ramp(slope, duration)` method for playing linear voltage ramps
 - Added `Channel.ramp_to_zero(duration)` method for ramping channel output to zero
 - Added `FEMPortsContainer` and `OPXPlusPortsContainer` for centralized port management
@@ -19,6 +19,7 @@
 
 ### Changed
 
+- Improved error messages in `OPXPlusPortsContainer` and `FEMPortsContainer`: invalid port types now raise `ValueError` immediately, and malformed port reference strings raise `ValueError` with a descriptive message instead of a cryptic unpacking error.
 - **Breaking Change**: `set_at_reference()` method now defaults to `allow_non_reference=True` instead of `False`. This aligns with real-world usage patterns and improves developer experience. Users requiring error-by-default can explicitly pass `allow_non_reference=False`.
 - **Breaking Change**: Default serialization behavior changed from excluding defaults to including them for more explicit state representation
 - Config version bumped from v2 to v3

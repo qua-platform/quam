@@ -56,6 +56,14 @@ class OPXPlusPortsContainer(QuamComponent):
         create: bool = False,
         **kwargs,
     ):
+        if port_type not in {
+            "analog_output",
+            "analog_input",
+            "digital_output",
+            "digital_input",
+        }:
+            raise ValueError(f"Invalid port type: {port_type}")
+
         controllers = getattr(self, f"{port_type}s")
 
         try:
@@ -78,8 +86,6 @@ class OPXPlusPortsContainer(QuamComponent):
             ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)
         elif port_type == "digital_input":
             ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)
-        else:
-            raise ValueError(f"Invalid port type: {port_type}")
 
         return ports[port_id]
 
@@ -94,13 +100,19 @@ class OPXPlusPortsContainer(QuamComponent):
             if reference is None:
                 raise ValueError("Cannot get port from reference {port_reference}")
             port_reference = reference
-        elems = port_reference.split("/")
-        port_type, controller_id, port_id = elems[-3:]
 
-        port_type = port_type[:-1]
-        if controller_id.isdigit():
-            controller_id = int(controller_id)
-        port_id = int(port_id)
+        try:
+            elems = port_reference.split("/")
+            port_type, controller_id, port_id = elems[-3:]
+
+            port_type = port_type[:-1]
+            if controller_id.isdigit():
+                controller_id = int(controller_id)
+            port_id = int(port_id)
+        except Exception as e:
+            raise ValueError(
+                f"Unable to parse port reference for OPX+: {port_reference}"
+            ) from e
 
         return self._get_port(controller_id, port_id, port_type, create=create)
 
@@ -177,6 +189,15 @@ class FEMPortsContainer(QuamComponent):
         create: bool = False,
         **kwargs,
     ):
+        if port_type not in {
+            "analog_output",
+            "analog_input",
+            "mw_output",
+            "mw_input",
+            "digital_output",
+        }:
+            raise ValueError(f"Invalid port type: {port_type}")
+
         controllers = getattr(self, f"{port_type}s")
 
         try:
@@ -228,8 +249,6 @@ class FEMPortsContainer(QuamComponent):
             ports[port_id] = FEMDigitalOutputPort(
                 controller_id, fem_id, port_id, **kwargs
             )
-        else:
-            raise ValueError(f"Invalid port type: {port_type}")
 
         return ports[port_id]
 
@@ -245,16 +264,23 @@ class FEMPortsContainer(QuamComponent):
                 raise ValueError("Cannot get port from reference {port_reference}")
             port_reference = reference
 
-        elems = port_reference.split("/")
-        port_type, controller_id, fem_id, port_id = elems[-4:]
+        try:
+            elems = port_reference.split("/")
+            port_type, controller_id, fem_id, port_id = elems[-4:]
 
-        port_type = port_type[:-1]
-        if controller_id.isdigit():
-            controller_id = int(controller_id)
-        fem_id = int(fem_id)
-        port_id = int(port_id)
+            port_type = port_type[:-1]
+            if controller_id.isdigit():
+                controller_id = int(controller_id)
+            fem_id = int(fem_id)
+            port_id = int(port_id)
+        except Exception as e:
+            raise ValueError(
+                f"Unable to parse port reference for OPX1000 FEM: {port_reference}"
+            ) from e
 
-        return self._get_port(controller_id, fem_id, port_id, port_type, create=create)
+        return self._get_port(
+            controller_id, fem_id, port_id, port_type, create=create
+        )
 
     def get_analog_output(
         self,
