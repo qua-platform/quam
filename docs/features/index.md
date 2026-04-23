@@ -8,6 +8,12 @@ QUAM provides comprehensive serialization capabilities to save and load quantum 
 
 - **[Serialization Documentation](serialization.md)**: Learn how to save and load QUAM configurations, control default value inclusion, and exclude specific fields from serialization using the `skip_save` metadata. This feature is essential for managing machine state, version controlling configurations, and separating runtime data from persistent configuration.
 
+## Transient State
+
+Transient state records temporary runtime mutations so they can affect normal QUAM behavior and config generation without being persisted to disk.
+
+- **[Transient State Documentation](transient-state.md)**: Learn how to record, inspect, revert, and save temporary changes with `record_transient()`, `get_transient_changes()`, `revert_transient()`, and transient-aware `save()` behavior.
+
 ## Gate-Level Operations
 
 Gate-level operations provide an abstraction layer that transforms low-level pulse definitions into high-level quantum gate operations. This feature allows users to build circuit-level QUA programs by working with quantum components (qubits and qubit pairs) and applying macros that represent common quantum gates.

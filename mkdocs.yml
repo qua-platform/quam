@@ -58,6 +58,7 @@ nav:
   - "QUAM Features":
       - "features/index.md"
       - "features/serialization.md"
+      - "features/transient-state.md"
       - "features/gate-level-operations.md"
       - "features/quam-references.md"
   - migrating-to-quam.md
