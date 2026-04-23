@@ -83,7 +83,9 @@ def get_quam_config(
             migrate_command(["--config-path", str(config_path)], standalone_mode=False)
         except Exception as migrate_error:
             # If migration fails, provide helpful context
-            error_detail = f"Migration failed: {migrate_error.__class__.__name__}: {migrate_error}"
+            error_detail = (
+                f"Migration failed: {migrate_error.__class__.__name__}: {migrate_error}"
+            )
             raise RuntimeError(
                 f"Failed to automatically migrate config. {error_detail}\n"
                 f"Please manually upgrade your configuration or run `quam migrate`."

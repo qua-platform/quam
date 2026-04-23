@@ -1280,10 +1280,15 @@ class _OutComplexChannel(Channel, ABC):
         """
         name = getattr(self, "name", self.__class__.__name__)
         if not isinstance(self.LO_frequency, (float, int)):
-            _raise_inferred_freq_error("RF frequency", name, "LO_frequency", self.LO_frequency)
+            _raise_inferred_freq_error(
+                "RF frequency", name, "LO_frequency", self.LO_frequency
+            )
         if not isinstance(self.intermediate_frequency, (float, int)):
             _raise_inferred_freq_error(
-                "RF frequency", name, "intermediate_frequency", self.intermediate_frequency
+                "RF frequency",
+                name,
+                "intermediate_frequency",
+                self.intermediate_frequency,
             )
         return self.LO_frequency + self.intermediate_frequency
 
@@ -1324,7 +1329,10 @@ class _OutComplexChannel(Channel, ABC):
             )
         if not isinstance(self.intermediate_frequency, (float, int)):
             _raise_inferred_freq_error(
-                "LO frequency", name, "intermediate_frequency", self.intermediate_frequency
+                "LO frequency",
+                name,
+                "intermediate_frequency",
+                self.intermediate_frequency,
             )
         return self.RF_frequency - self.intermediate_frequency
 

@@ -253,7 +253,7 @@ def instantiate_attr(
         # Handle specific case: float-to-int coercion for saved state compatibility
         if expected_type == int and isinstance(instantiated_attr, float):
             instantiated_attr = int(instantiated_attr)
-        
+
         # TODO Add logic that required attributes cannot be None
         validate_obj_type(
             elem=instantiated_attr,
@@ -307,9 +307,7 @@ def instantiate_attrs(
                 if quam_class is not None
                 else ""
             )
-            lines = [
-                f"Unexpected attribute '{attr_name}' in {str_repr}{class_info}."
-            ]
+            lines = [f"Unexpected attribute '{attr_name}' in {str_repr}{class_info}."]
             if required:
                 lines.append(f"  Required attributes: {required}")
             if optional:

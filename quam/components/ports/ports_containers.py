@@ -278,9 +278,7 @@ class FEMPortsContainer(QuamComponent):
                 f"Unable to parse port reference for OPX1000 FEM: {port_reference}"
             ) from e
 
-        return self._get_port(
-            controller_id, fem_id, port_id, port_type, create=create
-        )
+        return self._get_port(controller_id, fem_id, port_id, port_type, create=create)
 
     def get_analog_output(
         self,

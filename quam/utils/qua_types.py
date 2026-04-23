@@ -43,4 +43,3 @@ except ImportError:
     QuaVariableBool = QuaVariableType
     QuaVariableInt = QuaVariableType
     QuaVariableFloat = QuaVariableType
-

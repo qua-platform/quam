@@ -5,12 +5,12 @@ Covers three failure modes:
   2. Missing required attribute in JSON (new field added to class, or typo in key)
   3. Source file path included in errors raised from QuamRoot.load()
 """
+
 import json
 import pytest
 
 from quam.core import QuamRoot, QuamComponent, quam_dataclass
 from quam.core.quam_instantiation import instantiate_quam_class
-
 
 # ---------------------------------------------------------------------------
 # Unexpected attribute errors

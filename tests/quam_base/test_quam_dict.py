@@ -237,6 +237,7 @@ def test_quam_dict_to_dict_include_defaults():
     Reproduces issue #166: https://github.com/qua-platform/quam/issues/166
     The bug is that QuamDict.to_dict() doesn't pass kwargs to super().to_dict()
     """
+
     @quam_dataclass
     class MyComponent(QuamComponent):
         a: int = 5
@@ -266,6 +267,7 @@ def test_quam_dict_to_dict_follow_references():
     Related to issue #166: https://github.com/qua-platform/quam/issues/166
     The key point is that the parameter gets passed to nested components in the dict.
     """
+
     @quam_dataclass
     class MyComponent(QuamComponent):
         ref_value: str = "#./target"

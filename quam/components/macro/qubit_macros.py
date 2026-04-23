@@ -4,7 +4,6 @@ from quam.core.macro import QuamMacro
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
 
-
 __all__ = ["QubitMacro", "PulseMacro"]
 
 
@@ -48,4 +47,3 @@ class PulseMacro(QubitMacro):
             return self.pulse.length * 1e-9
         else:
             return self.qubit.get_pulse(self.pulse).length * 1e-9
-    

@@ -77,9 +77,17 @@ def test_quamroot_save_excludes_defaults_when_config_false():
         component_data = saved_data["component"]
         assert component_data["required_val"] == 1
         # Default values should NOT be in the output
-        assert "optional_val" not in component_data or component_data["optional_val"] != 42
-        assert "optional_str" not in component_data or component_data["optional_str"] != "default_string"
-        assert "optional_list" not in component_data or component_data["optional_list"] == []
+        assert (
+            "optional_val" not in component_data or component_data["optional_val"] != 42
+        )
+        assert (
+            "optional_str" not in component_data
+            or component_data["optional_str"] != "default_string"
+        )
+        assert (
+            "optional_list" not in component_data
+            or component_data["optional_list"] == []
+        )
 
 
 def test_quamroot_save_with_nested_components_includes_all_defaults():

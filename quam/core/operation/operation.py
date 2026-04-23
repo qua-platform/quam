@@ -3,7 +3,6 @@ from typing import Callable, Optional, Any
 from quam.core.operation.function_properties import FunctionProperties
 from quam.components import QuantumComponent
 
-
 __all__ = ["Operation"]
 
 

@@ -4,7 +4,6 @@ from typing import List
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 
-
 __all__ = [
     "LocalOscillator",
     "Mixer",

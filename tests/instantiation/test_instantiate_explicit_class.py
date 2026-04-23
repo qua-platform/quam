@@ -66,6 +66,7 @@ def test_instantiate_explicit_class_with_union_type():
 class Component1(QuamComponent):
     pass
 
+
 @quam_dataclass
 class Component2(QuamComponent):
     pass
@@ -73,11 +74,10 @@ class Component2(QuamComponent):
 
 def test_instantiation_unknown_error():
 
-
     instantiate_attr(
         attr_val={"a": {"__class__": get_full_class_path(Component1)}},
         expected_type=Dict[str, Union[Component1, Component2]],
         fix_attrs=True,
         validate_type=True,
-        str_repr="hi"
+        str_repr="hi",
     )

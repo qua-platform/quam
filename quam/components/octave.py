@@ -19,7 +19,6 @@ from qm import QuantumMachinesManager, QuantumMachine
 from qm.octave import QmOctaveConfig, RFOutputMode, ClockType
 from qm.octave.qm_octave import QmOctave
 
-
 __all__ = [
     "Octave",
     "OctaveUpConverter",

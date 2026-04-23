@@ -1,7 +1,6 @@
 from .quam_classes import *
 from .operation.operations_registry import OperationsRegistry
 
-
 # Exec statement needed to trick Pycharm type checker into recognizing it as a dataclass
 # This will no longer be necessary once we drop support for Python 3.9
 # We also do this at the end of quam_classes.py, but PyCharm also requires it here

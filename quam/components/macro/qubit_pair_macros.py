@@ -5,7 +5,6 @@ from quam.core import quam_dataclass
 
 from quam.components.quantum_components.qubit import Qubit
 
-
 __all__ = ["QubitPairMacro"]
 
 

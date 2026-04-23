@@ -1,7 +1,6 @@
 import warnings
 from abc import abstractclassmethod
 
-
 instantiation_deprecations = []
 
 

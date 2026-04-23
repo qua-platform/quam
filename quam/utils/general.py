@@ -120,7 +120,9 @@ def get_class_from_path(class_str) -> type:
             for name, obj in inspect.getmembers(module, isclass)
             if not name.startswith("_")
         ]
-        close_matches = difflib.get_close_matches(class_name, all_classes, n=3, cutoff=0.6)
+        close_matches = difflib.get_close_matches(
+            class_name, all_classes, n=3, cutoff=0.6
+        )
         if close_matches:
             raise AttributeError(
                 f"Class '{class_name}' not found in module '{module_path}'.\n"

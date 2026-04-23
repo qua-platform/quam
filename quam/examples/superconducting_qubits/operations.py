@@ -3,7 +3,6 @@ from qm.qua import QuaVariableType
 from quam.components import Qubit, QubitPair
 from quam.core import OperationsRegistry
 
-
 operations_registry = OperationsRegistry()
 
 

@@ -45,6 +45,7 @@ def prevent_default_config_loading():
     """
     try:
         import qualibrate_config.vars
+
         original_filename = qualibrate_config.vars.DEFAULT_CONFIG_FILENAME
         new_filename = "nonexisting_config_for_testing.toml"
         qualibrate_config.vars.DEFAULT_CONFIG_FILENAME = new_filename
@@ -65,6 +66,7 @@ def mock_quam_config():
 
     Returns a minimal mock config object with default values matching QuamConfig.
     """
+
     # Create a minimal mock config object that matches QuamConfig structure
     class MockSerializationConfig:
         include_defaults = True
@@ -78,9 +80,9 @@ def mock_quam_config():
     mock_config = MockQuamConfig()
 
     import_locations = [
-        'quam.core.quam_classes.get_quam_config',
-        'quam.serialisation.json.get_quam_config',
-        'quam.components.get_quam_config',
+        "quam.core.quam_classes.get_quam_config",
+        "quam.serialisation.json.get_quam_config",
+        "quam.components.get_quam_config",
     ]
 
     patches = [patch(location) for location in import_locations]

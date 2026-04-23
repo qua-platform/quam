@@ -6,7 +6,13 @@ with reference chains, set_at_reference() with chains, and edge cases.
 
 import pytest
 
-from quam.core.quam_classes import QuamBase, QuamRoot, QuamList, QuamDict, quam_dataclass
+from quam.core.quam_classes import (
+    QuamBase,
+    QuamRoot,
+    QuamList,
+    QuamDict,
+    quam_dataclass,
+)
 
 
 # Fixture classes

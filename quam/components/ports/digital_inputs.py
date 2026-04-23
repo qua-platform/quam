@@ -3,7 +3,6 @@ from typing import Any, ClassVar, Dict, Literal
 from quam.components.ports.base_ports import OPXPlusPort
 from quam.core import quam_dataclass
 
-
 __all__ = ["OPXPlusDigitalInputPort"]
 
 
