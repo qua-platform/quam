@@ -3,6 +3,7 @@
 This module tests the ability to exclude specific dataclass fields from
 serialization using field(metadata={'skip_save': True}).
 """
+
 from dataclasses import field
 from typing import ClassVar
 import tempfile
@@ -13,6 +14,7 @@ from quam.core import QuamRoot, QuamComponent, QuamDict, QuamList, quam_dataclas
 # Basic functionality tests
 def test_skip_save_basic():
     """Test that fields with skip_save=True are excluded from to_dict()."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -29,6 +31,7 @@ def test_skip_save_basic():
 
 def test_skip_save_false_explicit():
     """Test that fields with skip_save=False are included."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -44,6 +47,7 @@ def test_skip_save_false_explicit():
 
 def test_skip_save_no_metadata():
     """Test that fields without metadata are included by default."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         field_a: int = 1
@@ -58,6 +62,7 @@ def test_skip_save_no_metadata():
 
 def test_skip_save_multiple_fields():
     """Test multiple fields with mixed skip_save values."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible_1: int = 1
@@ -76,6 +81,7 @@ def test_skip_save_multiple_fields():
 
 def test_skip_save_runtime_accessible():
     """Test that skipped fields remain accessible at runtime."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -99,6 +105,7 @@ def test_skip_save_runtime_accessible():
 # Nested component tests
 def test_skip_save_nested_component():
     """Test that skipped field with QuamComponent excludes entire subtree."""
+
     @quam_dataclass
     class InnerComponent(QuamComponent):
         inner_val: int = 1
@@ -121,6 +128,7 @@ def test_skip_save_nested_component():
 
 def test_skip_save_deeply_nested():
     """Test skip_save with deeply nested component tree."""
+
     @quam_dataclass
     class Level3(QuamComponent):
         val3: int = 3
@@ -147,6 +155,7 @@ def test_skip_save_deeply_nested():
 
 def test_skip_save_with_quam_dict_in_field():
     """Test skip_save on field containing QuamDict."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -164,6 +173,7 @@ def test_skip_save_with_quam_dict_in_field():
 
 def test_skip_save_with_quam_list_in_field():
     """Test skip_save on field containing QuamList."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -182,6 +192,7 @@ def test_skip_save_with_quam_list_in_field():
 # Inheritance tests
 def test_skip_save_inherited_field():
     """Test that inherited field with skip_save metadata is respected."""
+
     @quam_dataclass
     class ParentComponent(QuamComponent):
         inherited_visible: int = 1
@@ -201,6 +212,7 @@ def test_skip_save_inherited_field():
 
 def test_skip_save_field_override_removes_metadata():
     """Test that overriding a field in child class can remove skip_save."""
+
     @quam_dataclass
     class ParentComponent(QuamComponent):
         field: int = field(default=1, metadata={"skip_save": True})
@@ -219,6 +231,7 @@ def test_skip_save_field_override_removes_metadata():
 
 def test_skip_save_multiple_inheritance_levels():
     """Test skip_save behavior across multiple inheritance levels."""
+
     @quam_dataclass
     class GrandParent(QuamComponent):
         gp_visible: int = 1
@@ -246,6 +259,7 @@ def test_skip_save_multiple_inheritance_levels():
 # Integration tests
 def test_skip_save_with_get_attrs():
     """Test that get_attrs() respects skip_save metadata."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -260,6 +274,7 @@ def test_skip_save_with_get_attrs():
 
 def test_skip_save_save_load_roundtrip():
     """Test that skipped fields are excluded from saved JSON."""
+
     @quam_dataclass
     class TestRoot(QuamRoot):
         visible: int = 1
@@ -290,11 +305,13 @@ def test_skip_save_save_load_roundtrip():
 
     finally:
         import os
+
         os.unlink(temp_path)
 
 
 def test_skip_save_with_skip_attrs():
     """Test that skip_save works alongside _skip_attrs mechanism."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         _skip_attrs = ["programmatic_skip"]
@@ -313,6 +330,7 @@ def test_skip_save_with_skip_attrs():
 
 def test_skip_save_with_include_defaults_false():
     """Test skip_save interaction with include_defaults parameter."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible_default: int = 1
@@ -337,6 +355,7 @@ def test_skip_save_with_include_defaults_false():
 
 def test_skip_save_with_multiple_metadata_entries():
     """Test that skip_save works alongside other metadata."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1
@@ -353,6 +372,7 @@ def test_skip_save_with_multiple_metadata_entries():
 
 def test_skip_save_nondefault_value():
     """Test that skip_save takes precedence over value being non-default."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         hidden: int = field(default=1, metadata={"skip_save": True})
@@ -367,6 +387,7 @@ def test_skip_save_nondefault_value():
 # Edge case tests
 def test_skip_save_empty_metadata():
     """Test that empty metadata dict doesn't cause issues."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = field(default=1, metadata={})
@@ -379,6 +400,7 @@ def test_skip_save_empty_metadata():
 
 def test_skip_save_classvar_not_affected():
     """Test that ClassVar fields are not affected by skip_save logic."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         class_var: ClassVar[int] = 99
@@ -396,6 +418,7 @@ def test_skip_save_classvar_not_affected():
 
 def test_skip_save_with_required_field():
     """Test skip_save on a required field (no default)."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int
@@ -410,6 +433,7 @@ def test_skip_save_with_required_field():
 
 def test_skip_save_field_with_default_factory():
     """Test skip_save with default_factory fields."""
+
     @quam_dataclass
     class TestComponent(QuamComponent):
         visible: int = 1

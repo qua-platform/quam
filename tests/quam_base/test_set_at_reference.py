@@ -223,6 +223,7 @@ def test_set_at_reference_list_index_multiple_indices():
 
 def test_set_at_reference_list_index_nested_reference():
     """Test setting a value through a nested reference that ends with a list index"""
+
     @quam_dataclass
     class NestedContainerQuam(QuamBase):
         inner_list: QuamList = None
@@ -271,6 +272,7 @@ def test_set_at_reference_list_element_is_reference():
     Note: #../ is used because the reference is inside a list element, so we
     need to go up one level to reach the container's attributes.
     """
+
     @quam_dataclass
     class ContainerWithTarget(QuamRoot):
         target: int = 0
@@ -293,9 +295,9 @@ def test_set_at_reference_list_element_is_reference():
 
     # The reference should be preserved in the list, and target should be updated
     assert container.target == 777, "Target should be updated to 777"
-    assert container.values.data[0] == "#../target", (
-        "Reference should be preserved in list"
-    )
+    assert (
+        container.values.data[0] == "#../target"
+    ), "Reference should be preserved in list"
 
 
 def test_set_at_reference_double_list_reference():
@@ -308,6 +310,7 @@ def test_set_at_reference_double_list_reference():
     Note: #../ is used because the reference is inside a list element, so we
     need to go up one level to reach the container's attributes.
     """
+
     @quam_dataclass
     class ContainerWithNestedListRefs(QuamRoot):
         values: QuamList = None
@@ -330,6 +333,6 @@ def test_set_at_reference_double_list_reference():
 
     # values[1] should be updated, reference in values[0] should be preserved
     assert container.values[1] == 555, "values[1] should be updated to 555"
-    assert container.values.data[0] == "#../values/1", (
-        "Reference should be preserved in list"
-    )
+    assert (
+        container.values.data[0] == "#../values/1"
+    ), "Reference should be preserved in list"

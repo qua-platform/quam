@@ -210,7 +210,10 @@ def test_lf_fem_analog_output_port_exponential_filter():
 
     # Adding feedback filter should raise ValueError due to QOP version compatibility
     port.feedback_filter = [0.3, 0.4, 0.5]
-    with pytest.raises(ValueError, match="'exponential_filter' / 'high_pass_filter' / 'exponential_dc_gain'"):
+    with pytest.raises(
+        ValueError,
+        match="'exponential_filter' / 'high_pass_filter' / 'exponential_dc_gain'",
+    ):
         port.get_port_properties()
     # Remove exponential filter and verify feedback filter works
     port.exponential_filter = None
@@ -288,7 +291,10 @@ def test_lf_fem_analog_output_port_exponential_dc_gain_and_feedback_mutually_exc
     port.exponential_dc_gain = 0.5
     port.feedback_filter = [0.3, 0.4]
 
-    with pytest.raises(ValueError, match="'exponential_filter' / 'high_pass_filter' / 'exponential_dc_gain'"):
+    with pytest.raises(
+        ValueError,
+        match="'exponential_filter' / 'high_pass_filter' / 'exponential_dc_gain'",
+    ):
         port.get_port_properties()
 
 
@@ -297,5 +303,8 @@ def test_lf_fem_analog_output_port_high_pass_and_feedback_mutually_exclusive():
     port.high_pass_filter = 1e-3
     port.feedback_filter = [0.3, 0.4]
 
-    with pytest.raises(ValueError, match="'exponential_filter' / 'high_pass_filter' / 'exponential_dc_gain'"):
+    with pytest.raises(
+        ValueError,
+        match="'exponential_filter' / 'high_pass_filter' / 'exponential_dc_gain'",
+    ):
         port.get_port_properties()

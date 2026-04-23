@@ -268,7 +268,7 @@ def test_get_attr_name_with_reference():
         b: dict
 
     component = TestQuamComponent(a="#./b", b={"value": 43})
-    
+
     assert component.a is component.b
     assert component.get_attr_name(component.b) == "b"
 

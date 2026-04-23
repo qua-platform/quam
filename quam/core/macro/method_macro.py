@@ -3,7 +3,6 @@ import functools
 
 from quam.core.macro.base_macro import BaseMacro
 
-
 __all__ = ["method_macro", "MethodMacro"]
 
 

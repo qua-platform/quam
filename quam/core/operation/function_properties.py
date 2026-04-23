@@ -6,7 +6,6 @@ import keyword
 
 from quam.components import QuantumComponent
 
-
 __all__ = ["FunctionProperties"]
 
 

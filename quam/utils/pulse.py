@@ -5,7 +5,6 @@ from qm import qua
 
 from quam.utils.qua_types import ScalarFloat
 
-
 __all__ = ["pulse_str_to_axis_axis_angle", "add_amplitude_scale_to_pulse_name"]
 
 

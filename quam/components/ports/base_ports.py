@@ -4,7 +4,6 @@ from typing import Any, ClassVar, Dict, Tuple, Union
 
 from quam.core import QuamComponent, quam_dataclass
 
-
 __all__ = ["BasePort", "OPXPlusPort", "FEMPort"]
 
 

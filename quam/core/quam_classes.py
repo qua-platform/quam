@@ -770,9 +770,7 @@ class QuamBase(ReferenceClass):
         # Recursively follow the chain
         return self._follow_reference_chain(parent_obj, parent_attr, max_depth - 1)
 
-    def set_at_reference(
-        self, attr: str, value: Any, allow_non_reference: bool = True
-    ):
+    def set_at_reference(self, attr: str, value: Any, allow_non_reference: bool = True):
         """Follow the reference of an attribute and set the value at the reference.
 
         This method follows reference chains recursively. If an attribute contains

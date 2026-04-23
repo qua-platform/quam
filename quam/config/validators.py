@@ -10,6 +10,7 @@ from quam.config.vars import QUAM_CONFIG_KEY
 
 class InvalidQuamConfigVersion(RuntimeError):
     """Base exception for QUAM config version issues"""
+
     pass
 
 
@@ -30,9 +31,7 @@ def quam_version_validator(
     skip_if_none: bool = True,
 ) -> None:
     if not skip_if_none and QUAM_CONFIG_KEY not in config:
-        raise InvalidQuamConfigVersionError(
-            "Qualibrate config has no 'quam' key"
-        )
+        raise InvalidQuamConfigVersionError("Qualibrate config has no 'quam' key")
     version = config[QUAM_CONFIG_KEY].get("version")
     if version is None:
         raise InvalidQuamConfigVersionError(

@@ -4,7 +4,6 @@ from typing import Callable, Optional, TypeVar, Any
 
 from quam.core.operation import Operation
 
-
 __all__ = ["OperationsRegistry"]
 
 T = TypeVar("T", bound=Callable[..., Any])
