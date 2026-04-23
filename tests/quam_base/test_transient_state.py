@@ -1,5 +1,6 @@
 import ast
 from dataclasses import field
+import json
 from pathlib import Path
 import warnings
 
@@ -374,3 +375,78 @@ def test_record_transient_tracks_list_iadd_delete_and_clear_without_noop_snapsho
     root.revert_transient()
 
     assert root.items == [1, 2]
+
+
+def test_save_warns_when_transient_changes_are_active(tmp_path):
+    root = Root(child=Leaf(value=1))
+
+    with root.record_transient():
+        root.child.value = 2
+
+    with pytest.warns(
+        UserWarning,
+        match=(
+            "1 active transient change.*save\\(\\) will revert.*original "
+            "pre-transient values.*clear transient state"
+        ),
+    ):
+        root.save(tmp_path / "state.json")
+
+
+def test_save_persists_original_values_instead_of_transient_ones(tmp_path):
+    root = Root(child=Leaf(value=1), mapping={"status": "idle"})
+
+    with root.record_transient():
+        root.child.value = 2
+        root.mapping["status"] = "busy"
+
+    root.save(tmp_path / "state.json")
+
+    saved = json.loads((tmp_path / "state.json").read_text())
+
+    assert saved["child"]["value"] == 1
+    assert saved["mapping"]["status"] == "idle"
+
+
+def test_save_clears_transient_state_after_reverting(tmp_path):
+    root = Root(child=Leaf(value=1))
+
+    with root.record_transient():
+        root.child.value = 2
+
+    root.save(tmp_path / "state.json")
+
+    assert root.get_transient_changes() == []
+    assert root._transient_state._records == []
+
+
+def test_save_reverts_live_object_state_after_save(tmp_path):
+    root = Root(child=Leaf(value=1), items=[1, 2])
+
+    with root.record_transient():
+        root.child.value = 2
+        root.items.append(3)
+
+    root.save(tmp_path / "state.json")
+
+    assert root.child.value == 1
+    assert root.items == [1, 2]
+
+
+def test_save_failure_restores_transient_live_state_and_records(tmp_path):
+    root = Root(child=Leaf(value=1))
+
+    with root.record_transient():
+        root.child.value = 2
+
+    assert root.get_transient_changes() == [
+        {"path": "#/child/value", "was": 1, "now": 2}
+    ]
+
+    with pytest.raises(ValueError, match="Unsupported path suffix"):
+        root.save(tmp_path / "state.txt")
+
+    assert root.child.value == 2
+    assert root.get_transient_changes() == [
+        {"path": "#/child/value", "was": 1, "now": 2}
+    ]

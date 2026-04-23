@@ -175,6 +175,91 @@ def _get_attached_root(obj: Any) -> Optional["QuamRoot"]:
     return None
 
 
+def _clear_transient_parent(value: Any) -> None:
+    if isinstance(value, QuamBase):
+        value.parent = None
+
+
+def _restore_transient_parent(parent: Any, value: Any) -> None:
+    if isinstance(value, QuamBase) and value.parent is None:
+        value.parent = parent
+
+
+def _transient_added_items(current: list[Any], snapshot: list[Any]) -> list[Any]:
+    remaining = list(snapshot)
+    added = []
+
+    for item in current:
+        for index, original in enumerate(remaining):
+            if item is original:
+                remaining.pop(index)
+                break
+        else:
+            added.append(item)
+
+    return added
+
+
+def _snapshot_transient_record_value(record: Any) -> Any:
+    if isinstance(record, _AttrRecord):
+        return getattr(record.obj, record.attr, TRANSIENT_MISSING)
+    if isinstance(record, _DictRecord):
+        return record.obj.data.get(record.key, TRANSIENT_MISSING)
+    if isinstance(record, _ListRecord):
+        return list(record.obj.data)
+
+    raise TypeError(f"Unsupported transient record type: {type(record)}")
+
+
+def _restore_transient_records_after_failed_save(
+    transient_state: TransientState,
+    record_snapshots: list[tuple[tuple[int, Hashable], Any, Any]],
+) -> None:
+    for _, record, transient_value in record_snapshots:
+        if isinstance(record, _AttrRecord):
+            current = getattr(record.obj, record.attr, TRANSIENT_MISSING)
+            if transient_value is TRANSIENT_MISSING:
+                if current is not TRANSIENT_MISSING:
+                    _clear_transient_parent(current)
+                    object.__delattr__(record.obj, record.attr)
+            else:
+                if current is not TRANSIENT_MISSING and current is not transient_value:
+                    _clear_transient_parent(current)
+                object.__setattr__(record.obj, record.attr, transient_value)
+                _restore_transient_parent(record.obj, transient_value)
+            continue
+
+        if isinstance(record, _DictRecord):
+            current = record.obj.data.get(record.key, TRANSIENT_MISSING)
+            if transient_value is TRANSIENT_MISSING:
+                if current is not TRANSIENT_MISSING:
+                    _clear_transient_parent(current)
+                    del record.obj.data[record.key]
+            else:
+                if current is not TRANSIENT_MISSING and current is not transient_value:
+                    _clear_transient_parent(current)
+                record.obj.data[record.key] = transient_value
+                _restore_transient_parent(record.obj, transient_value)
+            continue
+
+        if isinstance(record, _ListRecord):
+            for item in _transient_added_items(list(record.obj.data), transient_value):
+                _clear_transient_parent(item)
+
+            record.obj.data[:] = transient_value
+            for item in transient_value:
+                _restore_transient_parent(record.obj, item)
+            continue
+
+        raise TypeError(f"Unsupported transient record type: {type(record)}")
+
+    transient_state._records = [
+        (token, record) for token, record, _ in record_snapshots
+    ]
+    transient_state._seen = {token for token, _, _ in record_snapshots}
+    transient_state._is_recording = False
+
+
 def _is_transient_subtree_record(record_obj: Any, subtree_root: Any) -> bool:
     if not isinstance(subtree_root, QuamBase) or not isinstance(record_obj, QuamBase):
         return False
@@ -1068,6 +1153,34 @@ class QuamRoot(QuamBase):
                 value.
             ignore: A list of components to ignore.
         """
+        if self._transient_state._records:
+            active_change_count = len(self._transient_state._records)
+            change_label = "change" if active_change_count == 1 else "changes"
+            transient_record_snapshots = [
+                (token, record, _snapshot_transient_record_value(record))
+                for token, record in self._transient_state._records
+            ]
+            warnings.warn(
+                f"{active_change_count} active transient {change_label}; save() "
+                "will revert them, persist the original pre-transient values, "
+                "and clear transient state."
+            )
+            self._transient_state.revert()
+            try:
+                self.serialiser.save(
+                    quam_obj=self,
+                    path=path,
+                    content_mapping=content_mapping,
+                    include_defaults=include_defaults,
+                    ignore=ignore,
+                )
+            except Exception:
+                _restore_transient_records_after_failed_save(
+                    self._transient_state, transient_record_snapshots
+                )
+                raise
+            return
+
         self.serialiser.save(
             quam_obj=self,
             path=path,
