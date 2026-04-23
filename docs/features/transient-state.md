@@ -21,9 +21,6 @@ Transient state separates these two steps:
 The following script uses the superconducting-qubits example components from `quam.examples.superconducting_qubits`. It creates a small QUAM, adds readout pulses, temporarily increases the readout amplitudes for config generation, then reverts those temporary values before saving the fitted calibration result.
 
 ```python
-from pathlib import Path
-from tempfile import TemporaryDirectory
-
 from quam.components import pulses
 from quam.examples.superconducting_qubits.generate_superconducting_quam import (
     create_quam_superconducting_referenced,
@@ -60,9 +57,7 @@ fitted_amplitudes = {
 for qubit_name, amplitude in fitted_amplitudes.items():
     machine.qubits[qubit_name].resonator.operations["readout"].amplitude = amplitude
 
-with TemporaryDirectory() as tmpdir:
-    state_path = Path(tmpdir) / "state.json"
-    machine.save(state_path)
+machine.save()
 ```
 
 This is the main transient-state pattern:
