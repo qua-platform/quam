@@ -16,6 +16,7 @@
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
 - Added support for channels as quantum components via multiple inheritance, enabling channel-level macros and operations (e.g., `class HybridChannel(SingleChannel, Qubit)`). This allows macros to be attached directly to channels instead of requiring a parent qubit component.
 - Added `skip_save` field metadata support to exclude specific dataclass fields from serialization while keeping them accessible at runtime. Use `field(metadata={"skip_save": True})` to mark fields that should not be saved to JSON
+- Added transient-state recording APIs on `QuamRoot` (`record_transient()`, `get_transient_changes()`, `revert_transient()`), with change records reported as `path`, `original`, and `transient`.
 
 ### Changed
 
@@ -48,6 +49,7 @@ All deprecated properties now show migration guidance with code examples. See [P
 
 ### Fixed
 
+- `QuamRoot.save()` now warns and persists original values when transient changes are active, then clears the transient state
 - Added `exponential_dc_gain` and `high_pass_filter` fields to `LFFEMAnalogOutputPort` for QOP 3.5+ filter support; fixed validation so the two fields can coexist and `exponential_dc_gain` alone conflicts with `feedback_filter`
 - Clarified in documentation how kwargs and attributes differ for method macros: kwargs are per-call overrides, attributes are persistent calibrated values that are saved with the QUAM state
 - Improved error messages for inferred frequency properties (`inferred_RF_frequency`, `inferred_intermediate_frequency`, `inferred_LO_frequency`) in `_OutComplexChannel` (`IQChannel` and `MWChannel`): errors now clearly identify the specific field and whether it is `None` or an unresolved reference

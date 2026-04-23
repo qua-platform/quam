@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections.abc import Iterable
 from collections import UserList
+from contextlib import contextmanager
 import sys
 import warnings
 from pathlib import Path
@@ -19,6 +20,7 @@ from typing import (
     get_origin,
     get_args,
     Optional,
+    Hashable,
 )
 from functools import partial
 from dataclasses import dataclass, fields, is_dataclass, MISSING
@@ -40,6 +42,14 @@ from quam.utils.exceptions import InvalidReferenceError
 from .qua_config_template import qua_config_template
 
 from qm.type_hinting import DictQuaConfig
+
+from .transient import (
+    MISSING as TRANSIENT_MISSING,
+    TransientState,
+    _AttrRecord,
+    _DictRecord,
+    _ListRecord,
+)
 
 __all__ = [
     "QuamBase",
@@ -146,6 +156,235 @@ def sort_quam_components(
         )
 
     return sorted_components
+
+
+def _warn_transient_overwrite(transient_state: TransientState, token) -> None:
+    warnings.warn(
+        "A transient value is being permanently overwritten outside the recording "
+        "scope; the transient record was removed."
+    )
+    transient_state.remove(token)
+
+
+def _get_attached_root(obj: Any) -> Optional["QuamRoot"]:
+    current = obj
+    while current is not None:
+        if isinstance(current, QuamRoot):
+            return current
+        current = getattr(current, "parent", None)
+    return None
+
+
+def _clear_transient_parent(value: Any) -> None:
+    if isinstance(value, QuamBase):
+        value.parent = None
+
+
+def _restore_transient_parent(parent: Any, value: Any) -> None:
+    if isinstance(value, QuamBase) and value.parent is None:
+        value.parent = parent
+
+
+def _transient_added_items(current: list[Any], snapshot: list[Any]) -> list[Any]:
+    remaining = list(snapshot)
+    added = []
+
+    for item in current:
+        for index, original in enumerate(remaining):
+            if item is original:
+                remaining.pop(index)
+                break
+        else:
+            added.append(item)
+
+    return added
+
+
+def _snapshot_transient_record_value(record: Any) -> Any:
+    if isinstance(record, _AttrRecord):
+        return getattr(record.obj, record.attr, TRANSIENT_MISSING)
+    if isinstance(record, _DictRecord):
+        return record.obj.data.get(record.key, TRANSIENT_MISSING)
+    if isinstance(record, _ListRecord):
+        return list(record.obj.data)
+
+    raise TypeError(f"Unsupported transient record type: {type(record)}")
+
+
+def _restore_transient_records_after_failed_save(
+    transient_state: TransientState,
+    record_snapshots: list[tuple[tuple[int, Hashable], Any, Any]],
+) -> None:
+    for _, record, transient_value in record_snapshots:
+        if isinstance(record, _AttrRecord):
+            current = getattr(record.obj, record.attr, TRANSIENT_MISSING)
+            if transient_value is TRANSIENT_MISSING:
+                if current is not TRANSIENT_MISSING:
+                    _clear_transient_parent(current)
+                    object.__delattr__(record.obj, record.attr)
+            else:
+                if current is not TRANSIENT_MISSING and current is not transient_value:
+                    _clear_transient_parent(current)
+                object.__setattr__(record.obj, record.attr, transient_value)
+                _restore_transient_parent(record.obj, transient_value)
+            continue
+
+        if isinstance(record, _DictRecord):
+            current = record.obj.data.get(record.key, TRANSIENT_MISSING)
+            if transient_value is TRANSIENT_MISSING:
+                if current is not TRANSIENT_MISSING:
+                    _clear_transient_parent(current)
+                    del record.obj.data[record.key]
+            else:
+                if current is not TRANSIENT_MISSING and current is not transient_value:
+                    _clear_transient_parent(current)
+                record.obj.data[record.key] = transient_value
+                _restore_transient_parent(record.obj, transient_value)
+            continue
+
+        if isinstance(record, _ListRecord):
+            for item in _transient_added_items(list(record.obj.data), transient_value):
+                _clear_transient_parent(item)
+
+            record.obj.data[:] = transient_value
+            for item in transient_value:
+                _restore_transient_parent(record.obj, item)
+            continue
+
+        raise TypeError(f"Unsupported transient record type: {type(record)}")
+
+    transient_state._records = [
+        (token, record) for token, record, _ in record_snapshots
+    ]
+    transient_state._seen = {token for token, _, _ in record_snapshots}
+    transient_state._is_recording = False
+
+
+def _is_transient_subtree_record(record_obj: Any, subtree_root: Any) -> bool:
+    if not isinstance(subtree_root, QuamBase) or not isinstance(record_obj, QuamBase):
+        return False
+
+    current = record_obj
+    while current is not None:
+        if current is subtree_root:
+            return True
+        current = getattr(current, "parent", None)
+    return False
+
+
+def _drop_transient_subtree_records(
+    transient_state: TransientState, subtree_root: Any
+) -> bool:
+    kept_records = []
+    removed = False
+
+    for existing_token, record in transient_state._records:
+        if _is_transient_subtree_record(record.obj, subtree_root):
+            transient_state._seen.discard(existing_token)
+            removed = True
+        else:
+            kept_records.append((existing_token, record))
+
+    if removed:
+        transient_state._records = kept_records
+
+    return removed
+
+
+def _record_attr_write(obj: "QuamBase", name: str, value: Any) -> None:
+    if not getattr(obj, "_initialized", False):
+        return
+
+    root = _get_attached_root(obj)
+    transient_state = getattr(root, "_transient_state", None)
+    if transient_state is None:
+        return
+
+    try:
+        current = object.__getattribute__(obj, name)
+    except AttributeError:
+        current = TRANSIENT_MISSING
+
+    if current is value:
+        return
+
+    token = (id(obj), name)
+    if transient_state._is_recording:
+        if token in transient_state._seen:
+            return
+
+        transient_state.record(_AttrRecord(obj, name, current), name)
+        return
+
+    removed_subtree_records = False
+    if current is not TRANSIENT_MISSING and current is not value:
+        removed_subtree_records = _drop_transient_subtree_records(
+            transient_state, current
+        )
+
+    if token in transient_state._seen or removed_subtree_records:
+        _warn_transient_overwrite(transient_state, token)
+
+
+def _get_transient_state_for_container(
+    container: "QuamBase",
+) -> Optional[TransientState]:
+    if not getattr(container, "_initialized", False):
+        return None
+
+    root = _get_attached_root(container)
+    return getattr(root, "_transient_state", None)
+
+
+def _record_dict_write(
+    container: "QuamDict", key: Hashable, value: Any, *, allow_missing: bool
+) -> None:
+    transient_state = _get_transient_state_for_container(container)
+    if transient_state is None:
+        return
+
+    token = (id(container), key)
+    if transient_state._is_recording:
+        if token in transient_state._seen:
+            return
+
+        if not allow_missing and key not in container.data:
+            return
+
+        original = container.data[key] if key in container.data else TRANSIENT_MISSING
+        transient_state.record(
+            _DictRecord(container, key, original),
+            key,
+        )
+        return
+
+    current = container.data[key] if key in container.data else TRANSIENT_MISSING
+    removed_subtree_records = False
+    if current is not TRANSIENT_MISSING and current is not value:
+        removed_subtree_records = _drop_transient_subtree_records(
+            transient_state, current
+        )
+
+    if token in transient_state._seen or removed_subtree_records:
+        _warn_transient_overwrite(transient_state, token)
+
+
+def _record_list_snapshot(container: "QuamList") -> None:
+    transient_state = _get_transient_state_for_container(container)
+    if transient_state is None:
+        return
+
+    token = (id(container), "__list__")
+    if transient_state._is_recording:
+        if token in transient_state._seen:
+            return
+
+        transient_state.record(
+            _ListRecord(container, container.data[:]),
+            "__list__",
+        )
+    elif token in transient_state._seen:
+        _warn_transient_overwrite(transient_state, token)
 
 
 def _quam_dataclass(cls=None, **kwargs):
@@ -289,8 +528,8 @@ class QuamBase(ReferenceClass):
 
         if self._last_instantiated_root is not None:
             warnings.warn(
-                f"This component is not part of any QuamRoot, using last "
-                f"instantiated QuamRoot. This is not recommended as it may lead to "
+                "This component is not part of any QuamRoot, using last "
+                "instantiated QuamRoot. This is not recommended as it may lead to "
                 f"unexpected behaviour. Component: {self.__class__.__name__}"
             )
             return self._last_instantiated_root
@@ -338,7 +577,8 @@ class QuamBase(ReferenceClass):
                 return self.id
         if self.parent is None:
             raise AttributeError(
-                f"Cannot infer id of {self.__class__.__name__} because it has no parent."
+                f"Cannot infer id of {self.__class__.__name__} because it has no"
+                " parent."
             )
         return str(self.parent.get_attr_name(self))
 
@@ -634,7 +874,7 @@ class QuamBase(ReferenceClass):
         root = self.get_root()
         if string_reference.is_absolute_reference(reference) and root is None:
             warnings.warn(
-                f"No QuamRoot initialized, cannot retrieve absolute reference "
+                "No QuamRoot initialized, cannot retrieve absolute reference "
                 f"{reference} from {self.__class__.__name__}"
             )
             return reference
@@ -730,8 +970,9 @@ class QuamBase(ReferenceClass):
             max_depth = self._MAX_REFERENCE_DEPTH
         if max_depth <= 0:
             raise RecursionError(
-                f"Reference chain exceeded maximum depth of {self._MAX_REFERENCE_DEPTH}. "
-                f"Possible circular reference starting from {obj.get_attr_path()}"
+                "Reference chain exceeded maximum depth of"
+                f" {self._MAX_REFERENCE_DEPTH}. Possible circular reference starting"
+                f" from {obj.get_attr_path()}"
             )
 
         # Handle list/dict index access specially
@@ -770,9 +1011,7 @@ class QuamBase(ReferenceClass):
         # Recursively follow the chain
         return self._follow_reference_chain(parent_obj, parent_attr, max_depth - 1)
 
-    def set_at_reference(
-        self, attr: str, value: Any, allow_non_reference: bool = True
-    ):
+    def set_at_reference(self, attr: str, value: Any, allow_non_reference: bool = True):
         """Follow the reference of an attribute and set the value at the reference.
 
         This method follows reference chains recursively. If an attribute contains
@@ -796,8 +1035,8 @@ class QuamBase(ReferenceClass):
         if not string_reference.is_reference(raw_value):
             if not allow_non_reference:
                 raise ValueError(
-                    f"Cannot set at reference because attr '{attr}' is not a reference. "
-                    f"'{attr}' = {raw_value}"
+                    f"Cannot set at reference because attr '{attr}' is not a reference."
+                    f" '{attr}' = {raw_value}"
                 )
             target_obj, target_attr = self, attr
         else:
@@ -833,16 +1072,36 @@ class QuamRoot(QuamBase):
     """
 
     def __post_init__(self):
+        self.__dict__["_transient_state"] = TransientState()
         QuamBase._last_instantiated_root = self
         self.serialiser = self.get_serialiser()
         super().__post_init__()
 
     def __setattr__(self, name, value):
+        _record_attr_write(self, name, value)
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
         if isinstance(converted_val, QuamBase) and name != "parent":
             converted_val.parent = self
+
+    @contextmanager
+    def record_transient(self):
+        transient_state = self._transient_state
+        if transient_state._is_recording:
+            raise RuntimeError("Nested recording scopes are not supported.")
+
+        transient_state._is_recording = True
+        try:
+            yield self
+        finally:
+            transient_state._is_recording = False
+
+    def revert_transient(self) -> None:
+        self._transient_state.revert()
+
+    def get_transient_changes(self) -> list[dict[str, Any]]:
+        return self._transient_state.describe()
 
     @classmethod
     def get_serialiser(cls) -> AbstractSerialiser:
@@ -894,6 +1153,34 @@ class QuamRoot(QuamBase):
                 value.
             ignore: A list of components to ignore.
         """
+        if self._transient_state._records:
+            active_change_count = len(self._transient_state._records)
+            change_label = "change" if active_change_count == 1 else "changes"
+            transient_record_snapshots = [
+                (token, record, _snapshot_transient_record_value(record))
+                for token, record in self._transient_state._records
+            ]
+            warnings.warn(
+                f"{active_change_count} active transient {change_label}; save() "
+                "will revert them, persist the original pre-transient values, "
+                "and clear transient state."
+            )
+            self._transient_state.revert()
+            try:
+                self.serialiser.save(
+                    quam_obj=self,
+                    path=path,
+                    content_mapping=content_mapping,
+                    include_defaults=include_defaults,
+                    ignore=ignore,
+                )
+            except Exception:
+                _restore_transient_records_after_failed_save(
+                    self._transient_state, transient_record_snapshots
+                )
+                raise
+            return
+
         self.serialiser.save(
             quam_obj=self,
             path=path,
@@ -980,6 +1267,7 @@ class QuamComponent(QuamBase):
     """
 
     def __setattr__(self, name, value):
+        _record_attr_write(self, name, value)
         converted_val = convert_dict_and_list(value, cls_or_obj=self, attr=name)
         super().__setattr__(name, converted_val)
 
@@ -1073,12 +1361,17 @@ class QuamDict(UserDict, QuamBase):
 
     # Overriding methods from UserDict
     def __setitem__(self, key, value):
+        _record_dict_write(self, key, value, allow_missing=True)
         value = convert_dict_and_list(value)
         self._is_valid_setattr(key, value, error_on_False=True)
         super().__setitem__(key, value)
 
         if isinstance(value, QuamBase):
             value.parent = self
+
+    def __delitem__(self, key):
+        _record_dict_write(self, key, TRANSIENT_MISSING, allow_missing=False)
+        super().__delitem__(key)
 
     def __eq__(self, other) -> bool:
         if isinstance(other, dict):
@@ -1247,13 +1540,15 @@ class QuamList(UserList, QuamBase):
     _value_annotation: ClassVar[type] = None
 
     def __init__(self, *args, value_annotation: type = None):
-        self._value_annotation = value_annotation
+        self.__dict__["_value_annotation"] = value_annotation
+        self.__dict__["_initialized"] = False
 
         # We manually add elements using extend instead of passing to super()
         # To ensure that any dicts and lists get converted to QuamDict and QuamList
         super().__init__()
         if args:
             self.extend(*args)
+        self.__dict__["_initialized"] = True
 
     # Overloading methods from UserList
     def __eq__(self, value: object) -> bool:
@@ -1296,6 +1591,7 @@ class QuamList(UserList, QuamBase):
             return self._get_referenced_value(elem)
 
     def __setitem__(self, i, item):
+        self._record_list_snapshot()
         converted_item = convert_dict_and_list(item)
         super().__setitem__(i, converted_item)
 
@@ -1304,9 +1600,12 @@ class QuamList(UserList, QuamBase):
 
     def __iadd__(self, other: Iterable):
         converted_other = [convert_dict_and_list(elem) for elem in other]
+        if converted_other:
+            self._record_list_snapshot()
         return super().__iadd__(converted_other)
 
     def append(self, item: Any) -> None:
+        self._record_list_snapshot()
         converted_item = convert_dict_and_list(item)
 
         if isinstance(converted_item, QuamBase):
@@ -1315,6 +1614,7 @@ class QuamList(UserList, QuamBase):
         return super().append(converted_item)
 
     def insert(self, i: int, item: Any) -> None:
+        self._record_list_snapshot()
         converted_item = convert_dict_and_list(item)
 
         if isinstance(converted_item, QuamBase):
@@ -1324,11 +1624,35 @@ class QuamList(UserList, QuamBase):
 
     def extend(self, iterable: Iterator) -> None:
         converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
+        if not converted_iterable:
+            return super().extend(converted_iterable)
+
+        self._record_list_snapshot()
         for converted_item in converted_iterable:
             if isinstance(converted_item, QuamBase):
                 converted_item.parent = self
 
         return super().extend(converted_iterable)
+
+    def remove(self, item: Any) -> None:
+        self._record_list_snapshot()
+        return super().remove(item)
+
+    def pop(self, i: int = -1):
+        self._record_list_snapshot()
+        return super().pop(i)
+
+    def __delitem__(self, i):
+        self._record_list_snapshot()
+        return super().__delitem__(i)
+
+    def clear(self) -> None:
+        if self.data:
+            self._record_list_snapshot()
+        return super().clear()
+
+    def _record_list_snapshot(self) -> None:
+        _record_list_snapshot(self)
 
     # Quam methods
     def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
