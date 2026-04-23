@@ -123,13 +123,13 @@ The output contains the QUAM path, the original value, and the current temporary
 [
     {
         "path": "#/qubits/q0/resonator/operations/readout/amplitude",
-        "was": 0.05,
-        "now": 0.2,
+        "original": 0.05,
+        "transient": 0.2,
     },
     {
         "path": "#/qubits/q1/resonator/operations/readout/amplitude",
-        "was": 0.05,
-        "now": 0.2,
+        "original": 0.05,
+        "transient": 0.2,
     },
 ]
 ```
@@ -198,7 +198,7 @@ If saving fails after QUAM has reverted the transient values, QUAM restores the 
 
 ### First Write Is Recorded
 
-Only the first write to a given attribute, dictionary key, or list is recorded. Later writes update the live value, but the original `was` value remains the value that will be restored:
+Only the first write to a given attribute, dictionary key, or list is recorded. Later writes update the live value, but the `original` value remains the value that will be restored:
 
 ```python
 with machine.record_transient():
@@ -207,7 +207,7 @@ with machine.record_transient():
     readout.amplitude = 0.2
 
 print(machine.get_transient_changes())
-# [{"path": ".../amplitude", "was": 0.05, "now": 0.2}]
+# [{"path": ".../amplitude", "original": 0.05, "transient": 0.2}]
 ```
 
 ### Dictionaries and Lists
@@ -221,7 +221,7 @@ with machine.record_transient():
     machine.wiring["temporary_mode"] = "power_sweep"
 ```
 
-For added or deleted dictionary keys, `was` or `now` is the `MISSING` sentinel from `quam.core.transient`.
+For added or deleted dictionary keys, `original` or `transient` is the `MISSING` sentinel from `quam.core.transient`.
 
 List mutations are recorded as a snapshot of the whole list:
 
@@ -232,7 +232,7 @@ with machine.record_transient():
     machine.wiring["active_qubits"].append("q2")
 
 print(machine.get_transient_changes())
-# [{"path": "#/wiring/active_qubits", "was": ["q0", "q1"], "now": ["q0", "q1", "q2"]}]
+# [{"path": "#/wiring/active_qubits", "original": ["q0", "q1"], "transient": ["q0", "q1", "q2"]}]
 ```
 
 List changes are tracked at list granularity, not per index.

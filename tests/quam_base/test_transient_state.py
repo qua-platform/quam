@@ -61,14 +61,18 @@ def test_transient_state_records_first_attr_write_and_can_remove():
     root.child.value = 3
 
     assert duplicate_token == token
-    assert state.describe() == [{"path": "#/child/value", "was": 1, "now": 3}]
+    assert state.describe() == [
+        {"path": "#/child/value", "original": 1, "transient": 3}
+    ]
 
     state.remove(token)
     assert state.describe() == []
 
     state.record(_AttrRecord(root.child, "value", 3), "value")
     root.child.value = 4
-    assert state.describe() == [{"path": "#/child/value", "was": 3, "now": 4}]
+    assert state.describe() == [
+        {"path": "#/child/value", "original": 3, "transient": 4}
+    ]
 
 
 def test_attr_record_revert_bypasses_write_hooks_and_removes_missing_attrs():
@@ -124,8 +128,8 @@ def test_dict_record_revert_restores_original_values_and_clears_added_parents():
     root.mapping["added"] = added
 
     assert state.describe() == [
-        {"path": "#/mapping/item", "was": original, "now": replacement},
-        {"path": "#/mapping/added", "was": MISSING, "now": added},
+        {"path": "#/mapping/item", "original": original, "transient": replacement},
+        {"path": "#/mapping/added", "original": MISSING, "transient": added},
     ]
 
     state.revert()
@@ -155,7 +159,11 @@ def test_list_record_revert_restores_snapshot_and_clears_added_parents():
 
     assert duplicate_token == token
     assert state.describe() == [
-        {"path": "#/items", "was": [original], "now": [replacement, appended]}
+        {
+            "path": "#/items",
+            "original": [original],
+            "transient": [replacement, appended],
+        }
     ]
 
     state.revert()
@@ -208,7 +216,7 @@ def test_record_transient_records_component_attribute_until_explicit_revert():
     assert isinstance(root._transient_state, TransientState)
     assert root.child.value == 2
     assert root.get_transient_changes() == [
-        {"path": "#/child/value", "was": 1, "now": 2}
+        {"path": "#/child/value", "original": 1, "transient": 2}
     ]
 
     root.revert_transient()
@@ -230,9 +238,9 @@ def test_record_transient_records_dict_add_modify_delete_and_reverts():
 
     assert root.mapping == {"modified": 10, "added": 20}
     assert root.get_transient_changes() == [
-        {"path": "#/mapping/modified", "was": 1, "now": 10},
-        {"path": "#/mapping/added", "was": MISSING, "now": 20},
-        {"path": "#/mapping/deleted", "was": 2, "now": MISSING},
+        {"path": "#/mapping/modified", "original": 1, "transient": 10},
+        {"path": "#/mapping/added", "original": MISSING, "transient": 20},
+        {"path": "#/mapping/deleted", "original": 2, "transient": MISSING},
     ]
 
     root.revert_transient()
@@ -250,7 +258,7 @@ def test_record_transient_records_list_changes_and_reverts():
 
     assert root.items == [0, 1, 3]
     assert root.get_transient_changes() == [
-        {"path": "#/items", "was": [1, 2], "now": [0, 1, 3]}
+        {"path": "#/items", "original": [1, 2], "transient": [0, 1, 3]}
     ]
 
     root.revert_transient()
@@ -265,7 +273,7 @@ def test_overwrite_outside_recording_scope_warns_and_drops_transient_record():
         root.child.value = 2
 
     assert root.get_transient_changes() == [
-        {"path": "#/child/value", "was": 1, "now": 2}
+        {"path": "#/child/value", "original": 1, "transient": 2}
     ]
 
     with pytest.warns(
@@ -285,7 +293,7 @@ def test_overwrite_outside_recording_scope_warns_and_drops_transient_record():
     assert root.child.value == 3
 
 
-def test_get_transient_changes_returns_human_readable_path_was_now():
+def test_get_transient_changes_returns_human_readable_path_original_transient():
     root = Root(child=Leaf(value=1), mapping={"status": "idle"}, items=[1])
 
     with root.record_transient():
@@ -294,9 +302,9 @@ def test_get_transient_changes_returns_human_readable_path_was_now():
         root.items.append(2)
 
     assert root.get_transient_changes() == [
-        {"path": "#/child/value", "was": 1, "now": 5},
-        {"path": "#/mapping/status", "was": "idle", "now": "busy"},
-        {"path": "#/items", "was": [1], "now": [1, 2]},
+        {"path": "#/child/value", "original": 1, "transient": 5},
+        {"path": "#/mapping/status", "original": "idle", "transient": "busy"},
+        {"path": "#/items", "original": [1], "transient": [1, 2]},
     ]
 
 
@@ -334,7 +342,7 @@ def test_overwriting_ancestor_outside_scope_drops_descendant_transient_record():
         root.child.value = 2
 
     assert root.get_transient_changes() == [
-        {"path": "#/child/value", "was": 1, "now": 2}
+        {"path": "#/child/value", "original": 1, "transient": 2}
     ]
 
     with pytest.warns(
@@ -369,7 +377,7 @@ def test_record_transient_tracks_list_iadd_delete_and_clear_without_noop_snapsho
 
     assert root.items == []
     assert root.get_transient_changes() == [
-        {"path": "#/items", "was": [1, 2], "now": []}
+        {"path": "#/items", "original": [1, 2], "transient": []}
     ]
 
     root.revert_transient()
@@ -440,7 +448,7 @@ def test_save_failure_restores_transient_live_state_and_records(tmp_path):
         root.child.value = 2
 
     assert root.get_transient_changes() == [
-        {"path": "#/child/value", "was": 1, "now": 2}
+        {"path": "#/child/value", "original": 1, "transient": 2}
     ]
 
     with pytest.raises(ValueError, match="Unsupported path suffix"):
@@ -448,5 +456,5 @@ def test_save_failure_restores_transient_live_state_and_records(tmp_path):
 
     assert root.child.value == 2
     assert root.get_transient_changes() == [
-        {"path": "#/child/value", "was": 1, "now": 2}
+        {"path": "#/child/value", "original": 1, "transient": 2}
     ]

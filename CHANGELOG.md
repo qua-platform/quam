@@ -16,6 +16,7 @@
 - Added v2→v3 config migration with automatic upgrade support for the new serialization settings
 - Added support for channels as quantum components via multiple inheritance, enabling channel-level macros and operations (e.g., `class HybridChannel(SingleChannel, Qubit)`). This allows macros to be attached directly to channels instead of requiring a parent qubit component.
 - Added `skip_save` field metadata support to exclude specific dataclass fields from serialization while keeping them accessible at runtime. Use `field(metadata={"skip_save": True})` to mark fields that should not be saved to JSON
+- Added transient-state recording APIs on `QuamRoot` (`record_transient()`, `get_transient_changes()`, `revert_transient()`), with change records reported as `path`, `original`, and `transient`.
 
 ### Changed
 

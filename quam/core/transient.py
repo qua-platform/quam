@@ -63,8 +63,8 @@ class _AttrRecord:
     def describe(self) -> dict[str, Any]:
         return {
             "path": _path_for(self.obj, self.attr),
-            "was": self.original,
-            "now": getattr(self.obj, self.attr, MISSING),
+            "original": self.original,
+            "transient": getattr(self.obj, self.attr, MISSING),
         }
 
     def revert(self) -> None:
@@ -92,8 +92,8 @@ class _DictRecord:
     def describe(self) -> dict[str, Any]:
         return {
             "path": _path_for(self.obj, str(self.key)),
-            "was": self.original,
-            "now": self.obj.data.get(self.key, MISSING),
+            "original": self.original,
+            "transient": self.obj.data.get(self.key, MISSING),
         }
 
     def revert(self) -> None:
@@ -120,8 +120,8 @@ class _ListRecord:
     def describe(self) -> dict[str, Any]:
         return {
             "path": _path_for(self.obj),
-            "was": list(self.snapshot),
-            "now": list(self.obj.data),
+            "original": list(self.snapshot),
+            "transient": list(self.obj.data),
         }
 
     def revert(self) -> None:
