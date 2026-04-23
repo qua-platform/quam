@@ -1,6 +1,7 @@
 import ast
 from dataclasses import field
 from pathlib import Path
+import warnings
 
 import pytest
 
@@ -146,7 +147,9 @@ def test_list_record_revert_restores_snapshot_and_clears_added_parents():
     token = state.record(_ListRecord(root.items, root.items.data[:]), "__list__")
     root.items[0] = replacement
 
-    duplicate_token = state.record(_ListRecord(root.items, root.items.data[:]), "__list__")
+    duplicate_token = state.record(
+        _ListRecord(root.items, root.items.data[:]), "__list__"
+    )
     root.items.append(appended)
 
     assert duplicate_token == token
@@ -184,10 +187,190 @@ def test_transient_state_starts_disabled_and_revert_leaves_it_disabled():
 
 
 def test_transient_module_has_no_top_level_quam_classes_import():
-    transient_source = Path(__file__).resolve().parents[2] / "quam" / "core" / "transient.py"
+    transient_source = (
+        Path(__file__).resolve().parents[2] / "quam" / "core" / "transient.py"
+    )
     source_text = transient_source.read_text()
     module = ast.parse(source_text)
 
     for node in module.body:
         if isinstance(node, ast.ImportFrom):
             assert node.module != "quam.core.quam_classes"
+
+
+def test_record_transient_records_component_attribute_until_explicit_revert():
+    root = Root(child=Leaf(value=1))
+
+    with root.record_transient():
+        root.child.value = 2
+
+    assert isinstance(root._transient_state, TransientState)
+    assert root.child.value == 2
+    assert root.get_transient_changes() == [
+        {"path": "#/child/value", "was": 1, "now": 2}
+    ]
+
+    root.revert_transient()
+
+    assert root.child.value == 1
+    assert root.get_transient_changes() == []
+
+
+def test_record_transient_records_dict_add_modify_delete_and_reverts():
+    root = Root(
+        child=Leaf(),
+        mapping={"modified": 1, "deleted": 2},
+    )
+
+    with root.record_transient():
+        root.mapping["modified"] = 10
+        root.mapping["added"] = 20
+        del root.mapping["deleted"]
+
+    assert root.mapping == {"modified": 10, "added": 20}
+    assert root.get_transient_changes() == [
+        {"path": "#/mapping/modified", "was": 1, "now": 10},
+        {"path": "#/mapping/added", "was": MISSING, "now": 20},
+        {"path": "#/mapping/deleted", "was": 2, "now": MISSING},
+    ]
+
+    root.revert_transient()
+
+    assert root.mapping == {"modified": 1, "deleted": 2}
+
+
+def test_record_transient_records_list_changes_and_reverts():
+    root = Root(child=Leaf(), items=[1, 2])
+
+    with root.record_transient():
+        root.items.append(3)
+        root.items.insert(0, 0)
+        root.items.remove(2)
+
+    assert root.items == [0, 1, 3]
+    assert root.get_transient_changes() == [
+        {"path": "#/items", "was": [1, 2], "now": [0, 1, 3]}
+    ]
+
+    root.revert_transient()
+
+    assert root.items == [1, 2]
+
+
+def test_overwrite_outside_recording_scope_warns_and_drops_transient_record():
+    root = Root(child=Leaf(value=1))
+
+    with root.record_transient():
+        root.child.value = 2
+
+    assert root.get_transient_changes() == [
+        {"path": "#/child/value", "was": 1, "now": 2}
+    ]
+
+    with pytest.warns(
+        UserWarning,
+        match=(
+            "transient value is being permanently overwritten.*transient record was"
+            " removed"
+        ),
+    ):
+        root.child.value = 3
+
+    assert root.child.value == 3
+    assert root.get_transient_changes() == []
+
+    root.revert_transient()
+
+    assert root.child.value == 3
+
+
+def test_get_transient_changes_returns_human_readable_path_was_now():
+    root = Root(child=Leaf(value=1), mapping={"status": "idle"}, items=[1])
+
+    with root.record_transient():
+        root.child.value = 5
+        root.mapping["status"] = "busy"
+        root.items.append(2)
+
+    assert root.get_transient_changes() == [
+        {"path": "#/child/value", "was": 1, "now": 5},
+        {"path": "#/mapping/status", "was": "idle", "now": "busy"},
+        {"path": "#/items", "was": [1], "now": [1, 2]},
+    ]
+
+
+def test_record_transient_nested_scope_raises():
+    root = Root(child=Leaf())
+
+    with root.record_transient():
+        with pytest.raises(
+            RuntimeError, match="Nested recording scopes are not supported."
+        ):
+            with root.record_transient():
+                pass
+
+
+def test_detached_component_write_is_not_recorded_by_another_root():
+    root = Root(child=Leaf(value=1))
+    detached = Leaf(value=7)
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        with root.record_transient():
+            detached.value = 9
+
+    assert caught == []
+    assert detached.value == 9
+    assert root.get_transient_changes() == []
+
+
+def test_overwriting_ancestor_outside_scope_drops_descendant_transient_record():
+    root = Root(child=Leaf(value=1))
+    old_child = root.child
+    replacement = Leaf(value=5)
+
+    with root.record_transient():
+        root.child.value = 2
+
+    assert root.get_transient_changes() == [
+        {"path": "#/child/value", "was": 1, "now": 2}
+    ]
+
+    with pytest.warns(
+        UserWarning,
+        match=(
+            "transient value is being permanently overwritten.*transient record was"
+            " removed"
+        ),
+    ):
+        root.child = replacement
+
+    assert root.child is replacement
+    assert root.get_transient_changes() == []
+
+    root.revert_transient()
+
+    assert root.child is replacement
+    assert replacement.value == 5
+    assert old_child.value == 2
+
+
+def test_record_transient_tracks_list_iadd_delete_and_clear_without_noop_snapshot():
+    root = Root(child=Leaf(), items=[1, 2])
+
+    with root.record_transient():
+        root.items += []
+        assert root.get_transient_changes() == []
+
+        root.items += [3]
+        del root.items[1]
+        root.items.clear()
+
+    assert root.items == []
+    assert root.get_transient_changes() == [
+        {"path": "#/items", "was": [1, 2], "now": []}
+    ]
+
+    root.revert_transient()
+
+    assert root.items == [1, 2]
