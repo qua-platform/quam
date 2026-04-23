@@ -16,28 +16,77 @@ Transient state separates these two steps:
 2. Revert those temporary values.
 3. Save only the final calibrated values selected by the analysis.
 
-## Temporary Values for a Calibration
+## Complete Example
 
-Start from a loaded QUAM state and select the components involved in the calibration:
+The following script uses the superconducting-qubits example components from `quam.examples.superconducting_qubits`. It creates a small QUAM, adds readout pulses, temporarily increases the readout amplitudes for config generation, then reverts those temporary values before saving the fitted calibration result.
 
 ```python
-machine = Quam.load()
-qubits = [machine.qubits["q1"], machine.qubits["q2"]]
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from quam.components import pulses
+from quam.examples.superconducting_qubits.generate_superconducting_quam import (
+    create_quam_superconducting_referenced,
+)
+
+
+machine = create_quam_superconducting_referenced(num_qubits=2)
+
+for qubit in machine.qubits.values():
+    qubit.resonator.operations["readout"] = pulses.SquareReadoutPulse(
+        length=1000,
+        amplitude=0.05,
+    )
+
+max_readout_amplitude = 0.2
+
+with machine.record_transient():
+    for qubit in machine.qubits.values():
+        qubit.resonator.operations["readout"].amplitude = max_readout_amplitude
+
+config = machine.generate_config()
+assert config["waveforms"]["IQ0.readout.wf.I"]["sample"] == max_readout_amplitude
+
+print(machine.get_transient_changes())
+
+machine.revert_transient()
+assert machine.qubits["q0"].resonator.operations["readout"].amplitude == 0.05
+
+fitted_amplitudes = {
+    "q0": 0.08,
+    "q1": 0.07,
+}
+
+for qubit_name, amplitude in fitted_amplitudes.items():
+    machine.qubits[qubit_name].resonator.operations["readout"].amplitude = amplitude
+
+with TemporaryDirectory() as tmpdir:
+    state_path = Path(tmpdir) / "state.json"
+    machine.save(state_path)
 ```
 
-The exact component structure depends on your QUAM model. In this example, each qubit has a resonator with a readout pulse amplitude:
+This is the main transient-state pattern:
+
+- Use transient values to run the experiment.
+- Revert the transient values after they are no longer needed.
+- Use normal assignments for the analyzed calibration result.
+- Save only the values you intend to keep.
+
+## Recording Temporary Values
+
+The transient recording scope is the part of the script where temporary values are assigned:
 
 ```python
 with machine.record_transient():
-    for qubit in qubits:
-        qubit.resonator.readout_pulse.amplitude = max_readout_amplitude
+    for qubit in machine.qubits.values():
+        qubit.resonator.operations["readout"].amplitude = max_readout_amplitude
 ```
 
 `record_transient()` records the original values before the writes happen. It does not revert the values when the `with` block exits. The temporary values remain live on the machine:
 
 ```python
-print(machine.qubits["q1"].resonator.readout_pulse.amplitude)
-# max_readout_amplitude
+print(machine.qubits["q0"].resonator.operations["readout"].amplitude)
+# 0.2
 ```
 
 This is the key behavior: the temporary values are available to normal QUAM access and config generation.
@@ -50,7 +99,14 @@ After recording the temporary changes, generate the config as usual:
 config = machine.generate_config()
 ```
 
-The generated config sees the temporary readout amplitudes because they are still live on the QUAM object. This lets the calibration run with the values needed for the experiment without making those values permanent.
+The generated config sees the temporary readout amplitudes because they are still live on the QUAM object:
+
+```python
+print(config["waveforms"]["IQ0.readout.wf.I"]["sample"])
+# 0.2
+```
+
+This lets the calibration run with the values needed for the experiment without making those values permanent.
 
 ## Inspect and Revert
 
@@ -66,13 +122,13 @@ The output contains the QUAM path, the original value, and the current temporary
 ```python
 [
     {
-        "path": "#/qubits/q1/resonator/readout_pulse/amplitude",
+        "path": "#/qubits/q0/resonator/operations/readout/amplitude",
         "was": 0.05,
         "now": 0.2,
     },
     {
-        "path": "#/qubits/q2/resonator/readout_pulse/amplitude",
-        "was": 0.04,
+        "path": "#/qubits/q1/resonator/operations/readout/amplitude",
+        "was": 0.05,
         "now": 0.2,
     },
 ]
@@ -83,7 +139,7 @@ When the temporary values are no longer needed, revert them:
 ```python
 machine.revert_transient()
 
-print(machine.qubits["q1"].resonator.readout_pulse.amplitude)
+print(machine.qubits["q0"].resonator.operations["readout"].amplitude)
 # 0.05
 print(machine.get_transient_changes())
 # []
@@ -98,10 +154,15 @@ After the experiment and analysis, apply the values you actually want to persist
 ```python
 machine.revert_transient()
 
-for qubit in qubits:
-    qubit.resonator.readout_pulse.amplitude = fitted_amplitudes[qubit.name]
+fitted_amplitudes = {
+    "q0": 0.08,
+    "q1": 0.07,
+}
 
-machine.save()
+for qubit_name, amplitude in fitted_amplitudes.items():
+    machine.qubits[qubit_name].resonator.operations["readout"].amplitude = amplitude
+
+machine.save("state.json")
 ```
 
 The distinction is important:
@@ -122,12 +183,12 @@ This pattern prevents temporary sweep setup from being accidentally saved as the
 
 ```python
 with machine.record_transient():
-    machine.qubits["q1"].resonator.readout_pulse.amplitude = max_readout_amplitude
+    machine.qubits["q0"].resonator.operations["readout"].amplitude = 0.2
 
-machine.save()
+machine.save("state.json")
 ```
 
-In this case, the saved state contains the original amplitude, not `max_readout_amplitude`.
+In this case, the saved state contains the original amplitude, not `0.2`.
 
 This behavior is a guardrail. In calibration code, it is usually clearer to call `revert_transient()` explicitly before applying and saving the final fitted values.
 
@@ -141,9 +202,9 @@ Only the first write to a given attribute, dictionary key, or list is recorded. 
 
 ```python
 with machine.record_transient():
-    pulse = machine.qubits["q1"].resonator.readout_pulse
-    pulse.amplitude = 0.1
-    pulse.amplitude = 0.2
+    readout = machine.qubits["q0"].resonator.operations["readout"]
+    readout.amplitude = 0.1
+    readout.amplitude = 0.2
 
 print(machine.get_transient_changes())
 # [{"path": ".../amplitude", "was": 0.05, "now": 0.2}]
@@ -157,7 +218,7 @@ Dictionary mutations are recorded per key:
 
 ```python
 with machine.record_transient():
-    machine.metadata["temporary_mode"] = "power_sweep"
+    machine.wiring["temporary_mode"] = "power_sweep"
 ```
 
 For added or deleted dictionary keys, `was` or `now` is the `MISSING` sentinel from `quam.core.transient`.
@@ -165,11 +226,13 @@ For added or deleted dictionary keys, `was` or `now` is the `MISSING` sentinel f
 List mutations are recorded as a snapshot of the whole list:
 
 ```python
+machine.wiring["active_qubits"] = ["q0", "q1"]
+
 with machine.record_transient():
-    machine.active_qubits.append("q3")
+    machine.wiring["active_qubits"].append("q2")
 
 print(machine.get_transient_changes())
-# [{"path": "#/active_qubits", "was": ["q1", "q2"], "now": ["q1", "q2", "q3"]}]
+# [{"path": "#/wiring/active_qubits", "was": ["q0", "q1"], "now": ["q0", "q1", "q2"]}]
 ```
 
 List changes are tracked at list granularity, not per index.
@@ -180,10 +243,10 @@ If a recorded transient value is overwritten outside a `record_transient()` scop
 
 ```python
 with machine.record_transient():
-    pulse = machine.qubits["q1"].resonator.readout_pulse
-    pulse.amplitude = 0.2
+    readout = machine.qubits["q0"].resonator.operations["readout"]
+    readout.amplitude = 0.2
 
-pulse.amplitude = 0.15  # warns; this value is now permanent
+readout.amplitude = 0.15  # warns; this value is now permanent
 
 print(machine.get_transient_changes())
 # []
