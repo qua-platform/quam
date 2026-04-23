@@ -1,131 +1,119 @@
 # Transient State
 
-Transient state lets you make temporary changes to a [QuamRoot][quam.core.quam_classes.QuamRoot] object for runtime use without persisting those changes to disk.
+Transient state lets you make temporary changes to a [QuamRoot][quam.core.quam_classes.QuamRoot] object for runtime use without saving those changes as calibrated state.
 
-Use it when you need a modified value to be visible to normal QUAM access, config generation, or experiment logic, but want `save()` to keep the original calibrated state.
+This is useful in calibration routines. A routine may need to temporarily change a machine parameter before generating a QUA config or running a program. That temporary value should affect the experiment, but it should not be persisted unless the later analysis decides it is the right calibrated value.
 
-## Basic Usage
+## Motivation
 
-Record temporary writes inside `record_transient()`:
+Consider a readout calibration that sweeps readout power. Before generating the QUA config, the calibration may need to raise the readout pulse amplitude to the maximum value used in the sweep. This ensures that the generated config contains a pulse large enough for all amplitude-scale factors used by the program.
+
+That maximum amplitude is not necessarily the value you want to save. It is a temporary runtime value used to run the sweep. After analysis, the calibration may choose a different fitted amplitude as the value to keep.
+
+Transient state separates these two steps:
+
+1. Record and apply temporary values for config generation or execution.
+2. Revert those temporary values.
+3. Save only the final calibrated values selected by the analysis.
+
+## Temporary Values for a Calibration
+
+Start from a loaded QUAM state and select the components involved in the calibration:
 
 ```python
-from dataclasses import field
+machine = Quam.load()
+qubits = [machine.qubits["q1"], machine.qubits["q2"]]
+```
 
-from quam import QuamRoot, quam_dataclass
-from quam.core import QuamComponent
+The exact component structure depends on your QUAM model. In this example, each qubit has a resonator with a readout pulse amplitude:
 
-
-@quam_dataclass
-class Qubit(QuamComponent):
-    frequency: float = 5e9
-
-
-@quam_dataclass
-class TransientMachine(QuamRoot):
-    qubit: Qubit = field(default_factory=Qubit)
-
-
-machine = TransientMachine()
-
+```python
 with machine.record_transient():
-    machine.qubit.frequency = 5.1e9
-
-print(machine.qubit.frequency)  # 5.1e9
+    for qubit in qubits:
+        qubit.resonator.readout_pulse.amplitude = max_readout_amplitude
 ```
 
-The context manager records the original value. It does not roll the value back when the `with` block exits. This allows the temporary value to remain active for later runtime operations:
+`record_transient()` records the original values before the writes happen. It does not revert the values when the `with` block exits. The temporary values remain live on the machine:
 
 ```python
-qua_config = machine.generate_config()
+print(machine.qubits["q1"].resonator.readout_pulse.amplitude)
+# max_readout_amplitude
 ```
 
-## Inspecting Changes
+This is the key behavior: the temporary values are available to normal QUAM access and config generation.
 
-Use `get_transient_changes()` to inspect the active transient records:
+## Generate a Config With Temporary Values
+
+After recording the temporary changes, generate the config as usual:
+
+```python
+config = machine.generate_config()
+```
+
+The generated config sees the temporary readout amplitudes because they are still live on the QUAM object. This lets the calibration run with the values needed for the experiment without making those values permanent.
+
+## Inspect and Revert
+
+Use `get_transient_changes()` to see what is currently recorded:
 
 ```python
 changes = machine.get_transient_changes()
 print(changes)
 ```
 
-Each change is described as a dictionary with:
-
-- `path`: the QUAM path of the changed value
-- `was`: the original pre-transient value
-- `now`: the current transient value
-
-For the example above, the result is:
+The output contains the QUAM path, the original value, and the current temporary value:
 
 ```python
 [
     {
-        "path": "#/qubit/frequency",
-        "was": 5e9,
-        "now": 5.1e9,
-    }
+        "path": "#/qubits/q1/resonator/readout_pulse/amplitude",
+        "was": 0.05,
+        "now": 0.2,
+    },
+    {
+        "path": "#/qubits/q2/resonator/readout_pulse/amplitude",
+        "was": 0.04,
+        "now": 0.2,
+    },
 ]
 ```
 
-Only the first write to a given attribute, dictionary key, or list is recorded. Later writes update the live value, but the original `was` value remains the value that will be restored.
-
-## Reverting Explicitly
-
-Call `revert_transient()` when you want to discard all active transient changes and return to the recorded original state:
+When the temporary values are no longer needed, revert them:
 
 ```python
-with machine.record_transient():
-    machine.qubit.frequency = 5.1e9
-
 machine.revert_transient()
 
-print(machine.qubit.frequency)  # 5e9
-print(machine.get_transient_changes())  # []
+print(machine.qubits["q1"].resonator.readout_pulse.amplitude)
+# 0.05
+print(machine.get_transient_changes())
+# []
 ```
 
-## Dictionaries and Lists
+The machine is now back to the state it had before the temporary calibration changes.
 
-Transient recording also tracks writes through QUAM dictionaries and lists.
+## Save Only the Calibration Result
 
-Dictionary mutations are recorded per key:
+After the experiment and analysis, apply the values you actually want to persist using normal assignments:
 
 ```python
-@quam_dataclass
-class SettingsMachine(QuamRoot):
-    settings: dict = field(default_factory=lambda: {"mode": "idle"})
+machine.revert_transient()
 
+for qubit in qubits:
+    qubit.resonator.readout_pulse.amplitude = fitted_amplitudes[qubit.name]
 
-machine = SettingsMachine()
-
-with machine.record_transient():
-    machine.settings["mode"] = "run"
-    machine.settings["temporary"] = True
-
-print(machine.get_transient_changes())
+machine.save()
 ```
 
-List mutations are recorded as a snapshot of the whole list:
+The distinction is important:
 
-```python
-@quam_dataclass
-class SweepMachine(QuamRoot):
-    sweep_points: list = field(default_factory=lambda: [1, 2])
+- Transient values are for running the experiment.
+- Normal assignments are for calibrated values you intend to keep.
 
-
-machine = SweepMachine()
-
-with machine.record_transient():
-    machine.sweep_points.append(3)
-    machine.sweep_points[0] = 0
-
-print(machine.get_transient_changes())
-# [{"path": "#/sweep_points", "was": [1, 2], "now": [0, 2, 3]}]
-```
-
-For added or deleted dictionary keys, `was` or `now` is the `MISSING` sentinel from `quam.core.transient`.
+This pattern prevents temporary sweep setup from being accidentally saved as the machine's calibrated state.
 
 ## Saving With Active Transient Changes
 
-When `save()` is called while transient changes are active, QUAM:
+`save()` also has a safety behavior. If transient changes are still active when you save, QUAM:
 
 1. Emits a `UserWarning` with the number of active transient changes.
 2. Reverts the object to the original pre-transient values.
@@ -133,41 +121,78 @@ When `save()` is called while transient changes are active, QUAM:
 4. Clears the transient records after a successful save.
 
 ```python
-from pathlib import Path
-
-machine = TransientMachine()
-
 with machine.record_transient():
-    machine.qubit.frequency = 5.1e9
+    machine.qubits["q1"].resonator.readout_pulse.amplitude = max_readout_amplitude
 
-machine.save(Path("state.json"))
-
-print(machine.qubit.frequency)  # 5e9
-print(machine.get_transient_changes())  # []
+machine.save()
 ```
 
-This means `save()` is a persistence boundary: active transient changes affect runtime behavior until saving, but the saved JSON contains the original values.
+In this case, the saved state contains the original amplitude, not `max_readout_amplitude`.
+
+This behavior is a guardrail. In calibration code, it is usually clearer to call `revert_transient()` explicitly before applying and saving the final fitted values.
 
 If saving fails after QUAM has reverted the transient values, QUAM restores the transient live state and records before raising the original exception.
 
-## Overwriting a Transient Value Permanently
+## Additional Details
+
+### First Write Is Recorded
+
+Only the first write to a given attribute, dictionary key, or list is recorded. Later writes update the live value, but the original `was` value remains the value that will be restored:
+
+```python
+with machine.record_transient():
+    pulse = machine.qubits["q1"].resonator.readout_pulse
+    pulse.amplitude = 0.1
+    pulse.amplitude = 0.2
+
+print(machine.get_transient_changes())
+# [{"path": ".../amplitude", "was": 0.05, "now": 0.2}]
+```
+
+### Dictionaries and Lists
+
+Transient recording also tracks writes through QUAM dictionaries and lists.
+
+Dictionary mutations are recorded per key:
+
+```python
+with machine.record_transient():
+    machine.metadata["temporary_mode"] = "power_sweep"
+```
+
+For added or deleted dictionary keys, `was` or `now` is the `MISSING` sentinel from `quam.core.transient`.
+
+List mutations are recorded as a snapshot of the whole list:
+
+```python
+with machine.record_transient():
+    machine.active_qubits.append("q3")
+
+print(machine.get_transient_changes())
+# [{"path": "#/active_qubits", "was": ["q1", "q2"], "now": ["q1", "q2", "q3"]}]
+```
+
+List changes are tracked at list granularity, not per index.
+
+### Overwriting Outside the Recording Scope
 
 If a recorded transient value is overwritten outside a `record_transient()` scope, QUAM treats that as a permanent write. It warns and removes the transient record:
 
 ```python
 with machine.record_transient():
-    machine.qubit.frequency = 5.1e9
+    pulse = machine.qubits["q1"].resonator.readout_pulse
+    pulse.amplitude = 0.2
 
-machine.qubit.frequency = 5.2e9  # warns; this value is now permanent
+pulse.amplitude = 0.15  # warns; this value is now permanent
 
-print(machine.get_transient_changes())  # []
+print(machine.get_transient_changes())
+# []
 ```
 
 After this happens, `revert_transient()` will not restore the old value for that path because the transient record has been removed.
 
-## Limitations
+### Scope and Limitations
 
 - Nested `record_transient()` scopes are not supported and raise `RuntimeError`.
 - Detached components are not recorded into the last instantiated root; only objects attached to the active root are tracked.
-- List changes are tracked at list granularity, not per index.
 - Transient state is for runtime mutations. Use `skip_save` metadata for fields that should never be serialized, even when they are not transient.
