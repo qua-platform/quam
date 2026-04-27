@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [v0.5.0]
+
 ### Added
 
 - `QuamBase.inferred_id` property: returns the explicit `id` field value if set, otherwise returns the attribute name or key under which the component is stored in its parent. Equivalent to `self.parent.get_attr_name(self)`. Resolves #53.
