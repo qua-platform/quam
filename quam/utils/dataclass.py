@@ -3,7 +3,7 @@ from dataclasses import dataclass, fields, is_dataclass
 import functools
 import sys
 import warnings
-from typing import Dict, Union, ClassVar, get_type_hints
+from typing import Any, Dict, Union, ClassVar, get_type_hints
 
 __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
 
@@ -12,6 +12,40 @@ class REQUIRED:
     """Flag used by `quam_dataclass` when a required dataclass arg needs a kwarg"""
 
     ...
+
+
+@functools.lru_cache(maxsize=None)
+def _get_type_hints_with_fallback(cls: type) -> Dict[str, type]:
+    """Resolve type hints per-annotation, using Any for unresolvable forward refs.
+
+    Called when get_type_hints() raises NameError — typically because a class uses
+    ``from __future__ import annotations`` together with TYPE_CHECKING-only imports
+    to break circular dependencies.  For each annotation that cannot be resolved in
+    the defining module's global namespace, ``typing.Any`` is substituted so that
+    the rest of the loading logic can still operate (relying on ``__class__`` keys
+    in the serialised dict to determine the concrete type at runtime).
+
+    Results are cached per class since annotation resolution is pure and expensive
+    relative to the number of times a class is instantiated during loading.
+    """
+    all_annotations: Dict[str, Any] = {}
+    for base in reversed(cls.__mro__):
+        all_annotations.update(getattr(base, "__annotations__", {}))
+
+    module = sys.modules.get(cls.__module__)
+    globalns = vars(module) if module is not None else {}
+
+    resolved: Dict[str, type] = {}
+    for attr, annotation in all_annotations.items():
+        if isinstance(annotation, str):
+            try:
+                resolved[attr] = eval(annotation, globalns)
+            except NameError:
+                resolved[attr] = Any
+        else:
+            resolved[attr] = annotation
+
+    return resolved
 
 
 def get_dataclass_attr_annotations(
@@ -30,8 +64,11 @@ def get_dataclass_attr_annotations(
         For each key, the values are dictionaries with the attribute names as keys
         and the attribute types as values.
     """
-
-    annotated_attrs = get_type_hints(cls_or_obj)
+    try:
+        annotated_attrs = get_type_hints(cls_or_obj)
+    except NameError:
+        cls = cls_or_obj if isinstance(cls_or_obj, type) else type(cls_or_obj)
+        annotated_attrs = _get_type_hints_with_fallback(cls)
 
     annotated_attrs.pop("_root", None)
     annotated_attrs.pop("_references", None)

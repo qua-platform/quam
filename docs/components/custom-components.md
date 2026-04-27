@@ -134,3 +134,37 @@ ac_dc_gate = AcDcGate(id="plunger_gate", dc_voltage=0.43, opx_output=("con1", 1)
 ```
 
 Notice that the keyword argument `opx_output` now also needs to be passed. This is because it's a required argument for [SingleChannel][quam.components.channels.SingleChannel].
+
+## Cross-Component Dependencies
+
+Components in separate files sometimes need to reference each other's types — for example, a `Qubit` that holds a `Resonator` and a `Resonator` that back-references its parent `Qubit`. Importing each class directly in the other's module creates a circular import error.
+
+The standard solution is to guard the import with `TYPE_CHECKING` and add `from __future__ import annotations` so the annotation is treated as a string at runtime rather than resolved immediately:
+
+```python title="my_quam/components/qubit.py"
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from quam.core import QuamComponent, quam_dataclass
+
+if TYPE_CHECKING:
+    from my_quam.components.resonator import Resonator
+
+@quam_dataclass
+class Qubit(QuamComponent):
+    resonator: Resonator
+```
+
+```python title="my_quam/components/resonator.py"
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from quam.core import QuamComponent, quam_dataclass
+
+if TYPE_CHECKING:
+    from my_quam.components.qubit import Qubit
+
+@quam_dataclass
+class Resonator(QuamComponent):
+    qubit: Qubit
+```
+
+QUAM saves and loads these components without any extra configuration. During loading, the `__class__` key present in every serialized QuAM dict identifies the concrete type, so the deferred annotation is never needed at runtime.
