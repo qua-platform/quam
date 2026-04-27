@@ -192,7 +192,11 @@ def instantiate_attr(
             validate_type=validate_type,
             str_repr=str_repr,
         )
-    elif isinstance(expected_type, dict) or typing.get_origin(expected_type) == dict:
+    elif (
+        isinstance(expected_type, dict)
+        or typing.get_origin(expected_type) == dict
+        or (isinstance(attr_val, dict) and expected_type is typing.Any)
+    ):
         instantiated_attr = instantiate_attrs_from_dict(
             attr_dict=attr_val,
             required_type=expected_type,

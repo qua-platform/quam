@@ -48,6 +48,7 @@ All deprecated properties now show migration guidance with code examples. See [P
 
 ### Fixed
 
+- Fixed loading of components defined in separate files that reference each other's types (e.g. a `Qubit` class that holds a `Resonator` and vice versa). Components can now use `from __future__ import annotations` with `TYPE_CHECKING`-guarded imports to avoid circular imports without breaking `QuamRoot.load()`.
 - Added `exponential_dc_gain` and `high_pass_filter` fields to `LFFEMAnalogOutputPort` for QOP 3.5+ filter support; fixed validation so the two fields can coexist and `exponential_dc_gain` alone conflicts with `feedback_filter`
 - Clarified in documentation how kwargs and attributes differ for method macros: kwargs are per-call overrides, attributes are persistent calibrated values that are saved with the QUAM state
 - Improved error messages for inferred frequency properties (`inferred_RF_frequency`, `inferred_intermediate_frequency`, `inferred_LO_frequency`) in `_OutComplexChannel` (`IQChannel` and `MWChannel`): errors now clearly identify the specific field and whether it is `None` or an unresolved reference
