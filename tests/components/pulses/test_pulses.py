@@ -227,6 +227,41 @@ def test_pulse_attr_annotations():
     assert list(attr_annotations["required"]) == ["length", "amplitude"]
 
 
+def test_snz_pulse_t_phi_eff_decomposition():
+    pulse = pulses.SNZPulse(amplitude=1.0, flat_length=8, t_phi_eff=0.0, padding=2)
+
+    assert pulse.t_phi == 0
+    assert np.isclose(pulse.b_over_a_ratio, 1.0)
+
+    waveform = np.asarray(pulse.waveform_function())
+    assert pulse.length == 16
+    assert len(waveform) == 16
+    assert np.allclose(waveform[3:13], [1, 1, 1, 1, 1, -1, -1, -1, -1, -1])
+
+    pulse.t_phi_eff = 1.5
+    assert pulse.t_phi == 0
+    assert np.isclose(pulse.b_over_a_ratio, 0.25)
+
+    waveform = np.asarray(pulse.waveform_function())
+    assert len(waveform) == 16
+    assert np.allclose(waveform[3:13], [1, 1, 1, 1, 0.25, -0.25, -1, -1, -1, -1])
+
+    pulse.t_phi_eff = 2.0
+    assert pulse.t_phi == 2
+    assert np.isclose(pulse.b_over_a_ratio, 1.0)
+
+    waveform = np.asarray(pulse.waveform_function())
+    assert len(waveform) == 16
+    assert np.allclose(waveform[2:14], [1, 1, 1, 1, 1, 0, 0, -1, -1, -1, -1, -1])
+
+
+def test_snz_pulse_negative_t_phi_eff():
+    pulse = pulses.SNZPulse(amplitude=1.0, flat_length=8, t_phi_eff=-0.1, padding=2)
+
+    with pytest.raises(ValueError, match="t_phi_eff must be non-negative"):
+        pulse.waveform_function()
+
+
 def test_deprecated_drag_pulse():
     with pytest.warns(
         DeprecationWarning,

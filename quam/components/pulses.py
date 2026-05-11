@@ -38,6 +38,7 @@ __all__ = [
     "BlackmanIntegralPulse",
     "FlatTopTanhPulse",
     "FlatTopCosinePulse",
+    "SNZPulse",
 ]
 
 
@@ -1423,6 +1424,98 @@ class _CosineBipolarPulse(Pulse):
         p = np.concatenate(
             [zero_padding_left, seg_rise, seg_flat_pos, seg_switch, seg_flat_neg, seg_fall, zero_padding_right]
         )
+
+        if self.axis_angle is not None:
+            p = p * np.exp(1j * self.axis_angle)
+
+        return p.tolist()
+
+
+@quam_dataclass
+class SNZPulse(Pulse):
+    """Sudden Net-Zero (SNZ) bipolar flux pulse (Di Carlo).
+
+    Generates a bipolar waveform with abrupt transitions between the two
+    lobes, separated by an idle period.  The waveform structure is::
+
+        [padding | +A flat | +B | idle(t_phi) | -B | -A flat | padding]
+
+    where ``t_phi_eff`` is decomposed into ``t_phi`` and ``B/A`` using the
+    same mapping as the SNZ calibration scripts:
+
+        t_phi = floor(t_phi_eff / 2) * 2
+        B/A = 1 - (t_phi_eff - t_phi) / 2
+
+    The single B / -B samples sit at the boundary between each flat section
+    and the idle gap, corresponding to the last/first sampling points of the
+    positive/negative lobes in the Di Carlo SNZ protocol.
+
+    The total flat duration (both halves combined) is ``flat_length``.  Each
+    half is ``flat_length // 2`` samples, so ``flat_length`` should be even.
+    Args:
+        amplitude (float): Peak amplitude of the flat sections (V).
+        flat_length (int): Total flat-section duration in samples, split
+            equally between positive and negative halves.  Should be even.
+        t_phi_eff (float): Effective idle time between the two lobes in
+            samples (ns at 1 GSa/s). Can be 0 for no idle gap.
+        padding (int): Zero-padding added to each side of the pulse
+            (samples).  Default is 0.
+        axis_angle (float, optional): IQ axis angle in radians.  If None,
+            the pulse targets a single channel or the I port of an IQ
+            channel.
+        length (int): Total waveform length in samples; auto-inferred from
+            the other parameters and rounded up to a multiple of 4.
+    """
+
+    amplitude: float
+    flat_length: int
+    t_phi_eff: float = 0.0
+    padding: int = 0
+    axis_angle: float = None
+    length: int = "#./inferred_length"  # pyright: ignore
+
+    @property
+    def t_phi(self) -> int:
+        if self.t_phi_eff < 0:
+            raise ValueError("SNZPulse.t_phi_eff must be non-negative")
+        return int(math.floor(self.t_phi_eff / 2.0)) * 2
+
+    @property
+    def b_over_a_ratio(self) -> float:
+        return 1.0 - (self.t_phi_eff - self.t_phi) / 2.0
+
+    @property
+    def inferred_length(self) -> int:
+        raw = 2 * self.padding + self.flat_length + 2 + self.t_phi
+        return int(np.ceil(raw / 4) * 4)
+
+    def waveform_function(self):
+        if self.flat_length <= 0:
+            raise ValueError("SNZPulse.flat_length must be positive")
+        if self.flat_length % 2 != 0:
+            raise ValueError(
+                f"SNZPulse.flat_length={self.flat_length} must be even to "
+                "split equally into positive and negative halves."
+            )
+        if self.padding < 0:
+            raise ValueError("SNZPulse.padding must be non-negative")
+
+        A = float(self.amplitude)
+        half = self.flat_length // 2
+        B = A * self.b_over_a_ratio
+
+        flat_pos = A * np.ones(half)
+        flat_neg = -A * np.ones(half)
+        idle = np.zeros(self.t_phi)
+
+        core = np.concatenate([flat_pos, [B], idle, [-B], flat_neg])
+
+        core_len = len(core)
+        total_pad = self.length - core_len
+        left_pad = total_pad // 2
+        right_pad = total_pad - left_pad
+
+        p = np.concatenate([np.zeros(left_pad), core, np.zeros(right_pad)])
 
         if self.axis_angle is not None:
             p = p * np.exp(1j * self.axis_angle)
