@@ -30,7 +30,7 @@ class BasicQuam(QuamRoot):
 
 @quam_dataclass
 class BasicFEMQuam(BasicQuam):
-    """Basic QUAM root component for FEM (Frequency Encoded Multiplexing) systems.
+    """Basic QUAM root component for FEM (Front-End Module) systems.
 
     Extends BasicQuam with FEM-specific port configurations for quantum control hardware.
 
