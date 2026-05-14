@@ -58,6 +58,41 @@ dev = [
 docs = ["mkdocstrings[python]>=0.18", "mkdocs-gen-files", "mkdocs-jupyter"]
 build = ["setuptools >= 71", "setuptools-scm >= 8.1.0", "build >= 1.2.1"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra"]
+filterwarnings = [
+    # Quiet known upstream noise so anything new stands out in the CI log.
+    # qualibrate_config re-export shims (raised with stacklevel=2, so matched by message).
+    "ignore:Module 'qualibrate_config\\..*' is deprecated:DeprecationWarning",
+    # qualibrate_config function-level re-export deprecations.
+    "ignore:'.*' from 'qualibrate_config\\..*' is deprecated:DeprecationWarning",
+    # marshmallow 3 -> 4 field-metadata warnings emitted by qm-qua's schema.
+    "ignore:Passing field metadata as keyword arguments is deprecated:DeprecationWarning",
+    # Several intentional inline QuAM dataclasses in tests are named Test* — pytest
+    # warns it can't collect them because they have __init__ (they're fixtures, not tests).
+    "ignore:cannot collect test class:pytest.PytestCollectionWarning",
+    # NOTE: a stricter "error" baseline would catch unintentional regressions, but
+    # several tests currently exercise deprecation/fallback paths without wrapping
+    # the emitted warning in `pytest.warns(...)`. Convert those first, then flip on.
+]
+
+[tool.coverage.run]
+source = ["quam"]
+branch = true
+omit = [
+    "quam/_version.py",
+    "quam/examples/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
 [tool.black]
 target-version = ["py39"]
 line-length = 88
