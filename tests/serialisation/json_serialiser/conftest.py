@@ -243,9 +243,12 @@ def mock_config(monkeypatch):
             # Provide the version attribute expected by validators
             version = EXPECTED_CONFIG_VERSION
             state_path = None  # Initialize state_path
+            # Mirrors the real QuamConfig.serialization (Optional[SerializationConfig]);
+            # JSONSerialiser._resolve_include_defaults() reads this on every save.
+            serialization = None
 
         mock_cfg = MockQuamConfigData()
-        mock_cfg.state_path = mock_config_data.state_path  # Set state_path if provided
+        # mock_cfg.state_path = mock_config_data.state_path  # Set state_path if provided
 
         return mock_cfg  # Return the object
 
