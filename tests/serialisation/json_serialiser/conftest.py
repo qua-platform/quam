@@ -248,7 +248,7 @@ def mock_config(monkeypatch):
             serialization = None
 
         mock_cfg = MockQuamConfigData()
-        # mock_cfg.state_path = mock_config_data.state_path  # Set state_path if provided
+        mock_cfg.state_path = mock_config_data.state_path  # Set state_path if provided
 
         return mock_cfg  # Return the object
 

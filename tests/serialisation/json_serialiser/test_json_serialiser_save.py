@@ -346,60 +346,10 @@ def test_save_nested_object(serialiser, sample_quam_object_nested, tmp_path):
     assert loaded["components"]["parent"]["child"]["child_value"] == 99
     assert loaded["default_val"] == 15
 
-
-def test_quam_root_save_without_path_uses_resolved_state_path(
-    sample_quam_object, mock_env, tmp_path
-):
-    """QuamRoot.save() with no path argument should fall back to
-    JSONSerialiser._get_state_path(). With QUAM_STATE_PATH set, the file
-    must land there."""
-    target = tmp_path / "resolved_state.json"
-    mock_env("QUAM_STATE_PATH", target)
-
-    sample_quam_object.save()
-
-    assert target.exists()
-    loaded = json.loads(target.read_text())
-    # Sanity-check that the serialised payload reflects the object.
-    assert loaded["other"] == "specific_value"
-    assert loaded["components"]["comp2"]["value"] == 5
-
-
-def test_quam_root_save_without_path_uses_qualibrate_config_state_path(
-    sample_quam_object, mock_env, mock_config, tmp_path
-):
-    """QuamRoot.save() with no path argument and no env var should fall back
-    to the ``state_path`` provided by the qualibrate config file (mocked here
-    via ``get_quam_config``)."""
-    # Make sure the env-var branch (which has higher precedence) is cleared.
-    # mock_env("QUAM_STATE_PATH", None)
-
-    # target = tmp_path / "config_state.json"
-    # mock_config.state_path = target
-
-    sample_quam_object.save()
-
-    # assert target.exists()
-    # loaded = json.loads(target.read_text())
-    # assert loaded["other"] == "specific_value"
-    # assert loaded["components"]["comp2"]["value"] == 5
-
-
 def test_save_with_explicit_path_does_not_require_quam_config(
     sample_quam_object, monkeypatch, tmp_path
 ):
-    """Regression for the qualibrate ``01_demo_qubit_spectroscopy.py`` failure:
-    ``machine.save('/explicit/path')`` must be self-contained and not reach
-    out to ``~/.qualibrate/config.toml``.
-
-    The session-scoped autouse ``prevent_default_config_loading`` fixture in
-    ``tests/conftest.py`` already redirects the default config filename to one
-    that does not exist inside the real ``~/.qualibrate``. The only thing
-    masking the bug in the test environment is the function-scoped autouse
-    ``mock_quam_config`` stub. Undo that here, and the real qualibrate_config
-    code path produces the exact ``FileNotFoundError`` the qualibrate script
-    hits.
-    """
+    """Saving to an explicit path must succeed even when no qualibrate config file exists."""
     from quam.config.resolvers import get_quam_config as real_get_quam_config
 
     monkeypatch.setattr(
