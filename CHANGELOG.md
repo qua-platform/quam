@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Fixed
+
+- Saving / loading no longer raises an error if `~/.qualibrate` doesn't exist`
+
 ## [v0.5.0]
 
 ### Added
