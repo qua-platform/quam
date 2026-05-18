@@ -345,3 +345,18 @@ def test_save_nested_object(serialiser, sample_quam_object_nested, tmp_path):
     # Check non-default values were saved
     assert loaded["components"]["parent"]["child"]["child_value"] == 99
     assert loaded["default_val"] == 15
+
+def test_save_with_explicit_path_does_not_require_quam_config(
+    sample_quam_object, monkeypatch, tmp_path
+):
+    """Saving to an explicit path must succeed even when no qualibrate config file exists."""
+    from quam.config.resolvers import get_quam_config as real_get_quam_config
+
+    monkeypatch.setattr(
+        "quam.serialisation.json.get_quam_config", real_get_quam_config
+    )
+
+    target = tmp_path / "explicit_state.json"
+    sample_quam_object.save(target)
+
+    assert target.exists()
