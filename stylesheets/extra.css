@@ -1,0 +1,125 @@
+[data-md-color-scheme="entropy-bright"] {
+    --md-primary-fg-color: #404044;
+    --md-accent-fg-color: #3082CF;
+    --md-typeset-a-color: #3082CF;
+    --md-footer-bg-color: #404044;
+    --md-default-bg-color: #E5E5E5;
+    --md-tabs-color: #464647;
+}
+
+[data-md-color-scheme="entropy-high-contrast"] {
+    --md-primary-fg-color: #404044;
+    --md-accent-fg-color: #3082CF;
+    --md-typeset-a-color: #3082CF;
+    --md-footer-bg-color: #404044;
+    --md-default-bg-color: #ffffff;
+    --md-tabs-color: #464647;
+    --md-typeset-color: black;
+}
+
+[data-md-color-scheme="entropy-dark"] {
+    --md-primary-fg-color: #404044;
+    --md-accent-fg-color: #3082CF;
+    --md-typeset-a-color: #3082CF;
+    --md-typeset-color: #C6CDD6;
+    --md-footer-bg-color: #404044;
+    --md-default-bg-color: #2B2C32;
+    --md-code-bg-color: #323339;
+    --md-default-fg-color: #F6F9FA;
+    --md-default-fg-color--light: rgba(255, 255, 255, .54);
+    --md-default-fg-color--lighter: rgba(255, 255, 255, .32);
+    --md-typeset-kbd-color: #323339;
+    --md-typeset-kbd-accent-color: #2B2C32;
+    --md-code-fg-color: #F6F9FA;
+    --md-code-hl-name-color: #C6CDD6;
+    --md-code-hl-operator-color: #F6F9FA;
+    --md-code-hl-punctuation-color: #F6F9FA;
+    --md-code-hl-color: rgba(115, 115, 51, 0.54);
+    --md-code-hl-comment-color: rgba(255, 255, 255, .32);
+    --md-default-fg-color--light: rgba(255, 255, 255, .54);
+    --md-default-fg-color--lighter: rgba(255, 255, 255, .32);
+    --md-typeset-table-color: rgba(255, 255, 255, .32);
+    --md-code-hl-string-color: #00D59A;
+    --md-code-hl-number-color: #FF2463;
+    --md-code-hl-keyword-color: #6593ea;
+    --md-code-hl-constant-color: #6593ea;
+    --md-code-hl-function-color: #FFDB2C;
+    --md-tabs-color: #212123;
+}
+
+.md-annotation__index::after {
+    background-color: #3082CF;
+    --md-default-fg-color--lightest: #0fafcbb3;
+}
+
+.md-header__topic:first-child {
+    font-weight: 700;
+}
+
+.md-nav__item .md-nav__link--active {
+    --md-typeset-a-color: #3082CF;
+}
+
+/* Indentation. */
+div.doc-contents:not(.first) {
+    padding-left: 25px;
+    border-left: .05rem solid var(--md-typeset-table-color);
+}
+
+/* Mark external links as such. */
+a.autorefs-external::after {
+    /* https://primer.style/octicons/arrow-up-right-24 */
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="rgb(0, 0, 0)" d="M18.25 15.5a.75.75 0 00.75-.75v-9a.75.75 0 00-.75-.75h-9a.75.75 0 000 1.5h7.19L6.22 16.72a.75.75 0 101.06 1.06L17.5 7.56v7.19c0 .414.336.75.75.75z"></path></svg>');
+    content: ' ';
+
+    display: inline-block;
+    position: relative;
+    top: 0.1em;
+    margin-left: 0.2em;
+    margin-right: 0.1em;
+
+    height: 1em;
+    width: 1em;
+    border-radius: 100%;
+    background-color: var(--md-typeset-a-color);
+}
+
+a.autorefs-external:hover::after {
+    background-color: var(--md-accent-fg-color);
+}
+
+.md-header {
+    background-color: rgba(30, 30, 32, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.md-tabs {
+    background-color: var(--md-tabs-color);
+}
+
+.md-typeset table:not([class]) {
+    font-size: 0.85rem;
+}
+
+
+.code-flex-container {
+    display: flex;
+    justify-content: space-between;
+    /* This will space out the flex items evenly */
+    align-items: left;
+    /* This will align items vertically in the center */
+    flex-wrap: wrap;
+    /* Allows items to wrap onto the next line */
+}
+
+.code-flex-item {
+    min-width: 500px;
+    width: 50%;
+    /* Each item takes up half of the container's width */
+    text-align: left;
+    /* Centers the text inside the flex items */
+    padding: 10px;
+    /* Optional: adds some padding inside each flex item */
+    padding-top: 0px;
+}
