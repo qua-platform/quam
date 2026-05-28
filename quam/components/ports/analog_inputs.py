@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Dict, Literal, Optional
 
 from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
 from quam.core import quam_dataclass
@@ -56,6 +56,7 @@ class MWFEMAnalogInputPort(FEMPort):
     gain_db: Optional[int] = None
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     shareable: bool = False
+    lo_mode: Optional[Literal["auto", "always_on"]] = None
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = {
@@ -66,4 +67,6 @@ class MWFEMAnalogInputPort(FEMPort):
         }
         if self.gain_db is not None:
             port_properties["gain_db"] = self.gain_db
+        if self.lo_mode is not None:
+            port_properties["lo_mode"] = self.lo_mode
         return port_properties
