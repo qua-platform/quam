@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+### Deprecated
+
+- `DragGaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `DragCosinePulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `GaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `FlatTopGaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `FlatTopBlackmanPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `BlackmanIntegralPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `FlatTopCosinePulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `FlatTopTanhPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+
+### Changed
+
+- Removed `qualang-tools` as a runtime dependency. Waveform and integration-weight functions are now vendored in `quam/components/_waveform_tools.py`. Added `scipy` as a direct dependency.
+
 ## [v0.5.0]
 
 ### Added
