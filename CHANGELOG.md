@@ -15,6 +15,10 @@
 
 - Removed `qualang-tools` as a runtime dependency. Waveform and integration-weight functions are now vendored in `quam/components/_waveform_tools.py`. Added `scipy` as a direct dependency.
 
+### Fixed
+
+- Saving / loading no longer raises an error if `~/.qualibrate` doesn't exist`
+
 ## [v0.5.0]
 
 ### Added
