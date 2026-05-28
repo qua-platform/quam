@@ -7,6 +7,17 @@ from typing import Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
+from quam.components._waveform_tools import (
+    blackman_integral_waveform,
+    convert_integration_weights,
+    drag_cosine_pulse_waveforms,
+    drag_gaussian_pulse_waveforms,
+    flattop_blackman_waveform,
+    flattop_cosine_waveform,
+    flattop_gaussian_waveform,
+    flattop_tanh_waveform,
+)
+
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
 from quam.utils.qua_types import (
@@ -495,8 +506,6 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
         return [(1, self.length)]
 
     def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
-        from qualang_tools.config import convert_integration_weights
-
         phase = np.exp(1j * self.integration_weights_angle)
 
         if isinstance(self.integration_weights[0], float):
@@ -593,11 +602,15 @@ class DragGaussianPulse(Pulse):
     subtracted: bool = True
 
     def __post_init__(self) -> None:
+        warnings.warn(
+            "DragGaussianPulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return super().__post_init__()
 
     def waveform_function(self):
-        from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
-
         I, Q = drag_gaussian_pulse_waveforms(
             amplitude=self.amplitude,
             length=self.length,
@@ -656,11 +669,15 @@ class DragCosinePulse(Pulse):
     detuning: float = 0.0
 
     def __post_init__(self) -> None:
+        warnings.warn(
+            "DragCosinePulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return super().__post_init__()
 
     def waveform_function(self):
-        from qualang_tools.config.waveform_tools import drag_cosine_pulse_waveforms
-
         I, Q = drag_cosine_pulse_waveforms(
             amplitude=self.amplitude,
             length=self.length,
@@ -761,6 +778,15 @@ class GaussianPulse(Pulse):
     axis_angle: float = None
     subtracted: bool = True
 
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "GaussianPulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__post_init__()
+
     def waveform_function(self):
         sampling_rate = self._get_sampling_rate()
         dt = 1e9 / sampling_rate  # time step in ns
@@ -798,9 +824,16 @@ class FlatTopGaussianPulse(Pulse):
     axis_angle: float = None
     flat_length: int
 
-    def waveform_function(self):
-        from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "FlatTopGaussianPulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__post_init__()
 
+    def waveform_function(self):
         rise_fall_length = (self.length - self.flat_length) // 2
         if not self.flat_length + 2 * rise_fall_length == self.length:
             raise ValueError(
@@ -874,8 +907,6 @@ class _FlatTopGaussianPulse(Pulse):
         )
 
     def waveform_function(self):
-        from qualang_tools.config.waveform_tools import flattop_gaussian_waveform
-
         rise_fall_length = self.smoothing_length // 2
         if not self.smoothing_length % 2 == 0:
             raise ValueError(
@@ -914,9 +945,16 @@ class FlatTopBlackmanPulse(Pulse):
     axis_angle: float = None
     flat_length: int
 
-    def waveform_function(self):
-        from qualang_tools.config.waveform_tools import flattop_blackman_waveform
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "FlatTopBlackmanPulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__post_init__()
 
+    def waveform_function(self):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
@@ -953,9 +991,16 @@ class BlackmanIntegralPulse(Pulse):
     v_end: float
     axis_angle: float = None
 
-    def waveform_function(self):
-        from qualang_tools.config.waveform_tools import blackman_integral_waveform
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "BlackmanIntegralPulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__post_init__()
 
+    def waveform_function(self):
         wf = blackman_integral_waveform(
             pulse_length=self.length,
             v_start=self.v_start,
@@ -983,9 +1028,16 @@ class FlatTopCosinePulse(Pulse):
     axis_angle: float = None
     flat_length: int = 0
 
-    def waveform_function(self):
-        from qualang_tools.config.waveform_tools import flattop_cosine_waveform
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "FlatTopCosinePulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__post_init__()
 
+    def waveform_function(self):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(
@@ -1021,9 +1073,16 @@ class FlatTopTanhPulse(Pulse):
     axis_angle: float = None
     flat_length: int = 0
 
-    def waveform_function(self):
-        from qualang_tools.config.waveform_tools import flattop_tanh_waveform
+    def __post_init__(self) -> None:
+        warnings.warn(
+            "FlatTopTanhPulse is deprecated and will be removed in a future release. "
+            "Implementation moved to quam-builder.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().__post_init__()
 
+    def waveform_function(self):
         rise_fall_length = (self.length - self.flat_length) // 2
         if self.flat_length + 2 * rise_fall_length != self.length:
             raise ValueError(

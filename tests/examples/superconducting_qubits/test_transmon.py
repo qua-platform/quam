@@ -232,7 +232,7 @@ def test_transmon_add_pulse():
     config = {"controllers": {}, "elements": {}, "pulses": {}, "waveforms": {}}
     transmon.xy.operations["X180"].apply_to_config(config)
 
-    from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
+    from quam.components._waveform_tools import drag_gaussian_pulse_waveforms
 
     I, Q = drag_gaussian_pulse_waveforms(
         amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20
