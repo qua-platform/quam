@@ -4,6 +4,10 @@
 
 - Added `lo_mode` field to `MWFEMAnalogInputPort` (`Optional[Literal["auto", "always_on"]]`, defaults to `None`). When set, the value is passed through to the QUA config, allowing users to override the QOP default (`"auto"`) with `"always_on"`.
 
+### Fixed
+
+- Saving / loading no longer raises an error if `~/.qualibrate` doesn't exist`
+
 ## [v0.5.0]
 
 ### Added

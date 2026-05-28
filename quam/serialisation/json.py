@@ -69,7 +69,8 @@ class JSONSerialiser(AbstractSerialiser):
         Priority (highest to lowest):
         1. Explicit parameter passed to save() (handled in save() method)
         2. Instance value (self.include_defaults)
-        3. Config setting (quam.config.serialization.include_defaults)
+        3. Config setting (quam.config.serialization.include_defaults), if a
+           qualibrate config exists on disk
         4. Fallback to True (default behavior)
 
         Returns:
@@ -78,7 +79,11 @@ class JSONSerialiser(AbstractSerialiser):
         if self.include_defaults is not None:
             return self.include_defaults
 
-        config = get_quam_config()
+        try:
+            config = get_quam_config()
+        except FileNotFoundError:
+            return True
+
         if config.serialization is not None:
             return config.serialization.include_defaults
         return True
