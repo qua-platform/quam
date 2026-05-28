@@ -603,7 +603,7 @@ class DragGaussianPulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "DragGaussianPulse is deprecated and will be removed in a future release. "
+            "DragGaussianPulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -670,7 +670,7 @@ class DragCosinePulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "DragCosinePulse is deprecated and will be removed in a future release. "
+            "DragCosinePulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -780,7 +780,7 @@ class GaussianPulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "GaussianPulse is deprecated and will be removed in a future release. "
+            "GaussianPulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -826,7 +826,7 @@ class FlatTopGaussianPulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "FlatTopGaussianPulse is deprecated and will be removed in a future release. "
+            "FlatTopGaussianPulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -947,7 +947,7 @@ class FlatTopBlackmanPulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "FlatTopBlackmanPulse is deprecated and will be removed in a future release. "
+            "FlatTopBlackmanPulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -993,7 +993,7 @@ class BlackmanIntegralPulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "BlackmanIntegralPulse is deprecated and will be removed in a future release. "
+            "BlackmanIntegralPulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -1030,7 +1030,7 @@ class FlatTopCosinePulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "FlatTopCosinePulse is deprecated and will be removed in a future release. "
+            "FlatTopCosinePulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
@@ -1075,7 +1075,7 @@ class FlatTopTanhPulse(Pulse):
 
     def __post_init__(self) -> None:
         warnings.warn(
-            "FlatTopTanhPulse is deprecated and will be removed in a future release. "
+            "FlatTopTanhPulse is deprecated and will be removed in v1.0. "
             "Implementation moved to quam-builder.",
             DeprecationWarning,
             stacklevel=2,
