@@ -5,41 +5,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_call:
-    inputs:
-      repo_name:
-        description: "Repository name to use for checkout - set from external repositories only"
-        required: false
-        type: string
-        default: ""
-      branch_name:
-        description: "Branch name to use for checkout - external repositories should set to their main branch"
-        required: false
-        type: string
-        default: ""
-      whl_artifact_names:
-        description: "Comma-separated list of wheel artifact names to install as dependencies"
-        required: false
-        type: string
-        default: ""
-      python_versions:
-        description: "Python versions to test (JSON array, e.g. '[\"3.11\", \"3.12\"]')"
-        required: false
-        type: string
-        default: ""
-      operating_systems:
-        description: "Operating systems to test (JSON array, e.g. '[\"ubuntu-latest\", \"macos-latest\"]')"
-        required: false
-        type: string
-        default: ""
 
 jobs:
   run-tests:
     uses: ./.github/workflows/run_tests.yaml
-    with:
-      repo_name: ${{ inputs.repo_name }}
-      branch_name: ${{ inputs.branch_name }}
-      whl_artifact_names: ${{ inputs.whl_artifact_names }}
-      python_versions: ${{ inputs.python_versions }}
-      operating_systems: ${{ inputs.operating_systems }}
     secrets: inherit

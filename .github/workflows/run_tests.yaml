@@ -4,14 +4,17 @@ on:
   workflow_call:
     inputs:
       repo_name:
+        description: "Repository name to use for checkout - set from external repositories only"
         required: false
         type: string
         default: ""
       branch_name:
+        description: "Branch name to use for checkout - external repositories should set to their main branch"
         required: false
         type: string
         default: ""
       whl_artifact_names:
+        description: "Comma-separated list of wheel artifact names to install as dependencies"
         required: false
         type: string
         default: ""
