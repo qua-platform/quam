@@ -26,7 +26,7 @@ on:
         description: "Python versions to test (JSON array, e.g. '[\"3.11\", \"3.12\"]')"
         required: false
         type: string
-        default: '["3.9", "3.10", "3.11", "3.12"]'
+        default: '["3.10", "3.11", "3.12", "3.13"]'
       operating_systems:
         description: "Operating systems to test (JSON array, e.g. '[\"ubuntu-latest\", \"macos-latest\"]')"
         required: false
@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ fromJson(inputs.python_versions || '["3.9", "3.10", "3.11", "3.12"]') }}
+        python-version: ${{ fromJson(inputs.python_versions || '["3.10", "3.11", "3.12", "3.13"]') }}
         os: ${{ fromJson(inputs.operating_systems || '["ubuntu-latest"]') }}
 
     steps:
