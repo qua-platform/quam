@@ -4,7 +4,7 @@ from quam.components import *
 from quam.examples.superconducting_qubits.components import *
 from quam.components.channels import IQChannel
 from quam.core import QuamRoot, quam_dataclass
-
+from quam.components._waveform_tools import drag_gaussian_pulse_waveforms
 
 def test_basic_transmon():
     transmon = Transmon(id=1)
@@ -231,8 +231,6 @@ def test_transmon_add_pulse():
 
     config = {"controllers": {}, "elements": {}, "pulses": {}, "waveforms": {}}
     transmon.xy.operations["X180"].apply_to_config(config)
-
-    from qualang_tools.config.waveform_tools import drag_gaussian_pulse_waveforms
 
     I, Q = drag_gaussian_pulse_waveforms(
         amplitude=1, sigma=4, alpha=2, anharmonicity=200e6, length=20

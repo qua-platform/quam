@@ -34,9 +34,9 @@ keywords = [
 dependencies = [
     "numpy >= 1.21.2 ; python_version < '3.14'",
     "numpy >= 2.4.4 ; python_version >= '3.14'",
+    "scipy",
     "qm-qua >=1.2.3 ; python_version < '3.14'",
     "qm-qua >=1.3.0a1 ; python_version >= '3.14'",
-    "qualang-tools >= 0.15.0",
     "typeguard >= 4.1.0",
     "qualibrate-config >= 0.1.6",
 ]
