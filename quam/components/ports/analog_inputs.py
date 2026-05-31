@@ -56,7 +56,7 @@ class MWFEMAnalogInputPort(FEMPort):
     gain_db: Optional[int] = None
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
     shareable: bool = False
-    lo_mode: Optional[Literal["auto", "always_on"]] = None
+    lo_mode: Literal["auto", "always_on"] = "auto"
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = {
@@ -64,9 +64,8 @@ class MWFEMAnalogInputPort(FEMPort):
             "downconverter_frequency": self.downconverter_frequency,
             "sampling_rate": self.sampling_rate,
             "shareable": self.shareable,
+            "lo_mode": self.lo_mode,
         }
         if self.gain_db is not None:
             port_properties["gain_db"] = self.gain_db
-        if self.lo_mode is not None:
-            port_properties["lo_mode"] = self.lo_mode
         return port_properties
