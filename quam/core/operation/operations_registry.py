@@ -1,6 +1,6 @@
 from collections import UserDict
 import functools
-from typing import Callable, Optional, TypeVar, Any
+from typing import Callable, TypeVar, Any
 
 from quam.core.operation import Operation
 

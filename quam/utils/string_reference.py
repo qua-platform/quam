@@ -179,7 +179,8 @@ def join_references(base, relative):
 
     For a relative base (e.g. '#./a/b'):
         - We allow accumulating extra '..' if we pop everything (no "true root").
-        - We don't remove trailing slashes for relative references (e.g. '#../' remains '#../').
+        - We don't remove trailing slashes for relative references
+          (e.g. '#../' remains '#../').
     """
     # 1) Disallow if 'relative' starts with "#/" (i.e., another absolute path)
     if relative.startswith("#/"):

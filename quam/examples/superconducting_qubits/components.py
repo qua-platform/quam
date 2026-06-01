@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 
 from quam import QuamComponent
 from quam.components.channels import IQChannel, SingleChannel, InOutIQChannel

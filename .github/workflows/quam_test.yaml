@@ -25,13 +25,13 @@ jobs:
         pip install .[dev]
 
     - name: Black formatting check
-      run: python -m black --check quam/
+      run: poe check-format
 
     - name: Flake8 linting
-      run: python -m pflake8 quam/config/
+      run: poe lint
 
     - name: Mypy type check
-      run: python -m mypy quam/ --ignore-missing-imports --follow-imports=silent
+      run: poe typecheck
 
   run-tests:
     uses: ./.github/workflows/run_tests.yaml

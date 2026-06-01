@@ -53,8 +53,6 @@ def instantiate_attrs_from_dict(
     Returns:
         A dictionary with the instantiated attributes.
     """
-    from quam.core import QuamComponent  # noqa: F811
-
     if typing.get_origin(required_type) == dict:
         required_subtype = typing.get_args(required_type)[1]
     else:
@@ -105,8 +103,6 @@ def instantiate_attrs_from_list(
     Returns:
         A list with the instantiated attributes.
     """
-    from quam.core import QuamComponent  # noqa: F811
-
     if typing.get_origin(required_type) == list:
         required_subtype = typing.get_args(required_type)[0]
     else:
@@ -222,7 +218,8 @@ def instantiate_attr(
                 continue
         else:
             raise TypeError(
-                f"Could not instantiate {str_repr} with any of the types in {expected_type}"
+                f"Could not instantiate {str_repr} with any of the types in "
+                f"{expected_type}"
             )
     elif (
         isinstance(expected_type, list)
@@ -290,7 +287,8 @@ def instantiate_attrs(
         validate_type: Whether to validate the type of the attributes.
             A TypeError is raised if an attribute has the wrong type.
         str_repr: A string representation of the object, used for error messages.
-        quam_class: The QuamBase class being instantiated, used for richer error messages.
+        quam_class: The QuamBase class being instantiated, used for richer
+            error messages.
 
     Returns:
         A dictionary where each element has been instantiated if it is a QuamComponent
@@ -406,7 +404,7 @@ def instantiate_quam_class(
 
     if not str_repr:
         str_repr = quam_class.__name__
-    # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
+    # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__  # noqa: E501
 
     if "__class__" in contents:
         try:

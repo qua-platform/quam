@@ -1,12 +1,10 @@
 from __future__ import annotations
 from collections.abc import Iterable
-from collections import UserList
 import sys
 import warnings
 from pathlib import Path
 from copy import deepcopy
 from typing import (
-    Iterator,
     Union,
     Generator,
     ClassVar,
@@ -14,7 +12,6 @@ from typing import (
     List,
     Dict,
     Sequence,
-    MutableSequence,
     TypeVar,
     cast,
     get_type_hints,
@@ -86,7 +83,7 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     if isinstance(value, dict):
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamDict(value, value_annotation=value_annotation)
-    elif type(value) == list:
+    elif type(value) is list:
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamList(value, value_annotation=value_annotation)
     else:
@@ -396,7 +393,7 @@ class QuamBase(ReferenceClass):
             return isinstance(val, (dict, QuamDict))
         elif required_type == list or get_origin(required_type) == list:
             return isinstance(val, (list, QuamList))
-        return type(val) == required_type
+        return type(val) is required_type
 
     def get_reference(
         self,
@@ -1150,7 +1147,7 @@ class QuamDict(UserDict, QuamBase):
             return True
         if self._value_annotation is None:
             return False
-        return type(val) == self._value_annotation
+        return type(val) is self._value_annotation
 
     def _attr_val_is_default(self, attr: str, val: Any):
         """Check whether the value of an attribute is the default value.
@@ -1350,7 +1347,7 @@ class QuamList(UserList, QuamBase):
             return True
         if self._value_annotation is None:
             return False
-        return type(val) == self._value_annotation
+        return type(val) is self._value_annotation
 
     def get_attr_name(self, attr_val: Any) -> str:
         for k, elem in enumerate(self.data):

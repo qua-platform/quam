@@ -219,7 +219,7 @@ def patch_dataclass(module_name):
         This function should be called at the top of a file, before dataclasses are
         defined:
         ```
-        patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
+        patch_dataclass(__name__)  # Ensure "kw_only" also works with python < 3.10
         ```
 
     Prior to Python 3.10, it was not possible for a dataclass to be a subclass of

@@ -2,7 +2,6 @@ import numbers
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from dataclasses import field
 from typing import Any, ClassVar, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -170,7 +169,9 @@ class Pulse(QuamComponent):
             if isinstance(waveform[0], (list, np.ndarray)):
                 waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])
             else:
-                waveform = float(waveform[0]) + 1.0j * float(waveform[1])  # type: ignore[arg-type]
+                waveform = (  # type: ignore[arg-type]
+                    float(waveform[0]) + 1.0j * float(waveform[1])
+                )
 
         return waveform
 
@@ -290,7 +291,7 @@ class Pulse(QuamComponent):
         assert self.operation in ["control", "measurement"]
         assert isinstance(self.length, int)
 
-        pulse_config = config["pulses"][self.pulse_name] = {
+        config["pulses"][self.pulse_name] = {
             "operation": self.operation,
             "length": self.length,
         }
@@ -395,7 +396,7 @@ class Pulse(QuamComponent):
     def apply_to_config(self, config: dict) -> None:
         """Adds this pulse, waveform, and digital marker to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         if self.channel is None:
@@ -471,7 +472,7 @@ class BaseReadoutPulse(Pulse, ABC):
     def apply_to_config(self, config: dict) -> None:
         """Adds this readout pulse to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         super().apply_to_config(config)
@@ -893,8 +894,8 @@ class _FlatTopGaussianPulse(Pulse):
     @property
     def inferred_total_length(self) -> int:
         warnings.warn(
-            "_FlatTopGaussianPulse is deprecated and will be removed in a future release. "
-            "Please use the version in qualang-tools instead.",
+            "_FlatTopGaussianPulse is deprecated and will be removed in a future "
+            "release. Please use the version in qualang-tools instead.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -1151,8 +1152,8 @@ class _CosineBipolarPulse(Pulse):
     @property
     def inferred_total_length(self) -> int:
         warnings.warn(
-            "_CosineBipolarPulse is deprecated and will be removed in a future release. "
-            "Please use the version in qualang-tools instead.",
+            "_CosineBipolarPulse is deprecated and will be removed in a future "
+            "release. Please use the version in qualang-tools instead.",
             DeprecationWarning,
             stacklevel=2,
         )

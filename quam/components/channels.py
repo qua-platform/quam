@@ -149,15 +149,17 @@ class DigitalOutputChannel(QuamComponent):
             136 ns exists by default.
         buffer (int, optional): Digital pulses played to this element will be convolved
             with a digital pulse of value 1 with this length [ns].
-        shareable (bool, deprecated): If True, the digital output can be shared with other
-            QM instances.
+        shareable (bool, deprecated): If True, the digital output can be shared
+            with other QM instances.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusDigitalOutputPort(shareable=...)` instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         inverted (bool, deprecated): If True, the digital output is inverted.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusDigitalOutputPort(inverted=...)` instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
     ."""
 
     opx_output: Union[Tuple[str, int], Tuple[str, int, int], DigitalOutputPort]
@@ -195,7 +197,7 @@ class DigitalOutputChannel(QuamComponent):
         config.controllers.<controller_name>.digital_outputs.<port> will be updated
         with the shareable and inverted settings of this channel if specified.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         if isinstance(self.opx_output, DigitalOutputPort):
@@ -310,7 +312,7 @@ class TimeTaggingAddon(QuamComponent):
         derivative_polarity (Literal["above", "below"]): The polarity of the derivative
             threshold. Default is "below".
 
-    For details see [Time Tagging](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging)
+    For details see [Time Tagging](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging)  # noqa: E501
     """
 
     signal_threshold: float = 800 / 4096
@@ -549,7 +551,8 @@ class Channel(QuamComponent, ABC):
         qua.ramp_to_zero(self.name, duration=duration)
 
     def wait(self, duration: ScalarInt, *other_elements: Union[str, "Channel"]):
-        """Wait for the given duration on all provided elements without outputting anything.
+        """Wait for the given duration on all provided elements without
+        outputting anything.
 
         Duration is in units of the clock cycle (4ns)
 
@@ -560,17 +563,19 @@ class Channel(QuamComponent, ABC):
                 in addition to this channel
 
         Warning:
-            In case the value of this is outside the range above, unexpected results may occur.
+            In case the value of this is outside the range above, unexpected
+            results may occur.
 
         Note:
             The current channel element is always included in the wait operation.
 
         Note:
-            The purpose of the `wait` operation is to add latency. In most cases, the
-            latency added will be exactly the same as that specified by the QUA variable or
-            the literal used. However, in some cases an additional computational latency may
-            be added. If the actual wait time has significance, such as in characterization
-            experiments, the actual wait time should always be verified with a simulator.
+            The purpose of the `wait` operation is to add latency. In most
+            cases, the latency added will be exactly the same as that specified
+            by the QUA variable or the literal used. However, in some cases an
+            additional computational latency may be added. If the actual wait
+            time has significance, such as in characterization experiments, the
+            actual wait time should always be verified with a simulator.
         """
         other_elements_str = [
             element if isinstance(element, str) else str(element)
@@ -783,15 +788,18 @@ class SingleChannel(Channel):
         filter_fir_taps (List[float], deprecated): FIR filter taps for the output port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(feedforward_filter=...)` instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         filter_iir_taps (List[float], deprecated): IIR filter taps for the output port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(feedback_filter=...)` instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         opx_output_offset (float, deprecated): DC offset for the output port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(offset=...)` instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
     """
@@ -823,7 +831,7 @@ class SingleChannel(Channel):
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         # Add pulses & waveforms
@@ -907,7 +915,8 @@ class InSingleChannel(Channel):
         opx_input_offset (float, deprecated): DC offset for the input port.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogInputPort(offset=...)` instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of OPX input,
             default is None.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
@@ -926,7 +935,7 @@ class InSingleChannel(Channel):
     def apply_to_config(self, config: dict):
         """Adds this InSingleChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         # Add output to config
@@ -993,7 +1002,9 @@ class InSingleChannel(Channel):
                 variables.
         """
 
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
+            self.operations[pulse_name]
+        )
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1002,7 +1013,9 @@ class InSingleChannel(Channel):
                     f"which is not a tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed) for _ in range(2)]  # type: ignore[assignment]
+            qua_vars = [  # type: ignore[assignment]
+                qua.declare(qua.fixed) for _ in range(2)
+            ]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1012,8 +1025,12 @@ class InSingleChannel(Channel):
         qua.measure(
             pulse_name_with_amp_scale,
             self.name,
-            qua.demod.full(integration_weight_labels[0], qua_vars[0], "out1"),  # type: ignore[index]
-            qua.demod.full(integration_weight_labels[1], qua_vars[1], "out1"),  # type: ignore[index]
+            qua.demod.full(  # type: ignore[index]
+                integration_weight_labels[0], qua_vars[0], "out1"
+            ),
+            qua.demod.full(  # type: ignore[index]
+                integration_weight_labels[1], qua_vars[1], "out1"
+            ),
             adc_stream=stream,
         )
         return tuple(qua_vars)  # type: ignore[return-value,arg-type]
@@ -1056,11 +1073,14 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
+            self.operations[pulse_name]
+        )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
-                "InOutSingleChannel.measure_accumulated requires either 'segment_length' "
+                "InOutSingleChannel.measure_accumulated requires either "
+                "'segment_length' "
                 "or 'num_segments' to be provided."
             )
         elif num_segments is not None and segment_length is not None:
@@ -1069,7 +1089,10 @@ class InSingleChannel(Channel):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
+            # Number of slices
+            num_segments = int(  # type: ignore[operator]
+                pulse.length / (4 * segment_length)
+            )
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1080,7 +1103,9 @@ class InSingleChannel(Channel):
                     f"which is not a tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(2)]  # type: ignore[assignment]
+            qua_vars = [  # type: ignore[assignment]
+                qua.declare(qua.fixed, size=num_segments) for _ in range(2)
+            ]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1091,10 +1116,10 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
             ),
             adc_stream=stream,
         )
@@ -1138,7 +1163,9 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
+            self.operations[pulse_name]
+        )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1151,7 +1178,10 @@ class InSingleChannel(Channel):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
+            # Number of slices
+            num_segments = int(  # type: ignore[operator]
+                pulse.length / (4 * segment_length)
+            )
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1162,7 +1192,9 @@ class InSingleChannel(Channel):
                     f"which is not a tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(2)]  # type: ignore[assignment]
+            qua_vars = [  # type: ignore[assignment]
+                qua.declare(qua.fixed, size=num_segments) for _ in range(2)
+            ]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1173,10 +1205,10 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
             ),
             adc_stream=stream,
         )
@@ -1193,7 +1225,7 @@ class InSingleChannel(Channel):
     ) -> Tuple[QuaVariableInt, QuaScalarInt]:
         """Perform a time tagging measurement on this channel.
 
-        For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
+        For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging  # noqa: E501
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
@@ -1356,11 +1388,13 @@ class IQChannel(_OutComplexChannel):
         opx_output_offset_I (float, deprecated): The offset of the I channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(offset=...)` on the I port instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         opx_output_offset_Q (float, deprecated): The offset of the Q channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogOutputPort(offset=...)` on the Q port instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         intermediate_frequency (float): Intermediate frequency of the mixer.
             Default is 0.0
         LO_frequency (float): Local oscillator frequency. Default is the LO frequency
@@ -1430,7 +1464,7 @@ class IQChannel(_OutComplexChannel):
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         # Add pulses & waveforms
@@ -1550,7 +1584,9 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
+            self.operations[pulse_name]
+        )
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1559,7 +1595,9 @@ class _InComplexChannel(Channel, ABC):
                     f"tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed) for _ in range(2)]  # type: ignore[assignment]
+            qua_vars = [  # type: ignore[assignment]
+                qua.declare(qua.fixed) for _ in range(2)
+            ]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1623,11 +1661,14 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
+            self.operations[pulse_name]
+        )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
-                "InOutSingleChannel.measure_accumulated requires either 'segment_length' "
+                "InOutSingleChannel.measure_accumulated requires either "
+                "'segment_length' "
                 "or 'num_segments' to be provided."
             )
         elif num_segments is not None and segment_length is not None:
@@ -1636,7 +1677,10 @@ class _InComplexChannel(Channel, ABC):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
+            # Number of slices
+            num_segments = int(  # type: ignore[operator]
+                pulse.length / (4 * segment_length)
+            )
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1647,7 +1691,9 @@ class _InComplexChannel(Channel, ABC):
                     f"which is not a tuple of four QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(4)]  # type: ignore[assignment]
+            qua_vars = [  # type: ignore[assignment]
+                qua.declare(qua.fixed, size=num_segments) for _ in range(4)
+            ]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1709,7 +1755,9 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
+            self.operations[pulse_name]
+        )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1722,7 +1770,10 @@ class _InComplexChannel(Channel, ABC):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
+            # Number of slices
+            num_segments = int(  # type: ignore[operator]
+                pulse.length / (4 * segment_length)
+            )
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1733,7 +1784,9 @@ class _InComplexChannel(Channel, ABC):
                     f"which is not a tuple of four QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(4)]  # type: ignore[assignment]
+            qua_vars = [  # type: ignore[assignment]
+                qua.declare(qua.fixed, size=num_segments) for _ in range(4)
+            ]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1778,11 +1831,13 @@ class InIQChannel(_InComplexChannel):
         opx_input_offset_I (float, deprecated): The offset of the I channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogInputPort(offset=...)` on the I port instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         opx_input_offset_Q (float, deprecated): The offset of the Q channel.
             **Deprecated**: This property has been moved to Port objects. Use
             `OPXPlusAnalogInputPort(offset=...)` on the Q port instead.
-            Will be removed in v0.6.0. See [Port documentation](channel-ports.md) for details.
+            Will be removed in v0.6.0.
+            See [Port documentation](channel-ports.md) for details.
         frequency_converter_down (Optional[FrequencyConverter]): Frequency converter
             QUAM component for the IQ input port. Only needed for the old Octave.
         time_of_flight (int): Round-trip signal duration in nanoseconds.
@@ -1809,7 +1864,7 @@ class InIQChannel(_InComplexChannel):
     def apply_to_config(self, config: dict):
         """Adds this InOutIQChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         super().apply_to_config(config)
