@@ -324,7 +324,7 @@ class JSONSerialiser(AbstractSerialiser):
             default_filepath = folder / self.default_filename
             self._save_dict_to_json(remaining_contents, default_filepath)
 
-    def save(
+    def save(  # type: ignore[override]
         self,
         quam_obj: QuamRoot,
         path: Optional[Union[Path, str]] = None,
@@ -372,10 +372,11 @@ class JSONSerialiser(AbstractSerialiser):
 
         # Get the dictionary representation of the object
         contents_dict = quam_obj.to_dict(include_defaults=current_include_defaults)
+        assert isinstance(contents_dict, dict), "QuamRoot.to_dict() must return a dict"
 
         # Apply ignore filter directly to the source dictionary before saving
         # This modification is temporary for the save operation.
-        effective_contents = contents_dict.copy()
+        effective_contents: Dict[str, Any] = contents_dict.copy()
         if ignore:
             current_content_mapping = current_content_mapping.copy()
             for key in ignore:
@@ -482,7 +483,7 @@ class JSONSerialiser(AbstractSerialiser):
                     f"File {filepath} does not contain a valid JSON dictionary.",
                 )
 
-            metadata = {
+            metadata: Dict[str, Any] = {
                 "content_mapping": {},
                 "default_filename": filepath.name,
                 "default_foldername": None,

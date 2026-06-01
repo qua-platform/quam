@@ -1,15 +1,17 @@
 import warnings
-from abc import abstractclassmethod
+from abc import ABC, abstractmethod
 
 instantiation_deprecations = []
 
 
-class InstantiationDeprecationRule:
-    @abstractclassmethod
+class InstantiationDeprecationRule(ABC):
+    @classmethod
+    @abstractmethod
     def match(cls, quam_class, contents):
         raise NotImplementedError
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def apply(cls, quam_class, contents):
         raise NotImplementedError
 

@@ -56,13 +56,13 @@ def add_amplitude_scale_to_pulse_name(
 
     try:
         check_type(amplitude_scale, Sequence[ScalarFloat])
-        return pulse_name * qua.amp(*amplitude_scale)
+        return pulse_name * qua.amp(*amplitude_scale)  # type: ignore[misc, arg-type]
     except TypeCheckError:
         pass
 
     try:
         check_type(amplitude_scale, ScalarFloat)
-        return pulse_name * qua.amp(amplitude_scale)
+        return pulse_name * qua.amp(amplitude_scale)  # type: ignore[arg-type]
     except TypeCheckError:
         pass
 

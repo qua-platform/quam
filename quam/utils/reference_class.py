@@ -1,4 +1,4 @@
-from typing import Any, ClassVar
+from typing import Any
 import warnings
 
 from quam.utils.exceptions import InvalidReferenceError
@@ -9,7 +9,7 @@ __all__ = ["ReferenceClass"]
 class ReferenceClass:
     """Class whose attributes can by references to other attributes"""
 
-    _initialized: ClassVar[bool] = False
+    _initialized: bool = False
 
     def __post_init__(self) -> None:
         """Post init function"""

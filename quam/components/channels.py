@@ -161,11 +161,11 @@ class DigitalOutputChannel(QuamComponent):
     ."""
 
     opx_output: Union[Tuple[str, int], Tuple[str, int, int], DigitalOutputPort]
-    delay: int = None
-    buffer: int = None
+    delay: Optional[int] = None
+    buffer: Optional[int] = None
 
-    shareable: bool = None
-    inverted: bool = None
+    shareable: Optional[bool] = None
+    inverted: Optional[bool] = None
 
     def generate_element_config(self) -> Dict[str, int]:
         """Generates the config entry for a digital channel in the QUA config.
@@ -180,7 +180,7 @@ class DigitalOutputChannel(QuamComponent):
         if isinstance(self.opx_output, DigitalOutputPort):
             opx_output = self.opx_output.port_tuple
         else:
-            opx_output = tuple(self.opx_output)
+            opx_output = tuple(self.opx_output)  # type: ignore[assignment]
 
         digital_cfg: Dict[str, Any] = {"port": opx_output}
         if self.delay is not None:
@@ -238,12 +238,13 @@ class DigitalOutputChannel(QuamComponent):
 
         shareable = self.shareable if self.shareable is not None else False
         inverted = self.inverted if self.inverted is not None else False
+        digital_output_port: DigitalOutputPort
         if len(self.opx_output) == 2:
-            digital_output_port = OPXPlusDigitalOutputPort(
+            digital_output_port = OPXPlusDigitalOutputPort(  # type: ignore[call-arg]
                 *self.opx_output, shareable=shareable, inverted=inverted
             )
         else:
-            digital_output_port = FEMDigitalOutputPort(
+            digital_output_port = FEMDigitalOutputPort(  # type: ignore[call-arg]
                 *self.opx_output, shareable=shareable, inverted=inverted
             )
         digital_output_port.apply_to_config(config)
@@ -274,7 +275,7 @@ class StickyChannelAddon(QuamComponent):
         if isinstance(self.parent, Channel):
             return self.parent
         else:
-            return
+            return None
 
     @property
     def config_settings(self):
@@ -324,7 +325,7 @@ class TimeTaggingAddon(QuamComponent):
         if isinstance(self.parent, Channel):
             return self.parent
         else:
-            return
+            return None
 
     @property
     def config_settings(self):
@@ -377,7 +378,7 @@ class Channel(QuamComponent, ABC):
 
     operations: Dict[str, Pulse] = field(default_factory=dict)
 
-    id: Union[str, int] = None
+    id: Optional[Union[str, int]] = None
     _default_label: ClassVar[str] = "ch"  # Used to determine name from id
 
     digital_outputs: Dict[str, DigitalOutputChannel] = field(default_factory=dict)
@@ -392,7 +393,7 @@ class Channel(QuamComponent, ABC):
         cls_name = self.__class__.__name__
 
         if self.id is not None:
-            if str_ref.is_reference(self.id):
+            if isinstance(self.id, str) and str_ref.is_reference(self.id):
                 raise AttributeError(
                     f"{cls_name}.name cannot be determined. "
                     f"Please either set {cls_name}.id to a string or integer, "
@@ -410,7 +411,7 @@ class Channel(QuamComponent, ABC):
                 "a name."
             )
         if isinstance(self.parent, QuamDict):
-            return self.inferred_id
+            return str(self.inferred_id)
         if not hasattr(self.parent, "name"):
             raise AttributeError(
                 f"{cls_name}.name cannot be determined. "
@@ -437,11 +438,11 @@ class Channel(QuamComponent, ABC):
         self,
         pulse_name: str,
         amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
-        duration: ScalarInt = None,
-        condition: ScalarBool = None,
-        chirp: ChirpType = None,
-        truncate: ScalarInt = None,
-        timestamp_stream: StreamType = None,
+        duration: Optional[ScalarInt] = None,
+        condition: Optional[ScalarBool] = None,
+        chirp: Optional[ChirpType] = None,
+        truncate: Optional[ScalarInt] = None,
+        timestamp_stream: Optional[StreamType] = None,
         continue_chirp: bool = False,
         target: str = "",
         validate: bool = True,
@@ -741,6 +742,7 @@ class Channel(QuamComponent, ABC):
             )
             qua_below_1_2_2 = True
 
+        core: Optional[str]
         if self.core is not None and self.thread is not None:
             warnings.warn(
                 "The 'thread' and 'core' arguments are mutually exclusive. "
@@ -795,16 +797,16 @@ class SingleChannel(Channel):
     """
 
     opx_output: LF_output_port_types
-    filter_fir_taps: List[float] = None
-    filter_iir_taps: List[float] = None
+    filter_fir_taps: Optional[List[float]] = None
+    filter_iir_taps: Optional[List[float]] = None
 
-    opx_output_offset: float = None
+    opx_output_offset: Optional[float] = None
 
     @property
     def sampling_rate(self) -> float:
         """Sampling rate from the output port, defaulting to 1 GHz."""
         if hasattr(self.opx_output, "sampling_rate"):
-            return self.opx_output.sampling_rate
+            return self.opx_output.sampling_rate  # type: ignore[union-attr]
         return 1e9
 
     def set_dc_offset(self, offset: ScalarFloat):
@@ -871,7 +873,7 @@ class SingleChannel(Channel):
         if isinstance(self.opx_output, LFAnalogOutputPort):
             opx_port = self.opx_output
         elif len(self.opx_output) == 2:
-            opx_port = OPXPlusAnalogOutputPort(
+            opx_port = OPXPlusAnalogOutputPort(  # type: ignore[call-arg]
                 *self.opx_output,
                 offset=self.opx_output_offset,
                 feedforward_filter=filter_fir_taps,
@@ -879,7 +881,7 @@ class SingleChannel(Channel):
             )
             opx_port.apply_to_config(config)
         else:
-            opx_port = LFFEMAnalogOutputPort(
+            opx_port = LFFEMAnalogOutputPort(  # type: ignore[call-arg]
                 *self.opx_output,
                 offset=self.opx_output_offset,
                 feedforward_filter=filter_fir_taps,
@@ -914,7 +916,7 @@ class InSingleChannel(Channel):
     """
 
     opx_input: LF_input_port_types
-    opx_input_offset: float = None
+    opx_input_offset: Optional[float] = None
 
     time_of_flight: int = 140
     smearing: int = 0
@@ -948,12 +950,12 @@ class InSingleChannel(Channel):
         if isinstance(self.opx_input, LFAnalogInputPort):
             opx_port = self.opx_input
         elif len(self.opx_input) == 2:
-            opx_port = OPXPlusAnalogInputPort(
+            opx_port = OPXPlusAnalogInputPort(  # type: ignore[call-arg]
                 *self.opx_input, offset=self.opx_input_offset
             )
             opx_port.apply_to_config(config)
         else:
-            opx_port = LFFEMAnalogInputPort(
+            opx_port = LFFEMAnalogInputPort(  # type: ignore[call-arg]
                 *self.opx_input, offset=self.opx_input_offset
             )
             opx_port.apply_to_config(config)
@@ -964,7 +966,7 @@ class InSingleChannel(Channel):
         self,
         pulse_name: str,
         amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
-        qua_vars: Tuple[QuaVariableFloat, ...] = None,
+        qua_vars: Optional[Tuple[QuaVariableFloat, ...]] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
         """Perform a full demodulation measurement on this channel.
@@ -991,7 +993,7 @@ class InSingleChannel(Channel):
                 variables.
         """
 
-        pulse: BaseReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1000,7 +1002,7 @@ class InSingleChannel(Channel):
                     f"which is not a tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed) for _ in range(2)]
+            qua_vars = [qua.declare(qua.fixed) for _ in range(2)]  # type: ignore[assignment]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1010,19 +1012,19 @@ class InSingleChannel(Channel):
         qua.measure(
             pulse_name_with_amp_scale,
             self.name,
-            qua.demod.full(integration_weight_labels[0], qua_vars[0], "out1"),
-            qua.demod.full(integration_weight_labels[1], qua_vars[1], "out1"),
+            qua.demod.full(integration_weight_labels[0], qua_vars[0], "out1"),  # type: ignore[index]
+            qua.demod.full(integration_weight_labels[1], qua_vars[1], "out1"),  # type: ignore[index]
             adc_stream=stream,
         )
-        return tuple(qua_vars)
+        return tuple(qua_vars)  # type: ignore[return-value,arg-type]
 
     def measure_accumulated(
         self,
         pulse_name: str,
         amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
-        num_segments: int = None,
-        segment_length: int = None,
-        qua_vars: Tuple[QuaVariableFloat, ...] = None,
+        num_segments: Optional[int] = None,
+        segment_length: Optional[int] = None,
+        qua_vars: Optional[Tuple[QuaVariableFloat, ...]] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
         """Perform an accumulated demodulation measurement on this channel.
@@ -1054,7 +1056,7 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1067,7 +1069,7 @@ class InSingleChannel(Channel):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1078,7 +1080,7 @@ class InSingleChannel(Channel):
                     f"which is not a tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(2)]
+            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(2)]  # type: ignore[assignment]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1089,22 +1091,22 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             adc_stream=stream,
         )
-        return tuple(qua_vars)
+        return tuple(qua_vars)  # type: ignore[return-value,arg-type]
 
     def measure_sliced(
         self,
         pulse_name: str,
         amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
-        num_segments: int = None,
-        segment_length: int = None,
-        qua_vars: Tuple[QuaVariableFloat, ...] = None,
+        num_segments: Optional[int] = None,
+        segment_length: Optional[int] = None,
+        qua_vars: Optional[Tuple[QuaVariableFloat, ...]] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
         """Perform an accumulated demodulation measurement on this channel.
@@ -1136,7 +1138,7 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1149,7 +1151,7 @@ class InSingleChannel(Channel):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1160,7 +1162,7 @@ class InSingleChannel(Channel):
                     f"which is not a tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(2)]
+            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(2)]  # type: ignore[assignment]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1171,14 +1173,14 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"
+                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             adc_stream=stream,
         )
-        return tuple(qua_vars)
+        return tuple(qua_vars)  # type: ignore[return-value,arg-type]
 
     def measure_time_tagging(
         self,
@@ -1219,9 +1221,9 @@ class InSingleChannel(Channel):
         if mode == "analog":
             time_tagging_func = qua.time_tagging.analog
         elif mode == "high_res":
-            time_tagging_func = qua.time_tagging.high_res
+            time_tagging_func = qua.time_tagging.high_res  # type: ignore[assignment]
         elif mode == "digital":
-            time_tagging_func = qua.time_tagging.digital
+            time_tagging_func = qua.time_tagging.digital  # type: ignore[assignment]
         else:
             raise ValueError(f"Invalid time tagging mode: {mode}")
 
@@ -1229,7 +1231,7 @@ class InSingleChannel(Channel):
             times = qua.declare(int, size=size)
             counts = qua.declare(int)
         else:
-            times, counts = qua_vars
+            times, counts = qua_vars  # type: ignore[assignment]
 
         qua.measure(
             pulse_name,
@@ -1237,7 +1239,7 @@ class InSingleChannel(Channel):
             time_tagging_func(target=times, max_time=max_time, targetLen=counts),
             adc_stream=stream,
         )
-        return times, counts
+        return times, counts  # type: ignore[return-value]
 
 
 def _raise_inferred_freq_error(
@@ -1290,7 +1292,7 @@ class _OutComplexChannel(Channel, ABC):
                 "intermediate_frequency",
                 self.intermediate_frequency,
             )
-        return self.LO_frequency + self.intermediate_frequency
+        return self.LO_frequency + self.intermediate_frequency  # type: ignore[operator]
 
     @property
     def inferred_intermediate_frequency(self) -> float:
@@ -1334,7 +1336,7 @@ class _OutComplexChannel(Channel, ABC):
                 "intermediate_frequency",
                 self.intermediate_frequency,
             )
-        return self.RF_frequency - self.intermediate_frequency
+        return self.RF_frequency - self.intermediate_frequency  # type: ignore[operator]
 
 
 @quam_dataclass
@@ -1372,13 +1374,13 @@ class IQChannel(_OutComplexChannel):
     opx_output_I: LF_output_port_types
     opx_output_Q: LF_output_port_types
 
-    opx_output_offset_I: float = None
-    opx_output_offset_Q: float = None
+    opx_output_offset_I: Optional[float] = None
+    opx_output_offset_Q: Optional[float] = None
 
     frequency_converter_up: BaseFrequencyConverter
 
-    LO_frequency: float = "#./frequency_converter_up/LO_frequency"
-    RF_frequency: float = "#./inferred_RF_frequency"
+    LO_frequency: float = "#./frequency_converter_up/LO_frequency"  # type: ignore[assignment]
+    RF_frequency: float = "#./inferred_RF_frequency"  # type: ignore[assignment]
 
     _default_label: ClassVar[str] = "IQ"
 
@@ -1386,7 +1388,7 @@ class IQChannel(_OutComplexChannel):
     def sampling_rate(self) -> float:
         """Sampling rate from the I output port, defaulting to 1 GHz."""
         if hasattr(self.opx_output_I, "sampling_rate"):
-            return self.opx_output_I.sampling_rate
+            return self.opx_output_I.sampling_rate  # type: ignore[union-attr]
         return 1e9
 
     @property
@@ -1476,7 +1478,9 @@ class IQChannel(_OutComplexChannel):
             element_config["RF_inputs"] = {
                 "port": (octave.name, self.frequency_converter_up.id)
             }
-        elif str_ref.is_reference(self.frequency_converter_up):
+        elif isinstance(self.frequency_converter_up, str) and str_ref.is_reference(
+            self.frequency_converter_up
+        ):
             raise ValueError(
                 f"Error generating config: channel {self.name} could not determine "
                 f'"frequency_converter_up", it seems to point to a non-existent '
@@ -1497,10 +1501,10 @@ class IQChannel(_OutComplexChannel):
             if isinstance(opx_output, LFAnalogOutputPort):
                 opx_port = opx_output
             elif len(opx_output) == 2:
-                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)
+                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[call-arg]
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)
+                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[call-arg]
                 opx_port.apply_to_config(config)
 
             if "mixInputs" in element_config:
@@ -1524,7 +1528,7 @@ class _InComplexChannel(Channel, ABC):
         self,
         pulse_name: str,
         amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
-        qua_vars: Tuple[QuaVariableFloat, QuaVariableFloat] = None,
+        qua_vars: Optional[Tuple[QuaVariableFloat, QuaVariableFloat]] = None,
         stream=None,
     ) -> Tuple[QuaVariableFloat, QuaVariableFloat]:
         """Perform a full dual demodulation measurement on this channel.
@@ -1546,7 +1550,7 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1555,7 +1559,7 @@ class _InComplexChannel(Channel, ABC):
                     f"tuple of two QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed) for _ in range(2)]
+            qua_vars = [qua.declare(qua.fixed) for _ in range(2)]  # type: ignore[assignment]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1570,18 +1574,18 @@ class _InComplexChannel(Channel, ABC):
                 element_output1="out1",
                 iw2=integration_weight_labels[1],
                 element_output2="out2",
-                target=qua_vars[0],
+                target=qua_vars[0],  # type: ignore[index]
             ),
             qua.dual_demod.full(
                 iw1=integration_weight_labels[2],
                 element_output1="out1",
                 iw2=integration_weight_labels[0],
                 element_output2="out2",
-                target=qua_vars[1],
+                target=qua_vars[1],  # type: ignore[index]
             ),
             adc_stream=stream,
         )
-        return tuple(qua_vars)
+        return tuple(qua_vars)  # type: ignore[return-value,arg-type]
 
     def measure_accumulated(
         self,
@@ -1619,7 +1623,7 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1632,7 +1636,7 @@ class _InComplexChannel(Channel, ABC):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1643,7 +1647,7 @@ class _InComplexChannel(Channel, ABC):
                     f"which is not a tuple of four QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(4)]
+            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(4)]  # type: ignore[assignment]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1654,20 +1658,20 @@ class _InComplexChannel(Channel, ABC):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out2"
+                integration_weight_labels[1], qua_vars[1], segment_length, "out2"  # type: ignore[index,arg-type]
             ),
             qua.demod.accumulated(
-                integration_weight_labels[2], qua_vars[2], segment_length, "out1"
+                integration_weight_labels[2], qua_vars[2], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[3], segment_length, "out2"
+                integration_weight_labels[0], qua_vars[3], segment_length, "out2"  # type: ignore[index,arg-type]
             ),
             adc_stream=stream,
         )
-        return tuple(qua_vars)
+        return tuple(qua_vars)  # type: ignore[return-value,arg-type]
 
     def measure_sliced(
         self,
@@ -1705,7 +1709,7 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1718,7 +1722,7 @@ class _InComplexChannel(Channel, ABC):
                 "and 'num_segments'. Please provide only one."
             )
         elif num_segments is None:
-            num_segments = int(pulse.length / (4 * segment_length))  # Number of slices
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]  # Number of slices
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1729,7 +1733,7 @@ class _InComplexChannel(Channel, ABC):
                     f"which is not a tuple of four QUA variables. Received {qua_vars=}"
                 )
         else:
-            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(4)]
+            qua_vars = [qua.declare(qua.fixed, size=num_segments) for _ in range(4)]  # type: ignore[assignment]
 
         pulse_name_with_amp_scale = add_amplitude_scale_to_pulse_name(
             pulse_name, amplitude_scale
@@ -1740,20 +1744,20 @@ class _InComplexChannel(Channel, ABC):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"
+                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out2"
+                integration_weight_labels[1], qua_vars[1], segment_length, "out2"  # type: ignore[index,arg-type]
             ),
             qua.demod.sliced(
-                integration_weight_labels[2], qua_vars[2], segment_length, "out1"
+                integration_weight_labels[2], qua_vars[2], segment_length, "out1"  # type: ignore[index,arg-type]
             ),
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[3], segment_length, "out2"
+                integration_weight_labels[0], qua_vars[3], segment_length, "out2"  # type: ignore[index,arg-type]
             ),
             adc_stream=stream,
         )
-        return tuple(qua_vars)
+        return tuple(qua_vars)  # type: ignore[return-value,arg-type]
 
 
 @quam_dataclass
@@ -1793,12 +1797,12 @@ class InIQChannel(_InComplexChannel):
     time_of_flight: int = 140
     smearing: int = 0
 
-    opx_input_offset_I: float = None
-    opx_input_offset_Q: float = None
+    opx_input_offset_I: Optional[float] = None
+    opx_input_offset_Q: Optional[float] = None
 
     input_gain: Optional[int] = None
 
-    frequency_converter_down: BaseFrequencyConverter = None
+    frequency_converter_down: Optional[BaseFrequencyConverter] = None
 
     _default_label: ClassVar[str] = "IQ"
 
@@ -1828,7 +1832,9 @@ class InIQChannel(_InComplexChannel):
             element_config["RF_outputs"] = {
                 "port": (octave.name, self.frequency_converter_down.id)
             }
-        elif str_ref.is_reference(self.frequency_converter_down):
+        elif isinstance(self.frequency_converter_down, str) and str_ref.is_reference(
+            self.frequency_converter_down
+        ):
             raise ValueError(
                 f"Error generating config: channel {self.name} could not determine "
                 f'"frequency_converter_down", it seems to point to a non-existent '
@@ -1864,12 +1870,12 @@ class InIQChannel(_InComplexChannel):
             if isinstance(opx_input, LFAnalogInputPort):
                 opx_port = opx_input
             elif len(opx_input) == 2:
-                opx_port = OPXPlusAnalogInputPort(
+                opx_port = OPXPlusAnalogInputPort(  # type: ignore[call-arg]
                     *opx_input, offset=offset, gain_db=input_gain
                 )
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogInputPort(
+                opx_port = LFFEMAnalogInputPort(  # type: ignore[call-arg]
                     *opx_input, offset=offset, gain_db=input_gain
                 )
                 opx_port.apply_to_config(config)
@@ -2039,8 +2045,8 @@ class MWChannel(_OutComplexChannel):
     opx_output: MWFEMAnalogOutputPort
     upconverter: int = 1
 
-    LO_frequency: float = "#./upconverter_frequency"
-    RF_frequency: float = "#./inferred_RF_frequency"
+    LO_frequency: float = "#./upconverter_frequency"  # type: ignore[assignment]
+    RF_frequency: float = "#./inferred_RF_frequency"  # type: ignore[assignment]
 
     @property
     def sampling_rate(self) -> float:

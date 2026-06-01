@@ -51,6 +51,7 @@ dev = [
     "black >= 23.7.0",
     "flake8 >= 5.0.1",
     "pyproject-flake8 >= 5.0.0",
+    "mypy >= 1.0.0",
     "ipykernel >= 6.24.0",
     "pytest-cov >= 4.1.0",
     "pytest-mock >= 3.6.1",
@@ -100,6 +101,7 @@ preview = true
 
 [tool.flake8]
 max-line-length = 88
+per-file-ignores = ["**/__init__.py:F401,F403,F405"]
 
 [tool.setuptools]
 packages = ["quam"]

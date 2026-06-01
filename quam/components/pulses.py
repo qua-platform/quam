@@ -85,9 +85,9 @@ class Pulse(QuamComponent):
 
     operation: ClassVar[str] = "control"
     length: int
-    id: str = None
+    id: Optional[str] = None
 
-    digital_marker: Union[str, List[Tuple[int, int]]] = None
+    digital_marker: Optional[Union[str, List[Tuple[int, int]]]] = None
 
     @property
     def channel(self):
@@ -147,7 +147,7 @@ class Pulse(QuamComponent):
 
     def calculate_waveform(
         self,
-    ) -> Union[float, complex, Sequence[float], Sequence[complex]]:
+    ) -> Optional[Union[float, complex, Sequence[float], Sequence[complex]]]:
         """Calculate the waveform of the pulse.
 
         This function calls `Pulse.waveform_function`, which should generally be
@@ -170,19 +170,21 @@ class Pulse(QuamComponent):
             if isinstance(waveform[0], (list, np.ndarray)):
                 waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])
             else:
-                waveform = waveform[0] + 1.0j * waveform[1]
+                waveform = float(waveform[0]) + 1.0j * float(waveform[1])  # type: ignore[arg-type]
 
         return waveform
 
     def waveform_function(
         self,
-    ) -> Union[
-        float,
-        complex,
-        Sequence[float],
-        Sequence[complex],
-        Tuple[float, float],
-        Tuple[Sequence[float], Sequence[float]],
+    ) -> Optional[
+        Union[
+            float,
+            complex,
+            Sequence[float],
+            Sequence[complex],
+            Tuple[float, float],
+            Tuple[Sequence[float], Sequence[float]],
+        ]
     ]:
         """Function that returns the waveform of the pulse.
 
@@ -192,7 +194,7 @@ class Pulse(QuamComponent):
         This function is called from `Pulse.calculate_waveform`
 
         Returns:
-            The waveform of the pulse. Can be one of the following:
+            The waveform of the pulse, or None for digital-only pulses. Can be one of:
             - a single float for a constant single-channel waveform,
             - a single complex number for a constant IQ waveform,
             - a sequence of floats for an arbitrary single-channel waveform,
@@ -200,16 +202,16 @@ class Pulse(QuamComponent):
             - a tuple of floats for a constant IQ waveform,
             - a tuple of sequences for an arbitrary IQ waveform
         """
-        ...
+        return None
 
     def play(
         self,
         amplitude_scale: Optional[Union[ScalarFloat, Sequence[ScalarFloat]]] = None,
-        duration: ScalarInt = None,
-        condition: ScalarBool = None,
-        chirp: ChirpType = None,
-        truncate: ScalarInt = None,
-        timestamp_stream: StreamType = None,
+        duration: Optional[ScalarInt] = None,
+        condition: Optional[ScalarBool] = None,
+        chirp: Optional[ChirpType] = None,
+        truncate: Optional[ScalarInt] = None,
+        timestamp_stream: Optional[StreamType] = None,
         continue_chirp: bool = False,
         target: str = "",
         validate: bool = True,
@@ -256,6 +258,7 @@ class Pulse(QuamComponent):
             ValueError: If the pulse is not attached to a channel.
             KeyError: If the pulse is not registered in the channel's operations.
         """
+        name: Union[str, int]
         if self.id is not None:
             name = self.id
         elif self.parent is not None:
@@ -422,8 +425,8 @@ class BaseReadoutPulse(Pulse, ABC):
     digital_marker: str = "ON"
 
     # TODO Understand why the thresholds were added.
-    threshold: float = None
-    rus_exit_threshold: float = None
+    threshold: Optional[float] = None
+    rus_exit_threshold: Optional[float] = None
 
     _weight_labels: ClassVar[List[str]] = ["iw1", "iw2", "iw3"]
 
@@ -496,7 +499,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
             integration weights in radians.
     """
 
-    integration_weights: Union[List[float], List[Tuple[float, int]]] = (
+    integration_weights: Union[List[float], List[Tuple[float, int]], str] = (
         "#./default_integration_weights"
     )
     integration_weights_angle: float = 0
@@ -505,7 +508,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
     def default_integration_weights(self) -> List[Tuple[float, int]]:
         return [(1, self.length)]
 
-    def integration_weights_function(self) -> List[Tuple[Union[complex, float], int]]:
+    def integration_weights_function(self) -> Dict[str, List[Tuple[float, int]]]:
         phase = np.exp(1j * self.integration_weights_angle)
 
         if isinstance(self.integration_weights[0], float):
@@ -539,9 +542,9 @@ class WaveformPulse(Pulse):
     waveform_Q: Optional[List[float]] = None
     # Length is derived from the waveform_I length, but still needs to be declared
     # to satisfy the dataclass, but we'll override its behavior
-    length: Optional[int] = None  # pyright: ignore
+    length: Optional[int] = None  # type: ignore[assignment]  # pyright: ignore
 
-    @property
+    @property  # type: ignore[override, no-redef]
     def length(self):  # noqa: 811
         if not isinstance(self.waveform_I, Iterable):
             return None
@@ -561,6 +564,7 @@ class WaveformPulse(Pulse):
         self, follow_references: bool = False, include_defaults: bool = True
     ) -> Dict[str, Any]:
         d = super().to_dict(follow_references, include_defaults)
+        assert isinstance(d, dict)
         d.pop("length")
         return d
 
@@ -709,7 +713,7 @@ class SquarePulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
 
     def waveform_function(self):
         waveform = self.amplitude
@@ -775,7 +779,7 @@ class GaussianPulse(Pulse):
     amplitude: float
     length: int
     sigma: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     subtracted: bool = True
 
     def __post_init__(self) -> None:
@@ -821,7 +825,7 @@ class FlatTopGaussianPulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     flat_length: int
 
     def __post_init__(self) -> None:
@@ -880,11 +884,11 @@ class _FlatTopGaussianPulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     flat_length: int
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
-    length: int = "#./inferred_total_length"
+    length: Union[int, str] = "#./inferred_total_length"  # type: ignore[assignment]
 
     @property
     def inferred_total_length(self) -> int:
@@ -942,7 +946,7 @@ class FlatTopBlackmanPulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     flat_length: int
 
     def __post_init__(self) -> None:
@@ -989,7 +993,7 @@ class BlackmanIntegralPulse(Pulse):
     # amplitude: float
     v_start: float
     v_end: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
 
     def __post_init__(self) -> None:
         warnings.warn(
@@ -1025,7 +1029,7 @@ class FlatTopCosinePulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     flat_length: int = 0
 
     def __post_init__(self) -> None:
@@ -1070,7 +1074,7 @@ class FlatTopTanhPulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     flat_length: int = 0
 
     def __post_init__(self) -> None:
@@ -1138,11 +1142,11 @@ class _CosineBipolarPulse(Pulse):
     """
 
     amplitude: float
-    axis_angle: float = None
+    axis_angle: Optional[float] = None
     flat_length: int
     smoothing_length: int = 0
     post_zero_padding_length: int = 0
-    length: int = "#./inferred_total_length"
+    length: Union[int, str] = "#./inferred_total_length"  # type: ignore[assignment]
 
     @property
     def inferred_total_length(self) -> int:

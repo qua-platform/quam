@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, Type, get_origin, get_args, TypeVar
+from typing import Any, Callable, Optional, Type, get_origin, get_args
 import inspect
 from typing import get_type_hints
 from dataclasses import dataclass, field
@@ -7,9 +7,6 @@ import keyword
 from quam.components import QuantumComponent
 
 __all__ = ["FunctionProperties"]
-
-
-QC = TypeVar("QC", bound=QuantumComponent)
 
 
 @dataclass
@@ -29,7 +26,7 @@ class FunctionProperties:
     """
 
     quantum_component_name: str
-    quantum_component_type: Type[QC]
+    quantum_component_type: Type[QuantumComponent]
     name: str = ""
     required_args: list[str] = field(default_factory=list)
     optional_args: dict[str, Any] = field(default_factory=dict)

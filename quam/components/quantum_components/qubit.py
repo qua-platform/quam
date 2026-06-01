@@ -26,7 +26,7 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuantumComponent):
     id: Union[str, int] = "#./inferred_id"
-    macros: Dict[str, MacroType] = field(default_factory=dict)
+    macros: Dict[str, MacroType] = field(default_factory=dict)  # type: ignore[assignment]
 
     @property
     def name(self) -> str:

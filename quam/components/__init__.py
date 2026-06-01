@@ -6,6 +6,7 @@ from . import pulses
 from .quantum_components import *
 from . import macro
 from quam.config import get_quam_config
+from . import basic_quam, hardware, channels, octave, quantum_components
 
 __all__ = [
     *basic_quam.__all__,

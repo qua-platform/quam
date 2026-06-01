@@ -295,7 +295,11 @@ def instantiate_attrs(
     Returns:
         A dictionary where each element has been instantiated if it is a QuamComponent
     """
-    instantiated_attrs = {"required": {}, "optional": {}, "extra": {}}
+    instantiated_attrs: Dict[str, Dict[str, Any]] = {
+        "required": {},
+        "optional": {},
+        "extra": {},
+    }
     for attr_name, attr_val in contents.items():
         if attr_name == "__class__":
             continue

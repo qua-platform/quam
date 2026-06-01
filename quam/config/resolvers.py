@@ -13,7 +13,6 @@ from quam.config.cli import migrate_command
 from quam.config.models import QuamConfig, QuamTopLevelConfig
 from quam.config.validators import (
     quam_version_validator,
-    InvalidQuamConfigVersion,
     InvalidQuamConfigVersionError,
     GreaterThanSupportedQuamConfigVersionError,
 )

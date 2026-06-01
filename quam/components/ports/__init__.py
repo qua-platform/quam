@@ -4,6 +4,14 @@ from .base_ports import *
 from .digital_inputs import *
 from .digital_outputs import *
 from .ports_containers import *
+from . import (
+    analog_outputs,
+    analog_inputs,
+    base_ports,
+    digital_inputs,
+    digital_outputs,
+    ports_containers,
+)
 
 __all__ = [
     *analog_outputs.__all__,

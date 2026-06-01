@@ -43,7 +43,8 @@ def split_next_attribute(string: str, splitter: str = "/") -> Tuple[str, str]:
         return "", ""
 
     if splitter in string:
-        return tuple(string.split(splitter, 1))
+        parts = string.split(splitter, 1)
+        return parts[0], parts[1]
 
     return string, ""
 
