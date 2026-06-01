@@ -78,13 +78,13 @@ class OPXPlusPortsContainer(QuamComponent):
         ports = controllers[controller_id]
 
         if port_type == "analog_output":
-            ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)  # type: ignore[call-arg]
+            ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
         elif port_type == "analog_input":
-            ports[port_id] = OPXPlusAnalogInputPort(controller_id, port_id, **kwargs)  # type: ignore[call-arg]
+            ports[port_id] = OPXPlusAnalogInputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
         elif port_type == "digital_output":
-            ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)  # type: ignore[call-arg]
+            ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
         elif port_type == "digital_input":
-            ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)  # type: ignore[call-arg]
+            ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
 
         return ports[port_id]
 
@@ -217,11 +217,11 @@ class FEMPortsContainer(QuamComponent):
         ports = fems[fem_id]
 
         if port_type == "analog_output":
-            ports[port_id] = LFFEMAnalogOutputPort(  # type: ignore[call-arg]
+            ports[port_id] = LFFEMAnalogOutputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "analog_input":
-            ports[port_id] = LFFEMAnalogInputPort(  # type: ignore[call-arg]
+            ports[port_id] = LFFEMAnalogInputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_output":
@@ -231,7 +231,7 @@ class FEMPortsContainer(QuamComponent):
                 kwargs["upconverter_frequency"] = 5e9
             if "band" not in kwargs:
                 kwargs["band"] = 1
-            ports[port_id] = MWFEMAnalogOutputPort(  # type: ignore[call-arg]
+            ports[port_id] = MWFEMAnalogOutputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_input":
@@ -241,14 +241,14 @@ class FEMPortsContainer(QuamComponent):
                 kwargs["band"] = 1
             if "downconverter_frequency" not in kwargs:
                 kwargs["downconverter_frequency"] = 5e9
-            ports[port_id] = MWFEMAnalogInputPort(  # type: ignore[call-arg]
+            ports[port_id] = MWFEMAnalogInputPort(  # type: ignore[misc]
                 controller_id,
                 fem_id,
                 port_id,
                 **kwargs,
             )
         elif port_type == "digital_output":
-            ports[port_id] = FEMDigitalOutputPort(  # type: ignore[call-arg]
+            ports[port_id] = FEMDigitalOutputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
 

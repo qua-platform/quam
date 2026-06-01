@@ -1,6 +1,5 @@
 from __future__ import annotations
 from collections.abc import Iterable
-import sys
 import warnings
 from pathlib import Path
 from copy import deepcopy
@@ -20,6 +19,11 @@ from typing import (
     Optional,
 )
 from functools import partial
+
+try:
+    from typing import dataclass_transform
+except ImportError:
+    from typing_extensions import dataclass_transform  # type: ignore[no-redef]
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
@@ -150,44 +154,18 @@ def sort_quam_components(
     return sorted_components
 
 
-def _quam_dataclass(cls=None, **kwargs):
-    """Dataclass for QUAM classes.
+@dataclass_transform(eq_default=False, kw_only_default=True)
+def quam_dataclass(cls=None, **kwargs):
+    """Dataclass decorator for QUAM classes.
 
-    This class is used as a patch to maintain compatibility with Python 3.9, as
-    these do not support the dataclass argument `kw_only`. This argument is needed to
-    ensure inheritance of parent dataclasses is allowed.
-
-    Args:
-    - cls: The QUAM class to decorate.
-    - kwargs: The arguments to pass to the dataclass decorator.
-      By default, kw_only=True and eq=False are passed, though they can be overwritten.
-    Notes:
-    - This custom dataclass is no longer necessary once Python 3.9 support is dropped
-    - The actual custom dataclass is `quam_dataclass` (without the underscore). This
-      function is only used to trick type checkers into recognizing it as a dataclass.
-    - From Python 3.10 onwards, this customized dataclass is no longer needed, as then
-      the following two decorators are equivalent:
-      - @quam_dataclass
-      - @dataclass(eq=False, kw_only=True)
+    Equivalent to @dataclass(eq=False, kw_only=True). Both defaults can be overridden
+    by passing the corresponding keyword argument, e.g. @quam_dataclass(kw_only=False).
     """
     if cls is None:
-        return partial(_quam_dataclass, **kwargs)
-
+        return partial(quam_dataclass, **kwargs)
     kwargs.setdefault("kw_only", True)
     kwargs.setdefault("eq", False)
-
-    if sys.version_info.minor > 9:
-        return dataclass(cls, **kwargs)
-
-    from quam.utils.dataclass import _quam_patched_dataclass
-
-    return _quam_patched_dataclass(cls, **kwargs)
-
-
-# Exec statement is needed to trick type checkers into recognizing it as a dataclass
-# This will no longer be necessary once we drop support for Python 3.9
-quam_dataclass = dataclass
-exec("quam_dataclass = _quam_dataclass")
+    return dataclass(cls, **kwargs)
 
 
 class ParentDescriptor:

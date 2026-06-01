@@ -242,11 +242,11 @@ class DigitalOutputChannel(QuamComponent):
         inverted = self.inverted if self.inverted is not None else False
         digital_output_port: DigitalOutputPort
         if len(self.opx_output) == 2:
-            digital_output_port = OPXPlusDigitalOutputPort(  # type: ignore[call-arg]
+            digital_output_port = OPXPlusDigitalOutputPort(  # type: ignore[misc]
                 *self.opx_output, shareable=shareable, inverted=inverted
             )
         else:
-            digital_output_port = FEMDigitalOutputPort(  # type: ignore[call-arg]
+            digital_output_port = FEMDigitalOutputPort(  # type: ignore[misc]
                 *self.opx_output, shareable=shareable, inverted=inverted
             )
         digital_output_port.apply_to_config(config)
@@ -881,7 +881,7 @@ class SingleChannel(Channel):
         if isinstance(self.opx_output, LFAnalogOutputPort):
             opx_port = self.opx_output
         elif len(self.opx_output) == 2:
-            opx_port = OPXPlusAnalogOutputPort(  # type: ignore[call-arg]
+            opx_port = OPXPlusAnalogOutputPort(  # type: ignore[misc]
                 *self.opx_output,
                 offset=self.opx_output_offset,
                 feedforward_filter=filter_fir_taps,
@@ -889,7 +889,7 @@ class SingleChannel(Channel):
             )
             opx_port.apply_to_config(config)
         else:
-            opx_port = LFFEMAnalogOutputPort(  # type: ignore[call-arg]
+            opx_port = LFFEMAnalogOutputPort(  # type: ignore[misc]
                 *self.opx_output,
                 offset=self.opx_output_offset,
                 feedforward_filter=filter_fir_taps,
@@ -959,12 +959,12 @@ class InSingleChannel(Channel):
         if isinstance(self.opx_input, LFAnalogInputPort):
             opx_port = self.opx_input
         elif len(self.opx_input) == 2:
-            opx_port = OPXPlusAnalogInputPort(  # type: ignore[call-arg]
+            opx_port = OPXPlusAnalogInputPort(  # type: ignore[misc]
                 *self.opx_input, offset=self.opx_input_offset
             )
             opx_port.apply_to_config(config)
         else:
-            opx_port = LFFEMAnalogInputPort(  # type: ignore[call-arg]
+            opx_port = LFFEMAnalogInputPort(  # type: ignore[misc]
                 *self.opx_input, offset=self.opx_input_offset
             )
             opx_port.apply_to_config(config)
@@ -1535,10 +1535,10 @@ class IQChannel(_OutComplexChannel):
             if isinstance(opx_output, LFAnalogOutputPort):
                 opx_port = opx_output
             elif len(opx_output) == 2:
-                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[call-arg]
+                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[misc]
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[call-arg]
+                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[misc]
                 opx_port.apply_to_config(config)
 
             if "mixInputs" in element_config:
@@ -1925,12 +1925,12 @@ class InIQChannel(_InComplexChannel):
             if isinstance(opx_input, LFAnalogInputPort):
                 opx_port = opx_input
             elif len(opx_input) == 2:
-                opx_port = OPXPlusAnalogInputPort(  # type: ignore[call-arg]
+                opx_port = OPXPlusAnalogInputPort(  # type: ignore[misc]
                     *opx_input, offset=offset, gain_db=input_gain
                 )
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogInputPort(  # type: ignore[call-arg]
+                opx_port = LFFEMAnalogInputPort(  # type: ignore[misc]
                     *opx_input, offset=offset, gain_db=input_gain
                 )
                 opx_port.apply_to_config(config)

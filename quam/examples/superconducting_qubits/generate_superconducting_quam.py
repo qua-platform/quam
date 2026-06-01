@@ -41,8 +41,8 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         machine.qubits[transmon.name] = transmon
 
         transmon.xy = IQChannel(  # type: ignore[call-arg]
-            opx_output_I=f"#/wiring/qubits/q{idx}/port_I",
-            opx_output_Q=f"#/wiring/qubits/q{idx}/port_Q",
+            opx_output_I=f"#/wiring/qubits/q{idx}/port_I",  # type: ignore[arg-type]
+            opx_output_Q=f"#/wiring/qubits/q{idx}/port_Q",  # type: ignore[arg-type]
             frequency_converter_up=FrequencyConverter(  # type: ignore[call-arg]
                 mixer=Mixer(),
                 local_oscillator=LocalOscillator(  # type: ignore[call-arg]
@@ -53,15 +53,15 @@ def create_quam_superconducting_referenced(num_qubits: int) -> QuamRoot:
         )
 
         transmon.z = SingleChannel(  # type: ignore[call-arg]
-            opx_output=f"#/wiring/qubits/q{idx}/port_Z"
+            opx_output=f"#/wiring/qubits/q{idx}/port_Z"  # type: ignore[arg-type]
         )
 
         transmon.resonator = InOutIQChannel(  # type: ignore[call-arg]
             id=idx,
-            opx_output_I="#/wiring/feedline/opx_output_I",
-            opx_output_Q="#/wiring/feedline/opx_output_Q",
-            opx_input_I="#/wiring/feedline/opx_input_I",
-            opx_input_Q="#/wiring/feedline/opx_input_Q",
+            opx_output_I="#/wiring/feedline/opx_output_I",  # type: ignore[arg-type]
+            opx_output_Q="#/wiring/feedline/opx_output_Q",  # type: ignore[arg-type]
+            opx_input_I="#/wiring/feedline/opx_input_I",  # type: ignore[arg-type]
+            opx_input_Q="#/wiring/feedline/opx_input_Q",  # type: ignore[arg-type]
             frequency_converter_up=FrequencyConverter(  # type: ignore[call-arg]
                 mixer=Mixer(),
                 local_oscillator=LocalOscillator(  # type: ignore[call-arg]
