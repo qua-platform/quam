@@ -7,7 +7,7 @@ from quam.config.cli.config import config_command
 from quam.config.models.quam import QuamConfig
 
 
-def test_config_creates_new_file_when_missing(tmp_path, write_toml):
+def test_config_creates_new_file_when_missing(tmp_path):
     config_path = tmp_path / "config.toml"
     state_path = tmp_path / "state"
 
@@ -29,20 +29,18 @@ def test_config_creates_new_file_when_missing(tmp_path, write_toml):
     assert state_path.is_dir()
 
 
-def test_config_updates_existing_file_in_place(tmp_path, write_toml):
+def test_config_updates_existing_file_in_place(tmp_path):
     config_path = tmp_path / "config.toml"
     initial_state = tmp_path / "initial_state"
     new_state = tmp_path / "new_state"
-    write_toml(
-        config_path,
-        {
-            "quam": {
-                "version": QuamConfig.version,
-                "state_path": str(initial_state),
-                "raise_error_missing_reference": False,
-                "serialization": {"include_defaults": True},
-            }
-        },
+    runner = CliRunner()
+    runner.invoke(
+        config_command,
+        [
+            "--config-path", str(config_path),
+            "--state-path", str(initial_state),
+            "--auto-accept",
+        ],
     )
 
     runner = CliRunner()
@@ -60,23 +58,20 @@ def test_config_updates_existing_file_in_place(tmp_path, write_toml):
     assert loaded["quam"]["state_path"] == str(new_state)
 
 
-def test_config_state_path_inferred_from_existing_config(tmp_path, write_toml):
+def test_config_state_path_inferred_from_existing_config(tmp_path):
     """If --state-path is omitted, the callback should read it from the existing file."""
     config_path = tmp_path / "config.toml"
     existing_state = tmp_path / "existing_state"
-    write_toml(
-        config_path,
-        {
-            "quam": {
-                "version": QuamConfig.version,
-                "state_path": str(existing_state),
-                "raise_error_missing_reference": False,
-                "serialization": {"include_defaults": True},
-            }
-        },
+    runner = CliRunner()
+    runner.invoke(
+        config_command,
+        [
+            "--config-path", str(config_path),
+            "--state-path", str(existing_state),
+            "--auto-accept",
+        ],
     )
 
-    runner = CliRunner()
     result = runner.invoke(
         config_command,
         ["--config-path", str(config_path), "--auto-accept"],

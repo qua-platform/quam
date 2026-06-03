@@ -3,6 +3,7 @@
 from click.testing import CliRunner
 from qualibrate_config.cli.utils.content import get_config_file_content
 
+from quam.config.cli.config import config_command
 from quam.config.cli.migrate import migrate_command
 from quam.config.models.quam import QuamConfig
 
@@ -17,9 +18,16 @@ def test_migrate_no_config_file_is_noop(tmp_path):
     assert "Nothing to migrate" in result.output
 
 
-def test_migrate_already_current_version_is_noop(tmp_path, write_toml):
+def test_migrate_already_current_version_is_noop(tmp_path):
     config_path = tmp_path / "config.toml"
-    write_toml(config_path, {"quam": {"version": QuamConfig.version}})
+    CliRunner().invoke(
+        config_command,
+        [
+            "--config-path", str(config_path),
+            "--state-path", str(tmp_path / "state"),
+            "--auto-accept",
+        ],
+    )
 
     runner = CliRunner()
     result = runner.invoke(migrate_command, ["--config-path", str(config_path)])
