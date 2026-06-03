@@ -37,6 +37,8 @@ def test_migrate_already_current_version_is_noop(tmp_path):
 
 
 def test_migrate_forwards_v1_to_current(tmp_path, write_toml):
+    # config_command always writes the current version, so old-version configs
+    # must be created directly via write_toml to test the migration path.
     config_path = tmp_path / "config.toml"
     write_toml(config_path, {"quam": {"version": 1, "state_path": "/some/path"}})
 
@@ -54,6 +56,7 @@ def test_migrate_forwards_v1_to_current(tmp_path, write_toml):
 
 
 def test_migrate_explicit_target_version(tmp_path, write_toml):
+    # Same as above: needs an old-version config that config_command cannot produce.
     config_path = tmp_path / "config.toml"
     write_toml(config_path, {"quam": {"version": 1, "state_path": "/x"}})
 
