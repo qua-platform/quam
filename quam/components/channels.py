@@ -1002,9 +1002,7 @@ class InSingleChannel(Channel):
                 variables.
         """
 
-        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
-            self.operations[pulse_name]
-        )
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1025,11 +1023,11 @@ class InSingleChannel(Channel):
         qua.measure(
             pulse_name_with_amp_scale,
             self.name,
-            qua.demod.full(  # type: ignore[index]
-                integration_weight_labels[0], qua_vars[0], "out1"
+            qua.demod.full(
+                integration_weight_labels[0], qua_vars[0], "out1"  # type: ignore[index]
             ),
-            qua.demod.full(  # type: ignore[index]
-                integration_weight_labels[1], qua_vars[1], "out1"
+            qua.demod.full(
+                integration_weight_labels[1], qua_vars[1], "out1"  # type: ignore[index]
             ),
             adc_stream=stream,
         )
@@ -1073,9 +1071,7 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
-            self.operations[pulse_name]
-        )
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1090,9 +1086,7 @@ class InSingleChannel(Channel):
             )
         elif num_segments is None:
             # Number of slices
-            num_segments = int(  # type: ignore[operator]
-                pulse.length / (4 * segment_length)
-            )
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1163,9 +1157,7 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
-            self.operations[pulse_name]
-        )
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1179,9 +1171,7 @@ class InSingleChannel(Channel):
             )
         elif num_segments is None:
             # Number of slices
-            num_segments = int(  # type: ignore[operator]
-                pulse.length / (4 * segment_length)
-            )
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1584,9 +1574,7 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
-            self.operations[pulse_name]
-        )
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1661,9 +1649,7 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
-            self.operations[pulse_name]
-        )
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1678,9 +1664,7 @@ class _InComplexChannel(Channel, ABC):
             )
         elif num_segments is None:
             # Number of slices
-            num_segments = int(  # type: ignore[operator]
-                pulse.length / (4 * segment_length)
-            )
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 
@@ -1755,9 +1739,7 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = (  # type: ignore[assignment]
-            self.operations[pulse_name]
-        )
+        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1771,9 +1753,7 @@ class _InComplexChannel(Channel, ABC):
             )
         elif num_segments is None:
             # Number of slices
-            num_segments = int(  # type: ignore[operator]
-                pulse.length / (4 * segment_length)
-            )
+            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
         elif segment_length is None:
             segment_length = int(pulse.length / (4 * num_segments))
 

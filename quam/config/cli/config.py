@@ -100,7 +100,7 @@ def config_command(
             common_config,
             quam_top_l.quam,
             QUAM_CONFIG_KEY,
-            quam_before_write_cb,
+            quam_before_write_cb,  # type: ignore[arg-type]
             confirm=not auto_accept,
         )
     except Exit:
