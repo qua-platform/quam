@@ -28,6 +28,15 @@ on:
         required: false
         type: string
         default: '["ubuntu-latest"]'
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+      CI_CLOUD_SIMULATOR_HOST:
+        required: false
+      CI_CLOUD_SIMULATOR_USER_EMAIL:
+        required: false
+      CI_CLOUD_SIMULATOR_PASSWORD:
+        required: false
 
 permissions:
   contents: read
@@ -93,3 +102,41 @@ jobs:
         display-options: fEX
         fail-on-empty: true
         title: Test results
+
+  simulator:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repo_name || github.repository }}
+        ref: ${{ inputs.branch_name || github.ref }}
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: "pip"
+        cache-dependency-path: pyproject.toml
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[dev]
+
+    - name: Run simulator tests
+      run: |
+        pytest tests_against_simulator/ \
+          --cloudsim-host "${{ secrets.CI_CLOUD_SIMULATOR_HOST }}" \
+          --cloudsim-email "${{ secrets.CI_CLOUD_SIMULATOR_USER_EMAIL }}" \
+          --cloudsim-pwd "${{ secrets.CI_CLOUD_SIMULATOR_PASSWORD }}" \
+          --junitxml=pytest-simulator-report.xml
+
+    - name: Surface failing tests
+      if: always()
+      uses: pmeier/pytest-results-action@main
+      with:
+        path: pytest-simulator-report.xml
+        summary: true
+        display-options: fEX
+        fail-on-empty: true
+        title: Simulator test results
