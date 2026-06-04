@@ -1092,10 +1092,11 @@ class InSingleChannel(Channel):
                 "InOutSingleChannel.measure_accumulated received both 'segment_length' "
                 "and 'num_segments'. Please provide only one."
             )
-        elif num_segments is None:
-            # Number of slices
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
-        elif segment_length is None:
+        elif segment_length is not None:
+            num_segments = int(pulse.length / (4 * segment_length))
+        else:
+            if num_segments is None:
+                raise ValueError("Expected num_segments to be set")
             segment_length = int(pulse.length / (4 * num_segments))
 
         if qua_vars is not None:
@@ -1181,10 +1182,11 @@ class InSingleChannel(Channel):
                 "InOutSingleChannel.measure_sliced received both 'segment_length' "
                 "and 'num_segments'. Please provide only one."
             )
-        elif num_segments is None:
-            # Number of slices
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
-        elif segment_length is None:
+        elif segment_length is not None:
+            num_segments = int(pulse.length / (4 * segment_length))
+        else:
+            if num_segments is None:
+                raise ValueError("Expected num_segments to be set")
             segment_length = int(pulse.length / (4 * num_segments))
 
         if qua_vars is not None:
@@ -1682,10 +1684,11 @@ class _InComplexChannel(Channel, ABC):
                 "InOutSingleChannel.measure_accumulated received both 'segment_length' "
                 "and 'num_segments'. Please provide only one."
             )
-        elif num_segments is None:
-            # Number of slices
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
-        elif segment_length is None:
+        elif segment_length is not None:
+            num_segments = int(pulse.length / (4 * segment_length))
+        else:
+            if num_segments is None:
+                raise ValueError("Expected num_segments to be set")
             segment_length = int(pulse.length / (4 * num_segments))
 
         if qua_vars is not None:
@@ -1775,10 +1778,11 @@ class _InComplexChannel(Channel, ABC):
                 "InOutSingleChannel.measure_sliced received both 'segment_length' "
                 "and 'num_segments'. Please provide only one."
             )
-        elif num_segments is None:
-            # Number of slices
-            num_segments = int(pulse.length / (4 * segment_length))  # type: ignore[operator]
-        elif segment_length is None:
+        elif segment_length is not None:
+            num_segments = int(pulse.length / (4 * segment_length))
+        else:
+            if num_segments is None:
+                raise ValueError("Expected num_segments to be set")
             segment_length = int(pulse.length / (4 * num_segments))
 
         if qua_vars is not None:
