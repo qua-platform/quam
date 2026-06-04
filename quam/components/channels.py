@@ -1002,7 +1002,11 @@ class InSingleChannel(Channel):
                 variables.
         """
 
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse = self.operations[pulse_name]
+        if not isinstance(pulse, BaseReadoutPulse):
+            raise ValueError(
+                f"Pulse '{pulse_name}' is not a BaseReadoutPulse, got {type(pulse)}"
+            )
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1071,7 +1075,11 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse = self.operations[pulse_name]
+        if not isinstance(pulse, BaseReadoutPulse):
+            raise ValueError(
+                f"Pulse '{pulse_name}' is not a BaseReadoutPulse, got {type(pulse)}"
+            )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1157,7 +1165,11 @@ class InSingleChannel(Channel):
             ValueError: If `qua_vars` is provided and is not a tuple of two QUA
                 variables.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse = self.operations[pulse_name]
+        if not isinstance(pulse, BaseReadoutPulse):
+            raise ValueError(
+                f"Pulse '{pulse_name}' is not a BaseReadoutPulse, got {type(pulse)}"
+            )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1574,7 +1586,11 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse = self.operations[pulse_name]
+        if not isinstance(pulse, BaseReadoutPulse):
+            raise ValueError(
+                f"Pulse '{pulse_name}' is not a BaseReadoutPulse, got {type(pulse)}"
+            )
 
         if qua_vars is not None:
             if not isinstance(qua_vars, Sequence) or len(qua_vars) != 2:
@@ -1649,7 +1665,11 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse = self.operations[pulse_name]
+        if not isinstance(pulse, BaseReadoutPulse):
+            raise ValueError(
+                f"Pulse '{pulse_name}' is not a BaseReadoutPulse, got {type(pulse)}"
+            )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
@@ -1739,7 +1759,11 @@ class _InComplexChannel(Channel, ABC):
                 If provided as input, the same variables will be returned.
                 If not provided, new variables will be declared and returned.
         """
-        pulse: BaseReadoutPulse = self.operations[pulse_name]  # type: ignore[assignment]
+        pulse = self.operations[pulse_name]
+        if not isinstance(pulse, BaseReadoutPulse):
+            raise ValueError(
+                f"Pulse '{pulse_name}' is not a BaseReadoutPulse, got {type(pulse)}"
+            )
 
         if num_segments is None and segment_length is None:
             raise ValueError(
