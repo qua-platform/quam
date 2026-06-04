@@ -106,7 +106,6 @@ def test_mw_fem_analog_input_ports():
         "downconverter_frequency": 5e9,
         "sampling_rate": 1e9,
         "shareable": False,
-        "lo_mode": "auto",
     }
 
     cfg = {"controllers": {}}
@@ -124,7 +123,6 @@ def test_mw_fem_analog_input_ports():
                                 "downconverter_frequency": 5e9,
                                 "sampling_rate": 1e9,
                                 "shareable": False,
-                                "lo_mode": "auto",
                             }
                         },
                     }
@@ -140,7 +138,6 @@ def test_mw_fem_analog_input_ports():
         "sampling_rate": 1e9,
         "shareable": False,
         "gain_db": 10,
-        "lo_mode": "auto",
     }
 
     port.lo_mode = "always_on"
