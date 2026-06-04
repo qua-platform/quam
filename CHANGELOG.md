@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- Added `__package_versions__` to saved JSON configs, recording the installed versions of all packages used to build the config.
+
 ### Deprecated
 
 - `DragGaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
