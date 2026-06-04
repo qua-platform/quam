@@ -7,6 +7,7 @@ additional
 .coverage
 .idea
 build
+dist
 site
 calibration_db.json
 *.egg-info
