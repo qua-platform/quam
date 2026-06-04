@@ -6,6 +6,7 @@ from qualibrate_config.cli.utils.content import get_config_file_content
 from quam.config.cli.config import config_command
 from quam.config.cli.migrate import migrate_command
 from quam.config.models.quam import QuamConfig
+from tests.config.conftest import write_toml
 
 
 def test_migrate_no_config_file_is_noop(tmp_path):
@@ -36,7 +37,7 @@ def test_migrate_already_current_version_is_noop(tmp_path):
     assert "latest config version" in result.output
 
 
-def test_migrate_forwards_v1_to_current(tmp_path, write_toml):
+def test_migrate_forwards_v1_to_current(tmp_path):
     # config_command always writes the current version, so old-version configs
     # must be created directly via write_toml to test the migration path.
     config_path = tmp_path / "config.toml"
@@ -55,7 +56,7 @@ def test_migrate_forwards_v1_to_current(tmp_path, write_toml):
     assert migrated["quam"]["serialization"]["include_defaults"] is True
 
 
-def test_migrate_explicit_target_version(tmp_path, write_toml):
+def test_migrate_explicit_target_version(tmp_path):
     # Same as above: needs an old-version config that config_command cannot produce.
     config_path = tmp_path / "config.toml"
     write_toml(config_path, {"quam": {"version": 1, "state_path": "/x"}})
