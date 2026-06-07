@@ -3,17 +3,18 @@
 ### Added
 
 - Added `__package_versions__` to saved JSON configs, recording the installed versions of all packages used to build the config.
+- Added `lo_mode` field to `MWFEMAnalogInputPort` (`Optional[Literal["auto", "always_on"]]`, defaults to `None`). When set, the value is passed through to the QUA config, allowing users to override the QOP default.
 
 ### Deprecated
 
-- `DragGaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `DragCosinePulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `GaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `FlatTopGaussianPulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `FlatTopBlackmanPulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `BlackmanIntegralPulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `FlatTopCosinePulse` - Implementation moved to quam-builder. Will be removed in a future release.
-- `FlatTopTanhPulse` - Implementation moved to quam-builder. Will be removed in a future release.
+- `DragGaussianPulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `DragCosinePulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `GaussianPulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `FlatTopGaussianPulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `FlatTopBlackmanPulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `BlackmanIntegralPulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `FlatTopCosinePulse` - Implementation moved to quam-builder. Will be removed in v1.0.
+- `FlatTopTanhPulse` - Implementation moved to quam-builder. Will be removed in v1.0.
 
 ### Changed
 

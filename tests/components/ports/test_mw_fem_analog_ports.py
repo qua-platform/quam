@@ -140,6 +140,20 @@ def test_mw_fem_analog_input_ports():
         "gain_db": 10,
     }
 
+    port.lo_mode = "always_on"
+    assert port.get_port_properties() == {
+        "band": 1,
+        "downconverter_frequency": 5e9,
+        "sampling_rate": 1e9,
+        "shareable": False,
+        "gain_db": 10,
+        "lo_mode": "always_on",
+    }
+
+    cfg = {"controllers": {}}
+    port.apply_to_config(cfg)
+    assert cfg["controllers"]["con1"]["fems"][1]["analog_inputs"][2]["lo_mode"] == "always_on"
+
 
 def test_mw_fem_upconverter_config_generation():
     port = MWFEMAnalogOutputPort(
