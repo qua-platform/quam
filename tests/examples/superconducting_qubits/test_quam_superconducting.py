@@ -34,6 +34,7 @@ def test_quam_referenced_full(tmp_path):
         [
             "qubits",
             "__class__",
+            "__package_versions__",
         ]
     )
     assert (

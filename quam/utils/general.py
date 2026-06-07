@@ -1,15 +1,16 @@
 import difflib
 import importlib
+import importlib.metadata
 import inspect
 import warnings
 from inspect import isclass
-from typing import Any, Union
+from typing import Any, Dict, Union
 
 from quam.utils import string_reference
 
 from typeguard import TypeCheckError, check_type
 
-__all__ = ["get_full_class_path", "validate_obj_type", "get_class_from_path"]
+__all__ = ["get_full_class_path", "validate_obj_type", "get_class_from_path", "collect_package_versions"]
 
 
 def get_full_class_path(cls_or_obj: Union[type, object]) -> str:
@@ -88,6 +89,43 @@ def validate_obj_type(
                 f"Actual type: {type(elem)}\n"
                 f"value of actual type: {elem}"
             ) from e
+
+
+def collect_package_versions(contents: Any) -> Dict[str, str]:
+    """Collect installed versions of all top-level packages referenced via __class__.
+
+    Recursively walks the serialized dict, extracts the top-level package name from
+    every ``__class__`` value, and resolves its installed version via
+    ``importlib.metadata``. Packages whose version cannot be determined are omitted.
+
+    Args:
+        contents: The serialized QUAM dict (as returned by ``to_dict()``).
+
+    Returns:
+        A dict mapping top-level package name to its installed version string.
+    """
+    packages: set = set()
+    _collect_class_packages(contents, packages)
+    versions: Dict[str, str] = {}
+    for pkg in sorted(packages):
+        try:
+            versions[pkg] = importlib.metadata.version(pkg)
+        except importlib.metadata.PackageNotFoundError:
+            pass
+    return versions
+
+
+def _collect_class_packages(obj: Any, packages: set) -> None:
+    if isinstance(obj, dict):
+        for key, val in obj.items():
+            if key == "__class__" and isinstance(val, str):
+                top_level = val.split(".")[0]
+                if top_level:
+                    packages.add(top_level)
+            _collect_class_packages(val, packages)
+    elif isinstance(obj, list):
+        for item in obj:
+            _collect_class_packages(item, packages)
 
 
 def get_class_from_path(class_str) -> type:

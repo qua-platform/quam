@@ -2,6 +2,7 @@
 
 ### Added
 
+- Added `__package_versions__` to saved JSON configs, recording the installed versions of all packages used to build the config.
 - Added `lo_mode` field to `MWFEMAnalogInputPort` (`Optional[Literal["auto", "always_on"]]`, defaults to `None`). When set, the value is passed through to the QUA config, allowing users to override the QOP default.
 
 ### Deprecated
