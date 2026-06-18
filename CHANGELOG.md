@@ -1,9 +1,12 @@
 ## [Unreleased]
 
+## [v0.6.0]
+
 ### Added
 
 - Added `__package_versions__` to saved JSON configs, recording the installed versions of all packages used to build the config.
 - Added `lo_mode` field to `MWFEMAnalogInputPort` (`Optional[Literal["auto", "always_on"]]`, defaults to `None`). When set, the value is passed through to the QUA config, allowing users to override the QOP default.
+- Added support for Python 3.13 and 3.14.
 
 ### Deprecated
 
@@ -19,6 +22,10 @@
 ### Changed
 
 - Removed `qualang-tools` as a runtime dependency. Waveform and integration-weight functions are now vendored in `quam/components/_waveform_tools.py`. Added `scipy` as a direct dependency.
+
+### Removed
+
+- Removed support for Python 3.9.
 
 ### Fixed
 
