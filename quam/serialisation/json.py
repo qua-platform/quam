@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Tuple, Union, List
 
 from quam.config import get_quam_config
+from quam.utils.general import collect_package_versions
 from .base import AbstractSerialiser
 
 if TYPE_CHECKING:
@@ -373,6 +374,10 @@ class JSONSerialiser(AbstractSerialiser):
         # Get the dictionary representation of the object
         contents_dict = quam_obj.to_dict(include_defaults=current_include_defaults)
         assert isinstance(contents_dict, dict), "QuamRoot.to_dict() must return a dict"
+
+        package_versions = collect_package_versions(contents_dict)
+        if package_versions:
+            contents_dict["__package_versions__"] = package_versions
 
         # Apply ignore filter directly to the source dictionary before saving
         # This modification is temporary for the save operation.

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quam"
-version = "0.5.0"
+version = "0.6.0"
 description = "Quantum Abstract Machine (QUAM) facilitates development of abstraction layers in experiments."
 authors = [
     { name = "Serwan Asaad", email = "serwan.asaad@quantum-machines.co" },
 ]
 license = { text = "BSD-3-Clause" }
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.15"
 readme = "README.md"
 
 classifiers = [

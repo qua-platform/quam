@@ -299,7 +299,7 @@ def instantiate_attrs(
         "extra": {},
     }
     for attr_name, attr_val in contents.items():
-        if attr_name == "__class__":
+        if attr_name in ("__class__", "__package_versions__"):
             continue
         if attr_name not in attr_annotations["allowed"]:
             if not fix_attrs:
