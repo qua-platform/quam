@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Added
+
+- Added `mypy` type checking and a `poethepoet` task runner to the dev workflow: `poe format` / `poe check-format` (black), `poe lint` (flake8), `poe typecheck` (mypy), `poe test` (pytest), and a combined `poe check` that runs them all.
+
+### Changed
+
+- Annotated the codebase and resolved all `mypy` errors, alongside black formatting. These are internal type-correctness and formatting changes only — no public API or runtime behavior changes.
+
 ## [v0.6.0]
 
 ### Added
