@@ -833,6 +833,12 @@ class QuamRoot(QuamBase):
         relative_path: Optional[str] = None,
         follow_chain: bool = False,
     ) -> Optional[str]:
+        # `follow_chain` is accepted for signature compatibility with QuamBase;
+        # a root has no chain to follow.
+        if follow_chain:
+            raise NotImplementedError(
+                "follow_chain is not supported on QuamRoot"
+            )
         if attr is not None:
             return f"#/{attr}"
 
