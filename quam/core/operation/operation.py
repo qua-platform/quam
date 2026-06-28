@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Any
+from typing import Callable
 
 from quam.core.operation.function_properties import FunctionProperties
 from quam.components import QuantumComponent
@@ -11,7 +11,8 @@ class Operation:
         """
         Initialize a quantum operation.
 
-        This is typically used implicitly from the decorator @operations_registry.register_operation.
+        This is typically used implicitly from the decorator
+        @operations_registry.register_operation.
 
         Args:
             func: The function implementing the operation

@@ -1,12 +1,9 @@
 from __future__ import annotations
 from collections.abc import Iterable
-from collections import UserList
-import sys
 import warnings
 from pathlib import Path
 from copy import deepcopy
 from typing import (
-    Iterator,
     Union,
     Generator,
     ClassVar,
@@ -15,12 +12,18 @@ from typing import (
     Dict,
     Sequence,
     TypeVar,
+    cast,
     get_type_hints,
     get_origin,
     get_args,
     Optional,
 )
 from functools import partial
+
+try:
+    from typing import dataclass_transform
+except ImportError:
+    from typing_extensions import dataclass_transform  # type: ignore[no-redef]
 from dataclasses import dataclass, fields, is_dataclass, MISSING
 from collections import UserDict, UserList
 
@@ -84,7 +87,7 @@ def convert_dict_and_list(value, cls_or_obj=None, attr=None):
     if isinstance(value, dict):
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamDict(value, value_annotation=value_annotation)
-    elif type(value) == list:
+    elif type(value) is list:
         value_annotation = _get_value_annotation(cls_or_obj=cls_or_obj, attr=attr)
         return QuamList(value, value_annotation=value_annotation)
     else:
@@ -151,44 +154,18 @@ def sort_quam_components(
     return sorted_components
 
 
-def _quam_dataclass(cls=None, **kwargs):
-    """Dataclass for QUAM classes.
+@dataclass_transform(eq_default=False, kw_only_default=True)
+def quam_dataclass(cls=None, **kwargs):
+    """Dataclass decorator for QUAM classes.
 
-    This class is used as a patch to maintain compatibility with Python 3.9, as
-    these do not support the dataclass argument `kw_only`. This argument is needed to
-    ensure inheritance of parent dataclasses is allowed.
-
-    Args:
-    - cls: The QUAM class to decorate.
-    - kwargs: The arguments to pass to the dataclass decorator.
-      By default, kw_only=True and eq=False are passed, though they can be overwritten.
-    Notes:
-    - This custom dataclass is no longer necessary once Python 3.9 support is dropped
-    - The actual custom dataclass is `quam_dataclass` (without the underscore). This
-      function is only used to trick type checkers into recognizing it as a dataclass.
-    - From Python 3.10 onwards, this customized dataclass is no longer needed, as then
-      the following two decorators are equivalent:
-      - @quam_dataclass
-      - @dataclass(eq=False, kw_only=True)
+    Equivalent to @dataclass(eq=False, kw_only=True). Both defaults can be overridden
+    by passing the corresponding keyword argument, e.g. @quam_dataclass(kw_only=False).
     """
     if cls is None:
-        return partial(_quam_dataclass, **kwargs)
-
+        return partial(quam_dataclass, **kwargs)
     kwargs.setdefault("kw_only", True)
     kwargs.setdefault("eq", False)
-
-    if sys.version_info.minor > 9:
-        return dataclass(cls, **kwargs)
-
-    from quam.utils.dataclass import _quam_patched_dataclass
-
-    return _quam_patched_dataclass(cls, **kwargs)
-
-
-# Exec statement is needed to trick type checkers into recognizing it as a dataclass
-# This will no longer be necessary once we drop support for Python 3.9
-quam_dataclass = dataclass
-exec("quam_dataclass = _quam_dataclass")
+    return dataclass(cls, **kwargs)
 
 
 class ParentDescriptor:
@@ -245,9 +222,9 @@ class QuamBase(ReferenceClass):
         The subclasses should be dataclasses.
     """
 
-    parent: ClassVar["QuamBase"] = ParentDescriptor()
+    parent: Optional["QuamBase"] = ParentDescriptor()  # type: ignore[assignment]
     _last_instantiated_root: ClassVar[Optional["QuamRoot"]] = None
-    config_settings: ClassVar[Dict[str, Any]] = None
+    config_settings: ClassVar[Optional[Dict[str, Any]]] = None
     _MAX_REFERENCE_DEPTH: ClassVar[int] = 10
 
     def __init__(self):
@@ -299,7 +276,7 @@ class QuamBase(ReferenceClass):
             return self._last_instantiated_root
         return None
 
-    def get_attr_name(self, attr_val: Any) -> str:
+    def get_attr_name(self, attr_val: Any) -> Union[str, int]:
         """Get the name of an attribute that matches the value.
 
         Args:
@@ -394,7 +371,7 @@ class QuamBase(ReferenceClass):
             return isinstance(val, (dict, QuamDict))
         elif required_type == list or get_origin(required_type) == list:
             return isinstance(val, (list, QuamList))
-        return type(val) == required_type
+        return type(val) is required_type
 
     def get_reference(
         self,
@@ -537,7 +514,7 @@ class QuamBase(ReferenceClass):
 
     def to_dict(
         self, follow_references: bool = False, include_defaults: bool = True
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], List[Any]]:
         """Convert this object to a dictionary.
 
         Args:
@@ -557,7 +534,7 @@ class QuamBase(ReferenceClass):
         attrs = self.get_attrs(
             follow_references=follow_references, include_defaults=include_defaults
         )
-        quam_dict = {}
+        quam_dict: Dict[str, Any] = {}
         for attr, val in attrs.items():
             if isinstance(val, QuamBase):
                 quam_dict[attr] = val.to_dict(
@@ -573,12 +550,12 @@ class QuamBase(ReferenceClass):
         return quam_dict
 
     def iterate_components(
-        self, skip_elems: Optional[Sequence["QuamBase"]] = None
+        self, skip_elems: Optional[List["QuamBase"]] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
-            skip_elems: A sequence of QuamBase objects to skip.
+            skip_elems: A list of QuamBase objects to skip.
                 This is used to prevent infinite loops when iterating over nested
                 objects.
 
@@ -806,13 +783,10 @@ class QuamBase(ReferenceClass):
             target_obj, target_attr = self._follow_reference_chain(self, attr)
 
         # Use __setitem__ for dict/list types, otherwise use setattr
-        if isinstance(target_obj, (dict, list, UserDict, UserList, QuamDict, QuamList)):
+        if isinstance(target_obj, (list, UserList, QuamList)):
             # Convert string index to int for list types
-            if (
-                isinstance(target_obj, (list, UserList, QuamList))
-                and target_attr.isdigit()
-            ):
-                target_attr = int(target_attr)
+            target_obj[int(target_attr) if target_attr.isdigit() else target_attr] = value  # type: ignore[index]
+        elif isinstance(target_obj, (dict, UserDict, QuamDict)):
             target_obj[target_attr] = value
         else:
             setattr(target_obj, target_attr, value)
@@ -854,8 +828,15 @@ class QuamRoot(QuamBase):
         return JSONSerialiser()
 
     def get_reference(
-        self, attr: Optional[str] = None, relative_path: Optional[str] = None
+        self,
+        attr: Optional[str] = None,
+        relative_path: Optional[str] = None,
+        follow_chain: bool = False,
     ) -> Optional[str]:
+        # `follow_chain` is accepted for signature compatibility with QuamBase;
+        # a root has no chain to follow.
+        if follow_chain:
+            raise NotImplementedError("follow_chain is not supported on QuamRoot")
         if attr is not None:
             return f"#/{attr}"
 
@@ -931,11 +912,14 @@ class QuamRoot(QuamBase):
             contents, _ = serialiser.load(filepath_or_dict)
 
         try:
-            return instantiate_quam_class(
-                quam_class=cls,
-                contents=contents,
-                fix_attrs=fix_attrs,
-                validate_type=validate_type,
+            return cast(
+                QuamRootType,
+                instantiate_quam_class(
+                    quam_class=cls,
+                    contents=contents,
+                    fix_attrs=fix_attrs,
+                    validate_type=validate_type,
+                ),
             )
         except (AttributeError, TypeError, ValueError) as e:
             if not isinstance(filepath_or_dict, dict) and filepath_or_dict is not None:
@@ -958,7 +942,7 @@ class QuamRoot(QuamBase):
         """
         qua_config = deepcopy(qua_config_template)
 
-        quam_components = list(self.iterate_components())
+        quam_components = cast(List["QuamComponent"], list(self.iterate_components()))
         sorted_components = sort_quam_components(quam_components)
 
         for quam_component in sorted_components:
@@ -966,7 +950,7 @@ class QuamRoot(QuamBase):
 
         generate_config_final_actions(qua_config)
 
-        return qua_config
+        return cast(DictQuaConfig, qua_config)
 
 
 class QuamComponent(QuamBase):
@@ -1026,9 +1010,9 @@ class QuamDict(UserDict, QuamBase):
         it can be used as a normal dictionary, but it is not a subclass of `dict`.
     """
 
-    _value_annotation: ClassVar[type] = None
+    _value_annotation: ClassVar[Optional[type]] = None
 
-    def __init__(self, dict=None, /, value_annotation: type = None, **kwargs):
+    def __init__(self, dict=None, /, value_annotation: Optional[type] = None, **kwargs):
         self.__dict__["data"] = {}
         self.__dict__["_value_annotation"] = value_annotation
         self.__dict__["_initialized"] = True
@@ -1127,7 +1111,7 @@ class QuamDict(UserDict, QuamBase):
                 f"obj: {self}"
             )
 
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]
         """Check whether the type of an attribute matches the annotation.
 
         Called by [`QuamDict.to_dict`][quam.core.quam_classes.QuamDict.to_dict] to
@@ -1145,7 +1129,7 @@ class QuamDict(UserDict, QuamBase):
             return True
         if self._value_annotation is None:
             return False
-        return type(val) == self._value_annotation
+        return type(val) is self._value_annotation
 
     def _attr_val_is_default(self, attr: str, val: Any):
         """Check whether the value of an attribute is the default value.
@@ -1175,12 +1159,12 @@ class QuamDict(UserDict, QuamBase):
             ) from e
 
     def iterate_components(
-        self, skip_elems: Sequence[QuamBase] = None
+        self, skip_elems: Optional[List[QuamBase]] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 
         Args:
-            skip_elems: A sequence of QuamBase objects to skip.
+            skip_elems: A list of QuamBase objects to skip.
                 This is used to prevent infinite loops when iterating over nested
                 objects.
 
@@ -1213,9 +1197,12 @@ class QuamDict(UserDict, QuamBase):
         Returns:
             A dictionary representation of the object.
         """
-        quam_dict = super().to_dict(
-            follow_references=follow_references,
-            include_defaults=include_defaults,
+        quam_dict = cast(
+            Dict[str, Any],
+            super().to_dict(
+                follow_references=follow_references,
+                include_defaults=include_defaults,
+            ),
         )
 
         # Remove __class__ from the dictionary as it's the default for a dict
@@ -1245,9 +1232,9 @@ class QuamList(UserList, QuamBase):
         it can be used as a normal list, but it is not a subclass of `list`.
     """
 
-    _value_annotation: ClassVar[type] = None
+    _value_annotation: Optional[type] = None
 
-    def __init__(self, *args, value_annotation: type = None):
+    def __init__(self, *args, value_annotation: Optional[type] = None):
         self._value_annotation = value_annotation
 
         # We manually add elements using extend instead of passing to super()
@@ -1323,7 +1310,7 @@ class QuamList(UserList, QuamBase):
 
         return super().insert(i, converted_item)
 
-    def extend(self, iterable: Iterator) -> None:
+    def extend(self, iterable: Iterable) -> None:
         converted_iterable = [convert_dict_and_list(elem) for elem in iterable]
         for converted_item in converted_iterable:
             if isinstance(converted_item, QuamBase):
@@ -1332,7 +1319,7 @@ class QuamList(UserList, QuamBase):
         return super().extend(converted_iterable)
 
     # Quam methods
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]
         """Check whether the type of an attribute matches the annotation.
 
         Called by QuamList.to_dict to determine whether to add the __class__ key.
@@ -1342,7 +1329,7 @@ class QuamList(UserList, QuamBase):
             return True
         if self._value_annotation is None:
             return False
-        return type(val) == self._value_annotation
+        return type(val) is self._value_annotation
 
     def get_attr_name(self, attr_val: Any) -> str:
         for k, elem in enumerate(self.data):
@@ -1390,7 +1377,7 @@ class QuamList(UserList, QuamBase):
         return quam_list
 
     def iterate_components(
-        self, skip_elems: List[QuamBase] = None
+        self, skip_elems: Optional[List[QuamBase]] = None
     ) -> Generator["QuamBase", None, None]:
         """Iterate over all QuamBase objects in this object, including nested objects.
 

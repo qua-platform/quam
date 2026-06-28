@@ -10,7 +10,12 @@ from quam.utils import string_reference
 
 from typeguard import TypeCheckError, check_type
 
-__all__ = ["get_full_class_path", "validate_obj_type", "get_class_from_path", "collect_package_versions"]
+__all__ = [
+    "get_full_class_path",
+    "validate_obj_type",
+    "get_class_from_path",
+    "collect_package_versions",
+]
 
 
 def get_full_class_path(cls_or_obj: Union[type, object]) -> str:

@@ -23,7 +23,9 @@ class BasePort(QuamComponent, ABC):
 
     @property
     @abstractmethod
-    def port_tuple(self) -> Union[Tuple[str, int], Tuple[str, int, int]]:
+    def port_tuple(
+        self,
+    ) -> Union[Tuple[Union[str, int], int], Tuple[Union[str, int], int, int]]:
         pass
 
     def _update_port_config(self, port_config, port_properties):

@@ -2,7 +2,7 @@ from qualibrate_config.cli.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
 
 
-class Migrate(MigrateBase):
+class Migrate(MigrateBase):  # type: ignore[misc, valid-type]
     from_version: int = 1
     to_version: int = 2
 

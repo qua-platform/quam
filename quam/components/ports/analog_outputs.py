@@ -116,7 +116,7 @@ class MWFEMAnalogOutputPort(FEMPort):
             )
 
     def get_port_properties(self) -> Dict[str, Any]:
-        port_cfg = {
+        port_cfg: Dict[str, Any] = {
             "band": self.band,
             "delay": self.delay,
             "shareable": self.shareable,

@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import Dict, List, Union
+from typing import Dict, Optional, Union
 
 from quam import QuamComponent
 from quam.components.channels import IQChannel, SingleChannel, InOutIQChannel
@@ -14,10 +14,10 @@ class Transmon(QuamComponent):
 
     id: Union[int, str]
 
-    xy: IQChannel = None
-    z: SingleChannel = None
+    xy: Optional[IQChannel] = None
+    z: Optional[SingleChannel] = None
 
-    resonator: InOutIQChannel = None
+    resonator: Optional[InOutIQChannel] = None
 
     @property
     def name(self):

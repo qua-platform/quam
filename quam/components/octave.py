@@ -55,7 +55,7 @@ class Octave(QuamComponent):
     """
 
     name: str
-    calibration_db_path: str = None
+    calibration_db_path: Optional[str] = None
 
     RF_outputs: Dict[int, "OctaveUpConverter"] = field(default_factory=dict)
     RF_inputs: Dict[int, "OctaveDownConverter"] = field(default_factory=dict)
@@ -147,7 +147,7 @@ class OctaveFrequencyConverter(BaseFrequencyConverter, ABC):
     """
 
     id: int
-    channel: Channel = None
+    channel: Optional[Channel] = None
 
     @property
     def octave(self) -> Optional[Octave]:
@@ -159,7 +159,7 @@ class OctaveFrequencyConverter(BaseFrequencyConverter, ABC):
         return parent_parent
 
     @property
-    def config_settings(self) -> Dict[str, Any]:
+    def config_settings(self) -> Dict[str, Any]:  # type: ignore[override]
         """Specifies that the converter will be added to the config after the Octave."""
         return {"after": [self.octave]}
 
@@ -222,7 +222,7 @@ class OctaveUpConverter(OctaveFrequencyConverter):
             entering the mixer. Off by default.
     """
 
-    LO_frequency: float = None
+    LO_frequency: Optional[float] = None
     LO_source: Literal["internal", "external"] = "internal"
     gain: float = 0
     output_mode: Literal[
@@ -257,6 +257,7 @@ class OctaveUpConverter(OctaveFrequencyConverter):
                 )
 
         super().apply_to_config(config)
+        assert self.octave is not None
 
         if self.id in config["octaves"][self.octave.name]["RF_outputs"]:
             raise KeyError(
@@ -265,13 +266,14 @@ class OctaveUpConverter(OctaveFrequencyConverter):
                 f'already has an entry for OctaveDownConverter with id "{self.id}"'
             )
 
-        output_config = config["octaves"][self.octave.name]["RF_outputs"][self.id] = {
+        output_config: Dict[str, Any] = {
             "LO_frequency": self.LO_frequency,
             "LO_source": self.LO_source,
             "gain": self.gain,
             "output_mode": self.output_mode,
             "input_attenuators": self.input_attenuators,
         }
+        config["octaves"][self.octave.name]["RF_outputs"][self.id] = output_config
         if isinstance(self.channel, SingleChannel):
             if isinstance(self.channel.opx_output, LFAnalogOutputPort):
                 output_config["I_connection"] = self.channel.opx_output.port_tuple
@@ -320,7 +322,7 @@ class OctaveDownConverter(OctaveFrequencyConverter):
             are connected to the opposite OPX inputs.
     """
 
-    LO_frequency: float = None
+    LO_frequency: Optional[float] = None
     LO_source: Literal["internal", "external"] = "internal"
     IF_mode_I: Literal["direct", "envelope", "mixer", "off"] = "direct"
     IF_mode_Q: Literal["direct", "envelope", "mixer", "off"] = "direct"
@@ -357,6 +359,7 @@ class OctaveDownConverter(OctaveFrequencyConverter):
             return
 
         super().apply_to_config(config)
+        assert self.octave is not None
 
         # Add IF_outputs (physical wiring) whenever channel is connected.
         # This is required for qm.calibrate_element() to find calibration connections,
@@ -420,16 +423,16 @@ class OctaveOld(QuamComponent):
     port: int
     qmm_host: str
     qmm_port: int
-    connection_headers: Dict[str, str] = None
-    connectivity: str = None
+    connection_headers: Optional[Dict[str, str]] = None
+    connectivity: Optional[str] = None
 
-    calibration_db: str = None
+    calibration_db: Optional[str] = None
 
-    octave_config: ClassVar[QmOctaveConfig] = None
+    octave_config: ClassVar[Optional[QmOctaveConfig]] = None
     _qms: ClassVar[Dict[str, QuantumMachinesManager]] = {}
-    _qm: ClassVar[QuantumMachine] = None
-    octave: ClassVar[QmOctave] = None
-    _channel_to_qe: ClassVar[dict] = None
+    _qm: ClassVar[Optional[QuantumMachine]] = None
+    octave: ClassVar[Optional[QmOctave]] = None
+    _channel_to_qe: ClassVar[Optional[dict]] = None
 
     def _initialize_config(self):
         calibration_db = self.calibration_db
@@ -452,7 +455,10 @@ class OctaveOld(QuamComponent):
             octave=self.octave_config,
             connection_headers=self.connection_headers,
         )
-        qm = qmm.open_qm(self.get_root().generate_config())
+        root = self.get_root()
+        assert root is not None
+        qm = qmm.open_qm(root.generate_config())
+        assert isinstance(qm, QuantumMachine)
         return qm
 
     def get_portmap(self):
@@ -508,6 +514,8 @@ class OctaveOld(QuamComponent):
         self.configure_octave_settings()
 
     def calibrate(self, channel: str, lo_freq: int, if_freq: int, gain: float):
+        assert self._channel_to_qe is not None
+        assert self.octave is not None
         channel_qe = self._channel_to_qe[self.name, channel]
         self.octave.set_lo_frequency(channel_qe, lo_freq)
         self.octave.set_rf_output_gain(channel_qe, gain)
@@ -516,10 +524,14 @@ class OctaveOld(QuamComponent):
         self.octave.calibrate_element(channel_qe, [(lo_freq, if_freq)])
 
     def set_frequency(self, channel: str, frequency: float):
+        assert self._channel_to_qe is not None
+        assert self.octave is not None
         channel_qe = self._channel_to_qe[self.name, channel]
         self.octave.set_lo_frequency(channel_qe, frequency)
 
     def set_gain(self, channel: str, gain: float):
+        assert self._channel_to_qe is not None
+        assert self.octave is not None
         channel_qe = self._channel_to_qe[self.name, channel]
         self.octave.set_rf_output_gain(channel_qe, gain)
 

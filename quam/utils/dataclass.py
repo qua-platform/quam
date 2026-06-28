@@ -4,6 +4,7 @@ import functools
 import sys
 import warnings
 from typing import Any, Dict, Union, ClassVar, get_type_hints
+from dataclasses import Field
 
 __all__ = ["patch_dataclass", "get_dataclass_attr_annotations"]
 
@@ -78,7 +79,7 @@ def get_dataclass_attr_annotations(
     annotated_attrs.pop("_value_annotation", None)
     annotated_attrs.pop("_initialized", None)
 
-    attr_annotations = {"required": {}, "optional": {}}
+    attr_annotations: Dict[str, Dict[str, type]] = {"required": {}, "optional": {}}
     for attr, attr_type in annotated_attrs.items():
         if getattr(attr_type, "__origin__", None) == ClassVar:
             continue
@@ -87,7 +88,8 @@ def get_dataclass_attr_annotations(
             if attr not in getattr(cls_or_obj, "__dataclass_fields__", {}):
                 attr_annotations["required"][attr] = attr_type
             else:
-                field_attr = cls_or_obj.__dataclass_fields__[attr]
+                dataclass_fields = getattr(cls_or_obj, "__dataclass_fields__", {})
+                field_attr = dataclass_fields[attr]
                 if field_attr.default_factory is not dataclasses.MISSING:
                     attr_annotations["optional"][attr] = attr_type
                 else:
@@ -95,7 +97,8 @@ def get_dataclass_attr_annotations(
         elif hasattr(cls_or_obj, attr):
             attr_annotations["optional"][attr] = attr_type
         elif attr in getattr(cls_or_obj, "__dataclass_fields__", {}):
-            data_field = cls_or_obj.__dataclass_fields__[attr]
+            dataclass_fields = getattr(cls_or_obj, "__dataclass_fields__", {})
+            data_field = dataclass_fields[attr]
             if data_field.default_factory is not dataclasses.MISSING:
                 attr_annotations["optional"][attr] = attr_type
             else:
@@ -109,7 +112,7 @@ def get_dataclass_attr_annotations(
     return attr_annotations
 
 
-def dataclass_field_has_default(field: dataclasses.field) -> bool:
+def dataclass_field_has_default(field: Field[Any]) -> bool:
     """Check if a dataclass field has a default value"""
     if field.default is not dataclasses.MISSING:
         return True
@@ -216,7 +219,7 @@ def patch_dataclass(module_name):
         This function should be called at the top of a file, before dataclasses are
         defined:
         ```
-        patch_dataclass(__name__)  # Ensure dataclass "kw_only" also works with python < 3.10
+        patch_dataclass(__name__)  # Ensure "kw_only" also works with python < 3.10
         ```
 
     Prior to Python 3.10, it was not possible for a dataclass to be a subclass of

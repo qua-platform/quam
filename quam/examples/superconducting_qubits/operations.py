@@ -1,5 +1,5 @@
 from typing import Tuple
-from qm.qua import QuaVariableType
+from quam.utils.qua_types import QuaVariableInt
 from quam.components import Qubit, QubitPair
 from quam.core import OperationsRegistry
 
@@ -27,7 +27,7 @@ def cz(qubit_pair: QubitPair, **kwargs):
 
 
 @operations_registry.register_operation
-def measure(qubit: Qubit, **kwargs) -> QuaVariableType:
+def measure(qubit: Qubit, **kwargs) -> QuaVariableInt:  # type: ignore[empty-body]
     pass
 
 

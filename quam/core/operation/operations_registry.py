@@ -1,6 +1,6 @@
 from collections import UserDict
 import functools
-from typing import Callable, Optional, TypeVar, Any
+from typing import Callable, TypeVar, Any
 
 from quam.core.operation import Operation
 
@@ -12,7 +12,7 @@ T = TypeVar("T", bound=Callable[..., Any])
 class OperationsRegistry(UserDict):
     """A registry to store and manage operations."""
 
-    def register_operation(self, func: Optional[T]) -> T:
+    def register_operation(self, func: T) -> T:
         """
         Register a function as an operation.
 
@@ -31,7 +31,7 @@ class OperationsRegistry(UserDict):
         #     return functools.partial(self.register_operation)
 
         operation = Operation(func)
-        operation = functools.update_wrapper(operation, func)
+        functools.update_wrapper(operation, func)
 
         self[func.__name__] = operation
 

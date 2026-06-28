@@ -18,7 +18,9 @@ class QubitPair(QuantumComponent):
     id: str = "#./name"
     qubit_control: Qubit
     qubit_target: Qubit
-    macros: Dict[str, MacroType] = field(default_factory=dict)
+    macros: Dict[str, MacroType] = field(  # type: ignore[assignment]
+        default_factory=dict
+    )
 
     @property
     def name(self) -> str:

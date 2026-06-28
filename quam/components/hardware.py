@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Optional, Union
 
 from quam.core import QuamComponent, quam_dataclass
 from quam.utils import string_reference as str_ref
@@ -22,8 +22,8 @@ class LocalOscillator(QuamComponent):
             Not used for the QUA configuration
     """
 
-    frequency: float = None
-    power: float = None
+    frequency: Optional[float] = None
+    power: Optional[float] = None
 
     def configure(self): ...
 
@@ -48,8 +48,8 @@ class Mixer(QuamComponent):
         correction_phase (float, optional): The phase imbalance of the mixer in radians.
     """
 
-    local_oscillator_frequency: float = "#../local_oscillator/frequency"
-    intermediate_frequency: float = "#../../intermediate_frequency"
+    local_oscillator_frequency: Union[float, str] = "#../local_oscillator/frequency"
+    intermediate_frequency: Union[float, str] = "#../../intermediate_frequency"
 
     correction_gain: float = 0
     correction_phase: float = 0
@@ -131,9 +131,9 @@ class FrequencyConverter(BaseFrequencyConverter):
         gain (float): The gain of the frequency converter.
     """
 
-    local_oscillator: LocalOscillator = None
-    mixer: Mixer = None
-    gain: float = None
+    local_oscillator: Optional[LocalOscillator] = None
+    mixer: Optional[Mixer] = None
+    gain: Optional[float] = None
 
     @property
     def LO_frequency(self):

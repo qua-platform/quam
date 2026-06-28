@@ -1,16 +1,14 @@
 from collections import UserDict
 from collections.abc import Iterable
-from typing import Dict, List, Optional, Union, TYPE_CHECKING, Any
+from typing import Dict, Optional, Union, TYPE_CHECKING, Any
 from dataclasses import field
 
-from qm import qua
 from qm.qua import align
 
 from quam.components.channels import Channel
 from quam.components.pulses import Pulse
 from quam.components.quantum_components import QuantumComponent
 from quam.core import quam_dataclass
-from quam.utils import string_reference as str_ref
 
 if TYPE_CHECKING:
     from quam.components.macro import QubitMacro
@@ -26,7 +24,9 @@ __all__ = ["Qubit"]
 @quam_dataclass
 class Qubit(QuantumComponent):
     id: Union[str, int] = "#./inferred_id"
-    macros: Dict[str, MacroType] = field(default_factory=dict)
+    macros: Dict[str, MacroType] = field(  # type: ignore[assignment]
+        default_factory=dict
+    )
 
     @property
     def name(self) -> str:

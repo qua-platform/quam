@@ -43,7 +43,8 @@ def split_next_attribute(string: str, splitter: str = "/") -> Tuple[str, str]:
         return "", ""
 
     if splitter in string:
-        return tuple(string.split(splitter, 1))
+        parts = string.split(splitter, 1)
+        return parts[0], parts[1]
 
     return string, ""
 
@@ -178,7 +179,8 @@ def join_references(base, relative):
 
     For a relative base (e.g. '#./a/b'):
         - We allow accumulating extra '..' if we pop everything (no "true root").
-        - We don't remove trailing slashes for relative references (e.g. '#../' remains '#../').
+        - We don't remove trailing slashes for relative references
+          (e.g. '#../' remains '#../').
     """
     # 1) Disallow if 'relative' starts with "#/" (i.e., another absolute path)
     if relative.startswith("#/"):

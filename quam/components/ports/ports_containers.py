@@ -1,6 +1,5 @@
-from typing import ClassVar, Dict, Optional, TypeVar, Union
+from typing import ClassVar, Dict, Optional, Union
 from dataclasses import field
-from quam.components.ports.base_ports import FEMPort
 from quam.core import quam_dataclass, QuamComponent
 from quam.core.quam_classes import QuamBase
 from .analog_outputs import (
@@ -79,13 +78,13 @@ class OPXPlusPortsContainer(QuamComponent):
         ports = controllers[controller_id]
 
         if port_type == "analog_output":
-            ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)
+            ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
         elif port_type == "analog_input":
-            ports[port_id] = OPXPlusAnalogInputPort(controller_id, port_id, **kwargs)
+            ports[port_id] = OPXPlusAnalogInputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
         elif port_type == "digital_output":
-            ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)
+            ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
         elif port_type == "digital_input":
-            ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)
+            ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
 
         return ports[port_id]
 
@@ -103,12 +102,15 @@ class OPXPlusPortsContainer(QuamComponent):
 
         try:
             elems = port_reference.split("/")
-            port_type, controller_id, port_id = elems[-3:]
+            port_type_str, controller_id_str, port_id_str = elems[-3:]
 
-            port_type = port_type[:-1]
-            if controller_id.isdigit():
-                controller_id = int(controller_id)
-            port_id = int(port_id)
+            port_type = port_type_str[:-1]
+            controller_id: Union[str, int] = (
+                int(controller_id_str)
+                if controller_id_str.isdigit()
+                else controller_id_str
+            )
+            port_id: int = int(port_id_str)
         except Exception as e:
             raise ValueError(
                 f"Unable to parse port reference for OPX+: {port_reference}"
@@ -215,11 +217,11 @@ class FEMPortsContainer(QuamComponent):
         ports = fems[fem_id]
 
         if port_type == "analog_output":
-            ports[port_id] = LFFEMAnalogOutputPort(
+            ports[port_id] = LFFEMAnalogOutputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "analog_input":
-            ports[port_id] = LFFEMAnalogInputPort(
+            ports[port_id] = LFFEMAnalogInputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_output":
@@ -229,7 +231,7 @@ class FEMPortsContainer(QuamComponent):
                 kwargs["upconverter_frequency"] = 5e9
             if "band" not in kwargs:
                 kwargs["band"] = 1
-            ports[port_id] = MWFEMAnalogOutputPort(
+            ports[port_id] = MWFEMAnalogOutputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "mw_input":
@@ -239,14 +241,14 @@ class FEMPortsContainer(QuamComponent):
                 kwargs["band"] = 1
             if "downconverter_frequency" not in kwargs:
                 kwargs["downconverter_frequency"] = 5e9
-            ports[port_id] = MWFEMAnalogInputPort(
+            ports[port_id] = MWFEMAnalogInputPort(  # type: ignore[misc]
                 controller_id,
                 fem_id,
                 port_id,
                 **kwargs,
             )
         elif port_type == "digital_output":
-            ports[port_id] = FEMDigitalOutputPort(
+            ports[port_id] = FEMDigitalOutputPort(  # type: ignore[misc]
                 controller_id, fem_id, port_id, **kwargs
             )
 
@@ -266,13 +268,16 @@ class FEMPortsContainer(QuamComponent):
 
         try:
             elems = port_reference.split("/")
-            port_type, controller_id, fem_id, port_id = elems[-4:]
+            port_type_str, controller_id_str, fem_id_str, port_id_str = elems[-4:]
 
-            port_type = port_type[:-1]
-            if controller_id.isdigit():
-                controller_id = int(controller_id)
-            fem_id = int(fem_id)
-            port_id = int(port_id)
+            port_type = port_type_str[:-1]
+            controller_id: Union[str, int] = (
+                int(controller_id_str)
+                if controller_id_str.isdigit()
+                else controller_id_str
+            )
+            fem_id: int = int(fem_id_str)
+            port_id: int = int(port_id_str)
         except Exception as e:
             raise ValueError(
                 f"Unable to parse port reference for OPX1000 FEM: {port_reference}"

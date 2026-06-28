@@ -51,9 +51,11 @@ dev = [
     "black >= 23.7.0",
     "flake8 >= 5.0.1",
     "pyproject-flake8 >= 5.0.0",
+    "mypy >= 1.0.0",
     "ipykernel >= 6.24.0",
     "pytest-cov >= 4.1.0",
     "pytest-mock >= 3.6.1",
+    "poethepoet >= 0.24.0",
     "qm-saas",
 ]
 docs = ["mkdocstrings[python]>=0.18", "mkdocs-gen-files", "mkdocs-jupyter"]
@@ -101,6 +103,9 @@ preview = true
 
 [tool.flake8]
 max-line-length = 88
+# Black handles line length; E501 fires on lines it can't shorten (type: ignore comments, docstrings).
+extend-ignore = ["E501"]
+per-file-ignores = ["**/__init__.py:F401,F403,F405"]
 
 [tool.setuptools]
 packages = ["quam"]
@@ -112,38 +117,28 @@ local_scheme = "no-local-version"
 [tool.uv]
 prerelease = "allow"
 
-# Previous quam settings
+[tool.poe.tasks.format]
+cmd = "black quam/"
+help = "Auto-format source files"
 
-### Extra required dependencies
-# "jsonschema = ^4.14.0",
-# "pydantic = ^1.9.2",
-# "rich = ^12.5.1",
-# "rich-click = ^1.6.1",
-# "pyyaml = ^6.0",
+[tool.poe.tasks.check-format]
+cmd = "black --check quam/"
+help = "Check formatting without modifying files"
 
-### Extra optional dependencies
-# flake8-bugbear = "^22.4.25"
-# poethepoet = "^0.10.0"
-# typing-extensions = "^4.3.0"
-# coverage = "^6.4.4"
+[tool.poe.tasks.lint]
+cmd = "pflake8 quam/"
+help = "Run flake8 linting"
 
+[tool.poe.tasks.typecheck]
+# --ignore-missing-imports: suppress errors for deps without type stubs (e.g. qm-qua).
+# --follow-imports=silent: collect type info from followed imports but suppress errors inside them.
+cmd = "mypy quam/ --ignore-missing-imports --follow-imports=silent"
+help = "Run mypy type checking"
 
-# [tool.poe.tasks.check-format]
-# cmd = "black . --check --line-length 80"
-# help = "Format source files according to the style rules"
+[tool.poe.tasks.test]
+cmd = "pytest"
+help = "Run all unit tests"
 
-# [tool.poe.tasks.format]
-# cmd = "black . --line-length 80"
-# help = "Format source files according to the style rules"
-
-# [tool.poe.tasks.lint]
-# cmd = "flake8 ."
-# help = "Check for lint errors"
-
-# [tool.poe.tasks.test]
-# cmd = "pytest"
-# help = "Run all unit tests"
-
-# [tool.poe.tasks.check]
-# sequence = ["check-format", "lint", "test"]
-# help = "Run format and all checks on the code"
+[tool.poe.tasks.check]
+sequence = ["check-format", "lint", "typecheck", "test"]
+help = "Run all checks (format, lint, types, tests)"
