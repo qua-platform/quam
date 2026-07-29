@@ -42,6 +42,27 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - js/clarity.js
+
+extra:
+  analytics:
+    provider: google
+    property: G-REPLACE_WITH_NEW_MEASUREMENT_ID  # TODO: swap in the new GA4 property's Measurement ID once created
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    cookies:
+      analytics: Google Analytics
+      github: GitHub
+      clarity:
+        name: Microsoft Clarity
+        checked: false
+
 nav:
   - index.md
   - installation.md
