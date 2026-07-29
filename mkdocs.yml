@@ -60,8 +60,9 @@ extra:
       find what they're searching for. With your consent, you're helping us to
       make our documentation better.
     cookies:
-      analytics: Google Analytics
-      github: GitHub
+      analytics:
+        name: Google Analytics
+        checked: false
       clarity:
         name: Microsoft Clarity
         checked: false
