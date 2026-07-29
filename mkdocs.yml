@@ -1,7 +1,10 @@
 site_name: The Quantum Abstract Machine - QUAM Documentation
-# site_url:
+site_url: https://qua-platform.github.io/quam/
 site_author: QM. Technologies Ltd.
-# site_description:
+site_description: >-
+  Documentation for QUAM (Quantum Abstract Machine), a Python framework that
+  abstracts QUA configuration into qubits and quantum operations, with
+  automated QUA configuration generation from your QUAM setup.
 
 copyright: Copyright &copy; 2024 Q.M Technologies Ltd.
 
