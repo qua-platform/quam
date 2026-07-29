@@ -59,7 +59,7 @@ class MWFEMAnalogInputPort(FEMPort):
     lo_mode: Optional[Literal["auto", "always_on"]] = None  # None defers to QUA default
 
     def get_port_properties(self) -> Dict[str, Any]:
-        port_properties = {
+        port_properties: Dict[str, Any] = {
             "band": self.band,
             "downconverter_frequency": self.downconverter_frequency,
             "sampling_rate": self.sampling_rate,
