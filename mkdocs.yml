@@ -46,7 +46,22 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - js/gtm-feedback.js
+
 extra:
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: "Thanks for your feedback!"
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: "Thanks for your feedback! Let us know how we can improve this page below."
   consent:
     title: Cookie consent
     description: >-
