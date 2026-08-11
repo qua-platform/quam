@@ -47,10 +47,13 @@ extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
-  - js/gtm-feedback.js
+  - js/clarity.js
+  - js/feedback-comment.js
 
 extra:
   analytics:
+    provider: google
+    property: G-J5NF8W5QEM
     feedback:
       title: Was this page helpful?
       ratings:
