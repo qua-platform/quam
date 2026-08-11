@@ -56,18 +56,21 @@
             </div>
           {% endfor %}
         </div>
-
-        <!-- Optional free-text comment, revealed once a rating is submitted -->
-        <div class="md-feedback__comment" hidden>
-          <label for="md-feedback-comment-input">
-            Want to tell us more? (optional)
-          </label>
-          <textarea id="md-feedback-comment-input" rows="3" maxlength="100"></textarea>
-          <button type="button" class="md-feedback__comment-submit">
-            Send
-          </button>
-        </div>
       </div>
     </fieldset>
+
+    <!-- Optional free-text comment, revealed once a rating is submitted.
+         Deliberately outside the fieldset above: disabling that fieldset
+         after a rating click (to lock the rating buttons) would otherwise
+         also disable every control nested inside it, including this one. -->
+    <div class="md-feedback__comment" hidden>
+      <label for="md-feedback-comment-input">
+        Want to tell us more? (optional)
+      </label>
+      <textarea id="md-feedback-comment-input" rows="3" maxlength="100"></textarea>
+      <button type="button" class="md-feedback__comment-submit">
+        Send
+      </button>
+    </div>
   </form>
 {% endif %}
