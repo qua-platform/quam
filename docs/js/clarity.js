@@ -1,6 +1,6 @@
 const CLARITY_PROJECT_ID = "y0kzfcvdsz";
 
-const consent = __md_get("__consent");
+const consent = __md_get("__consent_v2");
 if (consent && consent.clarity) {
     (function (c, l, a, r, i, t, y) {
         c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
