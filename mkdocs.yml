@@ -68,20 +68,11 @@ extra:
   consent:
     title: Cookie consent
     description: >-
-      We use cookies to recognize your repeated visits and preferences, as well
-      as to measure the effectiveness of our documentation and whether users
-      find what they're searching for. With your consent, you're helping us to
-      make our documentation better.
-    actions:
-      - accept
-      - reject
-    cookies:
-      analytics:
-        name: Google Analytics
-        checked: false
-      clarity:
-        name: Microsoft Clarity
-        checked: false
+      We use cookies (including Google Analytics and Microsoft Clarity) to
+      recognize your repeated visits and preferences, as well as to measure
+      the effectiveness of our documentation and whether users find what
+      they're searching for. With your consent, you're helping us to make
+      our documentation better.
 
 nav:
   - index.md
