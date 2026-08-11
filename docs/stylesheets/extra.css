@@ -127,9 +127,10 @@ a.autorefs-external:hover::after {
 .md-feedback__comment {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.5em;
   max-width: 20rem;
-  margin-top: 0.75em;
+  margin: 0.75em auto 0;
 }
 
 .md-feedback__comment label {
@@ -152,7 +153,6 @@ a.autorefs-external:hover::after {
 }
 
 .md-feedback__comment-submit {
-  align-self: flex-end;
   padding: 0.3em 1em;
   font-size: 0.75rem;
   border-radius: 0.2rem;
