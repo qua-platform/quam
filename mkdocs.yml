@@ -10,6 +10,7 @@ copyright: Copyright &copy; 2024 Q.M Technologies Ltd.
 
 theme:
   name: material
+  custom_dir: overrides
   logo: assets/qm_logo_white.svg
   font:
     text: Roboto
