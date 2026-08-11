@@ -1,0 +1,127 @@
+name: CI Quality Gate - Format, Lint, Type Check, Internal & QA Automation Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+
+      - name: Black formatting check
+        run: poe check-format
+
+      - name: Flake8 linting
+        run: poe lint
+
+      - name: Mypy type check
+        run: poe typecheck
+
+  config-ci:
+    runs-on: ubuntu-latest
+    outputs:
+      python_versions: ${{ steps.matrix.outputs.python_versions }}
+      operating_systems: ${{ steps.matrix.outputs.operating_systems }}
+    steps:
+      - name: Checkout build-matrix config
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/config/build-matrix.json
+          sparse-checkout-cone-mode: false
+
+      - name: Load "product" matrix profile
+        id: matrix
+        env:
+          PROFILE: product
+          MATRIX_FILE: .github/config/build-matrix.json
+        run: |
+          set -euo pipefail
+          jq -e --arg p "$PROFILE" '.profiles[$p] // error("Unknown profile: \($p)")' \
+            "$MATRIX_FILE" > /dev/null
+          python_versions=$(jq -c --arg p "$PROFILE" '.profiles[$p].python_versions' "$MATRIX_FILE")
+          operating_systems=$(jq -c --arg p "$PROFILE" '.profiles[$p].operating_systems' "$MATRIX_FILE")
+          echo "python_versions=$python_versions" >> "$GITHUB_OUTPUT"
+          echo "operating_systems=$operating_systems" >> "$GITHUB_OUTPUT"
+
+  run-tests:
+    needs: config-ci
+    uses: ./.github/workflows/run_tests.yaml
+    with:
+      python_versions: ${{ needs.config-ci.outputs.python_versions }}
+      operating_systems: ${{ needs.config-ci.outputs.operating_systems }}
+    secrets: inherit
+
+  config:
+    if: |
+      (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+      github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      python_versions: ${{ steps.matrix.outputs.python_versions }}
+      operating_systems: ${{ steps.matrix.outputs.operating_systems }}
+    steps:
+      - name: Checkout build-matrix config
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/config/build-matrix.json
+          sparse-checkout-cone-mode: false
+
+      - name: Load matrix profile
+        id: matrix
+        env:
+          PROFILE: ${{ github.event_name == 'schedule' && 'automation_nightly_run' || 'pr' }}
+          MATRIX_FILE: .github/config/build-matrix.json
+        run: |
+          set -euo pipefail
+          jq -e --arg p "$PROFILE" '.profiles[$p] // error("Unknown profile: \($p)")' \
+            "$MATRIX_FILE" > /dev/null
+          python_versions=$(jq -c --arg p "$PROFILE" '.profiles[$p].python_versions' "$MATRIX_FILE")
+          operating_systems=$(jq -c --arg p "$PROFILE" '.profiles[$p].operating_systems' "$MATRIX_FILE")
+          echo "python_versions=$python_versions" >> "$GITHUB_OUTPUT"
+          echo "operating_systems=$operating_systems" >> "$GITHUB_OUTPUT"
+
+  build-wheel-artifacts:
+    name: Build wheel artifacts
+    needs:
+      - lint
+      - run-tests
+      - config
+    if: |
+      needs.lint.result == 'success' &&
+      needs.run-tests.result == 'success' &&
+      needs.config.result == 'success'
+    uses: ./.github/workflows/reusable-build.yaml
+
+  automation:
+    needs:
+      - config
+      - build-wheel-artifacts
+    if: needs.build-wheel-artifacts.result == 'success'
+    uses: qm-labs/qa_automation_framework/.github/workflows/qa_automation_workflows.yml@main
+    secrets: inherit
+    with:
+      quam_group: ${{ github.event_name == 'schedule' && 'regression' || 'smoke' }}
+      whl_artifact_names: "python-package-wheel"
+      python_versions: ${{ needs.config.outputs.python_versions }}
+      operating_systems: ${{ needs.config.outputs.operating_systems }}
+      allow_failure: true

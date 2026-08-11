@@ -25,12 +25,61 @@ jobs:
     with:
       ref: ${{inputs.ref}}
 
+  config-release-validation:
+    name: Resolve release_validation matrix (build-matrix.json)
+    runs-on: ubuntu-latest
+    outputs:
+      python_versions: ${{ steps.matrix.outputs.python_versions }}
+      operating_systems: ${{ steps.matrix.outputs.operating_systems }}
+    steps:
+      - name: Checkout build-matrix config
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          sparse-checkout: |
+            .github/config/build-matrix.json
+          sparse-checkout-cone-mode: false
+
+      - name: Load "release_validation" matrix profile
+        id: matrix
+        env:
+          PROFILE: release_validation
+          MATRIX_FILE: .github/config/build-matrix.json
+        run: |
+          set -euo pipefail
+          jq -e --arg p "$PROFILE" '.profiles[$p] // error("Unknown profile: \($p)")' \
+            "$MATRIX_FILE" > /dev/null
+          python_versions=$(jq -c --arg p "$PROFILE" '.profiles[$p].python_versions' "$MATRIX_FILE")
+          operating_systems=$(jq -c --arg p "$PROFILE" '.profiles[$p].operating_systems' "$MATRIX_FILE")
+          echo "python_versions=$python_versions" >> "$GITHUB_OUTPUT"
+          echo "operating_systems=$operating_systems" >> "$GITHUB_OUTPUT"
+
+  validate-wheel-artifacts:
+    name: QA Automation - validate wheel artifact
+    needs:
+      - build-release
+      - build-manually
+      - config-release-validation
+    if: |
+      always()
+      && contains(needs.*.result, 'success')
+      && !contains(needs.*.result, 'failure')
+    uses: qm-labs/qa_automation_framework/.github/workflows/qa_automation_workflows.yml@main
+    with:
+      quam_group: "smoke"
+      whl_artifact_names: "python-package-wheel"
+      python_versions: ${{ needs.config-release-validation.outputs.python_versions }}
+      operating_systems: ${{ needs.config-release-validation.outputs.operating_systems }}
+      allow_failure: true
+    secrets: inherit
+
   release:
     name: Release package to PyPi
     runs-on: ubuntu-latest
     needs:
       - build-release
       - build-manually
+      - validate-wheel-artifacts
     if: |  # TODO: remove when only release trigger be kept
       always()
       && contains(needs.*.result, 'success')
@@ -39,6 +88,8 @@ jobs:
       id-token: write
       contents: read
       checks: write
+    outputs:
+      quam_version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,3 +108,53 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Resolve released version
+        id: version
+        run: |
+          ref="${{ github.event.release.tag_name || inputs.ref }}"
+          echo "version=${ref#v}" >> "$GITHUB_OUTPUT"
+
+  config-public-pypi-validation:
+    name: Resolve public_pypi_validation matrix (build-matrix.json)
+    runs-on: ubuntu-latest
+    outputs:
+      python_versions: ${{ steps.matrix.outputs.python_versions }}
+      operating_systems: ${{ steps.matrix.outputs.operating_systems }}
+    steps:
+      - name: Checkout build-matrix config
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          sparse-checkout: |
+            .github/config/build-matrix.json
+          sparse-checkout-cone-mode: false
+
+      - name: Load "public_pypi_validation" matrix profile
+        id: matrix
+        env:
+          PROFILE: public_pypi_validation
+          MATRIX_FILE: .github/config/build-matrix.json
+        run: |
+          set -euo pipefail
+          jq -e --arg p "$PROFILE" '.profiles[$p] // error("Unknown profile: \($p)")' \
+            "$MATRIX_FILE" > /dev/null
+          python_versions=$(jq -c --arg p "$PROFILE" '.profiles[$p].python_versions' "$MATRIX_FILE")
+          operating_systems=$(jq -c --arg p "$PROFILE" '.profiles[$p].operating_systems' "$MATRIX_FILE")
+          echo "python_versions=$python_versions" >> "$GITHUB_OUTPUT"
+          echo "operating_systems=$operating_systems" >> "$GITHUB_OUTPUT"
+
+  validate-public-pypi:
+    name: QA Automation - validate public PyPI package
+    needs:
+      - release
+      - config-public-pypi-validation
+    if: always() && needs.release.result == 'success'
+    uses: qm-labs/qa_automation_framework/.github/workflows/qa_automation_workflows.yml@main
+    with:
+      quam_group: "smoke"
+      quam_version: ${{ needs.release.outputs.quam_version }}
+      python_versions: ${{ needs.config-public-pypi-validation.outputs.python_versions }}
+      operating_systems: ${{ needs.config-public-pypi-validation.outputs.operating_systems }}
+      allow_failure: true
+    secrets: inherit

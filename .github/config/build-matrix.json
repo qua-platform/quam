@@ -1,0 +1,29 @@
+{
+  "profiles": {
+    "product": {
+      "description": "Internal QUAM CI matrix (run_tests.yaml) - lint/typecheck/pytest/simulator",
+      "python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
+      "operating_systems": ["ubuntu-latest"]
+    },
+    "pr": {
+      "description": "QA Automation Framework matrix for pull_request-to-main validation (fast smoke feedback)",
+      "python_versions": ["3.10", "3.14"],
+      "operating_systems": ["ubuntu-latest"]
+    },
+    "automation_nightly_run": {
+      "description": "QA Automation Framework matrix for scheduled nightly regression (full sweep)",
+      "python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
+      "operating_systems": ["ubuntu-latest"]
+    },
+    "release_validation": {
+      "description": "Pre-publish wheel validation (release_pypi.yaml: validate-wheel-artifacts)",
+      "python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
+      "operating_systems": ["ubuntu-latest"]
+    },
+    "public_pypi_validation": {
+      "description": "Post-publish public PyPI validation (release_pypi.yaml: validate-public-pypi)",
+      "python_versions": ["3.10", "3.14"],
+      "operating_systems": ["ubuntu-latest"]
+    }
+  }
+}
