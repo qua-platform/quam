@@ -1,0 +1,38 @@
+{#- Local override of Material's vendored partial: the storage key is
+   changed from the default "__consent" to "__consent_v2" so any consent
+   decision recorded under the old key (e.g. from testing before this
+   category/action set existed) is ignored and the banner is shown again.
+   Bump the suffix once more if the consent schema changes materially. -#}
+<script>
+  var consent = __md_get("__consent_v2");
+  if (consent) {
+    for (var input of document.forms.consent.elements) {
+      if (input.name) input.checked = consent[input.name] || false;
+    }
+  } else if (location.protocol !== "file:") {
+    setTimeout(function () {
+      document.querySelector("[data-md-component=consent]").hidden = false;
+    }, 250);
+  }
+  var form = document.forms.consent;
+  for (var action of ["submit", "reset"]) {
+    form.addEventListener(action, function (e) {
+      e.preventDefault();
+      if (e.type === "reset") {
+        for (var n of document.forms.consent.elements) {
+          if (n.name) n.checked = false;
+        }
+      }
+      __md_set(
+        "__consent_v2",
+        Object.fromEntries(
+          Array.from(new FormData(form).keys()).map(function (key) {
+            return [key, true];
+          })
+        )
+      );
+      location.hash = "";
+      location.reload();
+    });
+  }
+</script>
