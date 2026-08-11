@@ -32,6 +32,6 @@ document$.subscribe(function () {
 
     input.disabled = true;
     submit.disabled = true;
-    submit.textContent = "Thanks for the detail!";
+    submit.textContent = "Thanks for your feedback!";
   });
 });
