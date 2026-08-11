@@ -46,13 +46,7 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
-extra_javascript:
-  - js/clarity.js
-
 extra:
-  analytics:
-    provider: google
-    property: G-J5NF8W5QEM
   consent:
     title: Cookie consent
     description: >-
