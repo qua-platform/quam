@@ -1,0 +1,15 @@
+{#- Local override of Material's vendored partial: presents a plain
+   Accept / Essential-only choice with no per-category checkboxes. Pairs
+   with the matching override at partials/javascripts/consent.html, which
+   grants or withholds every category atomically instead of reading
+   checkbox state. -#}
+<h4>{{ config.extra.consent.title }}</h4>
+<p>{{ config.extra.consent.description }}</p>
+<div class="md-consent__controls">
+  <button class="md-button md-button--primary">
+    {{- lang.t("consent.accept") -}}
+  </button>
+  <button type="reset" class="md-button">
+    Essential only
+  </button>
+</div>
