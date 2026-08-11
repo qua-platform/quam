@@ -133,6 +133,10 @@ a.autorefs-external:hover::after {
   margin: 0.75em auto 0;
 }
 
+.md-feedback__comment[hidden] {
+  display: none;
+}
+
 .md-feedback__comment label {
   font-size: 0.75rem;
   color: var(--md-default-fg-color--light);
