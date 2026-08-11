@@ -51,7 +51,7 @@ extra_javascript:
 extra:
   analytics:
     provider: google
-    property: G-REPLACE_WITH_NEW_MEASUREMENT_ID  # TODO: swap in the new GA4 property's Measurement ID once created
+    property: G-J5NF8W5QEM
   consent:
     title: Cookie consent
     description: >-
