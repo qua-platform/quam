@@ -105,6 +105,9 @@ nav:
           - "QUAM Macro API": "API_references/components/macro_API.md"
           - "BasicQUAM API": "API_references/components/basic_quam_API.md"
       - "QUAM Core Classes API": "API_references/core/quam_classes_API.md"
+  - "Legal":
+      - "Cookie Policy": "legal/cookie_policy.md"
+      - "Website Privacy Policy": "legal/privacy_policy.md"
 plugins:
   # - mkdocs-jupyter:
   #     include:
