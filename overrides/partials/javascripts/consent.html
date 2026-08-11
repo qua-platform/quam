@@ -1,15 +1,15 @@
-{#- Local override of Material's vendored partial: the storage key is
-   changed from the default "__consent" to "__consent_v2" so any consent
-   decision recorded under the old key (e.g. from testing before this
-   category/action set existed) is ignored and the banner is shown again.
-   Bump the suffix once more if the consent schema changes materially. -#}
+{#- Local override of Material's vendored partial: there are no
+   per-category checkboxes (see partials/consent.html), so "Accept" grants
+   every category listed here at once and "Essential only" (reset) grants
+   none, instead of reading checkbox state via FormData. Update
+   CONSENT_CATEGORIES if extra.consent.cookies keys change. Reads/writes
+   "__consent_v2" so a decision recorded under Material's default
+   "__consent" key, or under an earlier checkbox-based version of this
+   banner, is ignored and visitors get a fresh choice. -#}
 <script>
+  var CONSENT_CATEGORIES = ["analytics", "clarity"];
   var consent = __md_get("__consent_v2");
-  if (consent) {
-    for (var input of document.forms.consent.elements) {
-      if (input.name) input.checked = consent[input.name] || false;
-    }
-  } else if (location.protocol !== "file:") {
+  if (!consent && location.protocol !== "file:") {
     setTimeout(function () {
       document.querySelector("[data-md-component=consent]").hidden = false;
     }, 250);
@@ -18,19 +18,12 @@
   for (var action of ["submit", "reset"]) {
     form.addEventListener(action, function (e) {
       e.preventDefault();
-      if (e.type === "reset") {
-        for (var n of document.forms.consent.elements) {
-          if (n.name) n.checked = false;
-        }
-      }
-      __md_set(
-        "__consent_v2",
-        Object.fromEntries(
-          Array.from(new FormData(form).keys()).map(function (key) {
-            return [key, true];
-          })
-        )
-      );
+      var granted = e.type === "submit";
+      var value = {};
+      CONSENT_CATEGORIES.forEach(function (key) {
+        value[key] = granted;
+      });
+      __md_set("__consent_v2", value);
       location.hash = "";
       location.reload();
     });
