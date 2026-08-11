@@ -1,5 +1,4 @@
-// TODO: replace with the real Microsoft Clarity project ID once the project is created.
-const CLARITY_PROJECT_ID = "REPLACE_WITH_CLARITY_PROJECT_ID";
+const CLARITY_PROJECT_ID = "y0kzfcvdsz";
 
 const consent = __md_get("__consent");
 if (consent && consent.clarity) {
