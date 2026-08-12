@@ -123,3 +123,50 @@ a.autorefs-external:hover::after {
     /* Optional: adds some padding inside each flex item */
     padding-top: 0px;
 }
+/* Feedback widget: optional free-text comment field */
+.md-feedback__comment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+  max-width: 20rem;
+  margin: 0.75em auto 0;
+}
+
+.md-feedback__comment[hidden] {
+  display: none;
+}
+
+.md-feedback__comment label {
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-feedback__comment textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  border-radius: 0.2rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background-color: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+}
+
+.md-feedback__comment-submit {
+  padding: 0.3em 1em;
+  font-size: 0.75rem;
+  border-radius: 0.2rem;
+  border: 1px solid var(--md-primary-fg-color);
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+  cursor: pointer;
+}
+
+.md-feedback__comment-submit:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

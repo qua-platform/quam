@@ -1,12 +1,16 @@
 site_name: The Quantum Abstract Machine - QUAM Documentation
-# site_url:
+site_url: https://qua-platform.github.io/quam/
 site_author: QM. Technologies Ltd.
-# site_description:
+site_description: >-
+  Documentation for QUAM (Quantum Abstract Machine), a Python framework that
+  abstracts QUA configuration into qubits and quantum operations, with
+  automated QUA configuration generation from your QUAM setup.
 
 copyright: Copyright &copy; 2024 Q.M Technologies Ltd.
 
 theme:
   name: material
+  custom_dir: overrides
   logo: assets/qm_logo_white.svg
   font:
     text: Roboto
@@ -42,6 +46,34 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - js/clarity.js
+  - js/feedback-comment.js
+
+extra:
+  analytics:
+    provider: google
+    property: G-HVLVKR1M46
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: "Thanks for your feedback!"
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: "Thanks for your feedback! Let us know how we can improve this page below."
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies (including Google Analytics and Microsoft Clarity) to
+      recognize your repeated visits and preferences, as well as to measure
+      the effectiveness of our documentation and whether users find what
+      they're searching for. With your consent, you're helping us to make
+      our documentation better.
+
 nav:
   - index.md
   - installation.md
@@ -73,6 +105,9 @@ nav:
           - "QUAM Macro API": "API_references/components/macro_API.md"
           - "BasicQUAM API": "API_references/components/basic_quam_API.md"
       - "QUAM Core Classes API": "API_references/core/quam_classes_API.md"
+  - "Legal":
+      - "Cookie Policy": "legal/cookie_policy.md"
+      - "Website Privacy Policy": "legal/privacy_policy.md"
 plugins:
   # - mkdocs-jupyter:
   #     include:

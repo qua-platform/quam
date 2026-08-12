@@ -1,0 +1,14 @@
+{#- Local override of Material's vendored partial: reads the "__consent_v2"
+   key (see overrides/partials/javascripts/consent.html) instead of the
+   default "__consent", to match the renamed storage key. -#}
+{% if config.extra.analytics %}
+  {% set provider = config.extra.analytics.provider %}
+{% endif %}
+{% if provider %}
+  {% include "partials/integrations/analytics/" ~ provider ~ ".html" %}
+  {% if config.extra.consent %}
+    <script>if("undefined"!=typeof __md_analytics){var consent=__md_get("__consent_v2");consent&&consent.analytics&&__md_analytics()}</script>
+  {% else %}
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  {% endif %}
+{% endif %}

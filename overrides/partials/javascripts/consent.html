@@ -1,0 +1,31 @@
+{#- Local override of Material's vendored partial: there are no
+   per-category checkboxes (see partials/consent.html), so "Accept" grants
+   every category listed here at once and "Essential only" (reset) grants
+   none, instead of reading checkbox state via FormData. Update
+   CONSENT_CATEGORIES if extra.consent.cookies keys change. Reads/writes
+   "__consent_v2" so a decision recorded under Material's default
+   "__consent" key, or under an earlier checkbox-based version of this
+   banner, is ignored and visitors get a fresh choice. -#}
+<script>
+  var CONSENT_CATEGORIES = ["analytics", "clarity"];
+  var consent = __md_get("__consent_v2");
+  if (!consent && location.protocol !== "file:") {
+    setTimeout(function () {
+      document.querySelector("[data-md-component=consent]").hidden = false;
+    }, 250);
+  }
+  var form = document.forms.consent;
+  for (var action of ["submit", "reset"]) {
+    form.addEventListener(action, function (e) {
+      e.preventDefault();
+      var granted = e.type === "submit";
+      var value = {};
+      CONSENT_CATEGORIES.forEach(function (key) {
+        value[key] = granted;
+      });
+      __md_set("__consent_v2", value);
+      location.hash = "";
+      location.reload();
+    });
+  }
+</script>

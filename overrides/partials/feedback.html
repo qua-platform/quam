@@ -1,0 +1,76 @@
+<!-- Determine feedback configuration -->
+{% if config.extra.analytics %}
+  {% set feedback = config.extra.analytics.feedback %}
+{% endif %}
+
+<!-- Determine whether to show feedback -->
+{% if page.meta and page.meta.hide %}
+  {% if "feedback" in page.meta.hide %}
+    {% set feedback = None %}
+  {% endif %}
+{% endif %}
+
+<!-- Was this page helpful? -->
+{% if feedback %}
+  <form class="md-feedback" name="feedback" hidden>
+    <fieldset>
+      <legend class="md-feedback__title">
+        {{ feedback.title }}
+      </legend>
+      <div class="md-feedback__inner">
+
+        <!-- Feedback ratings -->
+        <div class="md-feedback__list">
+          {% for rating in feedback.ratings %}
+            <button
+              class="md-feedback__icon md-icon"
+              type="submit"
+              title="{{ rating.name }}"
+              data-md-value="{{ rating.data }}"
+            >
+              {% include ".icons/" ~ rating.icon ~ ".svg" %}
+            </button>
+          {% endfor %}
+        </div>
+
+        <!-- Feedback rating notes (shown after submission) -->
+        <div class="md-feedback__note">
+          {% for rating in feedback.ratings %}
+            <div data-md-value="{{ rating.data }}" hidden>
+              {% set url = "/" ~ page.url %}
+
+              <!-- Determine title -->
+              {% if page.meta and page.meta.title %}
+                {% set title = page.meta.title | urlencode %}
+              {% else %}
+                {% set title = page.title | urlencode %}
+              {% endif %}
+
+              <!-- Replace {url} and {title} placeholders in note -->
+              {% set note = rating.note %}
+              {% if note %}
+                {% set note = note | replace("{url}", url) %}
+                {% set note = note | replace("{title}", title) %}
+              {% endif %}
+              {{ note }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Optional free-text comment, revealed once a rating is submitted.
+         Deliberately outside the fieldset above: disabling that fieldset
+         after a rating click (to lock the rating buttons) would otherwise
+         also disable every control nested inside it, including this one. -->
+    <div class="md-feedback__comment" hidden>
+      <label for="md-feedback-comment-input">
+        Want to tell us more? (optional)
+      </label>
+      <textarea id="md-feedback-comment-input" rows="3" maxlength="100"></textarea>
+      <button type="button" class="md-feedback__comment-submit">
+        Submit
+      </button>
+    </div>
+  </form>
+{% endif %}
