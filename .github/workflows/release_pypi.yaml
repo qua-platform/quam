@@ -71,7 +71,10 @@ jobs:
       python_versions: ${{ needs.config-release-validation.outputs.python_versions }}
       operating_systems: ${{ needs.config-release-validation.outputs.operating_systems }}
       allow_failure: true
-    secrets: inherit
+    secrets:
+      ALLURE_ENDPOINT: ${{ secrets.ALLURE_ENDPOINT }}
+      ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+      QA_FRAMEWORK_REPO_TOKEN: ${{ secrets.QA_FRAMEWORK_REPO_TOKEN }}
 
   release:
     name: Release package to PyPi
@@ -157,4 +160,7 @@ jobs:
       python_versions: ${{ needs.config-public-pypi-validation.outputs.python_versions }}
       operating_systems: ${{ needs.config-public-pypi-validation.outputs.operating_systems }}
       allow_failure: true
-    secrets: inherit
+    secrets:
+      ALLURE_ENDPOINT: ${{ secrets.ALLURE_ENDPOINT }}
+      ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+      QA_FRAMEWORK_REPO_TOKEN: ${{ secrets.QA_FRAMEWORK_REPO_TOKEN }}

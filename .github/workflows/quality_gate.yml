@@ -118,7 +118,10 @@ jobs:
       - build-wheel-artifacts
     if: needs.build-wheel-artifacts.result == 'success'
     uses: qm-labs/qa_automation_framework/.github/workflows/qa_automation_workflows.yml@main
-    secrets: inherit
+    secrets:
+      ALLURE_ENDPOINT: ${{ secrets.ALLURE_ENDPOINT }}
+      ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+      QA_FRAMEWORK_REPO_TOKEN: ${{ secrets.QA_FRAMEWORK_REPO_TOKEN }}
     with:
       quam_group: ${{ github.event_name == 'schedule' && 'regression' || 'smoke' }}
       whl_artifact_names: "python-package-wheel"
