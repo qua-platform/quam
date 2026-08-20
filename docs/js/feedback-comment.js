@@ -5,6 +5,15 @@ document$.subscribe(function () {
   var comment = feedback.querySelector(".md-feedback__comment");
   if (!comment) return;
 
+  // Material's native GA4 integration uses gtag.js, whose dataLayer processor
+  // only consumes the arguments form that gtag() pushes. A literal
+  // dataLayer.push(["event", ...]) array is silently dropped, so the event must
+  // be dispatched through this shim rather than pushed as a raw array.
+  function gtag() {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(arguments);
+  }
+
   var page = document.location.pathname;
   var currentRating = null;
 
@@ -23,12 +32,11 @@ document$.subscribe(function () {
     var text = input.value.trim();
     if (!text) return;
 
-    window.dataLayer = window.dataLayer || [];
-    dataLayer.push(["event", "feedback_comment", {
+    gtag("event", "feedback_comment", {
       page: page,
       rating: currentRating,
       comment: text
-    }]);
+    });
 
     input.disabled = true;
     submit.disabled = true;
