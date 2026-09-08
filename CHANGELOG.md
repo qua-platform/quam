@@ -2,7 +2,7 @@
 
 ### Added
 
-- Added `depletion_time_ns` field to `ReadoutPulse` (defaults to `16`, the minimum value accepted by the OPX), so per-pulse depletion time can be set directly on a readout pulse instead of only on the resonator. This allows a resonator's `depletion_time` to be defined as a QuAM reference into the currently-active readout pulse (e.g. `"#./operations/readout/depletion_time_ns"`), which is useful for active reset calibration where different readout pulses need different depletion times. Fully backward compatible: existing configs that set `depletion_time` as a literal on the resonator are unaffected.
+- Added `depletion_time_ns` field to `ReadoutPulse` (defaults to `16`), so per-pulse depletion time can be set directly on a readout pulse instead of only on the resonator. This allows a resonator's `depletion_time` to be defined as a QuAM reference into the currently-active readout pulse (e.g. `"#./operations/readout/depletion_time_ns"`), which is useful for active reset calibration where different readout pulses need different depletion times. Fully backward compatible: existing configs that set `depletion_time` as a literal on the resonator are unaffected.
 - Added `mypy` type checking and a `poethepoet` task runner to the dev workflow: `poe format` / `poe check-format` (black), `poe lint` (flake8), `poe typecheck` (mypy), `poe test` (pytest), and a combined `poe check` that runs them all.
 
 ### Changed
