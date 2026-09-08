@@ -504,6 +504,7 @@ class ReadoutPulse(BaseReadoutPulse, ABC):
         "#./default_integration_weights"
     )
     integration_weights_angle: float = 0
+    depletion_time_ns: int = 16
 
     @property
     def default_integration_weights(self) -> List[Tuple[float, int]]:
