@@ -197,7 +197,8 @@ class DigitalOutputChannel(QuamComponent):
         config.controllers.<controller_name>.digital_outputs.<port> will be updated
         with the shareable and inverted settings of this channel if specified.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         if isinstance(self.opx_output, DigitalOutputPort):
@@ -312,7 +313,9 @@ class TimeTaggingAddon(QuamComponent):
         derivative_polarity (Literal["above", "below"]): The polarity of the derivative
             threshold. Default is "below".
 
-    For details see [Time Tagging](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging)  # noqa: E501
+    For details see [Time Tagging][tt].
+
+    [tt]: https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
     """
 
     signal_threshold: float = 800 / 4096
@@ -831,7 +834,8 @@ class SingleChannel(Channel):
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         # Add pulses & waveforms
@@ -935,7 +939,8 @@ class InSingleChannel(Channel):
     def apply_to_config(self, config: dict):
         """Adds this InSingleChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         # Add output to config
@@ -1119,10 +1124,16 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             adc_stream=stream,
         )
@@ -1209,10 +1220,16 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             adc_stream=stream,
         )
@@ -1229,7 +1246,9 @@ class InSingleChannel(Channel):
     ) -> Tuple[QuaVariableInt, QuaScalarInt]:
         """Perform a time tagging measurement on this channel.
 
-        For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging  # noqa: E501
+        For details see [Time Tagging][tt].
+
+        [tt]: https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
@@ -1245,13 +1264,15 @@ class InSingleChannel(Channel):
             mode (Literal["analog", "high_res", "digital"]): The time tagging mode.
 
         Returns:
-            times (QuaVariable[Any]): The QUA variable to store the times of the detected
-                pulses.
+            times (QuaVariable[Any]): The QUA variable to store the times of the
+                detected pulses.
             counts (QuaScalar[int]): The number of detected pulses.
 
         Example:
             ```python
-            times, counts = channel.measure_time_tagging("readout", size=1000, max_time=1000)
+            times, counts = channel.measure_time_tagging(
+                "readout", size=1000, max_time=1000
+            )
             ```
         """
         if mode == "analog":
@@ -1297,7 +1318,8 @@ def _raise_inferred_freq_error(
             f"{prefix}: '{field_name}' is an unresolved reference: '{value}'"
         )
     raise AttributeError(
-        f"{prefix}: '{field_name}' has unexpected type {type(value).__name__}: {value!r}"
+        f"{prefix}: '{field_name}' has unexpected type "
+        f"{type(value).__name__}: {value!r}"
     )
 
 
@@ -1417,7 +1439,9 @@ class IQChannel(_OutComplexChannel):
 
     frequency_converter_up: BaseFrequencyConverter
 
-    LO_frequency: float = "#./frequency_converter_up/LO_frequency"  # type: ignore[assignment]
+    LO_frequency: float = (
+        "#./frequency_converter_up/LO_frequency"  # type: ignore[assignment]
+    )
     RF_frequency: float = "#./inferred_RF_frequency"  # type: ignore[assignment]
 
     _default_label: ClassVar[str] = "IQ"
@@ -1468,7 +1492,8 @@ class IQChannel(_OutComplexChannel):
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         # Add pulses & waveforms
@@ -1539,10 +1564,14 @@ class IQChannel(_OutComplexChannel):
             if isinstance(opx_output, LFAnalogOutputPort):
                 opx_port = opx_output
             elif len(opx_output) == 2:
-                opx_port = OPXPlusAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[misc]
+                opx_port = OPXPlusAnalogOutputPort(  # type: ignore[misc]
+                    *opx_output, offset=offset
+                )
                 opx_port.apply_to_config(config)
             else:
-                opx_port = LFFEMAnalogOutputPort(*opx_output, offset=offset)  # type: ignore[misc]
+                opx_port = LFFEMAnalogOutputPort(  # type: ignore[misc]
+                    *opx_output, offset=offset
+                )
                 opx_port.apply_to_config(config)
 
             if "mixInputs" in element_config:
@@ -1711,16 +1740,28 @@ class _InComplexChannel(Channel, ABC):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out2"  # type: ignore[index,arg-type]
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[2], qua_vars[2], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[2],
+                qua_vars[2],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[3], segment_length, "out2"  # type: ignore[index,arg-type]
+                integration_weight_labels[0],
+                qua_vars[3],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             adc_stream=stream,
         )
@@ -1805,16 +1846,28 @@ class _InComplexChannel(Channel, ABC):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out2"  # type: ignore[index,arg-type]
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             qua.demod.sliced(
-                integration_weight_labels[2], qua_vars[2], segment_length, "out1"  # type: ignore[index,arg-type]
+                integration_weight_labels[2],
+                qua_vars[2],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[3], segment_length, "out2"  # type: ignore[index,arg-type]
+                integration_weight_labels[0],
+                qua_vars[3],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             adc_stream=stream,
         )
@@ -1872,7 +1925,8 @@ class InIQChannel(_InComplexChannel):
     def apply_to_config(self, config: dict):
         """Adds this InOutIQChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         super().apply_to_config(config)
@@ -2096,7 +2150,8 @@ class MWChannel(_OutComplexChannel):
         id (str, int): The id of the channel, used to generate the name.
             Can be a string, or an integer in which case it will add
             `Channel._default_label`.
-        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX perspective.
+        opx_output (MWFEMAnalogOutputPort): Channel output port from the OPX
+            perspective.
         intermediate_frequency (float): Intermediate frequency of OPX output, default
             is None.
         upconverter (int): The upconverter to use. Default is 1.
@@ -2144,11 +2199,13 @@ class MWChannel(_OutComplexChannel):
             upconverter_config = self.opx_output.upconverters.get(self.upconverter)
             if upconverter_config is None:
                 raise ValueError(
-                    f"MWChannel: Upconverter {self.upconverter} not found in upconverters dictionary"
+                    f"MWChannel: Upconverter {self.upconverter} not found in "
+                    "upconverters dictionary"
                 )
             if "frequency" not in upconverter_config:
                 raise ValueError(
-                    f"MWChannel: 'frequency' key not found in upconverter {self.upconverter} configuration"
+                    "MWChannel: 'frequency' key not found in upconverter "
+                    f"{self.upconverter} configuration"
                 )
             return upconverter_config["frequency"]
         raise ValueError(

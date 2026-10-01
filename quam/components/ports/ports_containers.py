@@ -78,13 +78,21 @@ class OPXPlusPortsContainer(QuamComponent):
         ports = controllers[controller_id]
 
         if port_type == "analog_output":
-            ports[port_id] = OPXPlusAnalogOutputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
+            ports[port_id] = OPXPlusAnalogOutputPort(  # type: ignore[misc]
+                controller_id, port_id, **kwargs
+            )
         elif port_type == "analog_input":
-            ports[port_id] = OPXPlusAnalogInputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
+            ports[port_id] = OPXPlusAnalogInputPort(  # type: ignore[misc]
+                controller_id, port_id, **kwargs
+            )
         elif port_type == "digital_output":
-            ports[port_id] = OPXPlusDigitalOutputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
+            ports[port_id] = OPXPlusDigitalOutputPort(  # type: ignore[misc]
+                controller_id, port_id, **kwargs
+            )
         elif port_type == "digital_input":
-            ports[port_id] = OPXPlusDigitalInputPort(controller_id, port_id, **kwargs)  # type: ignore[misc]
+            ports[port_id] = OPXPlusDigitalInputPort(  # type: ignore[misc]
+                controller_id, port_id, **kwargs
+            )
 
         return ports[port_id]
 

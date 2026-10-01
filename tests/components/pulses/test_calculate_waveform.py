@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from quam.components.pulses import Pulse
 from quam.core import quam_dataclass
@@ -19,6 +20,17 @@ class NdarrayTuplePulse(Pulse):
         return (np.array([0.1, 0.2, 0.3, 0.4]), np.array([0.5, 0.6, 0.7, 0.8]))
 
 
+@quam_dataclass
+class NumpyScalarTuplePulse(Pulse):
+    i: float
+    q: float
+    dtype: str = "int64"
+
+    def waveform_function(self):
+        dtype = getattr(np, self.dtype)
+        return (dtype(self.i), dtype(self.q))
+
+
 def test_calculate_waveform_float_tuple_returns_complex():
     pulse = FloatTuplePulse(length=16, i=0.1, q=0.2)
     result = pulse.calculate_waveform()
@@ -36,3 +48,13 @@ def test_calculate_waveform_ndarray_tuple_returns_complex_ndarray():
     result = pulse.calculate_waveform()
     expected = np.array([0.1, 0.2, 0.3, 0.4]) + 1.0j * np.array([0.5, 0.6, 0.7, 0.8])
     assert np.all(result == expected)
+
+
+@pytest.mark.parametrize(
+    "dtype", ["int8", "int16", "int32", "int64", "float16", "float32", "float64"]
+)
+def test_calculate_waveform_numpy_scalar_tuple_returns_complex(dtype):
+    pulse = NumpyScalarTuplePulse(length=16, i=1, q=2, dtype=dtype)
+    result = pulse.calculate_waveform()
+    assert isinstance(result, complex)
+    assert result == complex(1, 2)

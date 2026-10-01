@@ -404,7 +404,9 @@ def instantiate_quam_class(
 
     if not str_repr:
         str_repr = quam_class.__name__
-    # str_repr = f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__  # noqa: E501
+    # str_repr = (
+    #     f"{str_repr}.{quam_class.__name__}" if str_repr else quam_class.__name__
+    # )
 
     if "__class__" in contents:
         try:

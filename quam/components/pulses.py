@@ -146,7 +146,9 @@ class Pulse(QuamComponent):
 
     def calculate_waveform(
         self,
-    ) -> Optional[Union[float, complex, Sequence[float], Sequence[complex]]]:
+    ) -> Optional[
+        Union[float, complex, Sequence[float], Sequence[complex], np.ndarray]
+    ]:
         """Calculate the waveform of the pulse.
 
         This function calls `Pulse.waveform_function`, which should generally be
@@ -167,9 +169,9 @@ class Pulse(QuamComponent):
         # Optionally convert IQ waveforms to complex waveform
         if isinstance(waveform, tuple) and len(waveform) == 2:
             if isinstance(waveform[0], (list, np.ndarray)):
-                waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])  # type: ignore[assignment]
-            elif isinstance(waveform[0], (int, float)) and isinstance(
-                waveform[1], (int, float)
+                waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])
+            elif isinstance(waveform[0], (int, float, np.number)) and isinstance(
+                waveform[1], (int, float, np.number)
             ):
                 waveform = complex(waveform[0], waveform[1])
 
@@ -183,6 +185,7 @@ class Pulse(QuamComponent):
             complex,
             Sequence[float],
             Sequence[complex],
+            np.ndarray,
             Tuple[float, float],
             Tuple[Sequence[float], Sequence[float]],
         ]
@@ -396,7 +399,8 @@ class Pulse(QuamComponent):
     def apply_to_config(self, config: dict) -> None:
         """Adds this pulse, waveform, and digital marker to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         if self.channel is None:
@@ -472,7 +476,8 @@ class BaseReadoutPulse(Pulse, ABC):
     def apply_to_config(self, config: dict) -> None:
         """Adds this readout pulse to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         super().apply_to_config(config)

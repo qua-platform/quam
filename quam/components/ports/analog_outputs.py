@@ -71,8 +71,8 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
             if self.feedback_filter is not None:
                 raise ValueError(
                     "LFFEMAnalogOutputPort: Please only specify 'exponential_filter' / "
-                    "'high_pass_filter' / 'exponential_dc_gain' if QOP >=3.3.0, or 'feedback_filter' if "
-                    "QOP < 3.3.0, not both"
+                    "'high_pass_filter' / 'exponential_dc_gain' if QOP >=3.3.0, or "
+                    "'feedback_filter' if QOP < 3.3.0, not both"
                 )
 
         if self.exponential_filter is not None:
