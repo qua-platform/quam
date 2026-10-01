@@ -177,18 +177,19 @@ class DigitalOutputChannel(QuamComponent):
 
         Returns:
             Dict[str, int]: The digital channel config entry.
-                Contains "port", and optionally "delay", "buffer" if specified
+                Contains "port", "delay", and "buffer".
         """
         if isinstance(self.opx_output, DigitalOutputPort):
             opx_output = self.opx_output.port_tuple
         else:
             opx_output = tuple(self.opx_output)  # type: ignore[assignment]
 
-        digital_cfg: Dict[str, Any] = {"port": opx_output}
-        if self.delay is not None:
-            digital_cfg["delay"] = self.delay
-        if self.buffer is not None:
-            digital_cfg["buffer"] = self.buffer
+        # qm-qua's schema requires "delay" and "buffer" to always be present
+        digital_cfg: Dict[str, Any] = {
+            "port": opx_output,
+            "delay": self.delay if self.delay is not None else 0,
+            "buffer": self.buffer if self.buffer is not None else 0,
+        }
         return digital_cfg
 
     def apply_to_config(self, config: dict) -> None:

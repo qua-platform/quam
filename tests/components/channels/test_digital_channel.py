@@ -23,7 +23,10 @@ def test_digital_only_channel(qua_config):
         "con1": {"digital_outputs": {1: {"inverted": False, "shareable": False}}}
     }
     qua_config["elements"] = {
-        "channel": {"digitalInputs": {"1": {"port": ("con1", 1)}}, "operations": {}}
+        "channel": {
+            "digitalInputs": {"1": {"port": ("con1", 1), "delay": 0, "buffer": 0}},
+            "operations": {},
+        }
     }
 
     assert cfg == qua_config
@@ -49,7 +52,10 @@ def test_digital_only_channel_with_port(qua_config):
         "con1": {"digital_outputs": {2: {"inverted": True, "shareable": True}}}
     }
     qua_config["elements"] = {
-        "channel": {"digitalInputs": {"1": {"port": ("con1", 2)}}, "operations": {}}
+        "channel": {
+            "digitalInputs": {"1": {"port": ("con1", 2), "delay": 0, "buffer": 0}},
+            "operations": {},
+        }
     }
 
     assert cfg == qua_config
