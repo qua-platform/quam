@@ -8,7 +8,9 @@ simulator connection is required. This catches drift between quam's output
 and what the installed qm-qua actually accepts.
 """
 
+import pytest
 from qm import QuantumMachinesManager
+from qm.exceptions import ConfigSchemaError
 from qm.program._qua_config_schema import load_config
 
 from quam.components.basic_quam import BasicFEMQuam, BasicOPXPlusQuam, BasicQuam
@@ -29,6 +31,8 @@ from quam.components.ports import (
     OPXPlusAnalogOutputPort,
     OPXPlusAnalogInputPort,
     FEMDigitalOutputPort,
+    BBFEMAnalogOutputPort,
+    BBFEMAnalogInputPort,
 )
 
 QuantumMachinesManager.set_capabilities_offline()
@@ -109,6 +113,26 @@ def test_opx_plus_in_out_single_channel_config_is_valid():
     machine.channels["readout"] = InOutSingleChannel(
         opx_output=OPXPlusAnalogOutputPort("con1", 1),
         opx_input=OPXPlusAnalogInputPort("con1", 1),
+        time_of_flight=280,
+        operations={"const": SquarePulse(length=1000, amplitude=0.1)},
+    )
+    _validate_config(machine)
+
+
+@pytest.mark.xfail(
+    raises=ConfigSchemaError,
+    reason=(
+        "BB-FEM support (qm-qua-sdk PR #1234) is not in the installed qm-qua "
+        "release yet; remove this xfail once qm-qua >=1.5.0 (which recognizes "
+        "the 'BB' FEM type) is released and the dependency pin is bumped."
+    ),
+    strict=False,
+)
+def test_bb_fem_in_out_single_channel_config_is_valid():
+    machine = BasicFEMQuam()
+    machine.channels["readout"] = InOutSingleChannel(
+        opx_output=BBFEMAnalogOutputPort("con1", 1, 1),
+        opx_input=BBFEMAnalogInputPort("con1", 1, 1),
         time_of_flight=280,
         operations={"const": SquarePulse(length=1000, amplitude=0.1)},
     )

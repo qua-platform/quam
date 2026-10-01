@@ -1,7 +1,12 @@
 from abc import ABC
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple
 
-from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
+from quam.components.ports.base_ports import (
+    BasePort,
+    FEMPort,
+    OPXPlusPort,
+    DEFAULT_FEM_SAMPLING_RATE,
+)
 from quam.core import quam_dataclass
 
 __all__ = [
@@ -9,6 +14,7 @@ __all__ = [
     "OPXPlusAnalogOutputPort",
     "LFFEMAnalogOutputPort",
     "MWFEMAnalogOutputPort",
+    "BBFEMAnalogOutputPort",
 ]
 
 
@@ -53,7 +59,7 @@ class OPXPlusAnalogOutputPort(LFAnalogOutputPort, OPXPlusPort):
 @quam_dataclass
 class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     fem_type: ClassVar[str] = "LF"
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
     upsampling_mode: Literal["mw", "pulse"] = "mw"
     exponential_filter: Optional[List[Tuple[float, float]]] = None
     exponential_dc_gain: Optional[float] = None
@@ -95,6 +101,47 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
 
 
 @quam_dataclass
+class BBFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
+    fem_type: ClassVar[str] = "BB"
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
+    upsampling_mode: Literal["mw", "pulse"] = "mw"
+    exponential_filter: Optional[List[Tuple[float, float]]] = None
+    exponential_dc_gain: Optional[float] = None
+    high_pass_filter: Optional[float] = None
+
+    def get_port_properties(self) -> Dict[str, Any]:
+        port_properties = super().get_port_properties()
+
+        if (
+            self.exponential_filter is not None
+            or self.high_pass_filter is not None
+            or self.exponential_dc_gain is not None
+        ):
+            if self.feedback_filter is not None:
+                raise ValueError(
+                    "BBFEMAnalogOutputPort: Please only specify 'exponential_filter' / "
+                    "'high_pass_filter' / 'exponential_dc_gain', not 'feedback_filter'"
+                )
+
+        if self.exponential_filter is not None:
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["exponential"] = list(self.exponential_filter)
+
+        if self.exponential_dc_gain is not None:
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["exponential_dc_gain"] = self.exponential_dc_gain
+
+        if self.high_pass_filter is not None:
+            filter_properties = port_properties.setdefault("filter", {})
+            filter_properties["high_pass"] = self.high_pass_filter
+
+        port_properties["sampling_rate"] = self.sampling_rate
+        if self.sampling_rate == 1e9:
+            port_properties["upsampling_mode"] = self.upsampling_mode
+        return port_properties
+
+
+@quam_dataclass
 class MWFEMAnalogOutputPort(FEMPort):
     fem_type: ClassVar[str] = "MW"
     port_type: ClassVar[str] = "analog_output"
@@ -104,7 +151,7 @@ class MWFEMAnalogOutputPort(FEMPort):
     upconverters: Optional[Dict[int, Dict[str, float]]] = None
     delay: int = 0
     shareable: bool = False
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
     full_scale_power_dbm: int = -11
 
     def __post_init__(self) -> None:

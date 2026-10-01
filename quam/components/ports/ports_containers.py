@@ -6,11 +6,13 @@ from .analog_outputs import (
     OPXPlusAnalogOutputPort,
     LFFEMAnalogOutputPort,
     MWFEMAnalogOutputPort,
+    BBFEMAnalogOutputPort,
 )
 from .analog_inputs import (
     OPXPlusAnalogInputPort,
     LFFEMAnalogInputPort,
     MWFEMAnalogInputPort,
+    BBFEMAnalogInputPort,
 )
 from .digital_outputs import OPXPlusDigitalOutputPort, FEMDigitalOutputPort
 from .digital_inputs import OPXPlusDigitalInputPort
@@ -28,6 +30,8 @@ FEMPortTypes = Union[
     LFFEMAnalogOutputPort,
     MWFEMAnalogInputPort,
     MWFEMAnalogOutputPort,
+    BBFEMAnalogInputPort,
+    BBFEMAnalogOutputPort,
     FEMDigitalOutputPort,
 ]
 
@@ -186,6 +190,12 @@ class FEMPortsContainer(QuamComponent):
     mw_inputs: Dict[Union[str, int], Dict[int, Dict[int, MWFEMAnalogInputPort]]] = (
         field(default_factory=dict)
     )
+    bb_outputs: Dict[Union[str, int], Dict[int, Dict[int, BBFEMAnalogOutputPort]]] = (
+        field(default_factory=dict)
+    )
+    bb_inputs: Dict[Union[str, int], Dict[int, Dict[int, BBFEMAnalogInputPort]]] = (
+        field(default_factory=dict)
+    )
     digital_outputs: Dict[
         Union[str, int], Dict[int, Dict[int, FEMDigitalOutputPort]]
     ] = field(default_factory=dict)
@@ -204,6 +214,8 @@ class FEMPortsContainer(QuamComponent):
             "analog_input",
             "mw_output",
             "mw_input",
+            "bb_output",
+            "bb_input",
             "digital_output",
         }:
             raise ValueError(f"Invalid port type: {port_type}")
@@ -254,6 +266,14 @@ class FEMPortsContainer(QuamComponent):
                 fem_id,
                 port_id,
                 **kwargs,
+            )
+        elif port_type == "bb_output":
+            ports[port_id] = BBFEMAnalogOutputPort(  # type: ignore[misc]
+                controller_id, fem_id, port_id, **kwargs
+            )
+        elif port_type == "bb_input":
+            ports[port_id] = BBFEMAnalogInputPort(  # type: ignore[misc]
+                controller_id, fem_id, port_id, **kwargs
             )
         elif port_type == "digital_output":
             ports[port_id] = FEMDigitalOutputPort(  # type: ignore[misc]
@@ -357,6 +377,40 @@ class FEMPortsContainer(QuamComponent):
             fem_id,
             port_id,
             port_type="mw_input",
+            create=create,
+            **kwargs,
+        )
+
+    def get_bb_output(
+        self,
+        controller_id: Union[str, int],
+        fem_id: int,
+        port_id: int,
+        create: bool = False,
+        **kwargs,
+    ) -> BBFEMAnalogOutputPort:
+        return self._get_port(
+            controller_id,
+            fem_id,
+            port_id,
+            port_type="bb_output",
+            create=create,
+            **kwargs,
+        )
+
+    def get_bb_input(
+        self,
+        controller_id: Union[str, int],
+        fem_id: int,
+        port_id: int,
+        create: bool = False,
+        **kwargs,
+    ) -> BBFEMAnalogInputPort:
+        return self._get_port(
+            controller_id,
+            fem_id,
+            port_id,
+            port_type="bb_input",
             create=create,
             **kwargs,
         )

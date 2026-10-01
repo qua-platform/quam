@@ -2,6 +2,7 @@
 
 ### Added
 
+- Added support for the BB-FEM (OPX1000 baseband front-end module): `BBFEMAnalogOutputPort`, `BBFEMAnalogInputPort`, and `bb_outputs`/`bb_inputs`/`get_bb_output`/`get_bb_input` on `FEMPortsContainer`. BB-FEM analog outputs behave like LF-FEM analog outputs but have no `output_mode` (no "amplified" mode).
 - Added `tests/components/ports/test_fem_qm_qua_schema_validation.py`, a test suite that validates generated configs (LF-FEM, MW-FEM, OPX+, IQ channels, digital outputs) against `qm-qua`'s real config schema via `QuantumMachinesManager.set_capabilities_offline()`, with no QOP server or simulator connection required.
 - Added `mypy` type checking and a `poethepoet` task runner to the dev workflow: `poe format` / `poe check-format` (black), `poe lint` (flake8), `poe typecheck` (mypy), `poe test` (pytest), and a combined `poe check` that runs them all.
 

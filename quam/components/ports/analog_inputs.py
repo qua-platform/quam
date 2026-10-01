@@ -1,7 +1,12 @@
 from abc import ABC
 from typing import Any, ClassVar, Dict, Literal, Optional
 
-from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
+from quam.components.ports.base_ports import (
+    BasePort,
+    FEMPort,
+    OPXPlusPort,
+    DEFAULT_FEM_SAMPLING_RATE,
+)
 from quam.core import quam_dataclass
 
 __all__ = [
@@ -9,6 +14,7 @@ __all__ = [
     "OPXPlusAnalogInputPort",
     "LFFEMAnalogInputPort",
     "MWFEMAnalogInputPort",
+    "BBFEMAnalogInputPort",
 ]
 
 
@@ -38,7 +44,18 @@ class OPXPlusAnalogInputPort(LFAnalogInputPort, OPXPlusPort):
 
 @quam_dataclass
 class LFFEMAnalogInputPort(LFAnalogInputPort, FEMPort):
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
+
+    def get_port_properties(self) -> Dict[str, Any]:
+        port_properties = super().get_port_properties()
+        port_properties["sampling_rate"] = self.sampling_rate
+        return port_properties
+
+
+@quam_dataclass
+class BBFEMAnalogInputPort(LFAnalogInputPort, FEMPort):
+    fem_type: ClassVar[str] = "BB"
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
 
     def get_port_properties(self) -> Dict[str, Any]:
         port_properties = super().get_port_properties()
@@ -54,7 +71,7 @@ class MWFEMAnalogInputPort(FEMPort):
     band: int
     downconverter_frequency: float
     gain_db: Optional[int] = None
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
     shareable: bool = False
     lo_mode: Optional[Literal["auto", "always_on"]] = None  # None defers to QUA default
 
