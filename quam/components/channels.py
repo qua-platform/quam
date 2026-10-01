@@ -1119,10 +1119,16 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             adc_stream=stream,
         )
@@ -1209,10 +1215,16 @@ class InSingleChannel(Channel):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             adc_stream=stream,
         )
@@ -1420,7 +1432,9 @@ class IQChannel(_OutComplexChannel):
 
     frequency_converter_up: BaseFrequencyConverter
 
-    LO_frequency: float = "#./frequency_converter_up/LO_frequency"  # type: ignore[assignment]  # noqa: E501
+    LO_frequency: float = (
+        "#./frequency_converter_up/LO_frequency"  # type: ignore[assignment]
+    )
     RF_frequency: float = "#./inferred_RF_frequency"  # type: ignore[assignment]
 
     _default_label: ClassVar[str] = "IQ"
@@ -1718,16 +1732,28 @@ class _InComplexChannel(Channel, ABC):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out2"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[2], qua_vars[2], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[2],
+                qua_vars[2],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.accumulated(
-                integration_weight_labels[0], qua_vars[3], segment_length, "out2"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[3],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             adc_stream=stream,
         )
@@ -1812,16 +1838,28 @@ class _InComplexChannel(Channel, ABC):
             pulse_name_with_amp_scale,
             self.name,
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[0], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[0],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.sliced(
-                integration_weight_labels[1], qua_vars[1], segment_length, "out2"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[1],
+                qua_vars[1],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             qua.demod.sliced(
-                integration_weight_labels[2], qua_vars[2], segment_length, "out1"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[2],
+                qua_vars[2],  # type: ignore[index,arg-type]
+                segment_length,
+                "out1",
             ),
             qua.demod.sliced(
-                integration_weight_labels[0], qua_vars[3], segment_length, "out2"  # type: ignore[index,arg-type]  # noqa: E501
+                integration_weight_labels[0],
+                qua_vars[3],  # type: ignore[index,arg-type]
+                segment_length,
+                "out2",
             ),
             adc_stream=stream,
         )

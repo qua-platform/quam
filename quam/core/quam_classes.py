@@ -1118,7 +1118,9 @@ class QuamDict(UserDict, QuamBase):
                 f"obj: {self}"
             )
 
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]  # noqa: E501
+    def _val_matches_attr_annotation(  # type: ignore[override]
+        self, attr: str, val: Any
+    ) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
         Called by [`QuamDict.to_dict`][quam.core.quam_classes.QuamDict.to_dict] to
@@ -1326,7 +1328,9 @@ class QuamList(UserList, QuamBase):
         return super().extend(converted_iterable)
 
     # Quam methods
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]  # noqa: E501
+    def _val_matches_attr_annotation(  # type: ignore[override]
+        self, attr: str, val: Any
+    ) -> bool:
         """Check whether the type of an attribute matches the annotation.
 
         Called by QuamList.to_dict to determine whether to add the __class__ key.
