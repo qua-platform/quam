@@ -168,8 +168,8 @@ class Pulse(QuamComponent):
         if isinstance(waveform, tuple) and len(waveform) == 2:
             if isinstance(waveform[0], (list, np.ndarray)):
                 waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])
-            elif isinstance(waveform[0], (int, float)) and isinstance(
-                waveform[1], (int, float)
+            elif isinstance(waveform[0], (int, float, np.number)) and isinstance(
+                waveform[1], (int, float, np.number)
             ):
                 waveform = complex(waveform[0], waveform[1])
 
