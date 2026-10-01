@@ -8,7 +8,8 @@
 
 ### Changed
 
-- Annotated the codebase and resolved all `mypy` errors, alongside black formatting. These are internal type-correctness and formatting changes only — no public API or runtime behavior changes.
+- Annotated the codebase and resolved all `mypy` errors, alongside black formatting. Most of these changes are type-correctness and formatting only; a small number of call sites in `channels.py` and `octave.py` now raise explicit `ValueError`/`AssertionError` earlier for previously-unchecked invalid inputs.
+- `InstantiationDeprecationRule` now properly inherits `ABC`, so a subclass missing `match` or `apply` fails at instantiation with a `TypeError` instead of only at call time with a `NotImplementedError`.
 
 ### Fixed
 
