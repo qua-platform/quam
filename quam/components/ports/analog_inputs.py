@@ -9,6 +9,7 @@ __all__ = [
     "OPXPlusAnalogInputPort",
     "LFFEMAnalogInputPort",
     "MWFEMAnalogInputPort",
+    "BBFEMAnalogInputPort",
 ]
 
 
@@ -38,6 +39,17 @@ class OPXPlusAnalogInputPort(LFAnalogInputPort, OPXPlusPort):
 
 @quam_dataclass
 class LFFEMAnalogInputPort(LFAnalogInputPort, FEMPort):
+    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+
+    def get_port_properties(self) -> Dict[str, Any]:
+        port_properties = super().get_port_properties()
+        port_properties["sampling_rate"] = self.sampling_rate
+        return port_properties
+
+
+@quam_dataclass
+class BBFEMAnalogInputPort(LFAnalogInputPort, FEMPort):
+    fem_type: ClassVar[str] = "BB"
     sampling_rate: float = 1e9  # Either 1e9 or 2e9
 
     def get_port_properties(self) -> Dict[str, Any]:

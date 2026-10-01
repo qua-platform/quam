@@ -8,9 +8,13 @@ from quam.components.ports import (
 from quam.components.ports.analog_inputs import (
     LFFEMAnalogInputPort,
     MWFEMAnalogInputPort,
+    BBFEMAnalogInputPort,
     OPXPlusAnalogInputPort,
 )
-from quam.components.ports.analog_outputs import MWFEMAnalogOutputPort
+from quam.components.ports.analog_outputs import (
+    MWFEMAnalogOutputPort,
+    BBFEMAnalogOutputPort,
+)
 from quam.components.ports.digital_inputs import OPXPlusDigitalInputPort
 from quam.components.ports.digital_outputs import (
     FEMDigitalOutputPort,
@@ -32,6 +36,8 @@ def test_fem_ports_container_initialize():
     assert ports_container.analog_inputs == {}
     assert ports_container.mw_outputs == {}
     assert ports_container.mw_inputs == {}
+    assert ports_container.bb_outputs == {}
+    assert ports_container.bb_inputs == {}
     assert ports_container.digital_outputs == {}
 
 
@@ -105,7 +111,15 @@ def test_opx_plus_ports_container_reference_to_port(port_type):
 
 @pytest.mark.parametrize(
     "port_type",
-    ["analog_output", "analog_input", "mw_output", "mw_input", "digital_output"],
+    [
+        "analog_output",
+        "analog_input",
+        "mw_output",
+        "mw_input",
+        "bb_output",
+        "bb_input",
+        "digital_output",
+    ],
 )
 def test_fem_ports_container_add_ports(port_type):
     port_mapping = {
@@ -113,6 +127,8 @@ def test_fem_ports_container_add_ports(port_type):
         "analog_input": LFFEMAnalogInputPort,
         "mw_output": MWFEMAnalogOutputPort,
         "mw_input": MWFEMAnalogInputPort,
+        "bb_output": BBFEMAnalogOutputPort,
+        "bb_input": BBFEMAnalogInputPort,
         "digital_output": FEMDigitalOutputPort,
     }
 
@@ -142,7 +158,15 @@ def test_fem_ports_container_add_ports(port_type):
 
 @pytest.mark.parametrize(
     "port_type",
-    ["analog_output", "analog_input", "mw_output", "mw_input", "digital_output"],
+    [
+        "analog_output",
+        "analog_input",
+        "mw_output",
+        "mw_input",
+        "bb_output",
+        "bb_input",
+        "digital_output",
+    ],
 )
 def test_fem_ports_container_reference_to_port(port_type):
     port_mapping = {
@@ -150,6 +174,8 @@ def test_fem_ports_container_reference_to_port(port_type):
         "analog_input": LFFEMAnalogInputPort,
         "mw_output": MWFEMAnalogOutputPort,
         "mw_input": MWFEMAnalogInputPort,
+        "bb_output": BBFEMAnalogOutputPort,
+        "bb_input": BBFEMAnalogInputPort,
         "digital_output": FEMDigitalOutputPort,
     }
 

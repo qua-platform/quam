@@ -1,7 +1,12 @@
 from typing import Callable
 import pytest
 from quam.components.basic_quam import BasicFEMQuam
-from quam.components.ports import LFFEMAnalogOutputPort, LFFEMAnalogInputPort
+from quam.components.ports import (
+    LFFEMAnalogOutputPort,
+    LFFEMAnalogInputPort,
+    BBFEMAnalogOutputPort,
+    BBFEMAnalogInputPort,
+)
 
 
 def make_lf_output_port(port_id: int = 1) -> LFFEMAnalogOutputPort:
@@ -10,6 +15,14 @@ def make_lf_output_port(port_id: int = 1) -> LFFEMAnalogOutputPort:
 
 def make_lf_input_port(port_id: int = 1) -> LFFEMAnalogInputPort:
     return LFFEMAnalogInputPort("con1", 1, port_id)
+
+
+def make_bb_output_port(port_id: int = 1) -> BBFEMAnalogOutputPort:
+    return BBFEMAnalogOutputPort("con1", 1, port_id)
+
+
+def make_bb_input_port(port_id: int = 1) -> BBFEMAnalogInputPort:
+    return BBFEMAnalogInputPort("con1", 1, port_id)
 
 
 @pytest.fixture
