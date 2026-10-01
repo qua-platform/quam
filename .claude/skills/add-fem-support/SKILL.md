@@ -149,34 +149,3 @@ again `xfail(strict=False)` until the simulator/qm-qua supports it. This is
 weaker signal than the offline schema check (needs secrets/a simulator to even
 run) but catches things schema validation can't (actual program compilation).
 
-## 4. Environment gotchas hit while doing this
-
-- **`poetry run pytest` can silently resolve to a stray global `pytest`**, not
-  this project's `.venv`, if the venv never had the `dev` extra installed
-  (`dev` is a PEP 621 optional-dependency, not a Poetry group — plain `poetry
-  install` skips it; use `pip install -e ".[dev]"` into the venv). Always use
-  `poetry run python -m pytest` in this repo to be sure you're in the right
-  environment — a bare `poetry run pytest` may run against a completely
-  different `qm-qua` version via `$PATH` and give false confidence.
-- `poe lint`/`poe check-format`/`poe typecheck` only scope to `quam/`, not
-  `tests/` (see `[tool.poe.tasks]` in `pyproject.toml`). Don't chase flake8/black
-  findings in `tests/` — they're not part of CI's gate, and plenty of
-  pre-existing test files don't conform.
-
-## 5. If stacking two PRs (e.g. generic test-harness work + the FEM feature)
-
-If you split "add the schema-validation harness with existing-FEM coverage"
-and "add the new FEM" into two PRs (second based on the first's branch):
-
-- Once the base PR is squash-merged into `main`, GitHub auto-retargets the
-  dependent PR's base to `main`, and it will usually show as conflicting (even
-  for a clean stack) because the squash commit has a different hash than your
-  branch's view of the same content. Fix: `git fetch origin && git merge
-  origin/main`, resolve (usually trivial — your branch's content is a superset,
-  so conflicts are almost always "keep both sides" or "keep mine"), rerun the
-  full check suite, then push.
-- Watch for an in-between PR landing on `main` too (e.g. an unrelated lint/CI
-  PR) — it can touch the same lines as your FEM work via pure reformatting
-  (long `# type: ignore` comments getting wrapped). These merge cleanly without
-  conflict markers; just diff the merge result for the files you touched to
-  make sure the semantic content (not just formatting) survived intact.
