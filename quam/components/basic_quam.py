@@ -32,7 +32,8 @@ class BasicQuam(QuamRoot):
 class BasicFEMQuam(BasicQuam):
     """Basic QUAM root component for FEM (Front-End Module) systems.
 
-    Extends BasicQuam with FEM-specific port configurations for quantum control hardware.
+    Extends BasicQuam with FEM-specific port configurations for quantum control
+    hardware.
 
     Attributes:
         ports (FEMPortsContainer): Container for FEM-specific analog and digital ports.
@@ -45,7 +46,8 @@ class BasicFEMQuam(BasicQuam):
 class BasicOPXPlusQuam(BasicQuam):
     """Basic QUAM root component for OPX+ systems.
 
-    Extends BasicQuam with OPX+-specific port configurations for quantum control hardware.
+    Extends BasicQuam with OPX+-specific port configurations for quantum control
+    hardware.
 
     Attributes:
         ports (OPXPlusPortsContainer): Container for OPX+ analog and digital ports.

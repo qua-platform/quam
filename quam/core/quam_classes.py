@@ -213,7 +213,7 @@ class QuamBase(ReferenceClass):
         parent: The parent of this object. This is automatically set when adding
             this object to another QuamBase object.
         config_settings: A dictionary of configuration settings for this object.
-            This is used by [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]
+            This is used by [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]  # noqa: E501
             to determine the order in which to add the components to the QUA config.
             Keys are "before" and "after", and the values are a list of QuamComponents
 
@@ -302,12 +302,14 @@ class QuamBase(ReferenceClass):
     def inferred_id(self) -> Union[str, int]:
         """Get the id of this object inferred from its ``id`` field or parent position.
 
-        If this object has a dataclass field named ``id`` with a concrete (non-reference,
-        non-None) value, that value is returned. Otherwise the attribute name or key under
-        which this object is stored in its parent is returned.
+        If this object has a dataclass field named ``id`` with a concrete
+        (non-reference, non-None) value, that value is returned. Otherwise the
+        attribute name or key under which this object is stored in its parent is
+        returned.
 
         Returns:
-            The explicit id if set, or the attribute name / key in the parent as a string.
+            The explicit id if set, or the attribute name / key in the parent as a
+            string.
 
         Raises:
             AttributeError: If no explicit id is set and this object has no parent.
@@ -318,7 +320,8 @@ class QuamBase(ReferenceClass):
                 return self.id
         if self.parent is None:
             raise AttributeError(
-                f"Cannot infer id of {self.__class__.__name__} because it has no parent."
+                f"Cannot infer id of {self.__class__.__name__} because it has no "
+                "parent."
             )
         return str(self.parent.get_attr_name(self))
 
@@ -402,10 +405,12 @@ class QuamBase(ReferenceClass):
             - elem.get_reference(attr="child") == "#/elem/child"
             - elem.get_reference(relative_path="#./child") == "#/elem/child"
             - elem.get_reference(relative_path="#../child") == "#/child"
-            - elem.get_reference(relative_path="#./child/grandchild") == "#/elem/child/grandchild"
+            - elem.get_reference(relative_path="#./child/grandchild")
+              == "#/elem/child/grandchild"
 
             With follow_chain=True (if attr contains a reference to another reference):
-            - elem.get_reference(attr="chain_ref", follow_chain=True)  # returns ultimate target
+            - elem.get_reference(attr="chain_ref", follow_chain=True)
+              # returns ultimate target
         """
 
         if attr is not None and relative_path is not None:
@@ -710,8 +715,9 @@ class QuamBase(ReferenceClass):
             max_depth = self._MAX_REFERENCE_DEPTH
         if max_depth <= 0:
             raise RecursionError(
-                f"Reference chain exceeded maximum depth of {self._MAX_REFERENCE_DEPTH}. "
-                f"Possible circular reference starting from {obj.get_attr_path()}"
+                "Reference chain exceeded maximum depth of "
+                f"{self._MAX_REFERENCE_DEPTH}. Possible circular reference starting "
+                f"from {obj.get_attr_path()}"
             )
 
         # Handle list/dict index access specially
@@ -774,8 +780,8 @@ class QuamBase(ReferenceClass):
         if not string_reference.is_reference(raw_value):
             if not allow_non_reference:
                 raise ValueError(
-                    f"Cannot set at reference because attr '{attr}' is not a reference. "
-                    f"'{attr}' = {raw_value}"
+                    f"Cannot set at reference because attr '{attr}' is not a "
+                    f"reference. '{attr}' = {raw_value}"
                 )
             target_obj, target_attr = self, attr
         else:
@@ -785,7 +791,8 @@ class QuamBase(ReferenceClass):
         # Use __setitem__ for dict/list types, otherwise use setattr
         if isinstance(target_obj, (list, UserList, QuamList)):
             # Convert string index to int for list types
-            target_obj[int(target_attr) if target_attr.isdigit() else target_attr] = value  # type: ignore[index]
+            key = int(target_attr) if target_attr.isdigit() else target_attr
+            target_obj[key] = value  # type: ignore[index]
         elif isinstance(target_obj, (dict, UserDict, QuamDict)):
             target_obj[target_attr] = value
         else:
@@ -980,10 +987,10 @@ class QuamComponent(QuamBase):
 
         Note:
             This function is called by
-            [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config].
+            [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config].  # noqa: E501
 
         Note:
-            The config has a starting template, defined at [`quam.core.qua_config_template`][]
+            The config has a starting template, defined at [`quam.core.qua_config_template`][]  # noqa: E501
         """
         ...
 
@@ -1111,7 +1118,7 @@ class QuamDict(UserDict, QuamBase):
                 f"obj: {self}"
             )
 
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]  # noqa: E501
         """Check whether the type of an attribute matches the annotation.
 
         Called by [`QuamDict.to_dict`][quam.core.quam_classes.QuamDict.to_dict] to
@@ -1319,7 +1326,7 @@ class QuamList(UserList, QuamBase):
         return super().extend(converted_iterable)
 
     # Quam methods
-    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]
+    def _val_matches_attr_annotation(self, attr: str, val: Any) -> bool:  # type: ignore[override]  # noqa: E501
         """Check whether the type of an attribute matches the annotation.
 
         Called by QuamList.to_dict to determine whether to add the __class__ key.
@@ -1345,7 +1352,8 @@ class QuamList(UserList, QuamBase):
     def to_dict(
         self, follow_references: bool = False, include_defaults: bool = True
     ) -> list:
-        """Convert this object to a list, usually as part of a dictionary representation.
+        """Convert this object to a list, usually as part of a dictionary
+        representation.
 
         Args:
             follow_references: Whether to follow references when getting the value.

@@ -167,7 +167,7 @@ class Pulse(QuamComponent):
         # Optionally convert IQ waveforms to complex waveform
         if isinstance(waveform, tuple) and len(waveform) == 2:
             if isinstance(waveform[0], (list, np.ndarray)):
-                waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])  # type: ignore[assignment]
+                waveform = np.array(waveform[0]) + 1.0j * np.array(waveform[1])
             elif isinstance(waveform[0], (int, float)) and isinstance(
                 waveform[1], (int, float)
             ):

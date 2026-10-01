@@ -72,7 +72,7 @@ class Mixer(QuamComponent):
     def apply_to_config(self, config: dict):
         """Adds this mixer to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]
+        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
         for details.
         """
         correction_matrix = self.IQ_imbalance(
@@ -126,7 +126,8 @@ class FrequencyConverter(BaseFrequencyConverter):
     - `InOutIQChannel.frequency_converter_down`
 
     Args:
-        local_oscillator (LocalOscillator): The local oscillator for the frequency converter.
+        local_oscillator (LocalOscillator): The local oscillator for the frequency
+            converter.
         mixer (Mixer): The mixer for the frequency converter.
         gain (float): The gain of the frequency converter.
     """

@@ -103,8 +103,6 @@ preview = true
 
 [tool.flake8]
 max-line-length = 88
-# Black handles line length; E501 fires on lines it can't shorten (type: ignore comments, docstrings).
-extend-ignore = ["E501"]
 per-file-ignores = ["**/__init__.py:F401,F403,F405"]
 
 [tool.setuptools]
