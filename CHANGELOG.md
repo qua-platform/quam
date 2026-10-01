@@ -6,7 +6,7 @@
 
 ### Changed
 
-- Annotated the codebase and resolved all `mypy` errors, alongside black formatting. These are internal type-correctness and formatting changes only — no public API or runtime behavior changes.
+- Annotated the codebase and resolved all `mypy` errors, alongside black formatting. Most of these changes are type-correctness and formatting only; a small number of call sites in `channels.py` and `octave.py` now raise explicit `ValueError`/`AssertionError` earlier for previously-unchecked invalid inputs.
 
 ## [v0.6.0]
 
