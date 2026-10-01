@@ -396,7 +396,8 @@ class Pulse(QuamComponent):
     def apply_to_config(self, config: dict) -> None:
         """Adds this pulse, waveform, and digital marker to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         if self.channel is None:
@@ -472,7 +473,8 @@ class BaseReadoutPulse(Pulse, ABC):
     def apply_to_config(self, config: dict) -> None:
         """Adds this readout pulse to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         super().apply_to_config(config)

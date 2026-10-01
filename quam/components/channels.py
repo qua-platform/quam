@@ -197,7 +197,8 @@ class DigitalOutputChannel(QuamComponent):
         config.controllers.<controller_name>.digital_outputs.<port> will be updated
         with the shareable and inverted settings of this channel if specified.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         if isinstance(self.opx_output, DigitalOutputPort):
@@ -312,7 +313,9 @@ class TimeTaggingAddon(QuamComponent):
         derivative_polarity (Literal["above", "below"]): The polarity of the derivative
             threshold. Default is "below".
 
-    For details see [Time Tagging](https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging)  # noqa: E501
+    For details see [Time Tagging][tt].
+
+    [tt]: https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
     """
 
     signal_threshold: float = 800 / 4096
@@ -831,7 +834,8 @@ class SingleChannel(Channel):
     def apply_to_config(self, config: dict):
         """Adds this SingleChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         # Add pulses & waveforms
@@ -935,7 +939,8 @@ class InSingleChannel(Channel):
     def apply_to_config(self, config: dict):
         """Adds this InSingleChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         # Add output to config
@@ -1241,7 +1246,9 @@ class InSingleChannel(Channel):
     ) -> Tuple[QuaVariableInt, QuaScalarInt]:
         """Perform a time tagging measurement on this channel.
 
-        For details see https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging  # noqa: E501
+        For details see [Time Tagging][tt].
+
+        [tt]: https://docs.quantum-machines.co/latest/docs/Guides/features/#time-tagging
 
         Args:
             pulse_name (str): The name of the pulse to play. Should be registered in
@@ -1485,7 +1492,8 @@ class IQChannel(_OutComplexChannel):
     def apply_to_config(self, config: dict):
         """Adds this IQChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         # Add pulses & waveforms
@@ -1917,7 +1925,8 @@ class InIQChannel(_InComplexChannel):
     def apply_to_config(self, config: dict):
         """Adds this InOutIQChannel to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         super().apply_to_config(config)

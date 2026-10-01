@@ -213,7 +213,8 @@ class QuamBase(ReferenceClass):
         parent: The parent of this object. This is automatically set when adding
             this object to another QuamBase object.
         config_settings: A dictionary of configuration settings for this object.
-            This is used by [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config]  # noqa: E501
+            This is used by [`QuamRoot.generate_config`]
+            [quam.core.quam_classes.QuamRoot.generate_config]
             to determine the order in which to add the components to the QUA config.
             Keys are "before" and "after", and the values are a list of QuamComponents
 
@@ -987,10 +988,12 @@ class QuamComponent(QuamBase):
 
         Note:
             This function is called by
-            [`QuamRoot.generate_config`][quam.core.quam_classes.QuamRoot.generate_config].  # noqa: E501
+            [`QuamRoot.generate_config`]
+            [quam.core.quam_classes.QuamRoot.generate_config].
 
         Note:
-            The config has a starting template, defined at [`quam.core.qua_config_template`][]  # noqa: E501
+            The config has a starting template, defined at
+            [`quam.core.qua_config_template`][]
         """
         ...
 

@@ -72,7 +72,8 @@ class Mixer(QuamComponent):
     def apply_to_config(self, config: dict):
         """Adds this mixer to the QUA configuration.
 
-        See [`QuamComponent.apply_to_config`][quam.core.quam_classes.QuamComponent.apply_to_config]  # noqa: E501
+        See [`QuamComponent.apply_to_config`]
+        [quam.core.quam_classes.QuamComponent.apply_to_config]
         for details.
         """
         correction_matrix = self.IQ_imbalance(
