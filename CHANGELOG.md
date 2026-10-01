@@ -2,11 +2,16 @@
 
 ### Added
 
+- Added `tests/components/ports/test_fem_qm_qua_schema_validation.py`, a test suite that validates generated configs (LF-FEM, MW-FEM, OPX+, IQ channels, digital outputs) against `qm-qua`'s real config schema via `QuantumMachinesManager.set_capabilities_offline()`, with no QOP server or simulator connection required.
 - Added `mypy` type checking and a `poethepoet` task runner to the dev workflow: `poe format` / `poe check-format` (black), `poe lint` (flake8), `poe typecheck` (mypy), `poe test` (pytest), and a combined `poe check` that runs them all.
 
 ### Changed
 
 - Annotated the codebase and resolved all `mypy` errors, alongside black formatting. These are internal type-correctness and formatting changes only — no public API or runtime behavior changes.
+
+### Fixed
+
+- `DigitalOutputChannel` now always includes `delay` and `buffer` in the generated `digitalInputs` element config (defaulting to `0` when unset), since `qm-qua`'s schema requires both keys unconditionally. Previously, omitting them (the default) caused `qm.open_qm()`/config schema validation to fail with `KeyError: 'delay'`.
 
 ## [v0.6.0]
 
