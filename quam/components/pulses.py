@@ -146,7 +146,9 @@ class Pulse(QuamComponent):
 
     def calculate_waveform(
         self,
-    ) -> Optional[Union[float, complex, Sequence[float], Sequence[complex]]]:
+    ) -> Optional[
+        Union[float, complex, Sequence[float], Sequence[complex], np.ndarray]
+    ]:
         """Calculate the waveform of the pulse.
 
         This function calls `Pulse.waveform_function`, which should generally be
@@ -183,6 +185,7 @@ class Pulse(QuamComponent):
             complex,
             Sequence[float],
             Sequence[complex],
+            np.ndarray,
             Tuple[float, float],
             Tuple[Sequence[float], Sequence[float]],
         ]
