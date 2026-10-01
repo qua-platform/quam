@@ -4,7 +4,9 @@ from typing import Any, ClassVar, Dict, Tuple, Union
 
 from quam.core import QuamComponent, quam_dataclass
 
-__all__ = ["BasePort", "OPXPlusPort", "FEMPort"]
+__all__ = ["BasePort", "OPXPlusPort", "FEMPort", "DEFAULT_FEM_SAMPLING_RATE"]
+
+DEFAULT_FEM_SAMPLING_RATE = 1e9  # Either 1e9 or 2e9
 
 
 @quam_dataclass

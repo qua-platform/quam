@@ -1,7 +1,12 @@
 from abc import ABC
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple
 
-from quam.components.ports.base_ports import BasePort, FEMPort, OPXPlusPort
+from quam.components.ports.base_ports import (
+    BasePort,
+    FEMPort,
+    OPXPlusPort,
+    DEFAULT_FEM_SAMPLING_RATE,
+)
 from quam.core import quam_dataclass
 
 __all__ = [
@@ -54,7 +59,7 @@ class OPXPlusAnalogOutputPort(LFAnalogOutputPort, OPXPlusPort):
 @quam_dataclass
 class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     fem_type: ClassVar[str] = "LF"
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
     upsampling_mode: Literal["mw", "pulse"] = "mw"
     exponential_filter: Optional[List[Tuple[float, float]]] = None
     exponential_dc_gain: Optional[float] = None
@@ -98,7 +103,7 @@ class LFFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
 @quam_dataclass
 class BBFEMAnalogOutputPort(LFAnalogOutputPort, FEMPort):
     fem_type: ClassVar[str] = "BB"
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
     upsampling_mode: Literal["mw", "pulse"] = "mw"
     exponential_filter: Optional[List[Tuple[float, float]]] = None
     exponential_dc_gain: Optional[float] = None
@@ -146,7 +151,7 @@ class MWFEMAnalogOutputPort(FEMPort):
     upconverters: Optional[Dict[int, Dict[str, float]]] = None
     delay: int = 0
     shareable: bool = False
-    sampling_rate: float = 1e9  # Either 1e9 or 2e9
+    sampling_rate: float = DEFAULT_FEM_SAMPLING_RATE
     full_scale_power_dbm: int = -11
 
     def __post_init__(self) -> None:
