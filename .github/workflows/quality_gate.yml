@@ -115,4 +115,3 @@ jobs:
       whl_artifact_names: "python-package-wheel"
       python_versions: ${{ needs.config.outputs.python_versions }}
       operating_systems: ${{ needs.config.outputs.operating_systems }}
-      allow_failure: true
