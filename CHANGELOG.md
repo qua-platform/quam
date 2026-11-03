@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- The simulator test fixture `validate_quam_config` now passes `close_other_machines=True` explicitly to `qmm.open_qm()`, silencing the `qm-qua` deprecation warning about the default changing to `False` in 2.0.0. Behavior is unchanged.
 - `DigitalOutputChannel` now always includes `delay` and `buffer` in the generated `digitalInputs` element config (defaulting to `0` when unset), since `qm-qua`'s schema requires both keys unconditionally. Previously, omitting them (the default) caused `qm.open_qm()`/config schema validation to fail with `KeyError: 'delay'`.
 
 ## [v0.6.0]
