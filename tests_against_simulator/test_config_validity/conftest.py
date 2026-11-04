@@ -22,7 +22,7 @@ def validate_quam_config(qmm, base_machine):
     def _validate(setup_fn: Callable[[BasicFEMQuam], None]) -> None:
         setup_fn(base_machine)
         config = base_machine.generate_config()
-        qm = qmm.open_qm(config)
+        qm = qmm.open_qm(config, close_other_machines=True)
         qm.close()
 
     return _validate
